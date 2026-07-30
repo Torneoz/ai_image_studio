@@ -171,6 +171,7 @@ final class StudioForm extends FormBase {
         $turn,
         $version_number,
         $selected_turn_id,
+        $turn_numbers,
       );
       $version_number++;
     }
@@ -357,6 +358,7 @@ final class StudioForm extends FormBase {
     object $turn,
     int $number,
     int $selected_turn_id,
+    array $turn_numbers,
   ): array {
     $prompt = (string) $turn->get('prompt')->value;
     $heading = $this->t('Version @number · @prompt', [
@@ -374,6 +376,7 @@ final class StudioForm extends FormBase {
         ]),
         'data-ai-image-studio-turn' => (string) $turn->id(),
         'data-ai-image-studio-source-title' => (string) $heading,
+        'id' => 'ai-image-studio-turn-' . $turn->id(),
       ],
       'header' => [
         '#type' => 'container',
@@ -394,7 +397,7 @@ final class StudioForm extends FormBase {
         'summary' => [
           '#type' => 'container',
           '#attributes' => ['class' => ['ai-image-studio-turn__summary']],
-          'feedback' => $this->buildRequestFeedback($turn),
+          'feedback' => $this->buildRequestFeedback($turn, $turn_numbers),
         ],
       ],
       'prompt' => [
@@ -516,7 +519,7 @@ final class StudioForm extends FormBase {
   /**
    * Builds readable request feedback for a generated version.
    */
-  private function buildRequestFeedback(object $turn): array {
+  private function buildRequestFeedback(object $turn, array $turn_numbers): array {
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
     $operation = $turn->get('operation')->value === 'image_to_image'
       ? $this->t('Image edit')
@@ -531,7 +534,7 @@ final class StudioForm extends FormBase {
     $duration = $duration_ms > 0
       ? number_format($duration_ms / 1000, 1) . 's'
       : $this->t('Time unavailable');
-    return [
+    $feedback = [
       '#type' => 'container',
       '#attributes' => ['class' => ['ai-image-studio-feedback']],
       'provider' => $this->feedbackItem(
@@ -554,6 +557,32 @@ final class StudioForm extends FormBase {
       'duration' => $this->feedbackItem($this->t('Processing'), (string) $duration),
       'tokens' => $this->feedbackItem($this->t('Tokens'), $this->formatTokens($turn)),
     ];
+    $parent_id = (int) ($turn->get('parent_id')->target_id ?? 0);
+    if ($parent_id > 0) {
+      $feedback['source'] = $this->feedbackItem(
+        $this->t('Source image'),
+        [
+          '#type' => 'link',
+          '#title' => $this->t('Version @number', [
+            '@number' => $turn_numbers[$parent_id] ?? $parent_id,
+          ]),
+          '#url' => Url::fromRoute(
+            'entity.ai_image_studio_session.canonical',
+            [
+              'ai_image_studio_session' => (int) $turn->get('session_id')->target_id,
+            ],
+            ['fragment' => 'ai-image-studio-turn-' . $parent_id],
+          ),
+        ],
+      );
+    }
+    elseif ($turn->get('operation')->value === 'image_to_image') {
+      $feedback['source'] = $this->feedbackItem(
+        $this->t('Source image'),
+        $this->t('Uploaded image'),
+      );
+    }
+    return $feedback;
   }
 
   /**
@@ -605,9 +634,21 @@ final class StudioForm extends FormBase {
    */
   private function feedbackItem(
     string|\Stringable $label,
-    string|\Stringable $value,
+    string|\Stringable|array $value,
     array $classes = [],
   ): array {
+    if (is_array($value)) {
+      $value['#attributes']['class'][] = 'ai-image-studio-feedback__value';
+      $value_element = $value;
+    }
+    else {
+      $value_element = [
+        '#type' => 'html_tag',
+        '#tag' => 'strong',
+        '#value' => Html::escape((string) $value),
+        '#attributes' => ['class' => ['ai-image-studio-feedback__value']],
+      ];
+    }
     return [
       '#type' => 'container',
       '#attributes' => [
@@ -619,12 +660,7 @@ final class StudioForm extends FormBase {
         '#value' => Html::escape((string) $label),
         '#attributes' => ['class' => ['ai-image-studio-feedback__label']],
       ],
-      'value' => [
-        '#type' => 'html_tag',
-        '#tag' => 'strong',
-        '#value' => Html::escape((string) $value),
-        '#attributes' => ['class' => ['ai-image-studio-feedback__value']],
-      ],
+      'value' => $value_element,
     ];
   }
 

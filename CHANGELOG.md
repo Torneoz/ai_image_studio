@@ -8,6 +8,8 @@ All notable changes to AI Image Studio will be documented in this file.
 - Added concise prompt summaries to version-card headings.
 - Added visual selection of any completed session image as the source for a
   new refinement branch.
+- Made version headers more compact and added linked source-image references
+  for refinement turns.
 
 ## 1.0.0-alpha2
 
