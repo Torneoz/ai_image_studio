@@ -6,6 +6,8 @@ All notable changes to AI Image Studio will be documented in this file.
 
 - Numbered version cards from one within each image session.
 - Added concise prompt summaries to version-card headings.
+- Added visual selection of any completed session image as the source for a
+  new refinement branch.
 
 ## 1.0.0-alpha2
 

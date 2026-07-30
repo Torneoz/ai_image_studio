@@ -2,3 +2,8 @@ studio:
   css:
     theme:
       css/studio.css: {}
+  js:
+    js/studio.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

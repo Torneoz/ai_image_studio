@@ -147,6 +147,19 @@ final class StudioForm extends FormBase {
 
     $turns = $this->loadTurns((int) $session->id());
     $latest = $this->latestCompletedTurn((int) $session->id());
+    $turn_numbers = [];
+    foreach (array_values($turns) as $index => $turn) {
+      $turn_numbers[(int) $turn->id()] = $index + 1;
+    }
+    $selected_turn_id = (int) (
+      $form_state->getValue('source_turn_id') ?: $latest?->id()
+    );
+    $selected_source = $this->completedTurnFromSession(
+      (int) $session->id(),
+      $selected_turn_id,
+    ) ?? $latest;
+    $selected_turn_id = (int) ($selected_source?->id() ?? 0);
+
     $form['history'] = [
       '#type' => 'container',
       '#tree' => TRUE,
@@ -154,7 +167,11 @@ final class StudioForm extends FormBase {
     ];
     $version_number = 1;
     foreach ($turns as $turn) {
-      $form['history']['turn_' . $turn->id()] = $this->buildTurn($turn, $version_number);
+      $form['history']['turn_' . $turn->id()] = $this->buildTurn(
+        $turn,
+        $version_number,
+        $selected_turn_id,
+      );
       $version_number++;
     }
 
@@ -172,25 +189,70 @@ final class StudioForm extends FormBase {
     else {
       $form['refine'] = [
         '#type' => 'details',
-        '#title' => $latest
-          ? $this->t('Refine the latest image')
+        '#title' => $selected_source
+          ? $this->t('Refine selected image')
           : $this->t('Retry image creation'),
         '#open' => TRUE,
       ];
-      $operation = $latest ? 'image_to_image' : 'text_to_image';
+      if ($selected_source !== NULL) {
+        $source_number = $turn_numbers[(int) $selected_source->id()] ?? 1;
+        $source_prompt = (string) $selected_source->get('prompt')->value;
+        $source_file = $selected_source->get('image')->entity;
+        $form['refine']['source'] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['ai-image-studio-source-preview'],
+            'data-ai-image-studio-source-preview' => '',
+          ],
+          'image' => $source_file instanceof FileInterface
+            ? [
+              '#theme' => 'image',
+              '#uri' => $source_file->getFileUri(),
+              '#alt' => $source_prompt,
+              '#attributes' => [
+                'data-ai-image-studio-source-preview-image' => '',
+              ],
+            ]
+            : [],
+          'copy' => [
+            '#type' => 'container',
+            'eyebrow' => [
+              '#markup' => '<span class="ai-image-studio-source-preview__eyebrow">'
+              . $this->t('Refining from') . '</span>',
+            ],
+            'title' => [
+              '#type' => 'html_tag',
+              '#tag' => 'strong',
+              '#value' => $this->t('Version @number · @prompt', [
+                '@number' => $source_number,
+                '@prompt' => $this->promptSummary($source_prompt),
+              ]),
+              '#attributes' => [
+                'data-ai-image-studio-source-preview-title' => '',
+              ],
+            ],
+            'description' => [
+              '#markup' => '<div class="description">'
+              . $this->t('The new version will branch from this image. Select another source from any completed version above.')
+              . '</div>',
+            ],
+          ],
+        ];
+      }
+      $operation = $selected_source ? 'image_to_image' : 'text_to_image';
       $form['refine']['model'] = [
         '#type' => 'select',
         '#title' => $this->t('Provider and model'),
         '#options' => $this->generator->getModelOptions($operation),
         '#default_value' => $this->generator->getDefaultModel($operation),
-        '#description' => $latest
+        '#description' => $selected_source
           ? $this->t('Only providers that advertise Image-to-Image editing support are listed.')
           : $this->t('Uses the Text-to-Image default configured in Drupal AI.'),
         '#required' => TRUE,
       ];
       $form['refine']['prompt'] = $this->promptElement(
-        $latest
-          ? $this->t('Describe only the change you want to make to the latest successful image.')
+        $selected_source
+          ? $this->t('Describe only the change you want to make to the selected image.')
           : $this->t('Describe the image to create.'),
         $max_length,
       );
@@ -291,7 +353,11 @@ final class StudioForm extends FormBase {
   /**
    * Builds one conversation turn.
    */
-  private function buildTurn(object $turn, int $number): array {
+  private function buildTurn(
+    object $turn,
+    int $number,
+    int $selected_turn_id,
+  ): array {
     $prompt = (string) $turn->get('prompt')->value;
     $heading = $this->t('Version @number · @prompt', [
       '@number' => $number,
@@ -299,7 +365,16 @@ final class StudioForm extends FormBase {
     ]);
     $build = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['ai-image-studio-turn']],
+      '#attributes' => [
+        'class' => array_filter([
+          'ai-image-studio-turn',
+          (int) $turn->id() === $selected_turn_id
+            ? 'is-refinement-source'
+            : NULL,
+        ]),
+        'data-ai-image-studio-turn' => (string) $turn->id(),
+        'data-ai-image-studio-source-title' => (string) $heading,
+      ],
       'header' => [
         '#type' => 'container',
         '#attributes' => ['class' => ['ai-image-studio-turn__header']],
@@ -353,8 +428,27 @@ final class StudioForm extends FormBase {
           '#uri' => $file->getFileUri(),
           '#alt' => (string) $turn->get('prompt')->value,
           '#title' => $this->t('Generated version @number', ['@number' => $number]),
+          '#attributes' => ['class' => ['ai-image-studio-turn__image']],
         ];
       }
+      $build['source_choice'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-image-studio-source-action']],
+        'choice' => [
+          '#type' => 'radio',
+          '#title' => $this->t('Use as refinement source'),
+          '#return_value' => (string) $turn->id(),
+          '#default_value' => (string) $selected_turn_id,
+          '#parents' => ['source_turn_id'],
+          '#attributes' => [
+            'class' => ['ai-image-studio-source-choice'],
+          ],
+        ],
+        'selected' => [
+          '#markup' => '<span class="ai-image-studio-source-badge">'
+          . $this->t('Selected source') . '</span>',
+        ],
+      ];
       if (!$turn->get('media_id')->isEmpty()) {
         $media = $turn->get('media_id')->entity;
         if ($media instanceof MediaInterface) {
@@ -605,6 +699,15 @@ final class StudioForm extends FormBase {
     }
 
     $session_id = $form_state->get('session_id');
+    if ($session_id !== NULL) {
+      $source_turn_id = (int) $form_state->getValue('source_turn_id');
+      if ($this->completedTurnFromSession((int) $session_id, $source_turn_id) === NULL) {
+        $form_state->setErrorByName(
+          'source_turn_id',
+          $this->t('Select a completed image from this session to refine.'),
+        );
+      }
+    }
     if ($session_id === NULL && $form_state->getValue('start_mode') === 'upload') {
       $files = array_filter((array) $form_state->getValue('source_image'));
       if (!$files) {
@@ -646,7 +749,12 @@ final class StudioForm extends FormBase {
       }
     }
 
-    $parent = $session_id === NULL ? NULL : $this->latestCompletedTurn((int) $session->id());
+    $parent = $session_id === NULL
+      ? NULL
+      : $this->completedTurnFromSession(
+        (int) $session->id(),
+        (int) $form_state->getValue('source_turn_id'),
+      );
     $source = NULL;
     $model = $session_id === NULL
       ? (string) $form_state->getValue('image_model')
@@ -747,6 +855,29 @@ final class StudioForm extends FormBase {
       ->range(0, 1)
       ->execute();
     return $ids ? $storage->load(reset($ids)) : NULL;
+  }
+
+  /**
+   * Loads a completed image turn that belongs to the requested session.
+   */
+  private function completedTurnFromSession(
+    int $session_id,
+    int $turn_id,
+  ): ?object {
+    if ($turn_id <= 0) {
+      return NULL;
+    }
+
+    $turn = $this->entityTypeManager
+      ->getStorage('ai_image_studio_turn')
+      ->load($turn_id);
+    if ($turn === NULL
+      || (int) $turn->get('session_id')->target_id !== $session_id
+      || $turn->get('status')->value !== 'completed'
+      || $turn->get('image')->isEmpty()) {
+      return NULL;
+    }
+    return $turn;
   }
 
 }
