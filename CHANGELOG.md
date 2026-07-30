@@ -2,7 +2,7 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
-## Unreleased
+## 1.0.0-alpha3
 
 - Numbered version cards from one within each image session.
 - Added concise prompt summaries to version-card headings.
