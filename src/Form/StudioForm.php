@@ -314,7 +314,7 @@ final class StudioForm extends FormBase {
         '#type' => 'select',
         '#title' => $this->t('Aspect ratio'),
         '#options' => [
-          'auto' => $this->t('Automatic'),
+          'auto' => $this->t('Automatic — match source'),
           '1:1' => $this->t('Square — 1:1'),
           '16:9' => $this->t('Landscape — 16:9'),
           '9:16' => $this->t('Portrait — 9:16'),
@@ -330,23 +330,24 @@ final class StudioForm extends FormBase {
           '9:20' => $this->t('Phone portrait — 9:20'),
         ],
         '#default_value' => 'auto',
-        '#description' => $this->t('Availability depends on the selected provider and model.'),
+        '#description' => $this->t('Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent.'),
       ],
       'resolution' => [
         '#type' => 'select',
         '#title' => $this->t('Resolution'),
         '#options' => [
+          'auto' => $this->t('Automatic — match source'),
           '1k' => $this->t('1K — faster and lower cost'),
           '2k' => $this->t('2K — higher detail and cost'),
         ],
-        '#default_value' => '1k',
-        '#description' => $this->t('Grok Imagine supports 1K and 2K output. Other providers may ignore this setting.'),
+        '#default_value' => 'auto',
+        '#description' => $this->t('Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting.'),
       ],
       'transparent_background' => [
         '#type' => 'checkbox',
         '#title' => $this->t('Request a transparent background'),
         '#default_value' => FALSE,
-        '#description' => $this->t('Best effort for Grok text-to-image generation; editing models and other providers may ignore it.'),
+        '#description' => $this->t('Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it.'),
       ],
     ];
   }

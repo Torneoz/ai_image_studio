@@ -12,6 +12,8 @@ All notable changes to AI Image Studio will be documented in this file.
   for refinement turns.
 - Kept refinement-source radio controls aligned inside their version cards.
 - Added concise, versioned Media names and editable alt-text suggestions.
+- Made automatic aspect ratio and resolution inherit the source image’s
+  dimensions when available, with clearer control descriptions.
 
 ## 1.0.0-alpha2
 

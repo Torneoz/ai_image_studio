@@ -88,6 +88,10 @@ final class ImageGenerator {
     $source ??= $parent && !$parent->get('image')->isEmpty()
       ? $parent->get('image')->entity
       : NULL;
+    $generation_settings = $this->resolveAutomaticGenerationSettings(
+      $generation_settings,
+      $source instanceof FileInterface ? $source : NULL,
+    );
     $operation = $source instanceof FileInterface ? 'image_to_image' : 'text_to_image';
     [$provider_id, $model_id] = $this->parseModelOption($model_option);
 
@@ -273,6 +277,69 @@ final class ImageGenerator {
     }
 
     return $normalized;
+  }
+
+  /**
+   * Resolves automatic output controls from a source image when possible.
+   */
+  private function resolveAutomaticGenerationSettings(
+    array $settings,
+    ?FileInterface $source,
+  ): array {
+    $ratio = (string) ($settings['aspect_ratio'] ?? 'auto');
+    $resolution = (string) ($settings['resolution'] ?? 'auto');
+    $dimensions = $source ? @getimagesize($source->getFileUri()) : FALSE;
+    $width = is_array($dimensions) ? (int) ($dimensions[0] ?? 0) : 0;
+    $height = is_array($dimensions) ? (int) ($dimensions[1] ?? 0) : 0;
+
+    if ($ratio === 'auto' && $width > 0 && $height > 0) {
+      $settings['aspect_ratio'] = $this->closestAspectRatio($width, $height);
+    }
+    if ($resolution === 'auto') {
+      $settings['resolution'] = $width > 0 && $height > 0
+        ? $this->closestResolution($width, $height)
+        : '1k';
+    }
+    return $settings;
+  }
+
+  /**
+   * Finds the closest provider-supported aspect ratio.
+   */
+  private function closestAspectRatio(int $width, int $height): string {
+    $ratios = [
+      '1:1' => 1,
+      '16:9' => 16 / 9,
+      '9:16' => 9 / 16,
+      '4:3' => 4 / 3,
+      '3:4' => 3 / 4,
+      '3:2' => 3 / 2,
+      '2:3' => 2 / 3,
+      '2:1' => 2,
+      '1:2' => 1 / 2,
+      '19.5:9' => 19.5 / 9,
+      '9:19.5' => 9 / 19.5,
+      '20:9' => 20 / 9,
+      '9:20' => 9 / 20,
+    ];
+    $actual = $width / $height;
+    $closest = '1:1';
+    $smallest_difference = PHP_FLOAT_MAX;
+    foreach ($ratios as $label => $candidate) {
+      $difference = abs(log($actual / $candidate));
+      if ($difference < $smallest_difference) {
+        $closest = $label;
+        $smallest_difference = $difference;
+      }
+    }
+    return $closest;
+  }
+
+  /**
+   * Maps source dimensions to the closest supported resolution tier.
+   */
+  private function closestResolution(int $width, int $height): string {
+    return max($width, $height) >= 1536 ? '2k' : '1k';
   }
 
   /**
