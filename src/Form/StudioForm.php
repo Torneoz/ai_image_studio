@@ -152,8 +152,10 @@ final class StudioForm extends FormBase {
       '#tree' => TRUE,
       '#attributes' => ['class' => ['ai-image-studio-turns']],
     ];
-    foreach ($turns as $index => $turn) {
-      $form['history']['turn_' . $turn->id()] = $this->buildTurn($turn, $index + 1);
+    $version_number = 1;
+    foreach ($turns as $turn) {
+      $form['history']['turn_' . $turn->id()] = $this->buildTurn($turn, $version_number);
+      $version_number++;
     }
 
     $max_turns = (int) ($settings->get('max_turns') ?: 25);
@@ -290,6 +292,11 @@ final class StudioForm extends FormBase {
    * Builds one conversation turn.
    */
   private function buildTurn(object $turn, int $number): array {
+    $prompt = (string) $turn->get('prompt')->value;
+    $heading = $this->t('Version @number · @prompt', [
+      '@number' => $number,
+      '@prompt' => $this->promptSummary($prompt),
+    ]);
     $build = [
       '#type' => 'container',
       '#attributes' => ['class' => ['ai-image-studio-turn']],
@@ -300,7 +307,7 @@ final class StudioForm extends FormBase {
           '#type' => 'container',
           '#attributes' => ['class' => ['ai-image-studio-turn__top']],
           'heading' => [
-            '#markup' => '<h3>' . $this->t('Version @number', ['@number' => $number]) . '</h3>',
+            '#markup' => '<h3>' . $heading . '</h3>',
           ],
           'result' => [
             '#type' => 'container',
@@ -318,7 +325,7 @@ final class StudioForm extends FormBase {
       'prompt' => [
         '#theme' => 'item_list',
         '#title' => $this->t('Prompt'),
-        '#items' => [['#plain_text' => (string) $turn->get('prompt')->value]],
+        '#items' => [['#plain_text' => $prompt]],
       ],
     ];
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
@@ -393,6 +400,23 @@ final class StudioForm extends FormBase {
       ];
     }
     return $build;
+  }
+
+  /**
+   * Creates a short, single-line card title from a prompt.
+   */
+  private function promptSummary(string $prompt): string {
+    $prompt = trim((string) preg_replace('/\s+/u', ' ', $prompt));
+    if ($prompt === '') {
+      return (string) $this->t('Untitled prompt');
+    }
+
+    $sentences = preg_split('/(?<=[.!?])\s+/u', $prompt, 2);
+    $summary = rtrim((string) ($sentences[0] ?? $prompt), " \t\n\r\0\x0B.!?");
+    if (mb_strlen($summary) > 64) {
+      $summary = rtrim(mb_substr($summary, 0, 61)) . '…';
+    }
+    return $summary;
   }
 
   /**
