@@ -1,75 +1,81 @@
-<img alt="Drupal Logo" src="https://www.drupal.org/files/Wordmark_blue_RGB.png" height="60px">
+# AI Image Studio
 
-Drupal is an open source content management platform supporting a variety of
-websites ranging from personal weblogs to large community-driven websites. For
-more information, visit the Drupal website, [Drupal.org][Drupal.org], and join
-the [Drupal community][Drupal community].
+AI Image Studio provides a conversational workspace for generating images and
+refining them through sequential prompts. Each generated version remains
+available in the session so editors can compare results, continue from an
+earlier image, and save the preferred version to Drupal Media.
 
-## Contributing
+## Features
 
-Drupal is developed on [Drupal.org][Drupal.org], the home of the international
-Drupal community since 2001!
+- Persistent image sessions with a chat-like prompt and version history.
+- Text-to-image generation through compatible Drupal AI providers.
+- Sequential image refinement when the selected provider and model support
+  image-to-image requests.
+- Provider and model selectors populated from Drupal AI configuration.
+- Aspect ratio, resolution, quality, and other provider-supported controls.
+- Version feedback for provider, model, request type, output settings,
+  processing time, status, token usage, and reported or estimated cost.
+- Media Library saving with alternative text required only when an image is
+  saved as Media.
 
-[Drupal.org][Drupal.org] hosts Drupal's [GitLab repository][GitLab repository],
-its [issue queue][issue queue], and its [documentation][documentation]. Before
-you start working on code, be sure to search the [issue queue][issue queue] and
-create an issue if your aren't able to find an existing issue.
+## Requirements
 
-Every issue on Drupal.org automatically creates a new community-accessible fork
-that you can contribute to. Learn more about the code contribution process on
-the [Issue forks & merge requests page][issue forks].
+- PHP 8.1 or later.
+- Drupal 10.3 or Drupal 11.
+- [AI](https://www.drupal.org/project/ai) 1.4 or later.
+- At least one Drupal AI provider with text-to-image support.
+
+Sequential refinement also requires a provider and model capable of accepting
+an image as input. Provider API usage may incur charges.
+
+## Installation
+
+Install with Composer:
+
+```shell
+composer require drupal/ai_image_studio
+```
+
+Enable the module:
+
+```shell
+drush en ai_image_studio
+```
+
+Configure a compatible provider through Drupal AI before creating a session.
+
+## Configuration
+
+Module settings are available at:
+
+```text
+/admin/config/ai/ai-image-studio
+```
+
+The studio is available from the Drupal administration interface to users with
+the module's access permission.
 
 ## Usage
 
-For a brief introduction, see [USAGE.txt](/core/USAGE.txt). You can also find
-guides, API references, and more by visiting Drupal's [documentation
-page][documentation].
+1. Create an image session.
+2. Select a provider and model exposed by Drupal AI.
+3. Choose the desired image options and submit an initial prompt.
+4. Enter follow-up prompts to refine the current image.
+5. Review the version history and select the preferred result.
+6. Save the image to Media and provide the required alternative text.
 
-You can quickly extend Drupal's core feature set by installing any of its
-[thousands of free and open source modules][modules]. With Drupal and its
-module ecosystem, you can often build most or all of what your project needs
-before writing a single line of code.
+## Similar projects
 
-## Changelog
+AI Image Studio differs from one-shot image generators by preserving a
+session-based refinement history, request metadata, usage information, and
+cost feedback through the full editing workflow.
 
-Drupal keeps detailed [change records][changelog]. You can search Drupal's
-changes for a record of every notable breaking change and new feature since
-2011.
+## Contributing
 
-## Security
+Bug reports and feature requests belong in the
+[Drupal.org issue queue](https://www.drupal.org/project/issues/ai_image_studio).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance.
 
-For a list of security announcements, see the [Security advisories
-page][Security advisories] (available as [an RSS feed][security RSS]). This
-page also describes how to subscribe to these announcements via email.
+## License
 
-For information about the Drupal security process, or to find out how to report
-a potential security issue to the Drupal security team, see the [Security team
-page][security team].
-
-## Need a helping hand?
-
-Visit the [Support page][support] or browse [over a thousand Drupal
-providers][service providers] offering design, strategy, development, and
-hosting services.
-
-## Legal matters
-
-Know your rights when using Drupal by reading Drupal core's
-[license](/core/LICENSE.txt).
-
-Learn about the [Drupal trademark and logo policy here][trademark].
-
-[Drupal.org]: https://www.drupal.org
-[Drupal community]: https://www.drupal.org/community
-[GitLab repository]: https://git.drupalcode.org/project/drupal
-[issue queue]: https://www.drupal.org/project/issues/drupal
-[issue forks]: https://www.drupal.org/drupalorg/docs/gitlab-integration/issue-forks-merge-requests
-[documentation]: https://www.drupal.org/documentation
-[changelog]: https://www.drupal.org/list-changes/drupal
-[modules]: https://www.drupal.org/project/project_module
-[security advisories]: https://www.drupal.org/security
-[security RSS]: https://www.drupal.org/security/rss.xml
-[security team]: https://www.drupal.org/drupal-security-team
-[service providers]: https://www.drupal.org/drupal-services
-[support]: https://www.drupal.org/support
-[trademark]: https://www.drupal.com/trademark
+This project is licensed under GPL-2.0-or-later. See [LICENSE.txt](LICENSE.txt).
