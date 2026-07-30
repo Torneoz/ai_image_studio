@@ -192,6 +192,7 @@ final class StudioForm extends FormBase {
       );
       $version_number++;
     }
+    $form['session_report'] = $this->buildSessionReport($turns, $turn_numbers);
 
     $max_turns = (int) ($settings->get('max_turns') ?: 25);
     if (count($turns) >= $max_turns) {
@@ -633,6 +634,141 @@ final class StudioForm extends FormBase {
   }
 
   /**
+   * Builds the session-wide version and cost report.
+   */
+  private function buildSessionReport(array $turns, array $turn_numbers): array {
+    $rows = [];
+    $reported_total = 0.0;
+    $estimated_total = 0.0;
+    $unavailable_count = 0;
+
+    foreach ($turns as $turn) {
+      $turn_id = (int) $turn->id();
+      $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+      $ratio = (string) ($settings['aspect_ratio'] ?? 'auto');
+      $ratio = $ratio === 'auto' ? (string) $this->t('Automatic') : $ratio;
+      $resolution = strtoupper((string) ($settings['resolution'] ?? '1k'));
+      $parent_id = (int) ($turn->get('parent_id')->target_id ?? 0);
+      $source = $parent_id > 0
+        ? $this->t('Version @number', [
+          '@number' => $turn_numbers[$parent_id] ?? $parent_id,
+        ])
+        : ($turn->get('operation')->value === 'image_to_image'
+          ? $this->t('Uploaded image')
+          : $this->t('Text prompt'));
+      $cost_source = (string) $turn->get('cost_source')->value;
+      $cost = $turn->get('estimated_cost')->isEmpty()
+        ? NULL
+        : (float) $turn->get('estimated_cost')->value;
+      if ($cost !== NULL && $cost_source === 'reported') {
+        $reported_total += $cost;
+      }
+      elseif ($cost !== NULL && $cost_source === 'estimated') {
+        $estimated_total += $cost;
+      }
+      else {
+        $unavailable_count++;
+      }
+      $cost_label = match ($cost_source) {
+        'reported' => $this->t('Reported'),
+        'estimated' => $this->t('Estimated'),
+        default => $this->t('Unavailable'),
+      };
+
+      $rows[] = [
+        'version' => [
+          'data' => [
+            '#type' => 'link',
+            '#title' => $this->t('Version @number', [
+              '@number' => $turn_numbers[$turn_id] ?? $turn_id,
+            ]),
+            '#url' => Url::fromRoute(
+              'entity.ai_image_studio_session.canonical',
+              [
+                'ai_image_studio_session' => (int) $turn->get('session_id')->target_id,
+              ],
+              ['fragment' => 'ai-image-studio-turn-' . $turn_id],
+            ),
+          ],
+        ],
+        'prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
+        'provider' => $this->t('@provider · @model', [
+          '@provider' => (string) $turn->get('provider_id')->value,
+          '@model' => (string) $turn->get('model_id')->value,
+        ]),
+        'request' => $turn->get('operation')->value === 'image_to_image'
+          ? $this->t('Image edit')
+          : $this->t('Image generation'),
+        'source' => $source,
+        'output' => $this->t('@ratio · @resolution', [
+          '@ratio' => $ratio,
+          '@resolution' => $resolution,
+        ]),
+        'processing' => $this->formatDuration($turn),
+        'tokens' => $this->formatTokens($turn),
+        'cost' => $cost === NULL
+          ? $cost_label
+          : $this->t('@source · $@cost USD', [
+            '@source' => $cost_label,
+            '@cost' => number_format($cost, 6, '.', ''),
+          ]),
+      ];
+    }
+
+    $total = $reported_total + $estimated_total;
+    return [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['ai-image-studio-report']],
+      'heading' => [
+        '#markup' => '<h2>' . $this->t('Session report') . '</h2>',
+      ],
+      'description' => [
+        '#markup' => '<p class="description">'
+        . $this->t('All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable.')
+        . '</p>',
+      ],
+      'table_wrapper' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-image-studio-report__table-wrapper']],
+        'table' => [
+          '#type' => 'table',
+          '#header' => [
+            $this->t('Version'),
+            $this->t('Prompt'),
+            $this->t('Provider and model'),
+            $this->t('Request'),
+            $this->t('Source'),
+            $this->t('Output'),
+            $this->t('Processing'),
+            $this->t('Tokens'),
+            $this->t('Cost'),
+          ],
+          '#rows' => $rows,
+          '#empty' => $this->t('No versions have been generated.'),
+          '#attributes' => ['class' => ['ai-image-studio-report__table']],
+        ],
+      ],
+      'totals' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-image-studio-report__totals']],
+        'total' => [
+          '#markup' => '<span>' . $this->t('Aggregate cost') . '</span>'
+          . '<strong>$' . number_format($total, 6, '.', '') . ' USD</strong>',
+        ],
+        'breakdown' => [
+          '#markup' => '<span>'
+          . $this->t('Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count', [
+            '@reported' => number_format($reported_total, 6, '.', ''),
+            '@estimated' => number_format($estimated_total, 6, '.', ''),
+            '@count' => $unavailable_count,
+          ])
+          . '</span>',
+        ],
+      ],
+    ];
+  }
+
+  /**
    * Builds the compact generation status pill.
    */
   private function buildStatus(object $turn): array {
@@ -747,6 +883,16 @@ final class StudioForm extends FormBase {
       $parts[] = number_format((int) $tokens['total']) . ' ' . $this->t('total');
     }
     return implode(' · ', $parts);
+  }
+
+  /**
+   * Formats a turn's processing duration.
+   */
+  private function formatDuration(object $turn): string {
+    $duration_ms = (int) ($turn->get('duration_ms')->value ?? 0);
+    return $duration_ms > 0
+      ? number_format($duration_ms / 1000, 1) . 's'
+      : (string) $this->t('Unavailable');
   }
 
   /**

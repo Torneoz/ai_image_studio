@@ -15,6 +15,8 @@ All notable changes to AI Image Studio will be documented in this file.
 - Made automatic aspect ratio and resolution inherit the source image’s
   dimensions when available, with clearer control descriptions.
 - Added an oldest-first/newest-first display control above session versions.
+- Added a tabular session report with per-version usage and cost details plus
+  aggregate reported and estimated totals.
 
 ## 1.0.0-alpha2
 
