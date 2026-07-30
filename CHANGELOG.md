@@ -2,6 +2,12 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-alpha2
+
+- Fixed publishing an earlier image version to Media when the next-generation
+  prompt is empty.
+- Kept prompt validation scoped to image-generation submissions.
+
 ## 1.0.0-alpha1
 
 - Added persistent, owner-scoped image-generation sessions.

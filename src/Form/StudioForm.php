@@ -228,7 +228,10 @@ final class StudioForm extends FormBase {
       '#type' => 'textarea',
       '#title' => $this->t('Prompt'),
       '#description' => $description,
-      '#required' => TRUE,
+      // Validate this only for generation submissions. HTML's required
+      // attribute would otherwise block the per-version Media submit buttons
+      // before Drupal can apply their limited validation scope.
+      '#required' => FALSE,
       '#maxlength' => $max_length,
       '#rows' => 5,
     ];
@@ -568,6 +571,13 @@ final class StudioForm extends FormBase {
 
     if (($trigger['#studio_action'] ?? '') !== 'generate') {
       return;
+    }
+
+    if (trim((string) $form_state->getValue('prompt')) === '') {
+      $form_state->setErrorByName(
+        'prompt',
+        $this->t('Enter a prompt to generate an image.'),
+      );
     }
 
     $session_id = $form_state->get('session_id');
