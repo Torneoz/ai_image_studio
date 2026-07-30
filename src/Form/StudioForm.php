@@ -160,6 +160,23 @@ final class StudioForm extends FormBase {
     ) ?? $latest;
     $selected_turn_id = (int) ($selected_source?->id() ?? 0);
 
+    $form['history_order'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Version order'),
+      '#options' => [
+        'oldest' => $this->t('Oldest first'),
+        'newest' => $this->t('Newest first'),
+      ],
+      '#default_value' => 'oldest',
+      '#description' => $this->t('Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same.'),
+      '#attributes' => [
+        'class' => ['ai-image-studio-history-order'],
+        'data-ai-image-studio-history-order' => '',
+      ],
+      '#wrapper_attributes' => [
+        'class' => ['ai-image-studio-history-order-wrapper'],
+      ],
+    ];
     $form['history'] = [
       '#type' => 'container',
       '#tree' => TRUE,

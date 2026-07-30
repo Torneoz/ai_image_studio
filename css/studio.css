@@ -9,6 +9,26 @@
   gap: 1rem;
 }
 
+.ai-image-studio-history-order-wrapper {
+  align-items: end;
+  display: grid;
+  justify-content: end;
+  margin: 0;
+}
+
+.ai-image-studio-history-order-wrapper .form-item__label {
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.ai-image-studio-history-order {
+  min-width: 10rem;
+}
+
+.ai-image-studio-history-order-wrapper .description {
+  max-width: 28rem;
+}
+
 .ai-image-studio-turn {
   border: 1px solid var(--color-gray-200, #d8d9da);
   border-radius: .5rem;

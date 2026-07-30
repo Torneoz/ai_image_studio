@@ -14,6 +14,7 @@ All notable changes to AI Image Studio will be documented in this file.
 - Added concise, versioned Media names and editable alt-text suggestions.
 - Made automatic aspect ratio and resolution inherit the source image’s
   dimensions when available, with clearer control descriptions.
+- Added an oldest-first/newest-first display control above session versions.
 
 ## 1.0.0-alpha2
 

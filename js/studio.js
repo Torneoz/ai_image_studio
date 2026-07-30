@@ -14,6 +14,13 @@
           const previewImage = studio.querySelector(
             '[data-ai-image-studio-source-preview-image]',
           );
+          const history = studio.querySelector('.ai-image-studio-turns');
+          const orderControl = studio.querySelector(
+            '[data-ai-image-studio-history-order]',
+          );
+          const cards = history
+            ? Array.from(history.querySelectorAll('[data-ai-image-studio-turn]'))
+            : [];
 
           const selectSource = (choice) => {
             const selectedCard = choice.closest(
@@ -52,6 +59,15 @@
               }
             });
           });
+
+          if (history && orderControl) {
+            orderControl.addEventListener('change', () => {
+              const orderedCards = orderControl.value === 'newest'
+                ? [...cards].reverse()
+                : cards;
+              orderedCards.forEach((card) => history.append(card));
+            });
+          }
         });
     },
   };
