@@ -466,15 +466,16 @@ final class StudioForm extends FormBase {
           'name' => [
             '#type' => 'textfield',
             '#title' => $this->t('Media name'),
-            '#default_value' => mb_substr((string) $turn->get('prompt')->value, 0, 120),
+            '#default_value' => $this->defaultMediaName($turn, $number),
             '#maxlength' => 255,
             '#required' => TRUE,
           ],
           'alt' => [
             '#type' => 'textfield',
             '#title' => $this->t('Alternative text'),
+            '#default_value' => $this->suggestedAltText($turn),
             '#maxlength' => 512,
-            '#description' => $this->t('Required when this version is published to Media.'),
+            '#description' => $this->t('Suggested from the session title and this version’s prompt. Review it for accuracy before publishing.'),
           ],
           'submit' => [
             '#type' => 'submit',
@@ -514,6 +515,34 @@ final class StudioForm extends FormBase {
       $summary = rtrim(mb_substr($summary, 0, 61)) . '…';
     }
     return $summary;
+  }
+
+  /**
+   * Creates a concise and unique default Media name.
+   */
+  private function defaultMediaName(object $turn, int $number): string {
+    $session = $turn->get('session_id')->entity;
+    $session_title = $session ? (string) $session->label() : (string) $this->t('AI image');
+    return mb_substr((string) $this->t('@session — Version @number', [
+      '@session' => $session_title,
+      '@number' => $number,
+    ]), 0, 255);
+  }
+
+  /**
+   * Creates an editable alternative-text suggestion for a generated image.
+   */
+  private function suggestedAltText(object $turn): string {
+    $session = $turn->get('session_id')->entity;
+    $session_title = $session ? trim((string) $session->label()) : '';
+    $prompt = $this->promptSummary((string) $turn->get('prompt')->value);
+    $suggestion = $session_title === ''
+      ? $prompt
+      : (string) $this->t('@session: @prompt', [
+        '@session' => $session_title,
+        '@prompt' => $prompt,
+      ]);
+    return mb_substr($suggestion, 0, 512);
   }
 
   /**

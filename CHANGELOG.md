@@ -11,6 +11,7 @@ All notable changes to AI Image Studio will be documented in this file.
 - Made version headers more compact and added linked source-image references
   for refinement turns.
 - Kept refinement-source radio controls aligned inside their version cards.
+- Added concise, versioned Media names and editable alt-text suggestions.
 
 ## 1.0.0-alpha2
 
