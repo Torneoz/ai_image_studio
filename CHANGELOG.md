@@ -2,6 +2,13 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-alpha5
+
+- Added a standard Drupal operations column to the image-session
+  administration table.
+- Added access-aware Open and Delete actions using Drupal’s compact operations
+  dropdown.
+
 ## 1.0.0-alpha4
 
 - Added a dedicated top-level AI Image Studio administration workspace with

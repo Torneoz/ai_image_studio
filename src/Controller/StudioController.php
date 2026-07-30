@@ -56,6 +56,25 @@ final class StudioController extends ControllerBase {
 
     $rows = [];
     foreach ($sessions as $session) {
+      $operations = [
+        'open' => [
+          'title' => $this->t('Open'),
+          'url' => Url::fromRoute('entity.ai_image_studio_session.canonical', [
+            'ai_image_studio_session' => $session->id(),
+          ]),
+          'weight' => 0,
+        ],
+      ];
+      if ($session->access('delete')) {
+        $operations['delete'] = [
+          'title' => $this->t('Delete'),
+          'url' => Url::fromRoute('entity.ai_image_studio_session.delete_form', [
+            'ai_image_studio_session' => $session->id(),
+          ]),
+          'weight' => 10,
+        ];
+      }
+
       $rows[] = [
         Link::fromTextAndUrl(
           $session->label(),
@@ -66,6 +85,12 @@ final class StudioController extends ControllerBase {
         $session->getOwner()?->getDisplayName() ?? $this->t('Unknown'),
         ucfirst((string) $session->get('status')->value),
         $this->dateFormatter->format((int) $session->getChangedTime(), 'short'),
+        [
+          'data' => [
+            '#type' => 'operations',
+            '#links' => $operations,
+          ],
+        ],
       ];
     }
 
@@ -81,6 +106,7 @@ final class StudioController extends ControllerBase {
           $this->t('Owner'),
           $this->t('Status'),
           $this->t('Updated'),
+          $this->t('Operations'),
         ],
         '#rows' => $rows,
         '#empty' => $this->t('No image sessions have been created yet.'),
