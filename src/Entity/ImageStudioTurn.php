@@ -1,0 +1,123 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\ai_image_studio\Entity;
+
+use Drupal\Core\Entity\Attribute\ContentEntityType;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Stores one prompt and its generated image.
+ */
+#[ContentEntityType(
+  id: 'ai_image_studio_turn',
+  label: new TranslatableMarkup('AI Image Studio turn'),
+  label_collection: new TranslatableMarkup('AI Image Studio turns'),
+  label_singular: new TranslatableMarkup('image studio turn'),
+  label_plural: new TranslatableMarkup('image studio turns'),
+  base_table: 'ai_image_studio_turn',
+  entity_keys: [
+    'id' => 'id',
+    'uuid' => 'uuid',
+  ],
+  admin_permission: 'administer ai image studio',
+)]
+final class ImageStudioTurn extends ContentEntityBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
+    $fields = parent::baseFieldDefinitions($entity_type);
+
+    $fields['session_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Session'))
+      ->setRequired(TRUE)
+      ->setSetting('target_type', 'ai_image_studio_session');
+
+    $fields['parent_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Parent turn'))
+      ->setSetting('target_type', 'ai_image_studio_turn');
+
+    $fields['prompt'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(new TranslatableMarkup('Prompt'))
+      ->setRequired(TRUE);
+
+    $fields['image'] = BaseFieldDefinition::create('file')
+      ->setLabel(new TranslatableMarkup('Generated image'))
+      ->setSetting('file_extensions', 'png jpg jpeg webp gif')
+      ->setSetting('file_directory', 'ai-image-studio');
+
+    $fields['provider_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Provider'))
+      ->setSetting('max_length', 128);
+
+    $fields['model_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Model'))
+      ->setSetting('max_length', 255);
+
+    $fields['operation'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(new TranslatableMarkup('Operation'))
+      ->setSettings([
+        'allowed_values' => [
+          'text_to_image' => 'Text to image',
+          'image_to_image' => 'Image to image',
+        ],
+      ]);
+
+    $fields['generation_settings'] = BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Generation settings'));
+
+    $fields['duration_ms'] = BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Generation duration'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['estimated_cost'] = BaseFieldDefinition::create('decimal')
+      ->setLabel(new TranslatableMarkup('Estimated cost'))
+      ->setSetting('precision', 14)
+      ->setSetting('scale', 8);
+
+    $fields['cost_source'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(new TranslatableMarkup('Cost source'))
+      ->setSettings([
+        'allowed_values' => [
+          'reported' => 'Provider reported',
+          'estimated' => 'Estimated',
+          'unavailable' => 'Unavailable',
+        ],
+      ])
+      ->setDefaultValue('unavailable');
+
+    $fields['token_usage'] = BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Token usage'));
+
+    $fields['status'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(new TranslatableMarkup('Status'))
+      ->setRequired(TRUE)
+      ->setSettings([
+        'allowed_values' => [
+          'pending' => 'Pending',
+          'completed' => 'Completed',
+          'failed' => 'Failed',
+        ],
+      ])
+      ->setDefaultValue('pending');
+
+    $fields['error_message'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(new TranslatableMarkup('Error message'));
+
+    $fields['media_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Published Media'))
+      ->setSetting('target_type', 'media');
+
+    $fields['created'] = BaseFieldDefinition::create('created')
+      ->setLabel(new TranslatableMarkup('Created'));
+
+    return $fields;
+  }
+
+}

@@ -1,0 +1,22 @@
+ai_image_studio.settings:
+  type: config_object
+  label: 'AI Image Studio settings'
+  mapping:
+    file_scheme:
+      type: string
+      label: 'File scheme'
+    file_directory:
+      type: string
+      label: 'File directory'
+    max_prompt_length:
+      type: integer
+      label: 'Maximum prompt length'
+    max_turns:
+      type: integer
+      label: 'Maximum turns per session'
+    media_bundle:
+      type: string
+      label: 'Media bundle'
+    media_source_field:
+      type: string
+      label: 'Media source field'

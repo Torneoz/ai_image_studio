@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for AI Image Studio.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Adds persisted image generation settings to existing installations.
+ */
+function ai_image_studio_update_10001(): void {
+  $definition = BaseFieldDefinition::create('map')
+    ->setLabel(new TranslatableMarkup('Generation settings'));
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'generation_settings',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $definition,
+  );
+}
+
+/**
+ * Adds duration and cost feedback to existing image turns.
+ */
+function ai_image_studio_update_10002(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  $duration = BaseFieldDefinition::create('integer')
+    ->setLabel(new TranslatableMarkup('Generation duration'))
+    ->setSetting('unsigned', TRUE);
+  $manager->installFieldStorageDefinition(
+    'duration_ms',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $duration,
+  );
+
+  $cost = BaseFieldDefinition::create('decimal')
+    ->setLabel(new TranslatableMarkup('Estimated cost'))
+    ->setSetting('precision', 14)
+    ->setSetting('scale', 8);
+  $manager->installFieldStorageDefinition(
+    'estimated_cost',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $cost,
+  );
+
+  $source = BaseFieldDefinition::create('list_string')
+    ->setLabel(new TranslatableMarkup('Cost source'))
+    ->setSettings([
+      'allowed_values' => [
+        'reported' => 'Provider reported',
+        'estimated' => 'Estimated',
+        'unavailable' => 'Unavailable',
+      ],
+    ])
+    ->setDefaultValue('unavailable');
+  $manager->installFieldStorageDefinition(
+    'cost_source',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $source,
+  );
+}
+
+/**
+ * Adds provider-reported token usage to existing image turns.
+ */
+function ai_image_studio_update_10003(): void {
+  $definition = BaseFieldDefinition::create('map')
+    ->setLabel(new TranslatableMarkup('Token usage'));
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'token_usage',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $definition,
+  );
+}

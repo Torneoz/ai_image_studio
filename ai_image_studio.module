@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * Hooks for AI Image Studio.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\file\FileInterface;
+
+/**
+ * Implements hook_file_download().
+ */
+function ai_image_studio_file_download(string $uri): array|int|null {
+  $config = \Drupal::config('ai_image_studio.settings');
+  $scheme = (string) ($config->get('file_scheme') ?: 'private');
+  $directory = trim((string) ($config->get('file_directory') ?: 'ai-image-studio'), '/');
+  if (!str_starts_with($uri, $scheme . '://' . $directory . '/')) {
+    return NULL;
+  }
+
+  $files = \Drupal::entityTypeManager()
+    ->getStorage('file')
+    ->loadByProperties(['uri' => $uri]);
+  $file = reset($files);
+  if (!$file instanceof FileInterface) {
+    return -1;
+  }
+
+  $turn_storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
+  $turn_ids = $turn_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('image', $file->id())
+    ->execute();
+  foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
+    if (!$turn->get('media_id')->isEmpty()) {
+      $media = $turn->get('media_id')->entity;
+      if ($media && $media->access('view')) {
+        return file_get_content_headers($file);
+      }
+    }
+
+    $session = $turn->get('session_id')->entity;
+    if ($session && $session->access('view')) {
+      return file_get_content_headers($file);
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * Implements hook_entity_predelete().
+ */
+function ai_image_studio_entity_predelete(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() === 'ai_image_studio_session') {
+    $storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $entity->id())
+      ->execute();
+    if ($ids) {
+      $storage->delete($storage->loadMultiple($ids));
+    }
+  }
+
+  if ($entity->getEntityTypeId() === 'ai_image_studio_turn'
+    && $entity->get('media_id')->isEmpty()
+    && !$entity->get('image')->isEmpty()) {
+    $file = $entity->get('image')->entity;
+    if ($file instanceof FileInterface) {
+      $file->delete();
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+    "name": "drupal/ai_image_studio",
+    "description": "Conversational image generation and sequential refinement using Drupal AI providers.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/ai_image_studio",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/ai_image_studio",
+        "source": "https://github.com/Torneoz/ai_image_studio"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "drupal/core": "^10.3 || ^11",
+        "drupal/ai": "^1.4"
+    },
+    "require-dev": {
+        "drupal/coder": "^8.3"
+    },
+    "suggest": {
+        "drupal/torneo_ai": "Provides shared provider-neutral cost estimates when an API does not report request cost."
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/core-composer-scaffold": false,
+            "php-http/discovery": false,
+            "php-tuf/composer-stager": false,
+            "symfony/runtime": false
+        },
+        "sort-packages": true
+    }
+}

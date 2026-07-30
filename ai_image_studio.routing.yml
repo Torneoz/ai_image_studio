@@ -1,0 +1,47 @@
+entity.ai_image_studio_session.collection:
+  path: '/admin/content/ai-image-studio'
+  defaults:
+    _controller: '\Drupal\ai_image_studio\Controller\StudioController::collection'
+    _title: 'AI Image Studio'
+  requirements:
+    _permission: 'access ai image studio'
+
+ai_image_studio.new:
+  path: '/admin/content/ai-image-studio/new'
+  defaults:
+    _form: '\Drupal\ai_image_studio\Form\StudioForm'
+    _title: 'New image session'
+  requirements:
+    _permission: 'access ai image studio'
+
+entity.ai_image_studio_session.canonical:
+  path: '/admin/content/ai-image-studio/{ai_image_studio_session}'
+  defaults:
+    _form: '\Drupal\ai_image_studio\Form\StudioForm'
+    _title_callback: '\Drupal\ai_image_studio\Form\StudioForm::title'
+  requirements:
+    _entity_access: 'ai_image_studio_session.view'
+  options:
+    parameters:
+      ai_image_studio_session:
+        type: entity:ai_image_studio_session
+
+entity.ai_image_studio_session.delete_form:
+  path: '/admin/content/ai-image-studio/{ai_image_studio_session}/delete'
+  defaults:
+    _entity_form: 'ai_image_studio_session.delete'
+    _title: 'Delete image session'
+  requirements:
+    _entity_access: 'ai_image_studio_session.delete'
+  options:
+    parameters:
+      ai_image_studio_session:
+        type: entity:ai_image_studio_session
+
+ai_image_studio.settings:
+  path: '/admin/config/ai/image-studio'
+  defaults:
+    _form: '\Drupal\ai_image_studio\Form\SettingsForm'
+    _title: 'AI Image Studio'
+  requirements:
+    _permission: 'administer ai image studio'

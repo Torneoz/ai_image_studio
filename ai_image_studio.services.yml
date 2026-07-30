@@ -1,0 +1,16 @@
+services:
+  ai_image_studio.generator:
+    class: Drupal\ai_image_studio\Service\ImageGenerator
+    arguments:
+      - '@ai.provider'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@file.repository'
+      - '@config.factory'
+      - '@datetime.time'
+      - '@logger.channel.ai_image_studio'
+      - '@?torneo_ai.pricing_catalog'
+
+  logger.channel.ai_image_studio:
+    parent: logger.channel_base
+    arguments: ['ai_image_studio']

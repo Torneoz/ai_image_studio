@@ -1,0 +1,5 @@
+ai_image_studio.new:
+  route_name: ai_image_studio.new
+  title: 'New image session'
+  appears_on:
+    - entity.ai_image_studio_session.collection

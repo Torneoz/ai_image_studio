@@ -1,0 +1,20 @@
+access ai image studio:
+  title: 'Access AI Image Studio'
+  description: 'Create and refine images in owned studio sessions.'
+
+view any ai image studio session:
+  title: 'View any AI Image Studio session'
+
+delete own ai image studio session:
+  title: 'Delete own AI Image Studio sessions'
+
+delete any ai image studio session:
+  title: 'Delete any AI Image Studio session'
+  restrict access: true
+
+publish ai image studio image:
+  title: 'Publish AI Image Studio images to Media'
+
+administer ai image studio:
+  title: 'Administer AI Image Studio'
+  restrict access: true

@@ -1,0 +1,4 @@
+studio:
+  css:
+    theme:
+      css/studio.css: {}

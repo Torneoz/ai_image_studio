@@ -1,0 +1,11 @@
+ai_image_studio.collection:
+  title: 'AI Image Studio'
+  description: 'Generate and iteratively refine images.'
+  route_name: entity.ai_image_studio_session.collection
+  parent: system.admin_content
+
+ai_image_studio.settings:
+  title: 'AI Image Studio'
+  description: 'Configure image storage, limits, and Media publishing.'
+  route_name: ai_image_studio.settings
+  parent: ai.admin_config_content

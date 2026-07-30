@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="AI Image Studio">
+  <description>Drupal coding standards for AI Image Studio.</description>
+
+  <file>./src</file>
+  <file>./ai_image_studio.install</file>
+  <file>./ai_image_studio.module</file>
+
+  <arg name="extensions" value="php,module,install"/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>
