@@ -173,6 +173,7 @@
 
 .ai-image-studio-source-action .form-item {
   margin: 0;
+  padding-inline-start: 1.75rem;
 }
 
 .ai-image-studio-source-badge {

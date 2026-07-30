@@ -10,6 +10,7 @@ All notable changes to AI Image Studio will be documented in this file.
   new refinement branch.
 - Made version headers more compact and added linked source-image references
   for refinement turns.
+- Kept refinement-source radio controls aligned inside their version cards.
 
 ## 1.0.0-alpha2
 
