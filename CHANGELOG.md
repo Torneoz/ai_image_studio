@@ -2,6 +2,16 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-alpha4
+
+- Added a dedicated top-level AI Image Studio administration workspace with
+  links to the session library, new-session form, and settings.
+- Added an AI Image Studio link under AI configuration’s Search & Discovery
+  section, immediately after AI API Explorer.
+- Made session versions display newest first by default.
+- Added a configurable “Default sort in Studio” setting with newest-first and
+  oldest-first options.
+
 ## 1.0.0-alpha3
 
 - Numbered version cards from one within each image session.

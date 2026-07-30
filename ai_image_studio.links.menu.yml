@@ -1,11 +1,33 @@
 ai_image_studio.collection:
   title: 'AI Image Studio'
-  description: 'Generate and iteratively refine images.'
+  description: 'Create images and manage refinement sessions.'
   route_name: entity.ai_image_studio_session.collection
-  parent: system.admin_content
+  parent: system.admin
+  weight: -5
+
+ai_image_studio.new:
+  title: 'New image session'
+  description: 'Create an image and refine it through sequential prompts.'
+  route_name: ai_image_studio.new
+  parent: ai_image_studio.collection
+  weight: -10
+
+ai_image_studio.workspace_settings:
+  title: 'Settings'
+  description: 'Configure image storage, limits, and Media publishing.'
+  route_name: ai_image_studio.settings
+  parent: ai_image_studio.collection
+  weight: 10
 
 ai_image_studio.settings:
   title: 'AI Image Studio'
   description: 'Configure image storage, limits, and Media publishing.'
   route_name: ai_image_studio.settings
   parent: ai.admin_config_content
+
+ai_image_studio.ai_search:
+  title: 'AI Image Studio'
+  description: 'Create images and manage refinement sessions.'
+  route_name: entity.ai_image_studio_session.collection
+  parent: ai.admin_config_search
+  weight: 1

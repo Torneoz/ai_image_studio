@@ -65,6 +65,21 @@ final class SettingsForm extends ConfigFormBase {
       $bundles[$id] = $definition['label'];
     }
 
+    $form['interface'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Studio interface'),
+      '#open' => TRUE,
+    ];
+    $form['interface']['default_history_order'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default sort in Studio'),
+      '#options' => [
+        'newest' => $this->t('Newest first'),
+        'oldest' => $this->t('Oldest first'),
+      ],
+      '#default_value' => $config->get('default_history_order') ?: 'newest',
+      '#description' => $this->t('Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session.'),
+    ];
     $form['storage'] = [
       '#type' => 'details',
       '#title' => $this->t('Draft storage'),
@@ -153,6 +168,7 @@ final class SettingsForm extends ConfigFormBase {
       ->set('file_directory', trim((string) $form_state->getValue('file_directory'), '/'))
       ->set('max_prompt_length', (int) $form_state->getValue('max_prompt_length'))
       ->set('max_turns', (int) $form_state->getValue('max_turns'))
+      ->set('default_history_order', $form_state->getValue('default_history_order'))
       ->set('media_bundle', $form_state->getValue('media_bundle'))
       ->set('media_source_field', $form_state->getValue('media_source_field'))
       ->save();

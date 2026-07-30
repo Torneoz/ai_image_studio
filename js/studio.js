@@ -61,12 +61,14 @@
           });
 
           if (history && orderControl) {
-            orderControl.addEventListener('change', () => {
+            const applyHistoryOrder = () => {
               const orderedCards = orderControl.value === 'newest'
                 ? [...cards].reverse()
                 : cards;
               orderedCards.forEach((card) => history.append(card));
-            });
+            };
+            orderControl.addEventListener('change', applyHistoryOrder);
+            applyHistoryOrder();
           }
         });
     },

@@ -167,7 +167,7 @@ final class StudioForm extends FormBase {
         'oldest' => $this->t('Oldest first'),
         'newest' => $this->t('Newest first'),
       ],
-      '#default_value' => 'oldest',
+      '#default_value' => $settings->get('default_history_order') ?: 'newest',
       '#description' => $this->t('Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same.'),
       '#attributes' => [
         'class' => ['ai-image-studio-history-order'],

@@ -2,5 +2,6 @@ file_scheme: private
 file_directory: ai-image-studio
 max_prompt_length: 4000
 max_turns: 25
+default_history_order: newest
 media_bundle: image
 media_source_field: field_media_image

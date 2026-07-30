@@ -14,6 +14,9 @@ ai_image_studio.settings:
     max_turns:
       type: integer
       label: 'Maximum turns per session'
+    default_history_order:
+      type: string
+      label: 'Default sort in Studio'
     media_bundle:
       type: string
       label: 'Media bundle'
