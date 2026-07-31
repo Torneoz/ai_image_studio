@@ -1,0 +1,13 @@
+.local-actions .ai-image-studio-settings-action {
+  align-items: center;
+  display: inline-flex;
+  font-size: 0;
+  justify-content: center;
+  min-width: 2.75rem;
+}
+
+.local-actions .ai-image-studio-settings-action::before {
+  content: "⚙";
+  font-size: 1.25rem;
+  line-height: 1;
+}

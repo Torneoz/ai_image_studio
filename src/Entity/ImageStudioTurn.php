@@ -52,6 +52,11 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setSetting('file_extensions', 'png jpg jpeg webp gif')
       ->setSetting('file_directory', 'ai-image-studio');
 
+    $fields['video'] = BaseFieldDefinition::create('file')
+      ->setLabel(new TranslatableMarkup('Generated video'))
+      ->setSetting('file_extensions', 'mp4')
+      ->setSetting('file_directory', 'ai-image-studio');
+
     $fields['provider_id'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Provider'))
       ->setSetting('max_length', 128);
@@ -66,6 +71,8 @@ final class ImageStudioTurn extends ContentEntityBase {
         'allowed_values' => [
           'text_to_image' => 'Text to image',
           'image_to_image' => 'Image to image',
+          'text_to_video' => 'Text to video',
+          'image_to_video' => 'Image to video',
         ],
       ]);
 

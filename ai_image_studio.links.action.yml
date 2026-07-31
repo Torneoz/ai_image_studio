@@ -1,5 +1,18 @@
 ai_image_studio.new:
   route_name: ai_image_studio.new
   title: 'New image session'
+  weight: 0
+  appears_on:
+    - entity.ai_image_studio_session.collection
+
+ai_image_studio.settings:
+  route_name: ai_image_studio.settings
+  title: 'Studio settings'
+  weight: 10
+  options:
+    attributes:
+      class:
+        - ai-image-studio-settings-action
+      title: 'Configure AI Image Studio'
   appears_on:
     - entity.ai_image_studio_session.collection

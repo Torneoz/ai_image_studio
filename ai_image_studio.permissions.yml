@@ -15,6 +15,9 @@ delete any ai image studio session:
 publish ai image studio image:
   title: 'Publish AI Image Studio images to Media'
 
+publish ai image studio video:
+  title: 'Publish AI Image Studio videos to Media'
+
 administer ai image studio:
   title: 'Administer AI Image Studio'
   restrict access: true

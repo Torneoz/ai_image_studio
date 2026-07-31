@@ -7,3 +7,8 @@ studio:
   dependencies:
     - core/drupal
     - core/once
+
+collection:
+  css:
+    theme:
+      css/collection.css: {}

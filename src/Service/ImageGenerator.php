@@ -6,7 +6,9 @@ namespace Drupal\ai_image_studio\Service;
 
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\GenericType\ImageFile;
+use Drupal\ai\OperationType\GenericType\VideoFile;
 use Drupal\ai\OperationType\ImageToImage\ImageToImageInput;
+use Drupal\ai\OperationType\ImageToVideo\ImageToVideoInput;
 use Drupal\ai\OperationType\TextToImage\TextToImageInput;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -73,6 +75,8 @@ final class ImageGenerator {
    *   An optional uploaded source image for the first turn.
    * @param array $generation_settings
    *   Provider configuration for image dimensions and output options.
+   * @param string $output_type
+   *   Either image or video.
    *
    * @return \Drupal\ai_image_studio\Entity\ImageStudioTurn
    *   The saved completed or failed turn.
@@ -84,6 +88,7 @@ final class ImageGenerator {
     ?object $parent = NULL,
     ?FileInterface $source = NULL,
     array $generation_settings = [],
+    string $output_type = 'image',
   ): object {
     $source ??= $parent && !$parent->get('image')->isEmpty()
       ? $parent->get('image')->entity
@@ -92,7 +97,12 @@ final class ImageGenerator {
       $generation_settings,
       $source instanceof FileInterface ? $source : NULL,
     );
-    $operation = $source instanceof FileInterface ? 'image_to_image' : 'text_to_image';
+    $operation = match ([$output_type, $source instanceof FileInterface]) {
+      ['video', TRUE] => 'image_to_video',
+      ['video', FALSE] => 'text_to_video',
+      ['image', TRUE] => 'image_to_image',
+      default => 'text_to_image',
+    };
     [$provider_id, $model_id] = $this->parseModelOption($model_option);
 
     $turn = $this->entityTypeManager->getStorage('ai_image_studio_turn')->create([
@@ -115,15 +125,31 @@ final class ImageGenerator {
         $operation,
         $generation_settings,
       ));
-      if ($operation === 'image_to_image') {
+      if (in_array($operation, ['image_to_image', 'image_to_video'], TRUE)) {
         $binary = file_get_contents($source->getFileUri());
         if ($binary === FALSE) {
           throw new \RuntimeException('The source image could not be read.');
         }
         $image = new ImageFile($binary, $source->getMimeType(), $source->getFilename());
-        $input = new ImageToImageInput($image);
-        $input->setPrompt($prompt);
-        $output = $provider->imageToImage($input, $model_id, ['ai_image_studio']);
+        if ($operation === 'image_to_video') {
+          $output = $provider->imageToVideo(
+            new ImageToVideoInput($image),
+            $model_id,
+            ['ai_image_studio'],
+          );
+        }
+        else {
+          $input = new ImageToImageInput($image);
+          $input->setPrompt($prompt);
+          $output = $provider->imageToImage($input, $model_id, ['ai_image_studio']);
+        }
+      }
+      elseif ($operation === 'text_to_video') {
+        $output = $provider->textToVideo(
+          $prompt,
+          $model_id,
+          ['ai_image_studio'],
+        );
       }
       else {
         $output = $provider->textToImage(
@@ -145,14 +171,30 @@ final class ImageGenerator {
         $metadata,
       );
 
-      $images = $output->getNormalized();
-      $image = reset($images);
-      if (!$image instanceof ImageFile || $image->getBinary() === '') {
-        throw new \RuntimeException('The provider returned no generated image.');
+      $outputs = $output->getNormalized();
+      $generated = reset($outputs);
+      if ($output_type === 'video') {
+        if (!$generated instanceof VideoFile || $generated->getBinary() === '') {
+          throw new \RuntimeException('The provider returned no generated video.');
+        }
+        $file = $this->saveGeneratedVideo(
+          $generated,
+          (int) $session->id(),
+          (int) $turn->id(),
+        );
+        $turn->set('video', ['target_id' => $file->id()]);
       }
-
-      $file = $this->saveGeneratedFile($image, (int) $session->id(), (int) $turn->id());
-      $turn->set('image', ['target_id' => $file->id()]);
+      else {
+        if (!$generated instanceof ImageFile || $generated->getBinary() === '') {
+          throw new \RuntimeException('The provider returned no generated image.');
+        }
+        $file = $this->saveGeneratedFile(
+          $generated,
+          (int) $session->id(),
+          (int) $turn->id(),
+        );
+        $turn->set('image', ['target_id' => $file->id()]);
+      }
       $turn->set('duration_ms', $duration_ms);
       $turn->set('estimated_cost', $estimated_cost);
       $turn->set('token_usage', $token_usage);
@@ -170,7 +212,7 @@ final class ImageGenerator {
       $turn->set('status', 'failed');
       $turn->set('error_message', $message);
       $turn->save();
-      $this->logger->error('Image generation failed for session @session: @message', [
+      $this->logger->error('Media generation failed for session @session: @message', [
         '@session' => $session->id(),
         '@message' => $message,
       ]);
@@ -182,9 +224,11 @@ final class ImageGenerator {
   /**
    * Publishes a completed turn to the configured Media bundle.
    */
-  public function publish(object $turn, string $name, string $alt): MediaInterface {
-    if ($turn->get('status')->value !== 'completed' || $turn->get('image')->isEmpty()) {
-      throw new \LogicException('Only completed image turns can be published.');
+  public function publish(object $turn, string $name, string $alt = ''): MediaInterface {
+    $is_video = !$turn->get('video')->isEmpty();
+    if ($turn->get('status')->value !== 'completed'
+      || ($turn->get('image')->isEmpty() && !$is_video)) {
+      throw new \LogicException('Only completed Studio turns can be published.');
     }
     if (!$turn->get('media_id')->isEmpty()) {
       $media = $turn->get('media_id')->entity;
@@ -194,20 +238,25 @@ final class ImageGenerator {
     }
 
     $settings = $this->configFactory->get('ai_image_studio.settings');
-    $bundle = (string) $settings->get('media_bundle');
-    $field = (string) $settings->get('media_source_field');
-    $file = $turn->get('image')->entity;
+    $bundle = (string) $settings->get(
+      $is_video ? 'video_media_bundle' : 'media_bundle',
+    );
+    $field = (string) $settings->get(
+      $is_video ? 'video_media_source_field' : 'media_source_field',
+    );
+    $file = $turn->get($is_video ? 'video' : 'image')->entity;
     if (!$file instanceof FileInterface) {
       throw new \RuntimeException('The generated file is unavailable.');
     }
 
+    $source_value = ['target_id' => $file->id()];
+    if (!$is_video) {
+      $source_value['alt'] = $alt;
+    }
     $media = $this->entityTypeManager->getStorage('media')->create([
       'bundle' => $bundle,
       'name' => $name,
-      $field => [
-        'target_id' => $file->id(),
-        'alt' => $alt,
-      ],
+      $field => $source_value,
       'status' => 1,
     ]);
     $media->save();
@@ -257,6 +306,21 @@ final class ImageGenerator {
     // declared a compatible mapping because some APIs reject them.
     if (!str_contains($provider_id, 'grok')) {
       return [];
+    }
+
+    if (in_array($operation, ['text_to_video', 'image_to_video'], TRUE)) {
+      $normalized = array_filter([
+        'duration' => (int) ($settings['duration'] ?? 5),
+        'aspect_ratio' => (string) ($settings['aspect_ratio'] ?? ''),
+        'resolution' => (string) ($settings['resolution'] ?? ''),
+        'prompt' => $operation === 'image_to_video'
+          ? (string) ($settings['prompt'] ?? '')
+          : '',
+      ], static fn (mixed $value): bool => $value !== '');
+      if (($normalized['aspect_ratio'] ?? '') === 'auto') {
+        unset($normalized['aspect_ratio']);
+      }
+      return $normalized;
     }
 
     $normalized = array_filter([
@@ -486,6 +550,33 @@ final class ImageGenerator {
     $destination = sprintf('%s/turn-%d.%s', $destination_directory, $turn_id, $extension);
     $file = $this->fileRepository->writeData(
       $image->getBinary(),
+      $destination,
+      FileExists::Rename,
+    );
+    $file->setPermanent();
+    $file->save();
+    return $file;
+  }
+
+  /**
+   * Writes a normalized video to managed file storage.
+   */
+  private function saveGeneratedVideo(
+    VideoFile $video,
+    int $session_id,
+    int $turn_id,
+  ): FileInterface {
+    $settings = $this->configFactory->get('ai_image_studio.settings');
+    $scheme = (string) ($settings->get('file_scheme') ?: 'private');
+    $directory = trim((string) ($settings->get('file_directory') ?: 'ai-image-studio'), '/');
+    $destination_directory = sprintf('%s://%s/%d', $scheme, $directory, $session_id);
+    $this->fileSystem->prepareDirectory(
+      $destination_directory,
+      FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
+    );
+    $destination = sprintf('%s/turn-%d.mp4', $destination_directory, $turn_id);
+    $file = $this->fileRepository->writeData(
+      $video->getBinary(),
       $destination,
       FileExists::Rename,
     );

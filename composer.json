@@ -1,6 +1,6 @@
 {
     "name": "drupal/ai_image_studio",
-    "description": "Conversational image generation and sequential refinement using Drupal AI providers.",
+    "description": "Conversational image and video generation using Drupal AI providers.",
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "homepage": "https://www.drupal.org/project/ai_image_studio",

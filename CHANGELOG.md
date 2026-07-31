@@ -2,6 +2,26 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-alpha6
+
+- Added experimental text-to-video and image-to-video generation through
+  operation-compatible Drupal AI providers.
+- Added configurable video duration, aspect ratio, and resolution controls,
+  inline MP4 playback, private-file authorization, and Video Media publishing.
+- Added selection of any completed session image as the source for image
+  refinement or image-to-video generation.
+- Added immediate, accessible generation progress feedback and duplicate-submit
+  protection for long-running image and video requests.
+- Added a Saved to Media indicator to generated result cards.
+- Expanded Studio settings with interface visibility, generation defaults,
+  per-operation model overrides, upload and video limits, cost warnings,
+  alternative-text policy, and provider diagnostics.
+- Added provider-reported and estimated image/video cost details to version
+  feedback and session reports, including configurable warning thresholds.
+- Reordered session pages around generation, sorting, results, and reporting,
+  and improved result-card controls and metadata presentation.
+- Added a settings cog beside the New image session action on the session list.
+
 ## 1.0.0-alpha5
 
 - Added a standard Drupal operations column to the image-session

@@ -82,3 +82,79 @@ function ai_image_studio_update_10003(): void {
     $definition,
   );
 }
+
+/**
+ * Adds video output storage and video operation values.
+ */
+function ai_image_studio_update_10004(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  $video = BaseFieldDefinition::create('file')
+    ->setLabel(new TranslatableMarkup('Generated video'))
+    ->setSetting('file_extensions', 'mp4')
+    ->setSetting('file_directory', 'ai-image-studio');
+  $manager->installFieldStorageDefinition(
+    'video',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $video,
+  );
+
+  $definitions = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('ai_image_studio_turn');
+  $operation = $definitions['operation'];
+  $operation->setSetting('allowed_values', [
+    'text_to_image' => 'Text to image',
+    'image_to_image' => 'Image to image',
+    'text_to_video' => 'Text to video',
+    'image_to_video' => 'Image to video',
+  ]);
+  $manager->updateFieldStorageDefinition($operation);
+
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  if ($config->get('video_media_bundle') === NULL) {
+    $config
+      ->set('video_media_bundle', 'video')
+      ->set('video_media_source_field', 'field_media_video_file')
+      ->save(TRUE);
+  }
+}
+
+/**
+ * Adds configurable Studio interface and generation defaults.
+ */
+function ai_image_studio_update_10005(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  $defaults = [
+    'generation_form_open' => TRUE,
+    'image_settings_open' => TRUE,
+    'video_settings_open' => TRUE,
+    'show_request_metadata' => TRUE,
+    'show_token_usage' => TRUE,
+    'show_costs' => TRUE,
+    'show_session_report' => TRUE,
+    'default_output_type' => 'image',
+    'default_aspect_ratio' => 'auto',
+    'default_image_resolution' => 'auto',
+    'default_video_resolution' => '720p',
+    'default_video_duration' => 5,
+    'default_transparent_background' => FALSE,
+    'default_text_to_image_model' => '',
+    'default_image_to_image_model' => '',
+    'default_text_to_video_model' => '',
+    'default_image_to_video_model' => '',
+    'max_source_image_size_mb' => 20,
+    'max_video_duration' => 15,
+    'request_cost_warning' => 0,
+    'session_cost_warning' => 0,
+    'require_image_alt' => TRUE,
+  ];
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+    }
+  }
+  $config->save(TRUE);
+}

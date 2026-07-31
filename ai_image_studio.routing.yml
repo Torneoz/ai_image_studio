@@ -10,7 +10,7 @@ ai_image_studio.new:
   path: '/admin/content/ai-image-studio/new'
   defaults:
     _form: '\Drupal\ai_image_studio\Form\StudioForm'
-    _title: 'New image session'
+    _title: 'New Studio session'
   requirements:
     _permission: 'access ai image studio'
 

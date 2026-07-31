@@ -96,6 +96,9 @@ final class StudioController extends ControllerBase {
 
     return [
       '#type' => 'container',
+      '#attached' => [
+        'library' => ['ai_image_studio/collection'],
+      ],
       'intro' => [
         '#markup' => '<p>' . $this->t('Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session.') . '</p>',
       ],

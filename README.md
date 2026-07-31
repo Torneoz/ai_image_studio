@@ -1,9 +1,10 @@
 # AI Image Studio
 
 AI Image Studio provides a conversational workspace for generating images and
-refining them through sequential prompts. Each generated version remains
-available in the session so editors can compare results, continue from an
-earlier image, and save the preferred version to Drupal Media.
+videos and refining images through sequential prompts. Each generated version
+remains available in the session so editors can compare results, branch from
+an earlier image, animate a selected image, and save preferred results to
+Drupal Media.
 
 ## Features
 
@@ -11,19 +12,23 @@ earlier image, and save the preferred version to Drupal Media.
 - Text-to-image generation through compatible Drupal AI providers.
 - Sequential image refinement when the selected provider and model support
   image-to-image requests.
+- Text-to-video and image-to-video generation through compatible providers.
+- Inline video playback and publishing to a configured Video Media type.
 - Provider and model selectors populated from Drupal AI configuration.
 - Aspect ratio, resolution, quality, and other provider-supported controls.
 - Version feedback for provider, model, request type, output settings,
   processing time, status, token usage, and reported or estimated cost.
 - Media Library saving with alternative text required only when an image is
   saved as Media.
+- Configurable generation defaults, limits, cost warnings, visibility controls,
+  and per-operation model overrides.
 
 ## Requirements
 
 - PHP 8.1 or later.
 - Drupal 10.3 or Drupal 11.
 - [AI](https://www.drupal.org/project/ai) 1.4 or later.
-- At least one Drupal AI provider with text-to-image support.
+- At least one Drupal AI provider supporting the operation you want to use.
 
 Sequential refinement also requires a provider and model capable of accepting
 an image as input. Provider API usage may incur charges.
@@ -49,7 +54,7 @@ Configure a compatible provider through Drupal AI before creating a session.
 Module settings are available at:
 
 ```text
-/admin/config/ai/ai-image-studio
+/admin/config/ai/image-studio
 ```
 
 The studio is available from the Drupal administration interface to users with
@@ -57,12 +62,13 @@ the module's access permission.
 
 ## Usage
 
-1. Create an image session.
+1. Create a Studio session.
 2. Select a provider and model exposed by Drupal AI.
-3. Choose the desired image options and submit an initial prompt.
-4. Enter follow-up prompts to refine the current image.
+3. Choose image or video output and submit an initial prompt.
+4. Enter follow-up prompts to refine or animate a selected image.
 5. Review the version history and select the preferred result.
-6. Save the image to Media and provide the required alternative text.
+6. Save the preferred image or video to Media. Images require alternative text
+   when that policy is enabled.
 
 ## Similar projects
 

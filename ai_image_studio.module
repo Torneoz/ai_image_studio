@@ -30,9 +30,13 @@ function ai_image_studio_file_download(string $uri): array|int|null {
   }
 
   $turn_storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
+  $file_reference = $turn_storage->getQuery()
+    ->orConditionGroup()
+    ->condition('image', $file->id())
+    ->condition('video', $file->id());
   $turn_ids = $turn_storage->getQuery()
     ->accessCheck(FALSE)
-    ->condition('image', $file->id())
+    ->condition($file_reference)
     ->execute();
   foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
     if (!$turn->get('media_id')->isEmpty()) {
@@ -67,11 +71,14 @@ function ai_image_studio_entity_predelete(EntityInterface $entity): void {
   }
 
   if ($entity->getEntityTypeId() === 'ai_image_studio_turn'
-    && $entity->get('media_id')->isEmpty()
-    && !$entity->get('image')->isEmpty()) {
-    $file = $entity->get('image')->entity;
-    if ($file instanceof FileInterface) {
-      $file->delete();
+    && $entity->get('media_id')->isEmpty()) {
+    foreach (['image', 'video'] as $field_name) {
+      if (!$entity->get($field_name)->isEmpty()) {
+        $file = $entity->get($field_name)->entity;
+        if ($file instanceof FileInterface) {
+          $file->delete();
+        }
+      }
     }
   }
 }

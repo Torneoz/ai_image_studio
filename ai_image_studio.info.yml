@@ -1,6 +1,6 @@
 name: 'AI Image Studio'
 type: module
-description: 'Conversational image generation and sequential refinement using Drupal AI providers.'
+description: 'Conversational image and video generation using Drupal AI providers.'
 package: 'AI'
 core_version_requirement: ^10.3 || ^11
 configure: ai_image_studio.settings

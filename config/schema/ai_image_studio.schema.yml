@@ -17,9 +17,81 @@ ai_image_studio.settings:
     default_history_order:
       type: string
       label: 'Default sort in Studio'
+    generation_form_open:
+      type: boolean
+      label: 'Open the generation form initially'
+    image_settings_open:
+      type: boolean
+      label: 'Open image settings initially'
+    video_settings_open:
+      type: boolean
+      label: 'Open video settings initially'
+    show_request_metadata:
+      type: boolean
+      label: 'Show request metadata'
+    show_token_usage:
+      type: boolean
+      label: 'Show token usage'
+    show_costs:
+      type: boolean
+      label: 'Show costs'
+    show_session_report:
+      type: boolean
+      label: 'Show the session report'
+    default_output_type:
+      type: string
+      label: 'Default output type'
+    default_aspect_ratio:
+      type: string
+      label: 'Default aspect ratio'
+    default_image_resolution:
+      type: string
+      label: 'Default image resolution'
+    default_video_resolution:
+      type: string
+      label: 'Default video resolution'
+    default_video_duration:
+      type: integer
+      label: 'Default video duration'
+    default_transparent_background:
+      type: boolean
+      label: 'Request transparent backgrounds by default'
+    default_text_to_image_model:
+      type: string
+      label: 'Default Text-to-Image model'
+    default_image_to_image_model:
+      type: string
+      label: 'Default Image-to-Image model'
+    default_text_to_video_model:
+      type: string
+      label: 'Default Text-to-Video model'
+    default_image_to_video_model:
+      type: string
+      label: 'Default Image-to-Video model'
+    max_source_image_size_mb:
+      type: integer
+      label: 'Maximum source image size in MB'
+    max_video_duration:
+      type: integer
+      label: 'Maximum video duration'
+    request_cost_warning:
+      type: float
+      label: 'Per-request cost warning threshold'
+    session_cost_warning:
+      type: float
+      label: 'Session cost warning threshold'
     media_bundle:
       type: string
       label: 'Media bundle'
     media_source_field:
       type: string
       label: 'Media source field'
+    require_image_alt:
+      type: boolean
+      label: 'Require image alternative text'
+    video_media_bundle:
+      type: string
+      label: 'Video Media bundle'
+    video_media_source_field:
+      type: string
+      label: 'Video Media source field'

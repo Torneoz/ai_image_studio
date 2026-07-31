@@ -12,7 +12,7 @@
 .ai-image-studio-history-order-wrapper {
   align-items: end;
   display: grid;
-  justify-content: end;
+  justify-content: start;
   margin: 0;
 }
 
@@ -192,6 +192,24 @@
   color: #e4b84f;
 }
 
+.ai-image-studio-media-status {
+  align-items: center;
+  background: color-mix(in srgb, #52b879 16%, transparent);
+  border: 1px solid color-mix(in srgb, #52b879 55%, transparent);
+  border-radius: 999px;
+  color: #52b879;
+  display: inline-flex;
+  font-size: .7rem;
+  font-weight: 700;
+  gap: .35rem;
+  padding: .22rem .55rem;
+}
+
+.ai-image-studio-media-status::before {
+  content: "✓";
+  font-weight: 800;
+}
+
 .ai-image-studio-cost {
   align-items: baseline;
   display: flex;
@@ -224,6 +242,65 @@
   height: auto;
   max-height: 48rem;
   max-width: 100%;
+}
+
+.ai-image-studio-turn__video {
+  background: #111;
+  display: block;
+  max-height: 75vh;
+  width: 100%;
+}
+
+.ai-image-studio-generation-feedback {
+  align-items: center;
+  background: color-mix(in srgb, var(--color-blue-500, #3789d8) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-blue-500, #3789d8) 55%, transparent);
+  border-radius: .5rem;
+  display: flex;
+  gap: 1rem;
+  margin-block-end: 1.25rem;
+  padding: 1rem 1.25rem;
+}
+
+.ai-image-studio-generation-feedback[hidden] {
+  display: none;
+}
+
+.ai-image-studio-generation-feedback__spinner {
+  animation: ai-image-studio-spin .8s linear infinite;
+  border: .2rem solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 50%;
+  border-top-color: var(--color-blue-500, #3789d8);
+  flex: 0 0 1.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.ai-image-studio-generation-feedback strong,
+.ai-image-studio-generation-feedback span:not(.ai-image-studio-generation-feedback__spinner) {
+  display: block;
+}
+
+.ai-image-studio-generation-feedback strong {
+  margin-block-end: .2rem;
+}
+
+.ai-image-studio-layout.is-generating {
+  cursor: progress;
+}
+
+.ai-image-studio-report.is-cost-warning {
+  border-color: var(--color-red-500, #d72222);
+}
+
+.ai-image-studio-report__warning {
+  color: var(--color-red-600, #b21616);
+}
+
+@keyframes ai-image-studio-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ai-image-studio-meta {

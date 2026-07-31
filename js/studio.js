@@ -73,4 +73,85 @@
         });
     },
   };
+
+  Drupal.behaviors.aiImageStudioGenerationFeedback = {
+    attach(context) {
+      once(
+        'ai-image-studio-generation-feedback',
+        '.ai-image-studio-layout',
+        context,
+      ).forEach((studio) => {
+        studio.addEventListener('submit', (event) => {
+          const submitter = event.submitter;
+          if (!submitter || !submitter.matches(
+            '[data-ai-image-studio-generate]',
+          )) {
+            return;
+          }
+          if (studio.classList.contains('is-generating')) {
+            event.preventDefault();
+            return;
+          }
+
+          const output = studio.querySelector(
+            'input[name="output_type"]:checked',
+          )?.value || 'image';
+          const isVideo = output === 'video';
+          const feedback = studio.querySelector(
+            '[data-ai-image-studio-generation-feedback]',
+          );
+          const title = studio.querySelector(
+            '[data-ai-image-studio-generation-title]',
+          );
+          const message = studio.querySelector(
+            '[data-ai-image-studio-generation-message]',
+          );
+          const busyLabel = isVideo
+            ? submitter.dataset.generatingVideoLabel
+            : submitter.dataset.generatingImageLabel;
+
+          studio.setAttribute('aria-busy', 'true');
+          studio.classList.add('is-generating');
+          studio.querySelectorAll('[data-ai-image-studio-generate]')
+            .forEach((button) => {
+              button.setAttribute('aria-disabled', 'true');
+            });
+          if (title) {
+            title.textContent = isVideo
+              ? Drupal.t('Generating video…')
+              : Drupal.t('Generating image…');
+          }
+          if (message) {
+            message.textContent = isVideo
+              ? Drupal.t(
+                'Video generation can take several minutes. Keep this page open while the provider completes the request.',
+              )
+              : Drupal.t(
+                'The provider is creating your image. Keep this page open until the request completes.',
+              );
+          }
+          if (feedback) {
+            feedback.hidden = false;
+            feedback.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+            });
+          }
+
+          // Wait until the browser has serialized the clicked submit button.
+          // Disabling it or changing its value synchronously can prevent
+          // Drupal Form API from identifying the triggering element.
+          window.setTimeout(() => {
+            studio.querySelectorAll('[data-ai-image-studio-generate]')
+              .forEach((button) => {
+                button.disabled = true;
+              });
+            if (busyLabel) {
+              submitter.value = busyLabel;
+            }
+          }, 0);
+        });
+      });
+    },
+  };
 })(Drupal, once);
