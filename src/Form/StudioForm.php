@@ -134,7 +134,7 @@ final class StudioForm extends FormBase {
           'video' => $this->t('Video'),
         ],
         '#default_value' => $default_output_type,
-        '#description' => $this->t('Video generation is experimental and runs synchronously in this test build.'),
+        '#description' => $this->t('Video generation is experimental and runs synchronously. Keep the page open until the request completes.'),
       ];
       $form['source_image'] = [
         '#type' => 'managed_file',
@@ -295,7 +295,7 @@ final class StudioForm extends FormBase {
         ],
       ];
     }
-    else {
+    elseif ($session->access('update')) {
       $form['refine'] = [
         '#type' => 'details',
         '#weight' => -40,
@@ -516,7 +516,7 @@ final class StudioForm extends FormBase {
   }
 
   /**
-   * Builds experimental video output controls.
+   * Builds video output controls.
    */
   private function videoControls(): array {
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
@@ -713,7 +713,8 @@ final class StudioForm extends FormBase {
           ->toLink($this->t('View published Media'))
           ->toRenderable();
       }
-      elseif ($this->currentUserProxy->hasPermission(
+      elseif ($turn->get('session_id')->entity?->access('update')
+        && $this->currentUserProxy->hasPermission(
         $is_video
           ? 'publish ai image studio video'
           : 'publish ai image studio image',
@@ -1236,6 +1237,28 @@ final class StudioForm extends FormBase {
 
     $session_id = $form_state->get('session_id');
     if ($session_id !== NULL) {
+      $session = $this->entityTypeManager
+        ->getStorage('ai_image_studio_session')
+        ->load($session_id);
+      if ($session === NULL || !$session->access('update')) {
+        $form_state->setErrorByName(
+          'prompt',
+          $this->t('You are not allowed to modify this session.'),
+        );
+        return;
+      }
+      $max_turns = (int) ($this->studioConfigFactory
+        ->get('ai_image_studio.settings')
+        ->get('max_turns') ?: 25);
+      if ($this->countTurns((int) $session_id) >= $max_turns) {
+        $form_state->setErrorByName(
+          'prompt',
+          $this->t('This session has reached its limit of @count turns.', [
+            '@count' => $max_turns,
+          ]),
+        );
+        return;
+      }
       $source_turn_id = (int) $form_state->getValue('source_turn_id');
       if ($this->completedTurnFromSession((int) $session_id, $source_turn_id) === NULL) {
         $form_state->setErrorByName(
@@ -1303,7 +1326,7 @@ final class StudioForm extends FormBase {
     }
     else {
       $session = $storage->load($session_id);
-      if ($session === NULL || !$session->access('view')) {
+      if ($session === NULL || !$session->access('update')) {
         throw new \RuntimeException('The image session is unavailable.');
       }
     }
@@ -1398,7 +1421,7 @@ final class StudioForm extends FormBase {
     $permission = $is_video
       ? 'publish ai image studio video'
       : 'publish ai image studio image';
-    if ($session === NULL || !$session->access('view')
+    if ($session === NULL || !$session->access('update')
       || !$this->currentUserProxy->hasPermission($permission)) {
       throw new \RuntimeException('You are not allowed to publish this result.');
     }
@@ -1433,6 +1456,19 @@ final class StudioForm extends FormBase {
       ->sort('id', 'ASC')
       ->execute();
     return $storage->loadMultiple($ids);
+  }
+
+  /**
+   * Counts turns belonging to a session without applying entity query access.
+   */
+  private function countTurns(int $session_id): int {
+    return (int) $this->entityTypeManager
+      ->getStorage('ai_image_studio_turn')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $session_id)
+      ->count()
+      ->execute();
   }
 
   /**

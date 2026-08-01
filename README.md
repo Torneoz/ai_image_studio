@@ -1,5 +1,8 @@
 # AI Image Studio
 
+> **Beta:** Test provider compatibility, private-file delivery, and Media field
+> mappings in a non-production environment before enabling access broadly.
+
 AI Image Studio provides a conversational workspace for generating images and
 videos and refining images through sequential prompts. Each generated version
 remains available in the session so editors can compare results, branch from
@@ -22,6 +25,9 @@ Drupal Media.
   saved as Media.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
   and per-operation model overrides.
+
+Image and video requests currently run synchronously. Keep the Studio page open
+until the selected provider completes the request.
 
 ## Requirements
 
@@ -75,6 +81,21 @@ the module's access permission.
 AI Image Studio differs from one-shot image generators by preserving a
 session-based refinement history, request metadata, usage information, and
 cost feedback through the full editing workflow.
+
+## Test harness
+
+A test harness powered by DDEV can be found in the
+[install-torneo-ddev GitHub repository](https://github.com/Torneoz/install-torneo-ddev).
+
+## Roadmap
+
+- Add video generation reference images (Grok).
+- Better session forking.
+- Improved Media integration.
+- Improved reporting.
+- Improved asynchronous generation.
+- More AI Providers.
+- Session recording and playback.
 
 ## Contributing
 

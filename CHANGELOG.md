@@ -2,6 +2,13 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-beta1
+
+- Prevented users with view-any access from generating or publishing content
+  in sessions they do not own.
+- Enforced the configured session turn limit during server-side validation.
+- Promoted the accumulated alpha feature set to the first beta release.
+
 ## 1.0.0-alpha6
 
 - Added experimental text-to-video and image-to-video generation through

@@ -31,6 +31,12 @@ final class SessionAccessControlHandler extends EntityAccessControlHandler {
       )->cachePerPermissions()->cachePerUser()->addCacheableDependency($entity);
     }
 
+    if ($operation === 'update') {
+      return AccessResult::allowedIf(
+        $owned && $account->hasPermission('access ai image studio')
+      )->cachePerPermissions()->cachePerUser()->addCacheableDependency($entity);
+    }
+
     if ($operation === 'delete') {
       return AccessResult::allowedIf(
         $account->hasPermission('delete any ai image studio session')
