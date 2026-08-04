@@ -13,6 +13,18 @@ Contributions and issue reports are welcome.
 Do not commit API keys, generated images, local settings, or vendor packages.
 Changes should follow Drupal coding standards and include focused verification.
 
+## Releases
+
+For every tagged release:
+
+1. Update `CHANGELOG.md`, commit the release, and create an annotated version
+   tag.
+2. Push the release commit and tag to both GitHub (`origin`) and Drupal.org
+   (`drupal`).
+3. Push or update the `1.0.x` development branch on both remotes.
+4. Create the matching release on the Drupal.org project page using the
+   changelog entry as its release notes.
+
 ## Reporting security issues
 
 Do not open public issues for suspected security vulnerabilities. Follow the
