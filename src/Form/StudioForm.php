@@ -523,6 +523,35 @@ final class StudioForm extends FormBase {
           : (bool) $settings->get('default_transparent_background'),
         '#description' => $this->t('Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it.'),
       ],
+      'file_type' => [
+        '#type' => 'select',
+        '#title' => $this->t('File type'),
+        '#options' => [
+          'png' => $this->t('PNG'),
+          'jpeg' => $this->t('JPEG'),
+          'webp' => $this->t('WebP'),
+        ],
+        '#default_value' => $defaults['file_type'] ?? ($settings->get('default_image_file_type') ?: 'png'),
+        '#description' => $this->t('PNG is the default. Availability of JPEG and WebP depends on the selected provider.'),
+      ],
+      'show_ai_badge' => [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show an AI image badge'),
+        '#default_value' => array_key_exists('show_ai_badge', $defaults)
+          ? (bool) $defaults['show_ai_badge']
+          : (bool) $settings->get('default_show_ai_badge'),
+      ],
+      'ai_badge_text' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Badge text'),
+        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_ai_badge_text') ?: 'AI Image'),
+        '#maxlength' => 80,
+        '#states' => [
+          'visible' => [
+            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
     ];
   }
 
@@ -579,6 +608,24 @@ final class StudioForm extends FormBase {
         ],
         '#default_value' => $defaults['resolution'] ?? ($settings->get('default_video_resolution') ?: '720p'),
         '#description' => $this->t('Text-to-video providers may not support 1080p.'),
+      ],
+      'video_show_ai_badge' => [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show an AI image badge'),
+        '#default_value' => array_key_exists('show_ai_badge', $defaults)
+          ? (bool) $defaults['show_ai_badge']
+          : (bool) $settings->get('default_show_ai_badge'),
+      ],
+      'video_ai_badge_text' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Badge text'),
+        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_ai_badge_text') ?: 'AI Image'),
+        '#maxlength' => 80,
+        '#states' => [
+          'visible' => [
+            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
       ],
     ];
   }
@@ -659,15 +706,17 @@ final class StudioForm extends FormBase {
       'data-ai-image-studio-resolution' => (string) ($settings['resolution'] ?? ''),
       'data-ai-image-studio-duration' => (string) ($settings['duration'] ?? ''),
       'data-ai-image-studio-transparent-background' => !empty($settings['transparent_background']) ? '1' : '0',
+      'data-ai-image-studio-file-type' => (string) ($settings['file_type'] ?? 'png'),
     ];
     if ($settings) {
       $build['settings'] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['ai-image-studio-meta']],
         'value' => [
-          '#plain_text' => $this->t('Aspect ratio: @ratio · Resolution: @resolution@transparent', [
+          '#plain_text' => $this->t('Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent', [
             '@ratio' => $settings['aspect_ratio'] ?? $this->t('Automatic'),
             '@resolution' => strtoupper((string) ($settings['resolution'] ?? '1k')),
+            '@file_type' => strtoupper((string) ($settings['file_type'] ?? 'png')),
             '@transparent' => !empty($settings['transparent_background'])
               ? ' · ' . $this->t('Transparent background requested')
               : '',
@@ -683,14 +732,24 @@ final class StudioForm extends FormBase {
         $file = $turn->get('video')->entity;
         if ($file instanceof FileInterface) {
           $build['video'] = [
-            '#type' => 'html_tag',
-            '#tag' => 'video',
-            '#attributes' => [
-              'class' => ['ai-image-studio-turn__video'],
-              'controls' => 'controls',
-              'preload' => 'metadata',
-              'src' => $file->createFileUrl(),
+            '#type' => 'container',
+            '#attributes' => ['class' => ['ai-image-studio-turn__image-wrapper']],
+            'asset' => [
+              '#type' => 'html_tag',
+              '#tag' => 'video',
+              '#attributes' => [
+                'class' => ['ai-image-studio-turn__video'],
+                'controls' => 'controls',
+                'preload' => 'metadata',
+                'src' => $file->createFileUrl(),
+              ],
             ],
+            'badge' => !empty($settings['show_ai_badge']) ? [
+              '#type' => 'html_tag',
+              '#tag' => 'span',
+              '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Image'))),
+              '#attributes' => ['class' => ['ai-image-studio-ai-badge']],
+            ] : [],
           ];
         }
       }
@@ -698,11 +757,21 @@ final class StudioForm extends FormBase {
         $file = $turn->get('image')->entity;
         if ($file instanceof FileInterface) {
           $build['image'] = [
-            '#theme' => 'image',
-            '#uri' => $file->getFileUri(),
-            '#alt' => (string) $turn->get('prompt')->value,
-            '#title' => $this->t('Generated version @number', ['@number' => $number]),
-            '#attributes' => ['class' => ['ai-image-studio-turn__image']],
+            '#type' => 'container',
+            '#attributes' => ['class' => ['ai-image-studio-turn__image-wrapper']],
+            'asset' => [
+              '#theme' => 'image',
+              '#uri' => $file->getFileUri(),
+              '#alt' => (string) $turn->get('prompt')->value,
+              '#title' => $this->t('Generated version @number', ['@number' => $number]),
+              '#attributes' => ['class' => ['ai-image-studio-turn__image']],
+            ],
+            'badge' => !empty($settings['show_ai_badge']) ? [
+              '#type' => 'html_tag',
+              '#tag' => 'span',
+              '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Image'))),
+              '#attributes' => ['class' => ['ai-image-studio-ai-badge']],
+            ] : [],
           ];
         }
       }
@@ -757,6 +826,14 @@ final class StudioForm extends FormBase {
               ? $this->t('Optional. Suggested from the session title and prompt.')
               : $this->t('Suggested from the session title and this version’s prompt. Review it for accuracy before publishing.'),
           ],
+          'render_badge' => [
+            '#type' => 'checkbox',
+            '#title' => $this->t('Render the badge into the saved Media file'),
+            '#default_value' => !empty($settings['show_ai_badge']),
+            '#description' => $this->t('Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved.', [
+              '@badge' => $settings['ai_badge_text'] ?? $this->t('AI Image'),
+            ]),
+          ],
           'submit' => [
             '#type' => 'submit',
             '#value' => $this->t('Publish this version'),
@@ -766,6 +843,7 @@ final class StudioForm extends FormBase {
             '#limit_validation_errors' => [
               ['history', 'turn_' . $turn->id(), 'publish', 'name'],
               ['history', 'turn_' . $turn->id(), 'publish', 'alt'],
+              ['history', 'turn_' . $turn->id(), 'publish', 'render_badge'],
             ],
           ],
         ];
@@ -864,10 +942,11 @@ final class StudioForm extends FormBase {
         '@resolution' => $resolution,
         '@duration' => (int) ($settings['duration'] ?? 5),
       ])
-      : $this->t('@ratio · @resolution · @detail', [
+      : $this->t('@ratio · @resolution · @detail · @file_type', [
         '@ratio' => $ratio,
         '@resolution' => $resolution,
         '@detail' => $detail,
+        '@file_type' => strtoupper((string) ($settings['file_type'] ?? 'png')),
       ]);
     $duration_ms = (int) ($turn->get('duration_ms')->value ?? 0);
     $duration = $duration_ms > 0
@@ -1425,6 +1504,13 @@ final class StudioForm extends FormBase {
         'duration' => $form_state->getValue('duration'),
         'prompt' => trim((string) $form_state->getValue('prompt')),
         'transparent_background' => $form_state->getValue('transparent_background'),
+        'file_type' => $form_state->getValue('file_type') ?: 'png',
+        'show_ai_badge' => (bool) $form_state->getValue(
+          $output_type === 'video' ? 'video_show_ai_badge' : 'show_ai_badge',
+        ),
+        'ai_badge_text' => trim((string) $form_state->getValue(
+          $output_type === 'video' ? 'video_ai_badge_text' : 'ai_badge_text',
+        )) ?: 'AI Image',
       ],
       $output_type,
     );
@@ -1482,11 +1568,23 @@ final class StudioForm extends FormBase {
       'turn_' . $turn_id,
       'publish',
     ]);
-    $media = $this->generator->publish(
-      $turn,
-      trim((string) ($values['name'] ?? '')),
-      trim((string) ($values['alt'] ?? '')),
-    );
+    try {
+      $media = $this->generator->publish(
+        $turn,
+        trim((string) ($values['name'] ?? '')),
+        trim((string) ($values['alt'] ?? '')),
+        !empty($values['render_badge']),
+      );
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('The result could not be published: @message', [
+        '@message' => $exception->getMessage(),
+      ]));
+      $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
+        'ai_image_studio_session' => $session_id,
+      ]);
+      return;
+    }
     $this->messenger()->addStatus($this->t('Published as Media “@name”.', [
       '@name' => $media->label(),
     ]));

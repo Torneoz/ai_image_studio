@@ -2,6 +2,15 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-beta3
+
+- Added PNG, JPEG, and WebP output selection, with PNG as the configurable
+  default, for compatible image providers.
+- Added optional, configurable AI badges to generated image and video previews.
+- Added an option to permanently render the badge into a separate image or
+  video file when publishing a result to Media, while preserving the original
+  Studio asset.
+
 ## 1.0.0-beta2
 
 - Fixed per-version Media publishing so the clicked result is saved instead of

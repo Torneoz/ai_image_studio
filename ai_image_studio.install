@@ -158,3 +158,22 @@ function ai_image_studio_update_10005(): void {
   }
   $config->save(TRUE);
 }
+
+/**
+ * Adds image file type and AI badge defaults.
+ */
+function ai_image_studio_update_10006(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  $defaults = [
+    'default_image_file_type' => 'png',
+    'default_show_ai_badge' => FALSE,
+    'default_ai_badge_text' => 'AI Image',
+  ];
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+    }
+  }
+  $config->save(TRUE);
+}

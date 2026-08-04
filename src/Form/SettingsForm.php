@@ -172,6 +172,32 @@ final class SettingsForm extends ConfigFormBase {
       $this->t('Request a transparent background by default'),
       $config->get('default_transparent_background'),
     );
+    $form['generation']['default_image_file_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default image file type'),
+      '#options' => [
+        'png' => $this->t('PNG'),
+        'jpeg' => $this->t('JPEG'),
+        'webp' => $this->t('WebP'),
+      ],
+      '#default_value' => $config->get('default_image_file_type') ?: 'png',
+      '#description' => $this->t('The selected provider must support the requested format. PNG is used by default.'),
+    ];
+    $form['generation']['default_show_ai_badge'] = $this->checkbox(
+      $this->t('Show an AI image badge by default'),
+      $config->get('default_show_ai_badge'),
+    );
+    $form['generation']['default_ai_badge_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Default AI image badge text'),
+      '#default_value' => $config->get('default_ai_badge_text') ?: 'AI Image',
+      '#maxlength' => 80,
+      '#states' => [
+        'visible' => [
+          ':input[name="default_show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     foreach ([
       'text_to_image' => $this->t('Default Text-to-Image model'),
       'image_to_image' => $this->t('Default Image-to-Image model'),
@@ -402,6 +428,9 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_video_resolution', $form_state->getValue('default_video_resolution'))
       ->set('default_video_duration', (int) $form_state->getValue('default_video_duration'))
       ->set('default_transparent_background', (bool) $form_state->getValue('default_transparent_background'))
+      ->set('default_image_file_type', $form_state->getValue('default_image_file_type'))
+      ->set('default_show_ai_badge', (bool) $form_state->getValue('default_show_ai_badge'))
+      ->set('default_ai_badge_text', trim((string) $form_state->getValue('default_ai_badge_text')) ?: 'AI Image')
       ->set('default_text_to_image_model', $form_state->getValue('default_text_to_image_model'))
       ->set('default_image_to_image_model', $form_state->getValue('default_image_to_image_model'))
       ->set('default_text_to_video_model', $form_state->getValue('default_text_to_video_model'))

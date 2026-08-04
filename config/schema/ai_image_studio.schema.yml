@@ -56,6 +56,15 @@ ai_image_studio.settings:
     default_transparent_background:
       type: boolean
       label: 'Request transparent backgrounds by default'
+    default_image_file_type:
+      type: string
+      label: 'Default image file type'
+    default_show_ai_badge:
+      type: boolean
+      label: 'Show an AI image badge by default'
+    default_ai_badge_text:
+      type: string
+      label: 'Default AI image badge text'
     default_text_to_image_model:
       type: string
       label: 'Default Text-to-Image model'

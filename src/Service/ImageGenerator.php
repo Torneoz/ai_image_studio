@@ -19,6 +19,7 @@ use Drupal\file\FileInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\media\MediaInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Generates Studio turns through Drupal AI operation types.
@@ -224,7 +225,12 @@ final class ImageGenerator {
   /**
    * Publishes a completed turn to the configured Media bundle.
    */
-  public function publish(object $turn, string $name, string $alt = ''): MediaInterface {
+  public function publish(
+    object $turn,
+    string $name,
+    string $alt = '',
+    bool $render_badge = FALSE,
+  ): MediaInterface {
     $is_video = !$turn->get('video')->isEmpty();
     if ($turn->get('status')->value !== 'completed'
       || ($turn->get('image')->isEmpty() && !$is_video)) {
@@ -247,6 +253,13 @@ final class ImageGenerator {
     $file = $turn->get($is_video ? 'video' : 'image')->entity;
     if (!$file instanceof FileInterface) {
       throw new \RuntimeException('The generated file is unavailable.');
+    }
+    if ($render_badge) {
+      $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+      $badge_text = trim((string) ($generation_settings['ai_badge_text'] ?? 'AI Image'));
+      $file = $is_video
+        ? $this->createBadgedVideo($file, $badge_text, (int) $turn->id())
+        : $this->createBadgedImage($file, $badge_text, (int) $turn->id());
     }
 
     $source_value = ['target_id' => $file->id()];
@@ -284,7 +297,8 @@ final class ImageGenerator {
     string $operation,
     array $settings,
   ): array {
-    if (str_contains($provider_id, 'openai') && $operation === 'text_to_image') {
+    if (str_contains($provider_id, 'openai')
+      && in_array($operation, ['text_to_image', 'image_to_image'], TRUE)) {
       $ratio = (string) ($settings['aspect_ratio'] ?? 'auto');
       $portrait = ['9:16', '3:4', '2:3', '1:2', '9:19.5', '9:20'];
       $landscape = ['16:9', '4:3', '3:2', '2:1', '19.5:9', '20:9'];
@@ -298,7 +312,7 @@ final class ImageGenerator {
         'quality' => ($settings['resolution'] ?? '1k') === '2k'
           ? 'high'
           : 'auto',
-        'output_format' => 'png',
+        'output_format' => (string) ($settings['file_type'] ?? 'png'),
       ];
     }
 
@@ -577,6 +591,156 @@ final class ImageGenerator {
     $destination = sprintf('%s/turn-%d.mp4', $destination_directory, $turn_id);
     $file = $this->fileRepository->writeData(
       $video->getBinary(),
+      $destination,
+      FileExists::Rename,
+    );
+    $file->setPermanent();
+    $file->save();
+    return $file;
+  }
+
+  /**
+   * Creates a managed image derivative with a permanent badge overlay.
+   */
+  private function createBadgedImage(
+    FileInterface $source,
+    string $text,
+    int $turn_id,
+  ): FileInterface {
+    if (!function_exists('imagecreatefromstring')) {
+      throw new \RuntimeException('Rendering a badge into an image requires the PHP GD extension.');
+    }
+    $binary = file_get_contents($source->getFileUri());
+    $image = $binary === FALSE ? FALSE : @imagecreatefromstring($binary);
+    if ($image === FALSE) {
+      throw new \RuntimeException('The generated image could not be opened for badge rendering.');
+    }
+    $badge = $this->createBadgeImage($text);
+    $margin = max(12, (int) round(imagesx($image) * 0.015));
+    imagealphablending($image, TRUE);
+    imagecopy(
+      $image,
+      $badge,
+      max(0, imagesx($image) - imagesx($badge) - $margin),
+      max(0, imagesy($image) - imagesy($badge) - $margin),
+      0,
+      0,
+      imagesx($badge),
+      imagesy($badge),
+    );
+
+    ob_start();
+    $mime_type = $source->getMimeType();
+    $written = match ($mime_type) {
+      'image/jpeg' => imagejpeg($image, NULL, 92),
+      'image/webp' => function_exists('imagewebp') && imagewebp($image, NULL, 92),
+      'image/gif' => imagegif($image),
+      default => imagepng($image, NULL, 6),
+    };
+    $output = ob_get_clean();
+    imagedestroy($badge);
+    imagedestroy($image);
+    if (!$written || !is_string($output) || $output === '') {
+      throw new \RuntimeException('The badged image could not be encoded.');
+    }
+    return $this->saveMediaDerivative($source, $output, $turn_id);
+  }
+
+  /**
+   * Creates a managed video derivative with a permanent badge overlay.
+   */
+  private function createBadgedVideo(
+    FileInterface $source,
+    string $text,
+    int $turn_id,
+  ): FileInterface {
+    if (!function_exists('imagecreatetruecolor')) {
+      throw new \RuntimeException('Rendering a badge into a video requires the PHP GD extension.');
+    }
+    $source_path = $this->fileSystem->realpath($source->getFileUri());
+    if ($source_path === FALSE) {
+      throw new \RuntimeException('The generated video could not be opened for badge rendering.');
+    }
+    $temporary_directory = $this->fileSystem->getTempDirectory();
+    $badge_path = tempnam($temporary_directory, 'ai-image-badge-');
+    $output_path = tempnam($temporary_directory, 'ai-image-video-');
+    if ($badge_path === FALSE || $output_path === FALSE) {
+      throw new \RuntimeException('Temporary files for video badge rendering could not be created.');
+    }
+    $badge = $this->createBadgeImage($text);
+    imagepng($badge, $badge_path, 6);
+    imagedestroy($badge);
+    try {
+      $process = new Process([
+        'ffmpeg', '-y', '-i', $source_path, '-i', $badge_path,
+        '-filter_complex', 'overlay=W-w-24:H-h-24',
+        '-codec:a', 'copy', '-movflags', '+faststart',
+        '-f', 'mp4', $output_path,
+      ]);
+      $process->setTimeout(300);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new \RuntimeException('FFmpeg could not render the badge into the video: '
+          . trim($process->getErrorOutput()));
+      }
+      $output = file_get_contents($output_path);
+      if ($output === FALSE || $output === '') {
+        throw new \RuntimeException('FFmpeg returned an empty badged video.');
+      }
+      return $this->saveMediaDerivative($source, $output, $turn_id);
+    }
+    finally {
+      @unlink($badge_path);
+      @unlink($output_path);
+    }
+  }
+
+  /**
+   * Creates a compact transparent PNG badge using GD's bundled font.
+   */
+  private function createBadgeImage(string $text): \GdImage {
+    $text = trim($text) ?: 'AI Image';
+    $text = mb_substr($text, 0, 80);
+    if (function_exists('iconv')) {
+      $converted = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $text);
+      $text = $converted === FALSE || $converted === '' ? 'AI Image' : $converted;
+    }
+    $font = 5;
+    $padding_x = 12;
+    $padding_y = 8;
+    $width = imagefontwidth($font) * strlen($text) + ($padding_x * 2);
+    $height = imagefontheight($font) + ($padding_y * 2);
+    $badge = imagecreatetruecolor($width, $height);
+    imagealphablending($badge, FALSE);
+    imagesavealpha($badge, TRUE);
+    $transparent = imagecolorallocatealpha($badge, 0, 0, 0, 127);
+    imagefill($badge, 0, 0, $transparent);
+    imagealphablending($badge, TRUE);
+    $background = imagecolorallocatealpha($badge, 0, 0, 0, 35);
+    $foreground = imagecolorallocate($badge, 255, 255, 255);
+    imagefilledrectangle($badge, 0, 0, $width - 1, $height - 1, $background);
+    imagestring($badge, $font, $padding_x, $padding_y, $text, $foreground);
+    return $badge;
+  }
+
+  /**
+   * Saves a permanent Media-only derivative beside the Studio source file.
+   */
+  private function saveMediaDerivative(
+    FileInterface $source,
+    string $binary,
+    int $turn_id,
+  ): FileInterface {
+    $source_directory = dirname($source->getFileUri());
+    $extension = pathinfo($source->getFilename(), PATHINFO_EXTENSION);
+    $destination = sprintf(
+      '%s/turn-%d-media-badged.%s',
+      $source_directory,
+      $turn_id,
+      $extension,
+    );
+    $file = $this->fileRepository->writeData(
+      $binary,
       $destination,
       FileExists::Rename,
     );

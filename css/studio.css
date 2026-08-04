@@ -308,6 +308,27 @@
   font-size: .875rem;
 }
 
+.ai-image-studio-turn__image-wrapper {
+  display: inline-block;
+  max-width: 100%;
+  position: relative;
+}
+
+.ai-image-studio-ai-badge {
+  background: rgb(0 0 0 / 72%);
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 999px;
+  bottom: .75rem;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  inset-inline-end: .75rem;
+  line-height: 1;
+  padding: .45rem .7rem;
+  pointer-events: none;
+  position: absolute;
+}
+
 .ai-image-studio-actions {
   display: flex;
   flex-wrap: wrap;
