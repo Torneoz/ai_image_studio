@@ -12,3 +12,8 @@ collection:
   css:
     theme:
       css/collection.css: {}
+
+media_source:
+  css:
+    theme:
+      css/media-source.css: {}

@@ -8,7 +8,195 @@
 declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
+use Drupal\media\Entity\MediaType;
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function ai_image_studio_module_implements_alter(
+  array &$implementations,
+  string $hook,
+): void {
+  // ai_media_image creates the image_source element in its form alter. Run our
+  // form alter afterwards so the Studio can extend that contributed element
+  // without patching ai_media_image.
+  if ($hook === 'form_alter' && isset($implementations['ai_image_studio'])) {
+    $implementation = $implementations['ai_image_studio'];
+    unset($implementations['ai_image_studio']);
+    $implementations['ai_image_studio'] = $implementation;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function ai_image_studio_form_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  string $form_id,
+): void {
+  $supported_forms = [
+    'media_image_add_form',
+    'media_library_add_form_upload',
+    'media_library_add_form_dropzonejs',
+  ];
+  if (!in_array($form_id, $supported_forms, TRUE)
+    || !\Drupal::currentUser()->hasPermission('access ai image studio')) {
+    return;
+  }
+
+  if (!isset($form['image_source']['#options'])) {
+    $form['image_source'] = [
+      '#type' => 'select',
+      '#title' => t('Image Source'),
+      '#weight' => -1,
+      '#options' => [
+        'upload' => t('Upload Image'),
+      ],
+      '#default_value' => 'upload',
+      '#states' => [
+        'invisible' => [
+          'li.media-library-add-form__media' => ['!value' => ''],
+        ],
+      ],
+    ];
+  }
+  $form['image_source']['#options']['ai_image_studio'] = t(
+    'Create in AI Image Studio',
+  );
+
+  // Keep each source's controls isolated. ai_media_image's original states
+  // only distinguish Upload from its own AI source.
+  if (isset($form['ai_media_image'])) {
+    $form['ai_media_image']['#states'] = [
+      'visible' => [
+        'select[name="image_source"]' => ['value' => 'ai'],
+      ],
+    ];
+  }
+  $upload_states = [
+    'visible' => [
+      'select[name="image_source"]' => ['value' => 'upload'],
+    ],
+  ];
+  if ($form_id === 'media_image_add_form') {
+    $media_type = MediaType::load('image');
+    $image_field = $media_type?->getSource()
+      ->getSourceFieldDefinition($media_type)
+      ->getName();
+    if ($image_field && isset($form[$image_field])) {
+      $form[$image_field]['#states'] = $upload_states;
+      $form[$image_field]['widget'][0]['#required'] = FALSE;
+    }
+  }
+  elseif (isset($form['container'])) {
+    $form['container']['#states'] = $upload_states;
+  }
+
+  $compact = \Drupal::service('ai_image_studio.compact_media_form');
+  $form['ai_image_studio_compact'] = $compact->build($form_state);
+  $form['#validate'][] = 'ai_image_studio_media_source_validate';
+}
+
+/**
+ * Validates compact Studio actions and prevents an empty Media submission.
+ */
+function ai_image_studio_media_source_validate(
+  array &$form,
+  FormStateInterface $form_state,
+): void {
+  $trigger = $form_state->getTriggeringElement();
+  $action = $trigger['#studio_compact_action'] ?? NULL;
+  if ($action === 'generate') {
+    $values = (array) $form_state->getValue('ai_image_studio_compact');
+    if (trim((string) ($values['prompt'] ?? '')) === '') {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][prompt',
+        t('Enter a prompt to generate an image.'),
+      );
+    }
+    if (empty($values['model'])) {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][model',
+        t('Select a configured provider and model.'),
+      );
+    }
+    return;
+  }
+  if ($action === 'publish') {
+    $values = (array) $form_state->getValue([
+      'ai_image_studio_compact',
+      'preview',
+    ]);
+    if (trim((string) ($values['name'] ?? '')) === '') {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][preview][name',
+        t('Enter a Media name.'),
+      );
+    }
+    $require_alt = \Drupal::config('ai_image_studio.settings')
+      ->get('require_image_alt') !== FALSE;
+    if ($require_alt && trim((string) ($values['alt'] ?? '')) === '') {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][preview][alt',
+        t('Enter alternative text for the image.'),
+      );
+    }
+    return;
+  }
+  if ($form_state->getValue('image_source') === 'ai_image_studio'
+    && $action === NULL) {
+    $form_state->setError(
+      $form['image_source'],
+      t('Generate an image with the compact AI Image Studio form below.'),
+    );
+  }
+}
+
+/**
+ * Submit callback for compact Studio generation.
+ */
+function ai_image_studio_compact_generate_submit(
+  array &$form,
+  FormStateInterface $form_state,
+): void {
+  \Drupal::service('ai_image_studio.compact_media_form')
+    ->generate($form, $form_state);
+}
+
+/**
+ * AJAX callback for compact Studio generation.
+ */
+function ai_image_studio_compact_generate_ajax(
+  array &$form,
+  FormStateInterface $form_state,
+): array {
+  return $form['ai_image_studio_compact'];
+}
+
+/**
+ * Submit callback for publishing a compact Studio result.
+ */
+function ai_image_studio_compact_publish_submit(
+  array &$form,
+  FormStateInterface $form_state,
+): void {
+  \Drupal::service('ai_image_studio.compact_media_form')
+    ->publish($form, $form_state);
+}
+
+/**
+ * AJAX callback for publishing a compact Studio result.
+ */
+function ai_image_studio_compact_publish_ajax(
+  array &$form,
+  FormStateInterface $form_state,
+): mixed {
+  return \Drupal::service('ai_image_studio.compact_media_form')
+    ->publishAjax($form, $form_state);
+}
 
 /**
  * Implements hook_file_download().

@@ -2,6 +2,16 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-beta2
+
+- Fixed per-version Media publishing so the clicked result is saved instead of
+  the first result in the session.
+- Made refinements inherit the selected source turn's available model and
+  generation parameters, including when changing the source without reloading.
+- Validated the submitted model against the request operation before generation.
+- Added compact image generation and publishing to image Media forms and Media
+  Library dialogs, including compatibility with AI Media Image.
+
 ## 1.0.0-beta1
 
 - Prevented users with view-any access from generating or publishing content

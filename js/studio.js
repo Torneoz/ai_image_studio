@@ -50,6 +50,34 @@
               previewImage.src = selectedImage.src;
               previewImage.alt = selectedImage.alt;
             }
+
+            const inherited = {
+              model: selectedCard.dataset.aiImageStudioModel,
+              aspect_ratio: selectedCard.dataset.aiImageStudioAspectRatio,
+              resolution: selectedCard.dataset.aiImageStudioResolution,
+              duration: selectedCard.dataset.aiImageStudioDuration,
+              transparent_background:
+                selectedCard.dataset.aiImageStudioTransparentBackground,
+            };
+            Object.entries(inherited).forEach(([name, value]) => {
+              if (value === undefined || value === '') {
+                return;
+              }
+              const control = studio.querySelector(`[name="${name}"]`);
+              if (!control) {
+                return;
+              }
+              if (control.type === 'checkbox') {
+                control.checked = value === '1';
+              }
+              else if (
+                control.tagName !== 'SELECT' ||
+                Array.from(control.options).some((option) => option.value === value)
+              ) {
+                control.value = value;
+              }
+              control.dispatchEvent(new Event('change', { bubbles: true }));
+            });
           };
 
           choices.forEach((choice) => {

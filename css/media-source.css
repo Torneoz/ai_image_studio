@@ -1,0 +1,12 @@
+.ai-image-studio-compact__preview img {
+  display: block;
+  height: auto;
+  margin-block: 1rem;
+  max-width: min(100%, 32rem);
+}
+
+.ai-image-studio-compact__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

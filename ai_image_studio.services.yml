@@ -14,3 +14,11 @@ services:
   logger.channel.ai_image_studio:
     parent: logger.channel_base
     arguments: ['ai_image_studio']
+
+  ai_image_studio.compact_media_form:
+    class: Drupal\ai_image_studio\Form\CompactMediaForm
+    arguments:
+      - '@ai_image_studio.generator'
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@current_user'

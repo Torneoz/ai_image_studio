@@ -242,6 +242,9 @@ final class StudioForm extends FormBase {
       $selected_turn_id,
     ) ?? $latest;
     $selected_turn_id = (int) ($selected_source?->id() ?? 0);
+    $selected_settings = $selected_source === NULL
+      ? []
+      : (array) ($selected_source->get('generation_settings')->first()?->getValue() ?? []);
 
     $form['history_order'] = [
       '#type' => 'select',
@@ -359,11 +362,17 @@ final class StudioForm extends FormBase {
         '#default_value' => $default_output_type,
       ];
       $operation = $selected_source ? 'image_to_image' : 'text_to_image';
+      $model_options = $this->generator->getModelOptions($operation);
+      $inherited_model = $selected_source === NULL
+        ? ''
+        : $this->turnModelOption($selected_source);
       $form['refine']['model'] = [
         '#type' => 'select',
         '#title' => $this->t('Provider and model'),
-        '#options' => $this->generator->getModelOptions($operation),
-        '#default_value' => $this->configuredDefaultModel($operation),
+        '#options' => $model_options,
+        '#default_value' => isset($model_options[$inherited_model])
+          ? $inherited_model
+          : $this->configuredDefaultModel($operation),
         '#description' => $selected_source
           ? $this->t('Only providers that advertise Image-to-Image editing support are listed.')
           : $this->t('Uses the Text-to-Image default configured in Drupal AI.'),
@@ -395,8 +404,8 @@ final class StudioForm extends FormBase {
           : $this->t('Describe the image to create.'),
         $max_length,
       );
-      $form['refine']['generation_controls'] = $this->generationControls();
-      $form['refine']['video_controls'] = $this->videoControls();
+      $form['refine']['generation_controls'] = $this->generationControls($selected_settings);
+      $form['refine']['video_controls'] = $this->videoControls($selected_settings);
       $form['refine']['actions'] = ['#type' => 'actions'];
       $form['refine']['actions']['generate'] = [
         '#type' => 'submit',
@@ -462,7 +471,7 @@ final class StudioForm extends FormBase {
   /**
    * Builds common image output controls.
    */
-  private function generationControls(): array {
+  private function generationControls(array $defaults = []): array {
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
     return [
       '#type' => 'details',
@@ -492,7 +501,7 @@ final class StudioForm extends FormBase {
           '20:9' => $this->t('Phone landscape — 20:9'),
           '9:20' => $this->t('Phone portrait — 9:20'),
         ],
-        '#default_value' => $settings->get('default_aspect_ratio') ?: 'auto',
+        '#default_value' => $defaults['aspect_ratio'] ?? ($settings->get('default_aspect_ratio') ?: 'auto'),
         '#description' => $this->t('Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent.'),
       ],
       'resolution' => [
@@ -503,13 +512,15 @@ final class StudioForm extends FormBase {
           '1k' => $this->t('1K — faster and lower cost'),
           '2k' => $this->t('2K — higher detail and cost'),
         ],
-        '#default_value' => $settings->get('default_image_resolution') ?: 'auto',
+        '#default_value' => $defaults['resolution'] ?? ($settings->get('default_image_resolution') ?: 'auto'),
         '#description' => $this->t('Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting.'),
       ],
       'transparent_background' => [
         '#type' => 'checkbox',
         '#title' => $this->t('Request a transparent background'),
-        '#default_value' => (bool) $settings->get('default_transparent_background'),
+        '#default_value' => array_key_exists('transparent_background', $defaults)
+          ? (bool) $defaults['transparent_background']
+          : (bool) $settings->get('default_transparent_background'),
         '#description' => $this->t('Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it.'),
       ],
     ];
@@ -518,7 +529,7 @@ final class StudioForm extends FormBase {
   /**
    * Builds video output controls.
    */
-  private function videoControls(): array {
+  private function videoControls(array $defaults = []): array {
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
     $max_duration = (int) ($settings->get('max_video_duration') ?: 15);
     return [
@@ -536,7 +547,7 @@ final class StudioForm extends FormBase {
         '#field_suffix' => $this->t('seconds'),
         '#default_value' => min(
           $max_duration,
-          (int) ($settings->get('default_video_duration') ?: 5),
+          (int) ($defaults['duration'] ?? ($settings->get('default_video_duration') ?: 5)),
         ),
         '#min' => 1,
         '#max' => $max_duration,
@@ -555,7 +566,7 @@ final class StudioForm extends FormBase {
           '3:2' => $this->t('Landscape — 3:2'),
           '2:3' => $this->t('Portrait — 2:3'),
         ],
-        '#default_value' => $settings->get('default_aspect_ratio') ?: 'auto',
+        '#default_value' => $defaults['aspect_ratio'] ?? ($settings->get('default_aspect_ratio') ?: 'auto'),
         '#description' => $this->t('Automatic matches the selected source image where possible.'),
       ],
       'video_resolution' => [
@@ -566,7 +577,7 @@ final class StudioForm extends FormBase {
           '720p' => $this->t('720p — standard'),
           '1080p' => $this->t('1080p — provider dependent'),
         ],
-        '#default_value' => $settings->get('default_video_resolution') ?: '720p',
+        '#default_value' => $defaults['resolution'] ?? ($settings->get('default_video_resolution') ?: '720p'),
         '#description' => $this->t('Text-to-video providers may not support 1080p.'),
       ],
     ];
@@ -642,6 +653,13 @@ final class StudioForm extends FormBase {
       ],
     ];
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $build['#attributes'] += [
+      'data-ai-image-studio-model' => $this->turnModelOption($turn),
+      'data-ai-image-studio-aspect-ratio' => (string) ($settings['aspect_ratio'] ?? ''),
+      'data-ai-image-studio-resolution' => (string) ($settings['resolution'] ?? ''),
+      'data-ai-image-studio-duration' => (string) ($settings['duration'] ?? ''),
+      'data-ai-image-studio-transparent-background' => !empty($settings['transparent_background']) ? '1' : '0',
+    ];
     if ($settings) {
       $build['settings'] = [
         '#type' => 'container',
@@ -742,6 +760,7 @@ final class StudioForm extends FormBase {
           'submit' => [
             '#type' => 'submit',
             '#value' => $this->t('Publish this version'),
+            '#name' => 'publish_turn_' . $turn->id(),
             '#studio_action' => 'publish',
             '#turn_id' => $turn->id(),
             '#limit_validation_errors' => [
@@ -777,6 +796,15 @@ final class StudioForm extends FormBase {
       $summary = rtrim(mb_substr($summary, 0, 61)) . '…';
     }
     return $summary;
+  }
+
+  /**
+   * Reassembles the Drupal AI provider/model option stored on a turn.
+   */
+  private function turnModelOption(object $turn): string {
+    return (string) $turn->get('provider_id')->value
+      . '__'
+      . (string) $turn->get('model_id')->value;
   }
 
   /**
@@ -1301,6 +1329,29 @@ final class StudioForm extends FormBase {
         $output_type === 'video' ? 'video_model' : 'model',
         $this->t('Select a configured provider and model.'),
       );
+    }
+
+    if (!$form_state->hasAnyErrors()) {
+      $has_source = $session_id !== NULL
+        || $form_state->getValue('start_mode') === 'upload';
+      $operation = match ([$output_type, $has_source]) {
+        ['video', TRUE] => 'image_to_video',
+        ['video', FALSE] => 'text_to_video',
+        ['image', TRUE] => 'image_to_image',
+        default => 'text_to_image',
+      };
+      $model_key = $session_id !== NULL
+        ? ($output_type === 'video' ? 'video_model' : 'model')
+        : ($has_source
+          ? ($output_type === 'video' ? 'image_video_model' : 'image_model')
+          : ($output_type === 'video' ? 'text_video_model' : 'text_model'));
+      $model = (string) $form_state->getValue($model_key);
+      if (!isset($this->generator->getModelOptions($operation)[$model])) {
+        $form_state->setErrorByName(
+          $model_key,
+          $this->t('The selected provider and model is not available for this request type.'),
+        );
+      }
     }
   }
 

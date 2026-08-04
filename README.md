@@ -23,6 +23,8 @@ Drupal Media.
   processing time, status, token usage, and reported or estimated cost.
 - Media Library saving with alternative text required only when an image is
   saved as Media.
+- Compact image generation directly in image Media forms and Media Library
+  dialogs, with or without the AI Media Image module.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
   and per-operation model overrides.
 
