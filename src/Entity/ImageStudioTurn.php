@@ -69,10 +69,10 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setLabel(new TranslatableMarkup('Operation'))
       ->setSettings([
         'allowed_values' => [
-          'text_to_image' => 'Text to image',
-          'image_to_image' => 'Image to image',
-          'text_to_video' => 'Text to video',
-          'image_to_video' => 'Image to video',
+          'text_to_image' => new TranslatableMarkup('Text to image'),
+          'image_to_image' => new TranslatableMarkup('Image to image'),
+          'text_to_video' => new TranslatableMarkup('Text to video'),
+          'image_to_video' => new TranslatableMarkup('Image to video'),
         ],
       ]);
 
@@ -92,9 +92,9 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setLabel(new TranslatableMarkup('Cost source'))
       ->setSettings([
         'allowed_values' => [
-          'reported' => 'Provider reported',
-          'estimated' => 'Estimated',
-          'unavailable' => 'Unavailable',
+          'reported' => new TranslatableMarkup('Provider reported'),
+          'estimated' => new TranslatableMarkup('Estimated'),
+          'unavailable' => new TranslatableMarkup('Unavailable'),
         ],
       ])
       ->setDefaultValue('unavailable');
@@ -107,9 +107,9 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setRequired(TRUE)
       ->setSettings([
         'allowed_values' => [
-          'pending' => 'Pending',
-          'completed' => 'Completed',
-          'failed' => 'Failed',
+          'pending' => new TranslatableMarkup('Pending'),
+          'completed' => new TranslatableMarkup('Completed'),
+          'failed' => new TranslatableMarkup('Failed'),
         ],
       ])
       ->setDefaultValue('pending');

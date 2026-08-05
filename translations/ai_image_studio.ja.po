@@ -1,0 +1,978 @@
+# Japanese translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: ja\n"
+"Language-Team: Japanese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "The source image could not be read."
+msgstr "ソース画像を読み取れませんでした。"
+
+msgid "The provider returned no generated video."
+msgstr "プロバイダーは生成されたビデオを返しませんでした。"
+
+msgid "The provider returned no generated image."
+msgstr "プロバイダーは生成されたイメージを返しませんでした。"
+
+msgid "Only completed Studio turns can be published."
+msgstr "完了したスタジオ ターンのみを公開できます。"
+
+msgid "The generated file is unavailable."
+msgstr "生成されたファイルは使用できません。"
+
+msgid "Select a configured AI provider and model."
+msgstr "構成された AI プロバイダーとモデルを選択します。"
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "バッジを画像にレンダリングするには、PHP GD 拡張機能が必要です。"
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "生成されたイメージをバッジのレンダリング用に開くことができませんでした。"
+
+msgid "The badged image could not be encoded."
+msgstr "バッジ付きの画像をエンコードできませんでした。"
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "バッジをビデオにレンダリングするには、PHP GD 拡張機能が必要です。"
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "生成されたビデオをバッジ レンダリング用に開くことができませんでした。"
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "ビデオバッジレンダリング用の一時ファイルを作成できませんでした。"
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg はバッジをビデオにレンダリングできませんでした: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg は空のバッジ付きビデオを返しました。"
+
+msgid "Open"
+msgstr "オープン"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Unknown"
+msgstr "不明"
+
+msgid "Active"
+msgstr "アクティブ"
+
+msgid "Archived"
+msgstr "アーカイブ済み"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "イメージを作成し、一連のプロンプトを通じてイメージを調整します。各結果はセッション内のターンとして保持されます。"
+
+msgid "Session"
+msgstr "セッション"
+
+msgid "Owner"
+msgstr "所有者"
+
+msgid "Status"
+msgstr "状態"
+
+msgid "Updated"
+msgstr "更新"
+
+msgid "Operations"
+msgstr "操作"
+
+msgid "No image sessions have been created yet."
+msgstr "イメージ セッションはまだ作成されていません。"
+
+msgid "AI Image Studio turn"
+msgstr "AIイメージスタジオのターン"
+
+msgid "AI Image Studio turns"
+msgstr "AI Image Studio のターン"
+
+msgid "image studio turn"
+msgstr "イメージスタジオターン"
+
+msgid "image studio turns"
+msgstr "画像スタジオが変わる"
+
+msgid "Parent turn"
+msgstr "親の番"
+
+msgid "Prompt"
+msgstr "プロンプト"
+
+msgid "Generated image"
+msgstr "生成された画像"
+
+msgid "Generated video"
+msgstr "生成されたビデオ"
+
+msgid "Provider"
+msgstr "プロバイダー"
+
+msgid "Model"
+msgstr "モデル"
+
+msgid "Operation"
+msgstr "操作"
+
+msgid "Text to image"
+msgstr "テキストから画像へ"
+
+msgid "Image to image"
+msgstr "画像から画像へ"
+
+msgid "Text to video"
+msgstr "テキストからビデオへ"
+
+msgid "Image to video"
+msgstr "画像からビデオへ"
+
+msgid "Generation settings"
+msgstr "生成設定"
+
+msgid "Generation duration"
+msgstr "生成期間"
+
+msgid "Estimated cost"
+msgstr "推定コスト"
+
+msgid "Cost source"
+msgstr "コスト源"
+
+msgid "Provider reported"
+msgstr "プロバイダーから報告されました"
+
+msgid "Estimated"
+msgstr "推定"
+
+msgid "Unavailable"
+msgstr "利用不可"
+
+msgid "Token usage"
+msgstr "トークンの使用法"
+
+msgid "Pending"
+msgstr "保留中"
+
+msgid "Completed"
+msgstr "完了"
+
+msgid "Failed"
+msgstr "失敗しました"
+
+msgid "Error message"
+msgstr "エラーメッセージ"
+
+msgid "Published Media"
+msgstr "出版されたメディア"
+
+msgid "Created"
+msgstr "作成"
+
+msgid "AI Image Studio session"
+msgstr "AIイメージスタジオセッション"
+
+msgid "AI Image Studio sessions"
+msgstr "AI Image Studio セッション"
+
+msgid "image studio session"
+msgstr "イメージスタジオセッション"
+
+msgid "image studio sessions"
+msgstr "イメージスタジオセッション"
+
+msgid "Title"
+msgstr "タイトル"
+
+msgid "Changed"
+msgstr "変更済"
+
+msgid "AI Image Studio"
+msgstr "AIイメージスタジオ"
+
+msgid "Provider and model"
+msgstr "プロバイダーとモデル"
+
+msgid "Image settings"
+msgstr "画像の設定"
+
+msgid "Aspect ratio"
+msgstr "アスペクト比"
+
+msgid "Automatic"
+msgstr "自動"
+
+msgid "Square — 1:1"
+msgstr "正方形 — 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "風景 — 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "ポートレート — 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "風景 — 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "ポートレート — 3:4"
+
+msgid "Resolution"
+msgstr "解像度"
+
+msgid "1K"
+msgstr "1K"
+
+msgid "2K"
+msgstr "2K"
+
+msgid "Request a transparent background"
+msgstr "透明な背景をリクエストする"
+
+msgid "Generate another"
+msgstr "別のを生成する"
+
+msgid "Generate image"
+msgstr "画像の生成"
+
+msgid "Generating image…"
+msgstr "画像を生成中…"
+
+msgid "Alternative text"
+msgstr "代替テキスト"
+
+msgid "Media name"
+msgstr "メディア名"
+
+msgid "Continue in full Studio"
+msgstr "スタジオ全体で続行する"
+
+msgid "Save and select"
+msgstr "保存して選択"
+
+msgid "Save to Media Library"
+msgstr "メディア ライブラリに保存"
+
+msgid "Saving image…"
+msgstr "画像を保存中…"
+
+msgid "Image generation failed: @message"
+msgstr "イメージの生成に失敗しました: @message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "Studio イメージを公開することはできません。"
+
+msgid "Generate an image before saving it."
+msgstr "保存する前に画像を生成します。"
+
+msgid "The generated image is unavailable."
+msgstr "生成されたイメージは使用できません。"
+
+msgid "Starting generation…"
+msgstr "開始世代…"
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "リクエストは選択したプロバイダーに送信されます。このページを開いたままにしておいてください。"
+
+msgid "Session title"
+msgstr "セッションタイトル"
+
+msgid "Start from"
+msgstr "から開始"
+
+msgid "A text prompt"
+msgstr "テキストプロンプト"
+
+msgid "An uploaded image"
+msgstr "アップロードされた画像"
+
+msgid "Create"
+msgstr "作成"
+
+msgid "Image"
+msgstr "画像"
+
+msgid "Video"
+msgstr "ビデオ"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "ビデオ生成は実験的であり、同期して実行されます。リクエストが完了するまでページを開いたままにしてください。"
+
+msgid "Starting image"
+msgstr "開始イメージ"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "Drupal AI で設定された Text-to-Image のデフォルトを使用します。構成されたプロバイダーとモデルのみがリストされます。"
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "Image-to-Image 編集サポートを宣伝しているプロバイダーのみがリストされています。"
+
+msgid "Provider and video model"
+msgstr "プロバイダーとビデオモデル"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "Text-to-Video サポートを宣伝する構成済みプロバイダーのみがリストされます。"
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "Image-to-Video プロバイダーを使用して、アップロードされた画像をアニメーション化します。"
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "作成する画像、またはアップロードを変換する方法について説明します。"
+
+msgid "Generating video…"
+msgstr "ビデオを生成中…"
+
+msgid "Version order"
+msgstr "バージョンの順序"
+
+msgid "Oldest first"
+msgstr "古い順"
+
+msgid "Newest first"
+msgstr "新しい順"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "このセッションのバージョンの表示方法を変更します。バージョン番号と絞り込み関係は変わりません。"
+
+msgid "This session has reached its limit of @count turns."
+msgstr "このセッションは、@count ターンの制限に達しました。"
+
+msgid "Create from selected image"
+msgstr "選択した画像から作成"
+
+msgid "Create another result"
+msgstr "別の結果を作成する"
+
+msgid "Refining from"
+msgstr "から精製する"
+
+msgid "Version @number · @prompt"
+msgstr "バージョン @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "新しいバージョンはこのイメージから分岐します。以下の結果の完成したバージョンから別のソースを選択します。"
+
+msgid "Refined image"
+msgstr "洗練されたイメージ"
+
+msgid "Video from this image"
+msgstr "この画像からのビデオ"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "Drupal AI で設定された Text-to-Image のデフォルトを使用します。"
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "Image-to-Video プロバイダーを使用して、選択した画像をアニメーション化します。"
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "構成された Text-to-Video プロバイダーを使用します。"
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "選択した画像に加えたい変更のみを記述します。"
+
+msgid "Describe the image to create."
+msgstr "作成するイメージを説明します。"
+
+msgid "Generate"
+msgstr "生成する"
+
+msgid "Delete session"
+msgstr "セッションの削除"
+
+msgid "Automatic — match source"
+msgstr "自動 — ソースと一致"
+
+msgid "Landscape — 3:2"
+msgstr "風景 — 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "ポートレート — 2:3"
+
+msgid "Wide — 2:1"
+msgstr "ワイド — 2:1"
+
+msgid "Tall — 1:2"
+msgstr "背が高い — 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "電話の横向き — 19.5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "電話ポートレート — 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "電話の風景 — 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "電話ポートレート — 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "[自動] では、選択またはアップロードされたソース画像の比率が検出できる場合、その比率が使用されます。ソース画像がない場合、プロバイダーはデフォルトのアスペクト比を選択します。明示的な比率はプロバイダーに依存します。"
+
+msgid "1K — faster and lower cost"
+msgstr "1K — 高速かつ低コスト"
+
+msgid "2K — higher detail and cost"
+msgstr "2K — より高い精細さとコスト"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "[自動] では、ソース イメージの最長エッジから最も近いサポートされている層が選択されます。ソースがない場合は 1K を使用します。 Grok Imagine は 1K と 2K をサポートします。他のプロバイダーはこの設定をマッピングまたは無視する場合があります。"
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "プロバイダーがサポートしている場合は透明性を要求します。 Grok はこれをベストエフォート型のテキストから画像への命令として適用します。画像編集や他のプロバイダーはこれを無視する場合があります。"
+
+msgid "File type"
+msgstr "ファイルの種類"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "JPEG"
+
+msgid "WebP"
+msgstr "WebP"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG がデフォルトです。 JPEG と WebP が利用できるかどうかは、選択したプロバイダーによって異なります。"
+
+msgid "Show an AI image badge"
+msgstr "AI画像バッジを表示する"
+
+msgid "Badge text"
+msgstr "バッジのテキスト"
+
+msgid "Video settings"
+msgstr "ビデオの設定"
+
+msgid "Duration"
+msgstr "期間"
+
+msgid "seconds"
+msgstr "秒"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "プロバイダーは、要求された期間を制限または調整する場合があります。"
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "可能な場合は、選択したソース画像を自動的に照合します。"
+
+msgid "480p — faster and lower cost"
+msgstr "480p — 高速かつ低コスト"
+
+msgid "720p — standard"
+msgstr "720p — 標準"
+
+msgid "1080p — provider dependent"
+msgstr "1080p — プロバイダーに依存"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "Text-to-Video プロバイダーは 1080p をサポートしていない場合があります。"
+
+msgid "Saved to Media"
+msgstr "メディアに保存"
+
+msgid "Transparent background requested"
+msgstr "透明な背景が要求されました"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "アスペクト比: @ratio · 解像度: @resolution · ファイルの種類: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "AI画像"
+
+msgid "Generated version @number"
+msgstr "生成されたバージョン @number"
+
+msgid "Use as refinement source"
+msgstr "精製ソースとして使用"
+
+msgid "Selected source"
+msgstr "選択したソース"
+
+msgid "View published Media"
+msgstr "公開されたメディアを表示する"
+
+msgid "Publish to Media"
+msgstr "メディアへの公開"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "オプション。セッションのタイトルとプロンプトから推測されます。"
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "セッション タイトルとこのバージョンのプロンプトから推測されます。公開する前に正確かどうかを確認してください。"
+
+msgid "Render the badge into the saved Media file"
+msgstr "保存されたメディア ファイルにバッジをレンダリングします"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "「@badge」が永続的に埋め込まれた別のメディア ファイルを作成します。元の Studio の結果は保持されます。"
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "PHP GD または FFmpeg が Web サーバーで使用できないため、バッジのレンダリングは使用できません。オリジナルビデオは引き続き公開できます。"
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "PHP GD が Web サーバーで利用できないため、バッジのレンダリングは利用できません。元の画像は引き続き公開できます。"
+
+msgid "Publish this version"
+msgstr "このバージョンを公開する"
+
+msgid "Untitled prompt"
+msgstr "無題のプロンプト"
+
+msgid "AI video"
+msgstr "AIビデオ"
+
+msgid "AI image"
+msgstr "AI画像"
+
+msgid "@session — Version @number"
+msgstr "@session — バージョン @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "画像編集"
+
+msgid "Video generation"
+msgstr "ビデオ生成"
+
+msgid "Image animation"
+msgstr "イメージアニメーション"
+
+msgid "Image generation"
+msgstr "画像生成"
+
+msgid "Automatic ratio"
+msgstr "自動比率"
+
+msgid "High detail"
+msgstr "高精細度"
+
+msgid "Standard detail"
+msgstr "標準の詳細"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration 秒"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "利用できない時間"
+
+msgid "Request"
+msgstr "リクエスト"
+
+msgid "Output"
+msgstr "出力"
+
+msgid "Processing"
+msgstr "処理中"
+
+msgid "Tokens"
+msgstr "トークン"
+
+msgid "Source image"
+msgstr "ソース画像"
+
+msgid "Version @number"
+msgstr "バージョン @number"
+
+msgid "Uploaded image"
+msgstr "アップロードされた画像"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "テキストプロンプト"
+
+msgid "Reported"
+msgstr "報告済み"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost 米ドル"
+
+msgid "Session report"
+msgstr "セッションレポート"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "このセッションで生成されたすべてのバージョン。コストの合計は、プロバイダーから報告された料金と、報告されたコストが入手できない場合の推定値を組み合わせたものです。"
+
+msgid "Version"
+msgstr "バージョン"
+
+msgid "Source"
+msgstr "ソース"
+
+msgid "Cost"
+msgstr "原価"
+
+msgid "No versions have been generated."
+msgstr "バージョンは生成されていません。"
+
+msgid "Aggregate cost"
+msgstr "総コスト"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "報告済み: $@reported 米ドル · 推定: $@estimated 米ドル · 利用不可: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "このセッションは、構成された $@amount USD 警告しきい値に達しました。"
+
+msgid "Reported cost"
+msgstr "報告コスト"
+
+msgid "Cost unavailable"
+msgstr "コストが利用できません"
+
+msgid "$@cost USD"
+msgstr "$@cost 米ドル"
+
+msgid "Not reported · media-billed"
+msgstr "報道されない・メディアから請求される"
+
+msgid "in"
+msgstr "in"
+
+msgid "out"
+msgstr "アウト"
+
+msgid "cached"
+msgstr "キャッシュされた"
+
+msgid "reasoning"
+msgstr "推論"
+
+msgid "total"
+msgstr "合計"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "画像をメディアに公開する場合は、代替テキストが必要です。"
+
+msgid "Enter a prompt to generate a result."
+msgstr "プロンプトを入力して結果を生成します。"
+
+msgid "You are not allowed to modify this session."
+msgstr "このセッションを変更することはできません。"
+
+msgid "Select a completed image from this session to refine."
+msgstr "このセッションから完成したイメージを選択して調整します。"
+
+msgid "Upload a starting image."
+msgstr "開始画像をアップロードします。"
+
+msgid "Select a configured provider and model."
+msgstr "構成されたプロバイダーとモデルを選択します。"
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "選択されたプロバイダーとモデルは、このリクエスト タイプでは使用できません。"
+
+msgid "The image session is unavailable."
+msgstr "イメージセッションは利用できません。"
+
+msgid "The video was generated successfully."
+msgstr "ビデオが正常に生成されました。"
+
+msgid "The image was generated successfully."
+msgstr "画像は正常に生成されました。"
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "このリクエストのコストは $@cost 米ドルで、構成された $@threshold 警告しきい値を満たしています。"
+
+msgid "Generation failed: @message"
+msgstr "生成に失敗しました: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "選択したイメージのバージョンは使用できません。"
+
+msgid "You are not allowed to publish this result."
+msgstr "この結果を公開することは許可されていません。"
+
+msgid "The result could not be published: @message"
+msgstr "結果を公開できませんでした: @message"
+
+msgid "Published as Media “@name”."
+msgstr "メディア「@name」として発行されました。"
+
+msgid "Studio interface"
+msgstr "スタジオインターフェース"
+
+msgid "Default sort in Studio"
+msgstr "Studio のデフォルトの並べ替え"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "セッションが開かれるとき、または新しいイメージが生成されるときのイメージ バージョンの初期順序を設定します。ユーザーはセッションの表示中に順序を変更できます。"
+
+msgid "Open the generation form initially"
+msgstr "最初に生成フォームを開きます"
+
+msgid "Open image settings initially"
+msgstr "最初に画像設定を開きます"
+
+msgid "Open video settings initially"
+msgstr "最初にビデオ設定を開きます"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "プロバイダー、モデル、リクエスト、および処理メタデータを表示する"
+
+msgid "Show token usage when available"
+msgstr "利用可能な場合はトークンの使用状況を表示する"
+
+msgid "Show reported and estimated costs"
+msgstr "報告されたコストと推定コストを表示する"
+
+msgid "Show the session-wide version and cost report"
+msgstr "セッション全体のバージョンとコストレポートを表示する"
+
+msgid "Generation defaults"
+msgstr "世代のデフォルト"
+
+msgid "Default output type"
+msgstr "デフォルトの出力タイプ"
+
+msgid "Default aspect ratio"
+msgstr "デフォルトのアスペクト比"
+
+msgid "Default image resolution"
+msgstr "デフォルトの画像解像度"
+
+msgid "Default video resolution"
+msgstr "デフォルトのビデオ解像度"
+
+msgid "480p"
+msgstr "480p"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "デフォルトのビデオの長さ"
+
+msgid "Request a transparent background by default"
+msgstr "デフォルトで透明な背景をリクエストする"
+
+msgid "Default image file type"
+msgstr "デフォルトの画像ファイルの種類"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "選択したプロバイダーは、要求された形式をサポートする必要があります。デフォルトでは PNG が使用されます。"
+
+msgid "Show an AI image badge by default"
+msgstr "デフォルトで AI 画像バッジを表示する"
+
+msgid "Default AI image badge text"
+msgstr "デフォルトの AI 画像バッジのテキスト"
+
+msgid "Default Text-to-Image model"
+msgstr "デフォルトの Text-to-Image モデル"
+
+msgid "Default Image-to-Image model"
+msgstr "デフォルトの画像間モデル"
+
+msgid "Default Text-to-Video model"
+msgstr "デフォルトの Text-to-Video モデル"
+
+msgid "Default Image-to-Video model"
+msgstr "デフォルトの Image-to-Video モデル"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "Drupal AI によって設定されたデフォルトを継承するには、「なし」のままにします。"
+
+msgid "Draft storage"
+msgstr "ドラフトストレージ"
+
+msgid "File scheme"
+msgstr "ファイルスキーム"
+
+msgid "Private"
+msgstr "プライベート"
+
+msgid "Public"
+msgstr "パブリック"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "生成されたドラフトには機密性の高い内容が含まれる可能性があるため、プライベート ストレージをお勧めします。"
+
+msgid "File directory"
+msgstr "ファイルディレクトリー"
+
+msgid "Limits"
+msgstr "限界"
+
+msgid "Maximum prompt length"
+msgstr "プロンプトの最大長"
+
+msgid "Maximum turns per session"
+msgstr "セッションあたりの最大ターン数"
+
+msgid "Maximum uploaded source image size"
+msgstr "アップロードされるソース画像の最大サイズ"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "Maximum requested video duration"
+msgstr "リクエストされたビデオの最大再生時間"
+
+msgid "Per-request cost warning"
+msgstr "リクエストごとのコストの警告"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "リクエストがこのコストに達した後、警告を表示します。無効にするにはゼロを使用します。"
+
+msgid "Session cost warning"
+msgstr "セッションコストの警告"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "この金額以上のセッション合計を強調表示します。無効にするにはゼロを使用します。"
+
+msgid "Media publishing"
+msgstr "メディア掲載"
+
+msgid "Image Media type"
+msgstr "画像メディアの種類"
+
+msgid "Image source field machine name"
+msgstr "画像ソースフィールドのマシン名"
+
+msgid "Require alternative text when publishing images"
+msgstr "画像を公開するときに代替テキストを要求する"
+
+msgid "Video Media type"
+msgstr "ビデオメディアタイプ"
+
+msgid "Video source field machine name"
+msgstr "ビデオソースフィールドマシン名"
+
+msgid "1 configured model"
+msgstr "1 構成モデル"
+
+msgid "@count configured models"
+msgstr "@count 構成モデル"
+
+msgid "Provider diagnostics"
+msgstr "プロバイダー診断"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "モデルは Drupal AI から検出され、各プロバイダーがアドバタイズする操作によってフィルターされます。"
+
+msgid "Availability"
+msgstr "可用性"
+
+msgid "Studio default"
+msgstr "スタジオのデフォルト"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "文字、数字、アンダースコア、ダッシュ、スラッシュのみを含む相対ディレクトリを使用します。"
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "デフォルトのビデオ継続時間は、設定された最大時間を超えることはできません。"
+
+msgid "The selected Media type must contain this image field."
+msgstr "選択したメディア タイプには、この画像フィールドが含まれている必要があります。"
+
+msgid "The selected Media type must contain this video file field."
+msgstr "選択したメディア タイプには、このビデオ ファイル フィールドが含まれている必要があります。"
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (Drupal AI のデフォルト)"
+
+msgid "No model available"
+msgstr "利用可能なモデルがありません"
+
+msgid "Image Source"
+msgstr "画像ソース"
+
+msgid "Upload Image"
+msgstr "画像アップロード"
+
+msgid "Create in AI Image Studio"
+msgstr "AI Image Studioで作成"
+
+msgid "Enter a prompt to generate an image."
+msgstr "イメージを生成するためのプロンプトを入力します。"
+
+msgid "Enter a Media name."
+msgstr "メディア名を入力します。"
+
+msgid "Enter alternative text for the image."
+msgstr "画像の代替テキストを入力します。"
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "以下のコンパクト AI Image Studio フォームを使用して画像を生成します。"
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "ビデオの生成には数分かかる場合があります。プロバイダーがリクエストを完了するまで、このページを開いたままにしてください。"
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "プロバイダーがイメージを作成しています。リクエストが完了するまで、このページを開いたままにしてください。"
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "Drupal AI プロバイダーを使用した会話型の画像とビデオの生成。"
+
+msgid "AI"
+msgstr "AI"
+
+msgid "Create images and manage refinement sessions."
+msgstr "イメージを作成し、リファインメントセッションを管理します。"
+
+msgid "New image session"
+msgstr "新しいイメージセッション"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "イメージを作成し、順次プロンプトを表示して調整します。"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "画像ストレージ、制限、メディア公開を設定します。"
+
+msgid "Studio settings"
+msgstr "スタジオ設定"
+
+msgid "Configure AI Image Studio"
+msgstr "AI Image Studio を構成する"
+
+msgid "Access AI Image Studio"
+msgstr "AI イメージ スタジオにアクセスする"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "所有するスタジオセッションで画像を作成し、調整します。"
+
+msgid "View any AI Image Studio session"
+msgstr "AI Image Studio セッションを表示する"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "自分の AI Image Studio セッションを削除する"
+
+msgid "Delete any AI Image Studio session"
+msgstr "AI Image Studio セッションを削除します"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "AI Image Studio の画像をメディアに公開する"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "AI Image Studio ビデオをメディアに公開する"
+
+msgid "Administer AI Image Studio"
+msgstr "AI Image Studio の管理"
+

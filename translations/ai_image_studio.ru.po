@@ -1,0 +1,978 @@
+# Russian translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: ru\n"
+"Language-Team: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "The source image could not be read."
+msgstr "Исходное изображение не удалось прочитать."
+
+msgid "The provider returned no generated video."
+msgstr "Поставщик не возвратил созданного видео."
+
+msgid "The provider returned no generated image."
+msgstr "Поставщик не вернул созданное изображение."
+
+msgid "Only completed Studio turns can be published."
+msgstr "Публиковать можно только завершенные ходы в Студии."
+
+msgid "The generated file is unavailable."
+msgstr "Сгенерированный файл недоступен."
+
+msgid "Select a configured AI provider and model."
+msgstr "Выберите настроенного поставщика ИИ и модель."
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "Для рендеринга значка в изображение требуется расширение PHP GD."
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "Сгенерированное изображение не удалось открыть для рендеринга значка."
+
+msgid "The badged image could not be encoded."
+msgstr "Изображение со значком не удалось закодировать."
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "Для рендеринга значка в видео требуется расширение PHP GD."
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "Сгенерированное видео не удалось открыть для рендеринга значков."
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "Не удалось создать временные файлы для рендеринга видео-значков."
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg не смог отобразить значок в видео: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg вернул пустое видео со значком."
+
+msgid "Open"
+msgstr "Открыть"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Unknown"
+msgstr "Неизвестно"
+
+msgid "Active"
+msgstr "Активно"
+
+msgid "Archived"
+msgstr "В архиве"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "Создайте изображение, а затем уточните его с помощью последовательных подсказок. Каждый результат сохраняется как ход в сеансе."
+
+msgid "Session"
+msgstr "Сессия"
+
+msgid "Owner"
+msgstr "Владелец"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Updated"
+msgstr "Обновлено"
+
+msgid "Operations"
+msgstr "Операции"
+
+msgid "No image sessions have been created yet."
+msgstr "Сеансы изображений еще не созданы."
+
+msgid "AI Image Studio turn"
+msgstr "Поворот в AI Image Studio"
+
+msgid "AI Image Studio turns"
+msgstr "AI Image Studio превращается в"
+
+msgid "image studio turn"
+msgstr "очередь в имидж-студию"
+
+msgid "image studio turns"
+msgstr "имидж-студия поворачивается"
+
+msgid "Parent turn"
+msgstr "Родительская очередь"
+
+msgid "Prompt"
+msgstr "Подскажите"
+
+msgid "Generated image"
+msgstr "Сгенерированное изображение"
+
+msgid "Generated video"
+msgstr "Сгенерированное видео"
+
+msgid "Provider"
+msgstr "Поставщик"
+
+msgid "Model"
+msgstr "Модель"
+
+msgid "Operation"
+msgstr "Действие"
+
+msgid "Text to image"
+msgstr "Текст в изображение"
+
+msgid "Image to image"
+msgstr "Изображение к изображению"
+
+msgid "Text to video"
+msgstr "Текст в видео"
+
+msgid "Image to video"
+msgstr "Изображение в видео"
+
+msgid "Generation settings"
+msgstr "Настройки генерации"
+
+msgid "Generation duration"
+msgstr "Продолжительность генерации"
+
+msgid "Estimated cost"
+msgstr "Ориентировочная стоимость"
+
+msgid "Cost source"
+msgstr "Источник затрат"
+
+msgid "Provider reported"
+msgstr "Поставщик сообщил"
+
+msgid "Estimated"
+msgstr "Предполагаемый"
+
+msgid "Unavailable"
+msgstr "Недоступно"
+
+msgid "Token usage"
+msgstr "Использование токена"
+
+msgid "Pending"
+msgstr "Ожидается"
+
+msgid "Completed"
+msgstr "Завершено"
+
+msgid "Failed"
+msgstr "Не удалось"
+
+msgid "Error message"
+msgstr "Сообщение об ошибке"
+
+msgid "Published Media"
+msgstr "Опубликованные СМИ"
+
+msgid "Created"
+msgstr "Создано"
+
+msgid "AI Image Studio session"
+msgstr "Сеанс AI Image Studio"
+
+msgid "AI Image Studio sessions"
+msgstr "Сеансы AI Image Studio"
+
+msgid "image studio session"
+msgstr "сеанс имидж-студии"
+
+msgid "image studio sessions"
+msgstr "занятия в имидж-студии"
+
+msgid "Title"
+msgstr "Заголовок"
+
+msgid "Changed"
+msgstr "Изменение"
+
+msgid "AI Image Studio"
+msgstr "Студия изображений AI"
+
+msgid "Provider and model"
+msgstr "Поставщик и модель"
+
+msgid "Image settings"
+msgstr "Настройки изображений"
+
+msgid "Aspect ratio"
+msgstr "Соотношение сторон"
+
+msgid "Automatic"
+msgstr "Автоматически"
+
+msgid "Square — 1:1"
+msgstr "Квадрат — 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "Пейзаж — 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "Портрет — 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "Пейзаж — 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "Портрет — 3:4"
+
+msgid "Resolution"
+msgstr "Разрешение"
+
+msgid "1K"
+msgstr "1К"
+
+msgid "2K"
+msgstr "2К"
+
+msgid "Request a transparent background"
+msgstr "Запросить прозрачный фон"
+
+msgid "Generate another"
+msgstr "Создать еще один"
+
+msgid "Generate image"
+msgstr "Создать изображение"
+
+msgid "Generating image…"
+msgstr "Создание изображения…"
+
+msgid "Alternative text"
+msgstr "Альтернативный текст"
+
+msgid "Media name"
+msgstr "Название медиа"
+
+msgid "Continue in full Studio"
+msgstr "Продолжить в полной версии Студии"
+
+msgid "Save and select"
+msgstr "Сохранить и выделить"
+
+msgid "Save to Media Library"
+msgstr "Сохранить в медиатеку"
+
+msgid "Saving image…"
+msgstr "Сохранение изображения…"
+
+msgid "Image generation failed: @message"
+msgstr "Не удалось создать изображение: @message."
+
+msgid "You are not allowed to publish Studio images."
+msgstr "Вам не разрешено публиковать изображения Studio."
+
+msgid "Generate an image before saving it."
+msgstr "Создайте изображение перед его сохранением."
+
+msgid "The generated image is unavailable."
+msgstr "Сгенерированное изображение недоступно."
+
+msgid "Starting generation…"
+msgstr "Начало поколения…"
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "Ваш запрос отправляется выбранному провайдеру. Держите эту страницу открытой."
+
+msgid "Session title"
+msgstr "Название сессии"
+
+msgid "Start from"
+msgstr "Начать с"
+
+msgid "A text prompt"
+msgstr "Текстовое приглашение"
+
+msgid "An uploaded image"
+msgstr "Загруженное изображение"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "Генерация видео является экспериментальной и выполняется синхронно. Держите страницу открытой до завершения запроса."
+
+msgid "Starting image"
+msgstr "Начальное изображение"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "Использует преобразование текста в изображение по умолчанию, настроенное в Drupal AI. В списке указаны только настроенные поставщики и модели."
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "В списке указаны только поставщики, рекламирующие поддержку редактирования изображений в изображениях."
+
+msgid "Provider and video model"
+msgstr "Провайдер и модель видео"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "В списке указаны только настроенные поставщики, рекламирующие поддержку преобразования текста в видео."
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "Анимирует загруженное изображение с помощью поставщика изображения в видео."
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "Опишите изображение, которое нужно создать, или как преобразовать загрузку."
+
+msgid "Generating video…"
+msgstr "Создание видео…"
+
+msgid "Version order"
+msgstr "Порядок версий"
+
+msgid "Oldest first"
+msgstr "Старые сначала"
+
+msgid "Newest first"
+msgstr "Новые сначала"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "Изменяет способ отображения версий этого сеанса. Номера версий и отношения уточнений остаются прежними."
+
+msgid "This session has reached its limit of @count turns."
+msgstr "Этот сеанс достиг своего предела в @count ходов."
+
+msgid "Create from selected image"
+msgstr "Создать из выбранного изображения"
+
+msgid "Create another result"
+msgstr "Создать другой результат"
+
+msgid "Refining from"
+msgstr "Переработка из"
+
+msgid "Version @number · @prompt"
+msgstr "Версия @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "Новая версия будет ответвлением от этого образа. Выберите другой источник из любой завершенной версии в результатах ниже."
+
+msgid "Refined image"
+msgstr "Утонченное изображение"
+
+msgid "Video from this image"
+msgstr "Видео с этого изображения"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "Использует преобразование текста в изображение по умолчанию, настроенное в Drupal AI."
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "Анимирует выбранное изображение с помощью поставщика изображения в видео."
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "Использует настроенного поставщика преобразования текста в видео."
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "Опишите только то изменение, которое вы хотите внести в выбранное изображение."
+
+msgid "Describe the image to create."
+msgstr "Опишите образ, который нужно создать."
+
+msgid "Generate"
+msgstr "Создать"
+
+msgid "Delete session"
+msgstr "Удалить сеанс"
+
+msgid "Automatic — match source"
+msgstr "Автоматически — источник совпадения"
+
+msgid "Landscape — 3:2"
+msgstr "Пейзаж — 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "Портрет — 2:3"
+
+msgid "Wide — 2:1"
+msgstr "Широкий — 2:1"
+
+msgid "Tall — 1:2"
+msgstr "Высокий — 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "Телефон в альбомной ориентации — 19,5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "Телефонный портрет — 9:19,5"
+
+msgid "Phone landscape — 20:9"
+msgstr "Телефон в альбомной ориентации — 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "Телефонный портрет — 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "Автоматически используются пропорции выбранного или загруженного исходного изображения, когда их можно обнаружить. Без исходного изображения поставщик выбирает соотношение сторон по умолчанию. Явные соотношения остаются зависимыми от поставщика услуг."
+
+msgid "1K — faster and lower cost"
+msgstr "1К — быстрее и дешевле"
+
+msgid "2K — higher detail and cost"
+msgstr "2К — выше детализация и стоимость"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "Автоматически выбирается ближайший поддерживаемый уровень от самого длинного края исходного изображения. Без источника используется 1К. Grok Imagine поддерживает 1K и 2K; другие поставщики могут сопоставить или игнорировать этот параметр."
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "Запрашивает прозрачность, если поставщик ее поддерживает. Грок применяет это как оптимальную инструкцию по преобразованию текста в изображение; редактирование изображений и другие поставщики могут игнорировать это."
+
+msgid "File type"
+msgstr "Тип файла"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "JPEG"
+
+msgid "WebP"
+msgstr "ВебП"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG — значение по умолчанию. Доступность JPEG и WebP зависит от выбранного провайдера."
+
+msgid "Show an AI image badge"
+msgstr "Показать значок изображения AI"
+
+msgid "Badge text"
+msgstr "Текст значка"
+
+msgid "Video settings"
+msgstr "Настройки видео"
+
+msgid "Duration"
+msgstr "Продолжительность"
+
+msgid "seconds"
+msgstr "секунд"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "Поставщик может ограничить или скорректировать запрошенную продолжительность."
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "Автоматически соответствует выбранному исходному изображению, где это возможно."
+
+msgid "480p — faster and lower cost"
+msgstr "480p — быстрее и дешевле"
+
+msgid "720p — standard"
+msgstr "720p — стандартное"
+
+msgid "1080p — provider dependent"
+msgstr "1080p — зависит от провайдера"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "Поставщики преобразования текста в видео могут не поддерживать 1080p."
+
+msgid "Saved to Media"
+msgstr "Сохранено на носителе"
+
+msgid "Transparent background requested"
+msgstr "Требуется прозрачный фон"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "Соотношение сторон: @ratio · Разрешение: @resolution · Тип файла: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "AI-изображение"
+
+msgid "Generated version @number"
+msgstr "Сгенерированная версия @number"
+
+msgid "Use as refinement source"
+msgstr "Использовать как источник уточнения"
+
+msgid "Selected source"
+msgstr "Выбранный источник"
+
+msgid "View published Media"
+msgstr "Просмотр опубликованных СМИ"
+
+msgid "Publish to Media"
+msgstr "Публикация в СМИ"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "Необязательно. Предлагается из названия сеанса и подсказки."
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "Предлагается из названия сеанса и подсказки этой версии. Перед публикацией проверьте его точность."
+
+msgid "Render the badge into the saved Media file"
+msgstr "Преобразуйте значок в сохраненный медиа-файл."
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "Создает отдельный медиа-файл с постоянно внедренным «@badge». Исходный результат Studio сохраняется."
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "Отрисовка значков недоступна, поскольку PHP GD или FFmpeg недоступен веб-серверу. Оригинальное видео еще можно опубликовать."
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "Отрисовка значков недоступна, поскольку PHP GD недоступен веб-серверу. Исходное изображение все еще можно опубликовать."
+
+msgid "Publish this version"
+msgstr "Опубликовать эту версию"
+
+msgid "Untitled prompt"
+msgstr "Подсказка без названия"
+
+msgid "AI video"
+msgstr "ИИ-видео"
+
+msgid "AI image"
+msgstr "AI-изображение"
+
+msgid "@session — Version @number"
+msgstr "@session — Версия @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "Редактирование изображения"
+
+msgid "Video generation"
+msgstr "Генерация видео"
+
+msgid "Image animation"
+msgstr "Анимация изображений"
+
+msgid "Image generation"
+msgstr "Генерация изображений"
+
+msgid "Automatic ratio"
+msgstr "Автоматическое соотношение"
+
+msgid "High detail"
+msgstr "Высокая детализация"
+
+msgid "Standard detail"
+msgstr "Стандартная деталь"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration секунд"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "Время недоступно"
+
+msgid "Request"
+msgstr "Запрос"
+
+msgid "Output"
+msgstr "Вывод"
+
+msgid "Processing"
+msgstr "Обработка"
+
+msgid "Tokens"
+msgstr "Токены"
+
+msgid "Source image"
+msgstr "Исходное изображение"
+
+msgid "Version @number"
+msgstr "Версия @number"
+
+msgid "Uploaded image"
+msgstr "Загруженное изображение"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "Текстовая подсказка"
+
+msgid "Reported"
+msgstr "Сообщено"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost долл. США"
+
+msgid "Session report"
+msgstr "Отчет о сессии"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "Все созданные версии в этом сеансе. Общие затраты объединяют расходы, заявленные поставщиком услуг, с оценками, в которых заявленная стоимость была недоступна."
+
+msgid "Version"
+msgstr "Версия"
+
+msgid "Source"
+msgstr "Источник"
+
+msgid "Cost"
+msgstr "Стоимость"
+
+msgid "No versions have been generated."
+msgstr "Версии не созданы."
+
+msgid "Aggregate cost"
+msgstr "Совокупная стоимость"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "Сообщено: $@reported USD · Расчетное: $@estimated USD · Недоступно: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "Этот сеанс достиг настроенного порога предупреждения $@amount в долларах США."
+
+msgid "Reported cost"
+msgstr "Заявленная стоимость"
+
+msgid "Cost unavailable"
+msgstr "Стоимость недоступна"
+
+msgid "$@cost USD"
+msgstr "$@cost долл. США"
+
+msgid "Not reported · media-billed"
+msgstr "Не сообщается · заявлено в СМИ"
+
+msgid "in"
+msgstr "в"
+
+msgid "out"
+msgstr "из"
+
+msgid "cached"
+msgstr "кэшированный"
+
+msgid "reasoning"
+msgstr "рассуждение"
+
+msgid "total"
+msgstr "всего"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "При публикации изображения в СМИ требуется альтернативный текст."
+
+msgid "Enter a prompt to generate a result."
+msgstr "Введите подсказку для получения результата."
+
+msgid "You are not allowed to modify this session."
+msgstr "Вам не разрешено изменять этот сеанс."
+
+msgid "Select a completed image from this session to refine."
+msgstr "Выберите готовое изображение из этого сеанса для уточнения."
+
+msgid "Upload a starting image."
+msgstr "Загрузите стартовое изображение."
+
+msgid "Select a configured provider and model."
+msgstr "Выберите настроенного поставщика и модель."
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "Выбранный поставщик и модель недоступны для этого типа запроса."
+
+msgid "The image session is unavailable."
+msgstr "Сеанс изображения недоступен."
+
+msgid "The video was generated successfully."
+msgstr "Видео было успешно создано."
+
+msgid "The image was generated successfully."
+msgstr "Изображение было успешно создано."
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "Этот запрос стоил $@cost долларов США, что соответствует настроенному порогу предупреждения $@threshold."
+
+msgid "Generation failed: @message"
+msgstr "Генерация не удалась: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "Выбранная версия изображения недоступна."
+
+msgid "You are not allowed to publish this result."
+msgstr "Вам не разрешено публиковать этот результат."
+
+msgid "The result could not be published: @message"
+msgstr "Не удалось опубликовать результат: @message."
+
+msgid "Published as Media “@name”."
+msgstr "Опубликовано как СМИ «@name»."
+
+msgid "Studio interface"
+msgstr "Интерфейс студии"
+
+msgid "Default sort in Studio"
+msgstr "Сортировка по умолчанию в Studio"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "Устанавливает первоначальный порядок версий изображений при открытии сеанса или создании нового изображения. Пользователи могут изменить порядок во время просмотра сеанса."
+
+msgid "Open the generation form initially"
+msgstr "Сначала откройте форму генерации"
+
+msgid "Open image settings initially"
+msgstr "Сначала откройте настройки изображения"
+
+msgid "Open video settings initially"
+msgstr "Сначала откройте настройки видео"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "Показать поставщика, модель, запрос и метаданные обработки"
+
+msgid "Show token usage when available"
+msgstr "Показывать использование токена, если он доступен"
+
+msgid "Show reported and estimated costs"
+msgstr "Показать заявленные и предполагаемые затраты"
+
+msgid "Show the session-wide version and cost report"
+msgstr "Показать версию для всего сеанса и отчет о расходах"
+
+msgid "Generation defaults"
+msgstr "Генерация по умолчанию"
+
+msgid "Default output type"
+msgstr "Тип вывода по умолчанию"
+
+msgid "Default aspect ratio"
+msgstr "Соотношение сторон по умолчанию"
+
+msgid "Default image resolution"
+msgstr "Разрешение изображения по умолчанию"
+
+msgid "Default video resolution"
+msgstr "Разрешение видео по умолчанию"
+
+msgid "480p"
+msgstr "480p"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "Продолжительность видео по умолчанию"
+
+msgid "Request a transparent background by default"
+msgstr "Запросить прозрачный фон по умолчанию"
+
+msgid "Default image file type"
+msgstr "Тип файла изображения по умолчанию"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "Выбранный провайдер должен поддерживать запрошенный формат. PNG используется по умолчанию."
+
+msgid "Show an AI image badge by default"
+msgstr "Показывать значок изображения AI по умолчанию"
+
+msgid "Default AI image badge text"
+msgstr "Текст значка изображения AI по умолчанию"
+
+msgid "Default Text-to-Image model"
+msgstr "Модель преобразования текста в изображение по умолчанию"
+
+msgid "Default Image-to-Image model"
+msgstr "Модель «изображение-изображение» по умолчанию"
+
+msgid "Default Text-to-Video model"
+msgstr "Модель преобразования текста в видео по умолчанию"
+
+msgid "Default Image-to-Video model"
+msgstr "Модель преобразования изображения в видео по умолчанию"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "Оставьте значение «Нет», чтобы унаследовать значение по умолчанию, настроенное Drupal AI."
+
+msgid "Draft storage"
+msgstr "Черновое хранилище"
+
+msgid "File scheme"
+msgstr "Схема файла"
+
+msgid "Private"
+msgstr "Приватный"
+
+msgid "Public"
+msgstr "Общедоступный"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "Рекомендуется хранить в частном порядке, поскольку созданные черновики могут содержать конфиденциальный материал."
+
+msgid "File directory"
+msgstr "Каталог файлов"
+
+msgid "Limits"
+msgstr "Ограничения"
+
+msgid "Maximum prompt length"
+msgstr "Максимальная длина приглашения"
+
+msgid "Maximum turns per session"
+msgstr "Максимальное количество оборотов за сеанс"
+
+msgid "Maximum uploaded source image size"
+msgstr "Максимальный размер загружаемого исходного изображения"
+
+msgid "MB"
+msgstr "МБ"
+
+msgid "Maximum requested video duration"
+msgstr "Максимальная запрошенная продолжительность видео"
+
+msgid "Per-request cost warning"
+msgstr "Предупреждение о стоимости каждого запроса"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "Отобразить предупреждение после того, как запрос достигнет этой стоимости. Используйте ноль для отключения."
+
+msgid "Session cost warning"
+msgstr "Предупреждение о стоимости сеанса"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "Выделите общие суммы сеансов, равные этой сумме или превышающие ее. Используйте ноль для отключения."
+
+msgid "Media publishing"
+msgstr "Публикации в СМИ"
+
+msgid "Image Media type"
+msgstr "Тип носителя изображения"
+
+msgid "Image source field machine name"
+msgstr "Имя компьютера поля источника изображения"
+
+msgid "Require alternative text when publishing images"
+msgstr "Требовать альтернативный текст при публикации изображений"
+
+msgid "Video Media type"
+msgstr "Тип видеоматериала"
+
+msgid "Video source field machine name"
+msgstr "Имя полевого компьютера видеоисточника"
+
+msgid "1 configured model"
+msgstr "1 настроенная модель"
+
+msgid "@count configured models"
+msgstr "@count настроенные модели"
+
+msgid "Provider diagnostics"
+msgstr "Диагностика провайдера"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "Модели обнаруживаются с помощью Drupal AI и фильтруются по операции, которую рекламирует каждый поставщик."
+
+msgid "Availability"
+msgstr "Доступность"
+
+msgid "Studio default"
+msgstr "Студия по умолчанию"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "Используйте относительный каталог, содержащий только буквы, цифры, символы подчеркивания, тире и косую черту."
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "Продолжительность видео по умолчанию не может превышать настроенный максимум."
+
+msgid "The selected Media type must contain this image field."
+msgstr "Выбранный тип носителя должен содержать это поле изображения."
+
+msgid "The selected Media type must contain this video file field."
+msgstr "Выбранный тип мультимедиа должен содержать это поле видеофайла."
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (по умолчанию Drupal AI)"
+
+msgid "No model available"
+msgstr "Нет доступной модели"
+
+msgid "Image Source"
+msgstr "Источник изображения"
+
+msgid "Upload Image"
+msgstr "Загрузить изображение"
+
+msgid "Create in AI Image Studio"
+msgstr "Создать в AI Image Studio"
+
+msgid "Enter a prompt to generate an image."
+msgstr "Введите приглашение для создания изображения."
+
+msgid "Enter a Media name."
+msgstr "Введите имя носителя."
+
+msgid "Enter alternative text for the image."
+msgstr "Введите альтернативный текст для изображения."
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "Создайте изображение с помощью компактной формы AI Image Studio ниже."
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "Создание видео может занять несколько минут. Держите эту страницу открытой, пока поставщик выполнит запрос."
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "Провайдер создает ваш имидж. Держите эту страницу открытой до завершения запроса."
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "Генерация диалоговых изображений и видео с использованием провайдеров Drupal AI."
+
+msgid "AI"
+msgstr "ИИ"
+
+msgid "Create images and manage refinement sessions."
+msgstr "Создавайте изображения и управляйте сеансами уточнения."
+
+msgid "New image session"
+msgstr "Новая сессия изображений"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "Создайте изображение и уточните его с помощью последовательных подсказок."
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "Настройте хранилище изображений, ограничения и публикацию мультимедиа."
+
+msgid "Studio settings"
+msgstr "Настройки студии"
+
+msgid "Configure AI Image Studio"
+msgstr "Настройка AI Image Studio"
+
+msgid "Access AI Image Studio"
+msgstr "Доступ к AI Image Studio"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "Создавайте и улучшайте изображения во время сеансов в собственной студии."
+
+msgid "View any AI Image Studio session"
+msgstr "Просмотр любого сеанса AI Image Studio"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "Удаление собственных сеансов AI Image Studio"
+
+msgid "Delete any AI Image Studio session"
+msgstr "Удалите любой сеанс AI Image Studio."
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "Публикация изображений AI Image Studio на носителях"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "Публикуйте видео AI Image Studio в медиа"
+
+msgid "Administer AI Image Studio"
+msgstr "Администрирование AI Image Studio"
+

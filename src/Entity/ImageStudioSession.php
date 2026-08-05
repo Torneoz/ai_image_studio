@@ -68,8 +68,8 @@ final class ImageStudioSession extends ContentEntityBase implements EntityOwnerI
       ->setRequired(TRUE)
       ->setSettings([
         'allowed_values' => [
-          'active' => 'Active',
-          'archived' => 'Archived',
+          'active' => new TranslatableMarkup('Active'),
+          'archived' => new TranslatableMarkup('Archived'),
         ],
       ])
       ->setDefaultValue('active');

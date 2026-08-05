@@ -806,6 +806,7 @@ final class StudioForm extends FormBase {
           ? 'publish ai image studio video'
           : 'publish ai image studio image',
       )) {
+        $can_render_badge = $this->generator->canRenderBadge($is_video);
         $build['publish'] = [
           '#type' => 'details',
           '#tree' => TRUE,
@@ -829,10 +830,16 @@ final class StudioForm extends FormBase {
           'render_badge' => [
             '#type' => 'checkbox',
             '#title' => $this->t('Render the badge into the saved Media file'),
-            '#default_value' => !empty($settings['show_ai_badge']),
-            '#description' => $this->t('Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved.', [
-              '@badge' => $settings['ai_badge_text'] ?? $this->t('AI Image'),
-            ]),
+            '#default_value' => $can_render_badge
+            && !empty($settings['show_ai_badge']),
+            '#disabled' => !$can_render_badge,
+            '#description' => $can_render_badge
+              ? $this->t('Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved.', [
+                '@badge' => $settings['ai_badge_text'] ?? $this->t('AI Image'),
+              ])
+              : ($is_video
+                ? $this->t('Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published.')
+                : $this->t('Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published.')),
           ],
           'submit' => [
             '#type' => 'submit',
@@ -1181,10 +1188,16 @@ final class StudioForm extends FormBase {
    */
   private function buildStatus(object $turn): array {
     $status = (string) $turn->get('status')->value;
+    $label = match ($status) {
+      'pending' => $this->t('Pending'),
+      'completed' => $this->t('Completed'),
+      'failed' => $this->t('Failed'),
+      default => $this->t('Unknown'),
+    };
     return [
       '#type' => 'html_tag',
       '#tag' => 'span',
-      '#value' => Html::escape(ucfirst($status)),
+      '#value' => $label,
       '#attributes' => [
         'class' => [
           'ai-image-studio-status',
@@ -1457,7 +1470,9 @@ final class StudioForm extends FormBase {
     else {
       $session = $storage->load($session_id);
       if ($session === NULL || !$session->access('update')) {
-        throw new \RuntimeException('The image session is unavailable.');
+        $this->messenger()->addError($this->t('The image session is unavailable.'));
+        $form_state->setRedirect('entity.ai_image_studio_session.collection');
+        return;
       }
     }
 
@@ -1551,7 +1566,11 @@ final class StudioForm extends FormBase {
     $turn = $this->entityTypeManager->getStorage('ai_image_studio_turn')->load($turn_id);
     $session_id = (int) $form_state->get('session_id');
     if ($turn === NULL || (int) $turn->get('session_id')->target_id !== $session_id) {
-      throw new \RuntimeException('The selected image version is unavailable.');
+      $this->messenger()->addError($this->t('The selected image version is unavailable.'));
+      $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
+        'ai_image_studio_session' => $session_id,
+      ]);
+      return;
     }
     $session = $this->entityTypeManager->getStorage('ai_image_studio_session')->load($session_id);
     $is_video = !$turn->get('video')->isEmpty();
@@ -1560,7 +1579,11 @@ final class StudioForm extends FormBase {
       : 'publish ai image studio image';
     if ($session === NULL || !$session->access('update')
       || !$this->currentUserProxy->hasPermission($permission)) {
-      throw new \RuntimeException('You are not allowed to publish this result.');
+      $this->messenger()->addError($this->t('You are not allowed to publish this result.'));
+      $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
+        'ai_image_studio_session' => $session_id,
+      ]);
+      return;
     }
 
     $values = $form_state->getValue([

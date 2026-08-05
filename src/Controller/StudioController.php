@@ -83,7 +83,11 @@ final class StudioController extends ControllerBase {
           ]),
         ),
         $session->getOwner()?->getDisplayName() ?? $this->t('Unknown'),
-        ucfirst((string) $session->get('status')->value),
+        match ((string) $session->get('status')->value) {
+          'active' => $this->t('Active'),
+          'archived' => $this->t('Archived'),
+          default => $this->t('Unknown'),
+        },
         $this->dateFormatter->format((int) $session->getChangedTime(), 'short'),
         [
           'data' => [

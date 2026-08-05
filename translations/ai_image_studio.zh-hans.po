@@ -1,0 +1,978 @@
+# Chinese, Simplified translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: zh-hans\n"
+"Language-Team: Chinese, Simplified\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "The source image could not be read."
+msgstr "无法读取源图像。"
+
+msgid "The provider returned no generated video."
+msgstr "提供商未返回生成的视频。"
+
+msgid "The provider returned no generated image."
+msgstr "提供者未返回生成的图像。"
+
+msgid "Only completed Studio turns can be published."
+msgstr "只能发布已完成的工作室回合。"
+
+msgid "The generated file is unavailable."
+msgstr "生成的文件不可用。"
+
+msgid "Select a configured AI provider and model."
+msgstr "选择已配置的 AI 提供商和模型。"
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "将徽章渲染为图像需要 PHP GD 扩展。"
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "无法打开生成的图像进行徽章渲染。"
+
+msgid "The badged image could not be encoded."
+msgstr "无法对标记图像进行编码。"
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "将徽章渲染到视频中需要 PHP GD 扩展。"
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "无法打开生成的视频进行徽章渲染。"
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "无法创建用于视频徽章渲染的临时文件。"
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg 无法将徽章渲染到视频中：@message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg 返回一个空的标记视频。"
+
+msgid "Open"
+msgstr "开放"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "Active"
+msgstr "有效"
+
+msgid "Archived"
+msgstr "已存档"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "创建图像，然后通过顺序提示对其进行优化。每个结果都会在会话中保留为一个回合。"
+
+msgid "Session"
+msgstr "会话"
+
+msgid "Owner"
+msgstr "所有者"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Updated"
+msgstr "已更新"
+
+msgid "Operations"
+msgstr "操作"
+
+msgid "No image sessions have been created yet."
+msgstr "尚未创建任何图像会话。"
+
+msgid "AI Image Studio turn"
+msgstr "AI影像工作室转"
+
+msgid "AI Image Studio turns"
+msgstr "AI图像工作室转身"
+
+msgid "image studio turn"
+msgstr "影像工作室转"
+
+msgid "image studio turns"
+msgstr "影像工作室轮流"
+
+msgid "Parent turn"
+msgstr "家长轮流"
+
+msgid "Prompt"
+msgstr "提示"
+
+msgid "Generated image"
+msgstr "生成的图像"
+
+msgid "Generated video"
+msgstr "生成的视频"
+
+msgid "Provider"
+msgstr "提供者"
+
+msgid "Model"
+msgstr "型号"
+
+msgid "Operation"
+msgstr "操作"
+
+msgid "Text to image"
+msgstr "文字转图像"
+
+msgid "Image to image"
+msgstr "图像到图像"
+
+msgid "Text to video"
+msgstr "文字转视频"
+
+msgid "Image to video"
+msgstr "图像转视频"
+
+msgid "Generation settings"
+msgstr "生成设置"
+
+msgid "Generation duration"
+msgstr "生成持续时间"
+
+msgid "Estimated cost"
+msgstr "预计费用"
+
+msgid "Cost source"
+msgstr "成本来源"
+
+msgid "Provider reported"
+msgstr "提供商报告"
+
+msgid "Estimated"
+msgstr "估计"
+
+msgid "Unavailable"
+msgstr "不可用"
+
+msgid "Token usage"
+msgstr "代币使用"
+
+msgid "Pending"
+msgstr "待定"
+
+msgid "Completed"
+msgstr "已完成"
+
+msgid "Failed"
+msgstr "失败"
+
+msgid "Error message"
+msgstr "错误信息"
+
+msgid "Published Media"
+msgstr "出版媒体"
+
+msgid "Created"
+msgstr "已建立"
+
+msgid "AI Image Studio session"
+msgstr "AI图像工作室会议"
+
+msgid "AI Image Studio sessions"
+msgstr "AI Image Studio 会议"
+
+msgid "image studio session"
+msgstr "影像工作室会议"
+
+msgid "image studio sessions"
+msgstr "图像工作室会议"
+
+msgid "Title"
+msgstr "标题"
+
+msgid "Changed"
+msgstr "已更改"
+
+msgid "AI Image Studio"
+msgstr "人工智能图像工作室"
+
+msgid "Provider and model"
+msgstr "提供商和型号"
+
+msgid "Image settings"
+msgstr "图像设置"
+
+msgid "Aspect ratio"
+msgstr "纵横比"
+
+msgid "Automatic"
+msgstr "自动"
+
+msgid "Square — 1:1"
+msgstr "正方形 — 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "风景 — 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "肖像 — 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "风景 — 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "肖像 — 3:4"
+
+msgid "Resolution"
+msgstr "分辨率"
+
+msgid "1K"
+msgstr "1K"
+
+msgid "2K"
+msgstr "2K"
+
+msgid "Request a transparent background"
+msgstr "要求透明背景"
+
+msgid "Generate another"
+msgstr "生成另一个"
+
+msgid "Generate image"
+msgstr "生成图像"
+
+msgid "Generating image…"
+msgstr "正在生成图像..."
+
+msgid "Alternative text"
+msgstr "替换文本"
+
+msgid "Media name"
+msgstr "媒体名称"
+
+msgid "Continue in full Studio"
+msgstr "在完整的 Studio 中继续"
+
+msgid "Save and select"
+msgstr "保存并选择"
+
+msgid "Save to Media Library"
+msgstr "保存到媒体库"
+
+msgid "Saving image…"
+msgstr "正在保存图像..."
+
+msgid "Image generation failed: @message"
+msgstr "图像生成失败：@message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "您不得发布 Studio 图像。"
+
+msgid "Generate an image before saving it."
+msgstr "保存之前生成图像。"
+
+msgid "The generated image is unavailable."
+msgstr "生成的图像不可用。"
+
+msgid "Starting generation…"
+msgstr "开始世代…"
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "您的请求正在发送给选定的提供商。保持此页面打开。"
+
+msgid "Session title"
+msgstr "会议标题"
+
+msgid "Start from"
+msgstr "开始于"
+
+msgid "A text prompt"
+msgstr "文字提示"
+
+msgid "An uploaded image"
+msgstr "上传的图片"
+
+msgid "Create"
+msgstr "创建"
+
+msgid "Image"
+msgstr "图像"
+
+msgid "Video"
+msgstr "视频"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "视频生成是实验性的并且同步运行。保持页面打开，直到请求完成。"
+
+msgid "Starting image"
+msgstr "起始图像"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "使用 Drupal AI 中配置的默认文本到图像。仅列出配置的提供程序和模型。"
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "仅列出宣传图像到图像编辑支持的提供商。"
+
+msgid "Provider and video model"
+msgstr "提供商和视频模型"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "仅列出宣传文本转视频支持的已配置提供商。"
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "使用图像到视频提供程序对上传的图像进行动画处理。"
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "描述要创建的图像或如何转换上传的图像。"
+
+msgid "Generating video…"
+msgstr "正在生成视频..."
+
+msgid "Version order"
+msgstr "版本顺序"
+
+msgid "Oldest first"
+msgstr "旧的先"
+
+msgid "Newest first"
+msgstr "由新到旧"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "更改此会话版本的显示方式。版本号和细化关系保持不变。"
+
+msgid "This session has reached its limit of @count turns."
+msgstr "此会话已达到 @count 轮的限制。"
+
+msgid "Create from selected image"
+msgstr "从选定的图像创建"
+
+msgid "Create another result"
+msgstr "创建另一个结果"
+
+msgid "Refining from"
+msgstr "精炼自"
+
+msgid "Version @number · @prompt"
+msgstr "版本 @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "新版本将从该图像分支。从下面结果中的任何已完成版本中选择另一个来源。"
+
+msgid "Refined image"
+msgstr "精致的形象"
+
+msgid "Video from this image"
+msgstr "这张图片的视频"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "使用 Drupal AI 中配置的默认文本到图像。"
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "使用图像到视频提供程序对选定的图像进行动画处理。"
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "使用配置的文本到视频提供程序。"
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "仅描述您要对所选图像进行的更改。"
+
+msgid "Describe the image to create."
+msgstr "描述要创建的图像。"
+
+msgid "Generate"
+msgstr "生成"
+
+msgid "Delete session"
+msgstr "删除会话"
+
+msgid "Automatic — match source"
+msgstr "自动 — 匹配源"
+
+msgid "Landscape — 3:2"
+msgstr "风景 — 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "肖像 — 2:3"
+
+msgid "Wide — 2:1"
+msgstr "宽幅 — 2:1"
+
+msgid "Tall — 1:2"
+msgstr "高 — 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "手机风景 — 19.5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "手机肖像 — 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "手机风景 — 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "手机肖像 — 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "当可以检测到时，自动使用所选或上传的源图像的比例。如果没有源图像，提供商将选择其默认宽高比。明确的比率仍然取决于提供商。"
+
+msgid "1K — faster and lower cost"
+msgstr "1K — 更快、成本更低"
+
+msgid "2K — higher detail and cost"
+msgstr "2K — 更高的细节和成本"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "自动从源图像的最长边缘中选择最接近的受支持层。如果没有来源，则使用 1K。 Grok Imagine 支持 1K 和 2K；其他提供商可能会映射或忽略此设置。"
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "当提供商支持时要求透明度。 Grok 将此作为尽力而为的文本到图像指令；图像编辑和其他提供商可能会忽略它。"
+
+msgid "File type"
+msgstr "文件类型"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "JPEG"
+
+msgid "WebP"
+msgstr "网络P"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG 是默认值。 JPEG 和 WebP 的可用性取决于所选的提供商。"
+
+msgid "Show an AI image badge"
+msgstr "显示 AI 图像徽章"
+
+msgid "Badge text"
+msgstr "徽章文字"
+
+msgid "Video settings"
+msgstr "视频设置"
+
+msgid "Duration"
+msgstr "期限"
+
+msgid "seconds"
+msgstr "秒"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "提供商可以限制或调整请求的持续时间。"
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "如果可能，自动匹配所选的源图像。"
+
+msgid "480p — faster and lower cost"
+msgstr "480p — 更快、成本更低"
+
+msgid "720p — standard"
+msgstr "720p — 标准"
+
+msgid "1080p — provider dependent"
+msgstr "1080p — 取决于提供商"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "文本转视频提供商可能不支持 1080p。"
+
+msgid "Saved to Media"
+msgstr "保存到媒体"
+
+msgid "Transparent background requested"
+msgstr "要求透明背景"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "宽高比：@ratio · 分辨率：@resolution · 文件类型：@file_type@transparent"
+
+msgid "AI Image"
+msgstr "人工智能图像"
+
+msgid "Generated version @number"
+msgstr "生成版本@number"
+
+msgid "Use as refinement source"
+msgstr "用作精炼源"
+
+msgid "Selected source"
+msgstr "选定的来源"
+
+msgid "View published Media"
+msgstr "查看已发布的媒体"
+
+msgid "Publish to Media"
+msgstr "发布到媒体"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "可选。根据会话标题和提示建议。"
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "根据会话标题和此版本的提示建议。在发布之前检查其准确性。"
+
+msgid "Render the badge into the saved Media file"
+msgstr "将徽章渲染到保存的媒体文件中"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "创建一个永久嵌入“@badge”的单独媒体文件。原始 Studio 结果将被保留。"
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "由于 Web 服务器无法使用 PHP GD 或 FFmpeg，因此徽章渲染不可用。原视频仍然可以发布。"
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "徽章渲染不可用，因为 PHP GD 不可用于 Web 服务器。原始图像仍然可以发布。"
+
+msgid "Publish this version"
+msgstr "发布此版本"
+
+msgid "Untitled prompt"
+msgstr "无标题提示"
+
+msgid "AI video"
+msgstr "人工智能视频"
+
+msgid "AI image"
+msgstr "人工智能图像"
+
+msgid "@session — Version @number"
+msgstr "@session — 版本 @number"
+
+msgid "@session: @prompt"
+msgstr "@session：@prompt"
+
+msgid "Image edit"
+msgstr "图片编辑"
+
+msgid "Video generation"
+msgstr "视频生成"
+
+msgid "Image animation"
+msgstr "图像动画"
+
+msgid "Image generation"
+msgstr "图像生成"
+
+msgid "Automatic ratio"
+msgstr "自动比例"
+
+msgid "High detail"
+msgstr "高细节"
+
+msgid "Standard detail"
+msgstr "标准细节"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration 秒"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "时间不可用"
+
+msgid "Request"
+msgstr "请求"
+
+msgid "Output"
+msgstr "输出"
+
+msgid "Processing"
+msgstr "处理中"
+
+msgid "Tokens"
+msgstr "置换符"
+
+msgid "Source image"
+msgstr "源图片"
+
+msgid "Version @number"
+msgstr "版本 @number"
+
+msgid "Uploaded image"
+msgstr "上传的图片"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "文字提示"
+
+msgid "Reported"
+msgstr "已报道"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost 美元"
+
+msgid "Session report"
+msgstr "会议报告"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "此会话中所有生成的版本。成本总计将提供商报告的费用与无法获得报告成本的情况下的估计费用结合起来。"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Source"
+msgstr "源"
+
+msgid "Cost"
+msgstr "成本"
+
+msgid "No versions have been generated."
+msgstr "尚未生成任何版本。"
+
+msgid "Aggregate cost"
+msgstr "总成本"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "报告：$@reported 美元 · 估计：$@estimated 美元 · 不可用：@count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "此会话已达到配置的 $@amount USD 警告阈值。"
+
+msgid "Reported cost"
+msgstr "报告成本"
+
+msgid "Cost unavailable"
+msgstr "费用不详"
+
+msgid "$@cost USD"
+msgstr "$@cost 美元"
+
+msgid "Not reported · media-billed"
+msgstr "未报道·媒体报道"
+
+msgid "in"
+msgstr "在"
+
+msgid "out"
+msgstr "出"
+
+msgid "cached"
+msgstr "缓存的"
+
+msgid "reasoning"
+msgstr "推理"
+
+msgid "total"
+msgstr "总计"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "将图像发布到媒体时需要替代文本。"
+
+msgid "Enter a prompt to generate a result."
+msgstr "输入提示以生成结果。"
+
+msgid "You are not allowed to modify this session."
+msgstr "您无权修改此会话。"
+
+msgid "Select a completed image from this session to refine."
+msgstr "从此会话中选择一个完整的图像进行优化。"
+
+msgid "Upload a starting image."
+msgstr "上传起始图像。"
+
+msgid "Select a configured provider and model."
+msgstr "选择已配置的提供商和型号。"
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "所选提供商和型号不适用于此请求类型。"
+
+msgid "The image session is unavailable."
+msgstr "图像会话不可用。"
+
+msgid "The video was generated successfully."
+msgstr "视频已成功生成。"
+
+msgid "The image was generated successfully."
+msgstr "图像已成功生成。"
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "此请求花费 $@cost 美元，满足配置的 $@threshold 警告阈值。"
+
+msgid "Generation failed: @message"
+msgstr "生成失败：@message"
+
+msgid "The selected image version is unavailable."
+msgstr "所选图像版本不可用。"
+
+msgid "You are not allowed to publish this result."
+msgstr "您无权发布此结果。"
+
+msgid "The result could not be published: @message"
+msgstr "结果无法发表：@message"
+
+msgid "Published as Media “@name”."
+msgstr "发布为媒体“@name”。"
+
+msgid "Studio interface"
+msgstr "工作室界面"
+
+msgid "Default sort in Studio"
+msgstr "Studio 中的默认排序"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "设置打开会话或生成新映像时映像版本的初始顺序。用户可以在查看会话时更改顺序。"
+
+msgid "Open the generation form initially"
+msgstr "最初打开生成表单"
+
+msgid "Open image settings initially"
+msgstr "首先打开图像设置"
+
+msgid "Open video settings initially"
+msgstr "首先打开视频设置"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "显示提供者、模型、请求和处理元数据"
+
+msgid "Show token usage when available"
+msgstr "显示可用的令牌使用情况"
+
+msgid "Show reported and estimated costs"
+msgstr "显示报告和估计成本"
+
+msgid "Show the session-wide version and cost report"
+msgstr "显示会话范围的版本和成本报告"
+
+msgid "Generation defaults"
+msgstr "生成默认值"
+
+msgid "Default output type"
+msgstr "默认输出类型"
+
+msgid "Default aspect ratio"
+msgstr "默认宽高比"
+
+msgid "Default image resolution"
+msgstr "默认图像分辨率"
+
+msgid "Default video resolution"
+msgstr "默认视频分辨率"
+
+msgid "480p"
+msgstr "480p"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "默认视频时长"
+
+msgid "Request a transparent background by default"
+msgstr "默认请求透明背景"
+
+msgid "Default image file type"
+msgstr "默认图像文件类型"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "所选提供商必须支持所请求的格式。默认使用 PNG。"
+
+msgid "Show an AI image badge by default"
+msgstr "默认显示 AI 图像徽章"
+
+msgid "Default AI image badge text"
+msgstr "默认 AI 图像徽章文本"
+
+msgid "Default Text-to-Image model"
+msgstr "默认文本到图像模型"
+
+msgid "Default Image-to-Image model"
+msgstr "默认图像到图像模型"
+
+msgid "Default Text-to-Video model"
+msgstr "默认文本转视频模型"
+
+msgid "Default Image-to-Video model"
+msgstr "默认图像到视频模型"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "保留为“None”以继承 Drupal AI 配置的默认值。"
+
+msgid "Draft storage"
+msgstr "草稿存储"
+
+msgid "File scheme"
+msgstr "文件方案"
+
+msgid "Private"
+msgstr "私有"
+
+msgid "Public"
+msgstr "公开"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "建议使用私人存储，因为生成的草稿可能包含敏感材料。"
+
+msgid "File directory"
+msgstr "文件目录"
+
+msgid "Limits"
+msgstr "限制"
+
+msgid "Maximum prompt length"
+msgstr "最大提示长度"
+
+msgid "Maximum turns per session"
+msgstr "每次会话的最大转数"
+
+msgid "Maximum uploaded source image size"
+msgstr "最大上传源图片大小"
+
+msgid "MB"
+msgstr "MB(兆)"
+
+msgid "Maximum requested video duration"
+msgstr "请求的最大视频时长"
+
+msgid "Per-request cost warning"
+msgstr "每个请求的成本警告"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "请求达到此成本后显示警告。使用零来禁用。"
+
+msgid "Session cost warning"
+msgstr "会话成本警告"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "突出显示等于或高于此金额的会话总数。使用零来禁用。"
+
+msgid "Media publishing"
+msgstr "媒体出版"
+
+msgid "Image Media type"
+msgstr "图片媒体类型"
+
+msgid "Image source field machine name"
+msgstr "图像源字段机器名称"
+
+msgid "Require alternative text when publishing images"
+msgstr "发布图像时需要替代文本"
+
+msgid "Video Media type"
+msgstr "视频媒体类型"
+
+msgid "Video source field machine name"
+msgstr "视频源场机名称"
+
+msgid "1 configured model"
+msgstr "1个配置型号"
+
+msgid "@count configured models"
+msgstr "@count 配置型号"
+
+msgid "Provider diagnostics"
+msgstr "提供商诊断"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "模型是从 Drupal AI 中发现的，并通过每个提供商宣传的操作进行过滤。"
+
+msgid "Availability"
+msgstr "可用性"
+
+msgid "Studio default"
+msgstr "工作室默认"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "使用仅包含字母、数字、下划线、破折号和斜杠的相对目录。"
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "默认视频时长不能超过配置的最大值。"
+
+msgid "The selected Media type must contain this image field."
+msgstr "所选媒体类型必须包含此图像字段。"
+
+msgid "The selected Media type must contain this video file field."
+msgstr "所选媒体类型必须包含此视频文件字段。"
+
+msgid "@model (Drupal AI default)"
+msgstr "@model（Drupal AI 默认）"
+
+msgid "No model available"
+msgstr "无可用型号"
+
+msgid "Image Source"
+msgstr "图片来源"
+
+msgid "Upload Image"
+msgstr "上传图片"
+
+msgid "Create in AI Image Studio"
+msgstr "在 AI Image Studio 中创建"
+
+msgid "Enter a prompt to generate an image."
+msgstr "输入提示以生成图像。"
+
+msgid "Enter a Media name."
+msgstr "输入媒体名称。"
+
+msgid "Enter alternative text for the image."
+msgstr "输入图像的替代文本。"
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "使用下面的紧凑型 AI Image Studio 表单生成图像。"
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "视频生成可能需要几分钟的时间。当提供商完成请求时，请保持此页面打开。"
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "提供商正在创建您的形象。保持此页面打开，直到请求完成。"
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "使用 Drupal AI 提供程序生成会话图像和视频。"
+
+msgid "AI"
+msgstr "人工智能"
+
+msgid "Create images and manage refinement sessions."
+msgstr "创建图像并管理优化会话。"
+
+msgid "New image session"
+msgstr "新图像会话"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "创建图像并通过顺序提示对其进行优化。"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "配置图像存储、限制和媒体发布。"
+
+msgid "Studio settings"
+msgstr "工作室设置"
+
+msgid "Configure AI Image Studio"
+msgstr "配置AI Image Studio"
+
+msgid "Access AI Image Studio"
+msgstr "访问AI Image Studio"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "在自有工作室会话中创建和完善图像。"
+
+msgid "View any AI Image Studio session"
+msgstr "查看任何 AI Image Studio 会话"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "删除自己的 AI Image Studio 会话"
+
+msgid "Delete any AI Image Studio session"
+msgstr "删除任何 AI Image Studio 会话"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "将 AI Image Studio 图像发布到媒体"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "将 AI Image Studio 视频发布到媒体"
+
+msgid "Administer AI Image Studio"
+msgstr "管理 AI Image Studio"
+

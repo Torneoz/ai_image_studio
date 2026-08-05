@@ -1,0 +1,978 @@
+# Hindi translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: hi\n"
+"Language-Team: Hindi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "The source image could not be read."
+msgstr "स्रोत छवि पढ़ी नहीं जा सकी."
+
+msgid "The provider returned no generated video."
+msgstr "प्रदाता ने कोई जेनरेट किया हुआ वीडियो नहीं लौटाया।"
+
+msgid "The provider returned no generated image."
+msgstr "प्रदाता ने कोई जेनरेट की गई छवि नहीं लौटाई।"
+
+msgid "Only completed Studio turns can be published."
+msgstr "केवल पूर्ण किए गए स्टूडियो टर्न को ही प्रकाशित किया जा सकता है।"
+
+msgid "The generated file is unavailable."
+msgstr "जनरेट की गई फ़ाइल अनुपलब्ध है."
+
+msgid "Select a configured AI provider and model."
+msgstr "एक कॉन्फ़िगर किए गए AI प्रदाता और मॉडल का चयन करें।"
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "किसी बैज को किसी छवि में प्रस्तुत करने के लिए PHP GD एक्सटेंशन की आवश्यकता होती है।"
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "उत्पन्न छवि बैज रेंडरिंग के लिए नहीं खोली जा सकी."
+
+msgid "The badged image could not be encoded."
+msgstr "बैज वाली छवि को एनकोड नहीं किया जा सका."
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "किसी वीडियो में बैज प्रस्तुत करने के लिए PHP GD एक्सटेंशन की आवश्यकता होती है।"
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "जनरेट किया गया वीडियो बैज रेंडरिंग के लिए नहीं खोला जा सका."
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "वीडियो बैज रेंडरिंग के लिए अस्थायी फ़ाइलें नहीं बनाई जा सकीं."
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg वीडियो में बैज प्रस्तुत नहीं कर सका: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg ने एक खाली बैज वाला वीडियो लौटाया।"
+
+msgid "Open"
+msgstr "खुला"
+
+msgid "Delete"
+msgstr "मिटायें"
+
+msgid "Unknown"
+msgstr "पता नहीं"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Archived"
+msgstr "संग्रहीत"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "एक छवि बनाएं, फिर उसे अनुक्रमिक संकेतों के माध्यम से परिष्कृत करें। प्रत्येक परिणाम को सत्र में एक मोड़ के रूप में रखा जाता है।"
+
+msgid "Session"
+msgstr "सेशन"
+
+msgid "Owner"
+msgstr "मालिक"
+
+msgid "Status"
+msgstr "अवस्था"
+
+msgid "Updated"
+msgstr "अद्यतित"
+
+msgid "Operations"
+msgstr "कार्यवाही"
+
+msgid "No image sessions have been created yet."
+msgstr "अभी तक कोई छवि सत्र नहीं बनाया गया है."
+
+msgid "AI Image Studio turn"
+msgstr "एआई इमेज स्टूडियो की बारी"
+
+msgid "AI Image Studio turns"
+msgstr "एआई इमेज स्टूडियो बदल जाता है"
+
+msgid "image studio turn"
+msgstr "छवि स्टूडियो बारी"
+
+msgid "image studio turns"
+msgstr "छवि स्टूडियो बदल जाता है"
+
+msgid "Parent turn"
+msgstr "माता-पिता की बारी"
+
+msgid "Prompt"
+msgstr "शीघ्र"
+
+msgid "Generated image"
+msgstr "उत्पन्न छवि"
+
+msgid "Generated video"
+msgstr "उत्पन्न वीडियो"
+
+msgid "Provider"
+msgstr "प्रदाता"
+
+msgid "Model"
+msgstr "मॉडल"
+
+msgid "Operation"
+msgstr "काम"
+
+msgid "Text to image"
+msgstr "छवि पर पाठ"
+
+msgid "Image to image"
+msgstr "छवि से छवि"
+
+msgid "Text to video"
+msgstr "वीडियो पर टेक्स्ट करें"
+
+msgid "Image to video"
+msgstr "छवि से वीडियो"
+
+msgid "Generation settings"
+msgstr "जनरेशन सेटिंग्स"
+
+msgid "Generation duration"
+msgstr "पीढ़ी अवधि"
+
+msgid "Estimated cost"
+msgstr "अनुमानित लागत"
+
+msgid "Cost source"
+msgstr "लागत स्रोत"
+
+msgid "Provider reported"
+msgstr "प्रदाता ने सूचना दी"
+
+msgid "Estimated"
+msgstr "अनुमानित"
+
+msgid "Unavailable"
+msgstr "अनुपलब्ध"
+
+msgid "Token usage"
+msgstr "टोकन का उपयोग"
+
+msgid "Pending"
+msgstr "लंबित"
+
+msgid "Completed"
+msgstr "पूरा हुआ"
+
+msgid "Failed"
+msgstr "असफल"
+
+msgid "Error message"
+msgstr "त्रुटि संदेश"
+
+msgid "Published Media"
+msgstr "प्रकाशित मीडिया"
+
+msgid "Created"
+msgstr "निर्मित"
+
+msgid "AI Image Studio session"
+msgstr "एआई इमेज स्टूडियो सत्र"
+
+msgid "AI Image Studio sessions"
+msgstr "एआई इमेज स्टूडियो सत्र"
+
+msgid "image studio session"
+msgstr "छवि स्टूडियो सत्र"
+
+msgid "image studio sessions"
+msgstr "छवि स्टूडियो सत्र"
+
+msgid "Title"
+msgstr "शीर्षक"
+
+msgid "Changed"
+msgstr "बदल गया"
+
+msgid "AI Image Studio"
+msgstr "एआई इमेज स्टूडियो"
+
+msgid "Provider and model"
+msgstr "प्रदाता और मॉडल"
+
+msgid "Image settings"
+msgstr "छवि सेटिंग्स"
+
+msgid "Aspect ratio"
+msgstr "पहलू अनुपात"
+
+msgid "Automatic"
+msgstr "स्वचालित"
+
+msgid "Square — 1:1"
+msgstr "वर्ग - 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "भूदृश्य - 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "पोर्ट्रेट - 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "भूदृश्य - 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "पोर्ट्रेट - 3:4"
+
+msgid "Resolution"
+msgstr "संकल्प"
+
+msgid "1K"
+msgstr "1K"
+
+msgid "2K"
+msgstr "2K"
+
+msgid "Request a transparent background"
+msgstr "पारदर्शी पृष्ठभूमि का अनुरोध करें"
+
+msgid "Generate another"
+msgstr "दूसरा उत्पन्न करें"
+
+msgid "Generate image"
+msgstr "छवि उत्पन्न करें"
+
+msgid "Generating image…"
+msgstr "छवि उत्पन्न हो रही है..."
+
+msgid "Alternative text"
+msgstr "वैकल्पिक पाठ"
+
+msgid "Media name"
+msgstr "मीडिया का नाम"
+
+msgid "Continue in full Studio"
+msgstr "पूर्ण स्टूडियो में जारी रखें"
+
+msgid "Save and select"
+msgstr "सहेजें और चुनें"
+
+msgid "Save to Media Library"
+msgstr "मीडिया लाइब्रेरी में सहेजें"
+
+msgid "Saving image…"
+msgstr "छवि सहेजी जा रही है..."
+
+msgid "Image generation failed: @message"
+msgstr "छवि निर्माण विफल: @message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "आपको स्टूडियो छवियाँ प्रकाशित करने की अनुमति नहीं है।"
+
+msgid "Generate an image before saving it."
+msgstr "इसे सहेजने से पहले एक छवि बनाएं।"
+
+msgid "The generated image is unavailable."
+msgstr "उत्पन्न छवि अनुपलब्ध है."
+
+msgid "Starting generation…"
+msgstr "आरंभिक पीढ़ी..."
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "आपका अनुरोध चयनित प्रदाता को भेजा जा रहा है। इस पेज को खुला रखें."
+
+msgid "Session title"
+msgstr "सत्र का शीर्षक"
+
+msgid "Start from"
+msgstr "से शुरू करें"
+
+msgid "A text prompt"
+msgstr "एक पाठ संकेत"
+
+msgid "An uploaded image"
+msgstr "एक अपलोड की गई छवि"
+
+msgid "Create"
+msgstr "बनाएँ"
+
+msgid "Image"
+msgstr "चित्र"
+
+msgid "Video"
+msgstr "वीडियो"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "वीडियो निर्माण प्रायोगिक है और समकालिक रूप से चलता है। अनुरोध पूरा होने तक पेज खुला रखें।"
+
+msgid "Starting image"
+msgstr "आरंभिक छवि"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "Drupal AI में कॉन्फ़िगर किए गए टेक्स्ट-टू-इमेज डिफ़ॉल्ट का उपयोग करता है। केवल कॉन्फ़िगर किए गए प्रदाता और मॉडल सूचीबद्ध हैं।"
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "केवल वे प्रदाता जो छवि-से-छवि संपादन समर्थन का विज्ञापन करते हैं, सूचीबद्ध हैं।"
+
+msgid "Provider and video model"
+msgstr "प्रदाता और वीडियो मॉडल"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "केवल कॉन्फ़िगर किए गए प्रदाता जो टेक्स्ट-टू-वीडियो समर्थन का विज्ञापन करते हैं, सूचीबद्ध हैं।"
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "इमेज-टू-वीडियो प्रदाता का उपयोग करके अपलोड की गई छवि को एनिमेट करता है।"
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "बनाने के लिए छवि का वर्णन करें या अपलोड को कैसे रूपांतरित करें।"
+
+msgid "Generating video…"
+msgstr "वीडियो जनरेट किया जा रहा है..."
+
+msgid "Version order"
+msgstr "संस्करण क्रम"
+
+msgid "Oldest first"
+msgstr "पहले सबसे पुराना"
+
+msgid "Newest first"
+msgstr "पहले सबसे नया"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "इस सत्र के संस्करण प्रदर्शित होने का तरीका बदलता है। संस्करण संख्याएँ और परिशोधन संबंध समान रहते हैं।"
+
+msgid "This session has reached its limit of @count turns."
+msgstr "यह सत्र @count टर्न की अपनी सीमा तक पहुंच गया है।"
+
+msgid "Create from selected image"
+msgstr "चयनित छवि से बनाएं"
+
+msgid "Create another result"
+msgstr "दूसरा परिणाम बनाएं"
+
+msgid "Refining from"
+msgstr "से परिष्कृत करना"
+
+msgid "Version @number · @prompt"
+msgstr "संस्करण @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "नया संस्करण इस छवि से शाखाबद्ध होगा. नीचे दिए गए परिणामों में किसी भी पूर्ण संस्करण से किसी अन्य स्रोत का चयन करें।"
+
+msgid "Refined image"
+msgstr "परिष्कृत छवि"
+
+msgid "Video from this image"
+msgstr "इस छवि से वीडियो"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "Drupal AI में कॉन्फ़िगर किए गए टेक्स्ट-टू-इमेज डिफ़ॉल्ट का उपयोग करता है।"
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "इमेज-टू-वीडियो प्रदाता का उपयोग करके चयनित छवि को एनिमेट करता है।"
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "कॉन्फ़िगर किए गए टेक्स्ट-टू-वीडियो प्रदाता का उपयोग करता है।"
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "केवल उस परिवर्तन का वर्णन करें जो आप चयनित छवि में करना चाहते हैं।"
+
+msgid "Describe the image to create."
+msgstr "बनाई जाने वाली छवि का वर्णन करें."
+
+msgid "Generate"
+msgstr "उत्पन्न करें"
+
+msgid "Delete session"
+msgstr "सत्र हटाएँ"
+
+msgid "Automatic — match source"
+msgstr "स्वचालित - मिलान स्रोत"
+
+msgid "Landscape — 3:2"
+msgstr "भूदृश्य - 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "पोर्ट्रेट - 2:3"
+
+msgid "Wide — 2:1"
+msgstr "वाइड - 2:1"
+
+msgid "Tall — 1:2"
+msgstr "लंबा - 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "फ़ोन परिदृश्य - 19.5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "फ़ोन पोर्ट्रेट - 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "फ़ोन परिदृश्य - 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "फोन पोर्ट्रेट- 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "स्वचालित रूप से चयनित या अपलोड की गई स्रोत छवि के अनुपात का उपयोग तब किया जाता है जब उनका पता लगाया जा सके। स्रोत छवि के बिना, प्रदाता अपना डिफ़ॉल्ट पहलू अनुपात चुनता है। स्पष्ट अनुपात प्रदाता-निर्भर रहता है।"
+
+msgid "1K — faster and lower cost"
+msgstr "1K - तेज़ और कम लागत"
+
+msgid "2K — higher detail and cost"
+msgstr "2K - उच्च विवरण और लागत"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "स्वचालित स्रोत छवि के सबसे लंबे किनारे से निकटतम समर्थित स्तर चुनता है। बिना किसी स्रोत के, यह 1K का उपयोग करता है। ग्रोक इमेजिन 1K और 2K का समर्थन करता है; अन्य प्रदाता इस सेटिंग को मैप या अनदेखा कर सकते हैं।"
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "जब प्रदाता इसका समर्थन करता है तो पारदर्शिता का अनुरोध करता है। ग्रोक इसे सर्वोत्तम प्रयास वाले टेक्स्ट-टू-इमेज निर्देश के रूप में लागू करता है; छवि संपादन और अन्य प्रदाता इसे अनदेखा कर सकते हैं।"
+
+msgid "File type"
+msgstr "फ़ाइल प्रकार"
+
+msgid "PNG"
+msgstr "पीएनजी"
+
+msgid "JPEG"
+msgstr "जेपीईजी"
+
+msgid "WebP"
+msgstr "वेबपी"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "पीएनजी डिफ़ॉल्ट है. JPEG और WebP की उपलब्धता चयनित प्रदाता पर निर्भर करती है।"
+
+msgid "Show an AI image badge"
+msgstr "AI छवि बैज दिखाएँ"
+
+msgid "Badge text"
+msgstr "बैज पाठ"
+
+msgid "Video settings"
+msgstr "वीडियो सेटिंग"
+
+msgid "Duration"
+msgstr "अवधि"
+
+msgid "seconds"
+msgstr "क्षण"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "प्रदाता अनुरोधित अवधि को सीमित या समायोजित कर सकता है।"
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "जहां संभव हो स्वचालित रूप से चयनित स्रोत छवि से मेल खाता है।"
+
+msgid "480p — faster and lower cost"
+msgstr "480p - तेज़ और कम लागत"
+
+msgid "720p — standard"
+msgstr "720पी - मानक"
+
+msgid "1080p — provider dependent"
+msgstr "1080p - प्रदाता पर निर्भर"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "टेक्स्ट-टू-वीडियो प्रदाता 1080p का समर्थन नहीं कर सकते हैं।"
+
+msgid "Saved to Media"
+msgstr "मीडिया में सहेजा गया"
+
+msgid "Transparent background requested"
+msgstr "पारदर्शी पृष्ठभूमि का अनुरोध किया गया"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "पहलू अनुपात: @ratio · रिज़ॉल्यूशन: @resolution · फ़ाइल प्रकार: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "एआई छवि"
+
+msgid "Generated version @number"
+msgstr "उत्पन्न संस्करण @number"
+
+msgid "Use as refinement source"
+msgstr "शोधन स्रोत के रूप में उपयोग करें"
+
+msgid "Selected source"
+msgstr "चयनित स्रोत"
+
+msgid "View published Media"
+msgstr "प्रकाशित मीडिया देखें"
+
+msgid "Publish to Media"
+msgstr "मीडिया में प्रकाशित करें"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "वैकल्पिक. सत्र शीर्षक और संकेत से सुझाया गया।"
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "सत्र शीर्षक और इस संस्करण के संकेत से सुझाया गया। प्रकाशन से पहले सटीकता के लिए इसकी समीक्षा करें।"
+
+msgid "Render the badge into the saved Media file"
+msgstr "बैज को सहेजी गई मीडिया फ़ाइल में प्रस्तुत करें"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "स्थायी रूप से एम्बेडेड \"@badge\" के साथ एक अलग मीडिया फ़ाइल बनाता है। मूल स्टूडियो परिणाम संरक्षित है।"
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD या FFmpeg वेब सर्वर पर उपलब्ध नहीं है। मूल वीडियो अभी भी प्रकाशित किया जा सकता है."
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD वेब सर्वर पर उपलब्ध नहीं है। मूल छवि अभी भी प्रकाशित की जा सकती है."
+
+msgid "Publish this version"
+msgstr "इस संस्करण को प्रकाशित करें"
+
+msgid "Untitled prompt"
+msgstr "शीर्षक रहित संकेत"
+
+msgid "AI video"
+msgstr "एआई वीडियो"
+
+msgid "AI image"
+msgstr "एआई छवि"
+
+msgid "@session — Version @number"
+msgstr "@session — संस्करण @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "छवि संपादन"
+
+msgid "Video generation"
+msgstr "वीडियो पीढ़ी"
+
+msgid "Image animation"
+msgstr "छवि एनीमेशन"
+
+msgid "Image generation"
+msgstr "छवि निर्माण"
+
+msgid "Automatic ratio"
+msgstr "स्वचालित अनुपात"
+
+msgid "High detail"
+msgstr "उच्च विवरण"
+
+msgid "Standard detail"
+msgstr "मानक विवरण"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration सेकंड"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "समय अनुपलब्ध"
+
+msgid "Request"
+msgstr "निवेदन"
+
+msgid "Output"
+msgstr "आउटपुट"
+
+msgid "Processing"
+msgstr "प्रक्रिया जारी"
+
+msgid "Tokens"
+msgstr "टोकन"
+
+msgid "Source image"
+msgstr "स्रोत छवि"
+
+msgid "Version @number"
+msgstr "संस्करण @number"
+
+msgid "Uploaded image"
+msgstr "छवि अपलोड की गई"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "पाठ संकेत"
+
+msgid "Reported"
+msgstr "रिपोर्ट किया गया"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost USD"
+
+msgid "Session report"
+msgstr "सत्र रिपोर्ट"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "इस सत्र में सभी जेनरेट किए गए संस्करण। कुल लागत प्रदाता द्वारा रिपोर्ट किए गए शुल्कों को उन अनुमानों के साथ जोड़ती है जहां रिपोर्ट की गई लागत अनुपलब्ध थी।"
+
+msgid "Version"
+msgstr "संस्करण"
+
+msgid "Source"
+msgstr "स्रोत"
+
+msgid "Cost"
+msgstr "लागत"
+
+msgid "No versions have been generated."
+msgstr "कोई संस्करण तैयार नहीं किया गया है."
+
+msgid "Aggregate cost"
+msgstr "कुल लागत"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "रिपोर्ट किया गया: $@reported USD · अनुमानित: $@estimated USD · अनुपलब्ध: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "यह सत्र कॉन्फ़िगर $@amount USD चेतावनी सीमा तक पहुंच गया है।"
+
+msgid "Reported cost"
+msgstr "रिपोर्ट की गई लागत"
+
+msgid "Cost unavailable"
+msgstr "लागत अनुपलब्ध"
+
+msgid "$@cost USD"
+msgstr "$@cost USD"
+
+msgid "Not reported · media-billed"
+msgstr "रिपोर्ट नहीं किया गया · मीडिया-बिल"
+
+msgid "in"
+msgstr "में"
+
+msgid "out"
+msgstr "बाहर"
+
+msgid "cached"
+msgstr "कैश्ड"
+
+msgid "reasoning"
+msgstr "तर्क"
+
+msgid "total"
+msgstr "कुल"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "मीडिया में छवि प्रकाशित करते समय वैकल्पिक पाठ की आवश्यकता होती है।"
+
+msgid "Enter a prompt to generate a result."
+msgstr "परिणाम उत्पन्न करने के लिए एक संकेत दर्ज करें।"
+
+msgid "You are not allowed to modify this session."
+msgstr "आपको इस सत्र को संशोधित करने की अनुमति नहीं है."
+
+msgid "Select a completed image from this session to refine."
+msgstr "परिष्कृत करने के लिए इस सत्र से एक पूर्ण छवि का चयन करें।"
+
+msgid "Upload a starting image."
+msgstr "एक आरंभिक छवि अपलोड करें."
+
+msgid "Select a configured provider and model."
+msgstr "एक कॉन्फ़िगर किया गया प्रदाता और मॉडल चुनें."
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "इस अनुरोध प्रकार के लिए चयनित प्रदाता और मॉडल उपलब्ध नहीं है।"
+
+msgid "The image session is unavailable."
+msgstr "छवि सत्र अनुपलब्ध है."
+
+msgid "The video was generated successfully."
+msgstr "वीडियो सफलतापूर्वक तैयार किया गया."
+
+msgid "The image was generated successfully."
+msgstr "छवि सफलतापूर्वक तैयार की गई."
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "इस अनुरोध की लागत $@cost USD है, जो कॉन्फ़िगर की गई $@threshold चेतावनी सीमा को पूरा करती है।"
+
+msgid "Generation failed: @message"
+msgstr "जनरेशन विफल: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "चयनित छवि संस्करण अनुपलब्ध है."
+
+msgid "You are not allowed to publish this result."
+msgstr "आपको यह परिणाम प्रकाशित करने की अनुमति नहीं है."
+
+msgid "The result could not be published: @message"
+msgstr "परिणाम प्रकाशित नहीं किया जा सका: @message"
+
+msgid "Published as Media “@name”."
+msgstr "मीडिया \"@name\" के रूप में प्रकाशित।"
+
+msgid "Studio interface"
+msgstr "स्टूडियो इंटरफ़ेस"
+
+msgid "Default sort in Studio"
+msgstr "स्टूडियो में डिफ़ॉल्ट सॉर्ट"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "जब कोई सत्र खोला जाता है या कोई नई छवि उत्पन्न होती है तो छवि संस्करणों का प्रारंभिक क्रम सेट करता है। उपयोगकर्ता सत्र देखते समय ऑर्डर बदल सकते हैं।"
+
+msgid "Open the generation form initially"
+msgstr "सबसे पहले जनरेशन फॉर्म खोलें"
+
+msgid "Open image settings initially"
+msgstr "प्रारंभ में छवि सेटिंग्स खोलें"
+
+msgid "Open video settings initially"
+msgstr "प्रारंभ में वीडियो सेटिंग खोलें"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "प्रदाता, मॉडल, अनुरोध और प्रसंस्करण मेटाडेटा दिखाएं"
+
+msgid "Show token usage when available"
+msgstr "उपलब्ध होने पर टोकन उपयोग दिखाएं"
+
+msgid "Show reported and estimated costs"
+msgstr "रिपोर्ट की गई और अनुमानित लागत दिखाएं"
+
+msgid "Show the session-wide version and cost report"
+msgstr "सत्र-व्यापी संस्करण और लागत रिपोर्ट दिखाएँ"
+
+msgid "Generation defaults"
+msgstr "पीढ़ी चूक"
+
+msgid "Default output type"
+msgstr "डिफ़ॉल्ट आउटपुट प्रकार"
+
+msgid "Default aspect ratio"
+msgstr "डिफ़ॉल्ट पहलू अनुपात"
+
+msgid "Default image resolution"
+msgstr "डिफ़ॉल्ट छवि रिज़ॉल्यूशन"
+
+msgid "Default video resolution"
+msgstr "डिफ़ॉल्ट वीडियो रिज़ॉल्यूशन"
+
+msgid "480p"
+msgstr "480पी"
+
+msgid "720p"
+msgstr "720पी"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "डिफ़ॉल्ट वीडियो अवधि"
+
+msgid "Request a transparent background by default"
+msgstr "डिफ़ॉल्ट रूप से पारदर्शी पृष्ठभूमि का अनुरोध करें"
+
+msgid "Default image file type"
+msgstr "डिफ़ॉल्ट छवि फ़ाइल प्रकार"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "चयनित प्रदाता को अनुरोधित प्रारूप का समर्थन करना होगा। पीएनजी का उपयोग डिफ़ॉल्ट रूप से किया जाता है।"
+
+msgid "Show an AI image badge by default"
+msgstr "डिफ़ॉल्ट रूप से AI छवि बैज दिखाएँ"
+
+msgid "Default AI image badge text"
+msgstr "डिफ़ॉल्ट AI छवि बैज टेक्स्ट"
+
+msgid "Default Text-to-Image model"
+msgstr "डिफ़ॉल्ट टेक्स्ट-टू-इमेज मॉडल"
+
+msgid "Default Image-to-Image model"
+msgstr "डिफ़ॉल्ट छवि-से-छवि मॉडल"
+
+msgid "Default Text-to-Video model"
+msgstr "डिफ़ॉल्ट टेक्स्ट-टू-वीडियो मॉडल"
+
+msgid "Default Image-to-Video model"
+msgstr "डिफ़ॉल्ट छवि-से-वीडियो मॉडल"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "Drupal AI द्वारा कॉन्फ़िगर किए गए डिफ़ॉल्ट को इनहेरिट करने के लिए \"कोई नहीं\" के रूप में छोड़ें।"
+
+msgid "Draft storage"
+msgstr "ड्राफ्ट भंडारण"
+
+msgid "File scheme"
+msgstr "फ़ाइल योजना"
+
+msgid "Private"
+msgstr "व्यक्तिगत"
+
+msgid "Public"
+msgstr "सार्वजनिक"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "निजी भंडारण की अनुशंसा की जाती है क्योंकि उत्पन्न ड्राफ्ट में संवेदनशील सामग्री हो सकती है।"
+
+msgid "File directory"
+msgstr "फ़ाइल निर्देशिका"
+
+msgid "Limits"
+msgstr "सीमाएँ"
+
+msgid "Maximum prompt length"
+msgstr "अधिकतम शीघ्र लंबाई"
+
+msgid "Maximum turns per session"
+msgstr "प्रति सत्र अधिकतम टर्न"
+
+msgid "Maximum uploaded source image size"
+msgstr "अधिकतम अपलोड की गई स्रोत छवि का आकार"
+
+msgid "MB"
+msgstr "मेगा बाईट"
+
+msgid "Maximum requested video duration"
+msgstr "अधिकतम अनुरोधित वीडियो अवधि"
+
+msgid "Per-request cost warning"
+msgstr "प्रति-अनुरोध लागत चेतावनी"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "अनुरोध के इस लागत तक पहुंचने के बाद एक चेतावनी प्रदर्शित करें। अक्षम करने के लिए शून्य का उपयोग करें."
+
+msgid "Session cost warning"
+msgstr "सत्र लागत चेतावनी"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "इस राशि पर या इससे ऊपर सत्र के कुल योग को हाइलाइट करें। अक्षम करने के लिए शून्य का उपयोग करें."
+
+msgid "Media publishing"
+msgstr "मीडिया प्रकाशन"
+
+msgid "Image Media type"
+msgstr "छवि मीडिया प्रकार"
+
+msgid "Image source field machine name"
+msgstr "छवि स्रोत फ़ील्ड मशीन का नाम"
+
+msgid "Require alternative text when publishing images"
+msgstr "छवियाँ प्रकाशित करते समय वैकल्पिक पाठ की आवश्यकता होती है"
+
+msgid "Video Media type"
+msgstr "वीडियो मीडिया प्रकार"
+
+msgid "Video source field machine name"
+msgstr "वीडियो स्रोत फ़ील्ड मशीन का नाम"
+
+msgid "1 configured model"
+msgstr "1 कॉन्फ़िगर मॉडल"
+
+msgid "@count configured models"
+msgstr "@count कॉन्फ़िगर किए गए मॉडल"
+
+msgid "Provider diagnostics"
+msgstr "प्रदाता निदान"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "मॉडल Drupal AI से खोजे जाते हैं और प्रत्येक प्रदाता द्वारा विज्ञापित ऑपरेशन द्वारा फ़िल्टर किए जाते हैं।"
+
+msgid "Availability"
+msgstr "उपलब्धता"
+
+msgid "Studio default"
+msgstr "स्टूडियो डिफ़ॉल्ट"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "एक सापेक्ष निर्देशिका का उपयोग करें जिसमें केवल अक्षर, संख्याएँ, अंडरस्कोर, डैश और स्लैश हों।"
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "डिफ़ॉल्ट वीडियो अवधि कॉन्फ़िगर की गई अधिकतम अवधि से अधिक नहीं हो सकती."
+
+msgid "The selected Media type must contain this image field."
+msgstr "चयनित मीडिया प्रकार में यह छवि फ़ील्ड अवश्य होनी चाहिए।"
+
+msgid "The selected Media type must contain this video file field."
+msgstr "चयनित मीडिया प्रकार में यह वीडियो फ़ाइल फ़ील्ड अवश्य होनी चाहिए।"
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (Drupal AI डिफ़ॉल्ट)"
+
+msgid "No model available"
+msgstr "कोई मॉडल उपलब्ध नहीं है"
+
+msgid "Image Source"
+msgstr "छवि स्रोत"
+
+msgid "Upload Image"
+msgstr "छवि अपलोड करें"
+
+msgid "Create in AI Image Studio"
+msgstr "एआई इमेज स्टूडियो में बनाएं"
+
+msgid "Enter a prompt to generate an image."
+msgstr "एक छवि उत्पन्न करने के लिए एक संकेत दर्ज करें।"
+
+msgid "Enter a Media name."
+msgstr "एक मीडिया नाम दर्ज करें."
+
+msgid "Enter alternative text for the image."
+msgstr "छवि के लिए वैकल्पिक पाठ दर्ज करें."
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "नीचे दिए गए कॉम्पैक्ट एआई इमेज स्टूडियो फॉर्म के साथ एक छवि बनाएं।"
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "वीडियो निर्माण में कई मिनट लग सकते हैं. प्रदाता द्वारा अनुरोध पूरा करने तक इस पृष्ठ को खुला रखें।"
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "प्रदाता आपकी छवि बना रहा है. अनुरोध पूरा होने तक इस पृष्ठ को खुला रखें।"
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "Drupal AI प्रदाताओं का उपयोग करके संवादी छवि और वीडियो निर्माण।"
+
+msgid "AI"
+msgstr "ऐ"
+
+msgid "Create images and manage refinement sessions."
+msgstr "छवियां बनाएं और परिशोधन सत्र प्रबंधित करें।"
+
+msgid "New image session"
+msgstr "नया छवि सत्र"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "एक छवि बनाएं और अनुक्रमिक संकेतों के माध्यम से इसे परिष्कृत करें।"
+
+msgid "Settings"
+msgstr "स्थापनायें"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "छवि भंडारण, सीमाएँ और मीडिया प्रकाशन कॉन्फ़िगर करें।"
+
+msgid "Studio settings"
+msgstr "स्टूडियो सेटिंग्स"
+
+msgid "Configure AI Image Studio"
+msgstr "एआई इमेज स्टूडियो कॉन्फ़िगर करें"
+
+msgid "Access AI Image Studio"
+msgstr "एआई इमेज स्टूडियो तक पहुंचें"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "स्वामित्व वाले स्टूडियो सत्रों में छवियां बनाएं और परिष्कृत करें।"
+
+msgid "View any AI Image Studio session"
+msgstr "कोई भी एआई इमेज स्टूडियो सत्र देखें"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "स्वयं के एआई इमेज स्टूडियो सत्र हटाएं"
+
+msgid "Delete any AI Image Studio session"
+msgstr "किसी भी एआई इमेज स्टूडियो सत्र को हटा दें"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "मीडिया पर AI इमेज स्टूडियो छवियाँ प्रकाशित करें"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "मीडिया पर एआई इमेज स्टूडियो वीडियो प्रकाशित करें"
+
+msgid "Administer AI Image Studio"
+msgstr "एआई इमेज स्टूडियो का प्रबंधन करें"
+

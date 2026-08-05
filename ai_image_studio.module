@@ -217,6 +217,36 @@ function ai_image_studio_file_download(string $uri): array|int|null {
     return -1;
   }
 
+  // A Media publication may reference a derived file, such as an image or
+  // video with a permanently rendered badge, rather than the original file
+  // stored on the Studio turn. Authorize those files through the Media entity
+  // that owns the configured source field.
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+  foreach ([
+    [
+      (string) $config->get('media_bundle'),
+      (string) $config->get('media_source_field'),
+    ],
+    [
+      (string) $config->get('video_media_bundle'),
+      (string) $config->get('video_media_source_field'),
+    ],
+  ] as [$bundle, $field]) {
+    if ($bundle === '' || $field === '') {
+      continue;
+    }
+    $media_ids = $media_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('bundle', $bundle)
+      ->condition($field, $file->id())
+      ->execute();
+    foreach ($media_storage->loadMultiple($media_ids) as $media) {
+      if ($media->access('view')) {
+        return file_get_content_headers($file);
+      }
+    }
+  }
+
   $turn_storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
   $file_reference = $turn_storage->getQuery()
     ->orConditionGroup()

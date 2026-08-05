@@ -1,0 +1,978 @@
+# Arabic translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: ar\n"
+"Language-Team: Arabic\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+msgid "The source image could not be read."
+msgstr "لا يمكن قراءة الصورة المصدر."
+
+msgid "The provider returned no generated video."
+msgstr "لم يُرجع الموفر أي فيديو تم إنشاؤه."
+
+msgid "The provider returned no generated image."
+msgstr "لم يُرجع الموفر أي صورة تم إنشاؤها."
+
+msgid "Only completed Studio turns can be published."
+msgstr "يمكن نشر دورات الاستوديو المكتملة فقط."
+
+msgid "The generated file is unavailable."
+msgstr "الملف الذي تم إنشاؤه غير متوفر."
+
+msgid "Select a configured AI provider and model."
+msgstr "حدد موفرًا ونموذجًا للذكاء الاصطناعي تم تكوينهما."
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "يتطلب عرض شارة في صورة امتداد PHP GD."
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "لا يمكن فتح الصورة التي تم إنشاؤها لعرض الشارة."
+
+msgid "The badged image could not be encoded."
+msgstr "لا يمكن ترميز الصورة ذات الشارة."
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "يتطلب عرض شارة في مقطع فيديو امتداد PHP GD."
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "لا يمكن فتح الفيديو الذي تم إنشاؤه لعرض الشارة."
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "لا يمكن إنشاء ملفات مؤقتة لعرض شارة الفيديو."
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "تعذر على FFmpeg عرض الشارة في الفيديو: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "أعاد FFmpeg مقطع فيديو فارغًا يحمل شارة."
+
+msgid "Open"
+msgstr "مفتوح"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Unknown"
+msgstr "غير معروف"
+
+msgid "Active"
+msgstr "نشط"
+
+msgid "Archived"
+msgstr "مؤرشف"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "قم بإنشاء صورة، ثم قم بتحسينها من خلال المطالبات المتسلسلة. يتم الاحتفاظ بكل نتيجة كدور في الجلسة."
+
+msgid "Session"
+msgstr "الجلسة"
+
+msgid "Owner"
+msgstr "المالك"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "Updated"
+msgstr "تم التحديث"
+
+msgid "Operations"
+msgstr "العمليات"
+
+msgid "No image sessions have been created yet."
+msgstr "لم يتم إنشاء أي جلسات تصوير حتى الآن."
+
+msgid "AI Image Studio turn"
+msgstr "بدوره AI Image Studio"
+
+msgid "AI Image Studio turns"
+msgstr "يتحول AI Image Studio"
+
+msgid "image studio turn"
+msgstr "بدوره استوديو الصور"
+
+msgid "image studio turns"
+msgstr "يتحول استوديو الصور"
+
+msgid "Parent turn"
+msgstr "بدوره الوالدين"
+
+msgid "Prompt"
+msgstr "موجه"
+
+msgid "Generated image"
+msgstr "الصورة التي تم إنشاؤها"
+
+msgid "Generated video"
+msgstr "الفيديو الذي تم إنشاؤه"
+
+msgid "Provider"
+msgstr "المزود"
+
+msgid "Model"
+msgstr "نموذج"
+
+msgid "Operation"
+msgstr "عملية"
+
+msgid "Text to image"
+msgstr "النص إلى الصورة"
+
+msgid "Image to image"
+msgstr "صورة إلى صورة"
+
+msgid "Text to video"
+msgstr "النص إلى الفيديو"
+
+msgid "Image to video"
+msgstr "الصورة إلى الفيديو"
+
+msgid "Generation settings"
+msgstr "إعدادات الجيل"
+
+msgid "Generation duration"
+msgstr "مدة الجيل"
+
+msgid "Estimated cost"
+msgstr "التكلفة المقدرة"
+
+msgid "Cost source"
+msgstr "مصدر التكلفة"
+
+msgid "Provider reported"
+msgstr "أفاد المزود"
+
+msgid "Estimated"
+msgstr "يقدر"
+
+msgid "Unavailable"
+msgstr "غير متاح"
+
+msgid "Token usage"
+msgstr "استخدام الرمز المميز"
+
+msgid "Pending"
+msgstr "في انتظار"
+
+msgid "Completed"
+msgstr "مكتمل"
+
+msgid "Failed"
+msgstr "فشل"
+
+msgid "Error message"
+msgstr "رسالة الخطأ"
+
+msgid "Published Media"
+msgstr "وسائل الإعلام المنشورة"
+
+msgid "Created"
+msgstr "تم الإنشاء"
+
+msgid "AI Image Studio session"
+msgstr "جلسة AI Image Studio"
+
+msgid "AI Image Studio sessions"
+msgstr "جلسات AI Image Studio"
+
+msgid "image studio session"
+msgstr "جلسة استوديو الصور"
+
+msgid "image studio sessions"
+msgstr "جلسات استوديو الصور"
+
+msgid "Title"
+msgstr "العنوان"
+
+msgid "Changed"
+msgstr "تم التغير"
+
+msgid "AI Image Studio"
+msgstr "استوديو الصور بالذكاء الاصطناعي"
+
+msgid "Provider and model"
+msgstr "المزود والنموذج"
+
+msgid "Image settings"
+msgstr "إعدادات الصورة"
+
+msgid "Aspect ratio"
+msgstr "نسبة الارتفاع"
+
+msgid "Automatic"
+msgstr "آلي"
+
+msgid "Square — 1:1"
+msgstr "مربع — 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "منظر طبيعي — ١٦:٩"
+
+msgid "Portrait — 9:16"
+msgstr "صورة — 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "المناظر الطبيعية — 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "صورة — 3:4"
+
+msgid "Resolution"
+msgstr "القرار"
+
+msgid "1K"
+msgstr "1 ك"
+
+msgid "2K"
+msgstr "2 ك"
+
+msgid "Request a transparent background"
+msgstr "اطلب خلفية شفافة"
+
+msgid "Generate another"
+msgstr "توليد آخر"
+
+msgid "Generate image"
+msgstr "توليد الصورة"
+
+msgid "Generating image…"
+msgstr "جارٍ إنشاء الصورة…"
+
+msgid "Alternative text"
+msgstr "النص البديل (ALT)"
+
+msgid "Media name"
+msgstr "اسم الوسائط"
+
+msgid "Continue in full Studio"
+msgstr "تواصل في الاستوديو الكامل"
+
+msgid "Save and select"
+msgstr "حفظ وتحديد"
+
+msgid "Save to Media Library"
+msgstr "حفظ في مكتبة الوسائط"
+
+msgid "Saving image…"
+msgstr "جارٍ حفظ الصورة…"
+
+msgid "Image generation failed: @message"
+msgstr "فشل إنشاء الصورة: @message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "لا يسمح لك بنشر صور الاستوديو."
+
+msgid "Generate an image before saving it."
+msgstr "قم بإنشاء صورة قبل حفظها."
+
+msgid "The generated image is unavailable."
+msgstr "الصورة التي تم إنشاؤها غير متوفرة."
+
+msgid "Starting generation…"
+msgstr "بداية الجيل…"
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "يتم إرسال طلبك إلى المزود المحدد. أبقِ هذه الصفحة مفتوحة."
+
+msgid "Session title"
+msgstr "عنوان الجلسة"
+
+msgid "Start from"
+msgstr "ابدأ من"
+
+msgid "A text prompt"
+msgstr "مطالبة نصية"
+
+msgid "An uploaded image"
+msgstr "صورة تم تحميلها"
+
+msgid "Create"
+msgstr "إنشاء"
+
+msgid "Image"
+msgstr "الصورة"
+
+msgid "Video"
+msgstr "فيديو"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "يعد إنشاء الفيديو تجريبيًا ويتم تشغيله بشكل متزامن. أبقِ الصفحة مفتوحة حتى اكتمال الطلب."
+
+msgid "Starting image"
+msgstr "صورة البداية"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "يستخدم الإعداد الافتراضي لتحويل النص إلى صورة الذي تم تكوينه في Drupal AI. يتم سرد موفري الخدمة والنماذج التي تم تكوينها فقط."
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "يتم إدراج فقط مقدمي الخدمات الذين يعلنون عن دعم تحرير الصور إلى الصور."
+
+msgid "Provider and video model"
+msgstr "مزود ونموذج الفيديو"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "يتم إدراج فقط الموفرين الذين تم تكوينهم والذين يعلنون عن دعم تحويل النص إلى فيديو."
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "يقوم بتحريك الصورة التي تم تحميلها باستخدام موفر صورة إلى فيديو."
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "قم بوصف الصورة المراد إنشاؤها أو كيفية تحويل التحميل."
+
+msgid "Generating video…"
+msgstr "جارٍ إنشاء الفيديو…"
+
+msgid "Version order"
+msgstr "ترتيب الإصدار"
+
+msgid "Oldest first"
+msgstr "الأقدم أولاً"
+
+msgid "Newest first"
+msgstr "الأحدث أولاً"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "يغير كيفية عرض إصدارات هذه الجلسة. تظل أرقام الإصدارات وعلاقات التحسين كما هي."
+
+msgid "This session has reached its limit of @count turns."
+msgstr "وصلت هذه الجلسة إلى الحد الأقصى وهو @count من الدورات."
+
+msgid "Create from selected image"
+msgstr "إنشاء من الصورة المحددة"
+
+msgid "Create another result"
+msgstr "إنشاء نتيجة أخرى"
+
+msgid "Refining from"
+msgstr "التكرير من"
+
+msgid "Version @number · @prompt"
+msgstr "الإصدار @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "النسخة الجديدة سوف تتفرع من هذه الصورة. حدد مصدرًا آخر من أي إصدار مكتمل في النتائج أدناه."
+
+msgid "Refined image"
+msgstr "صورة محسنة"
+
+msgid "Video from this image"
+msgstr "فيديو من هذه الصورة"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "يستخدم الإعداد الافتراضي لتحويل النص إلى صورة الذي تم تكوينه في Drupal AI."
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "يقوم بتحريك الصورة المحددة باستخدام موفر صورة إلى فيديو."
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "يستخدم موفر تحويل النص إلى الفيديو الذي تم تكوينه."
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "قم بوصف التغيير الذي تريد إجراؤه على الصورة المحددة فقط."
+
+msgid "Describe the image to create."
+msgstr "قم بوصف الصورة المراد إنشاؤها."
+
+msgid "Generate"
+msgstr "إنشاء"
+
+msgid "Delete session"
+msgstr "حذف الجلسة"
+
+msgid "Automatic — match source"
+msgstr "تلقائي - مطابقة المصدر"
+
+msgid "Landscape — 3:2"
+msgstr "المناظر الطبيعية — 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "صورة — 2:3"
+
+msgid "Wide — 2:1"
+msgstr "واسعة — 2:1"
+
+msgid "Tall — 1:2"
+msgstr "طويل القامة — 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "مشهد الهاتف — 19.5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "صورة الهاتف – 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "مشهد الهاتف — 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "صورة الهاتف — 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "يستخدم الخيار التلقائي نسب الصورة المصدر المحددة أو التي تم تحميلها عندما يمكن اكتشافها. وبدون الصورة المصدر، يختار الموفر نسبة العرض إلى الارتفاع الافتراضية الخاصة به. تظل النسب الصريحة تعتمد على مقدم الخدمة."
+
+msgid "1K — faster and lower cost"
+msgstr "1K — أسرع وأقل تكلفة"
+
+msgid "2K — higher detail and cost"
+msgstr "2K – تفاصيل وتكلفة أعلى"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "يختار الخيار \"تلقائي\" أقرب طبقة مدعومة من الحافة الأطول للصورة المصدر. بدون مصدر، ويستخدم 1K. يدعم Grok Imagine 1K و2K؛ قد يقوم مقدمو الخدمة الآخرون بتعيين هذا الإعداد أو تجاهله."
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "يطلب الشفافية عندما يدعمها المزود. يطبق Grok هذا كتعليمات أفضل جهد لتحويل النص إلى صورة؛ قد يتجاهلها مقدمو خدمات تحرير الصور ومقدمو الخدمات الآخرون."
+
+msgid "File type"
+msgstr "نوع الملف"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "جبيغ"
+
+msgid "WebP"
+msgstr "ويب بي"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG هو الافتراضي. يعتمد توفر JPEG وWebP على الموفر المحدد."
+
+msgid "Show an AI image badge"
+msgstr "إظهار شارة صورة AI"
+
+msgid "Badge text"
+msgstr "نص الشارة"
+
+msgid "Video settings"
+msgstr "إعدادات الفيديو"
+
+msgid "Duration"
+msgstr "المدة الزمنية"
+
+msgid "seconds"
+msgstr "ثواني"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "يجوز للمزود تحديد المدة المطلوبة أو تعديلها."
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "يتطابق تلقائي مع الصورة المصدر المحددة حيثما أمكن ذلك."
+
+msgid "480p — faster and lower cost"
+msgstr "480p — أسرع وأقل تكلفة"
+
+msgid "720p — standard"
+msgstr "720p - قياسي"
+
+msgid "1080p — provider dependent"
+msgstr "1080p - يعتمد على المزود"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "قد لا يدعم موفرو خدمة تحويل النص إلى فيديو دقة 1080 بكسل."
+
+msgid "Saved to Media"
+msgstr "تم الحفظ في الوسائط"
+
+msgid "Transparent background requested"
+msgstr "مطلوب خلفية شفافة"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "نسبة العرض إلى الارتفاع: @ratio · الدقة: @resolution · نوع الملف: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "صورة منظمة العفو الدولية"
+
+msgid "Generated version @number"
+msgstr "النسخة المولدة @number"
+
+msgid "Use as refinement source"
+msgstr "استخدم كمصدر للتحسين"
+
+msgid "Selected source"
+msgstr "المصدر المحدد"
+
+msgid "View published Media"
+msgstr "عرض وسائل الإعلام المنشورة"
+
+msgid "Publish to Media"
+msgstr "نشر إلى وسائل الإعلام"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "اختياري. مقترح من عنوان الجلسة والموجه."
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "مقترح من عنوان الجلسة ومطالبة هذا الإصدار. قم بمراجعتها للتأكد من دقتها قبل النشر."
+
+msgid "Render the badge into the saved Media file"
+msgstr "قم بعرض الشارة في ملف الوسائط المحفوظ"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "ينشئ ملف وسائط منفصلاً مع تضمين \"@badge\" بشكل دائم. يتم الاحتفاظ بنتيجة الاستوديو الأصلية."
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "عرض الشارة غير متاح لأن PHP GD أو FFmpeg غير متاح لخادم الويب. لا يزال من الممكن نشر الفيديو الأصلي."
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "عرض الشارة غير متاح لأن PHP GD غير متاح لخادم الويب. لا يزال من الممكن نشر الصورة الأصلية."
+
+msgid "Publish this version"
+msgstr "نشر هذا الإصدار"
+
+msgid "Untitled prompt"
+msgstr "مطالبة بلا عنوان"
+
+msgid "AI video"
+msgstr "فيديو الذكاء الاصطناعي"
+
+msgid "AI image"
+msgstr "صورة منظمة العفو الدولية"
+
+msgid "@session — Version @number"
+msgstr "@session — الإصدار @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "تحرير الصورة"
+
+msgid "Video generation"
+msgstr "توليد الفيديو"
+
+msgid "Image animation"
+msgstr "صورة متحركة"
+
+msgid "Image generation"
+msgstr "توليد الصورة"
+
+msgid "Automatic ratio"
+msgstr "النسبة التلقائية"
+
+msgid "High detail"
+msgstr "تفاصيل عالية"
+
+msgid "Standard detail"
+msgstr "التفاصيل القياسية"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration ثانية"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "الوقت غير متاح"
+
+msgid "Request"
+msgstr "طلب"
+
+msgid "Output"
+msgstr "ناتج"
+
+msgid "Processing"
+msgstr "قيد المعالجة"
+
+msgid "Tokens"
+msgstr "رموز نصية (توكن)"
+
+msgid "Source image"
+msgstr "صورة المصدر"
+
+msgid "Version @number"
+msgstr "الإصدار @number"
+
+msgid "Uploaded image"
+msgstr "الصورة التي تم تحميلها"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "موجه النص"
+
+msgid "Reported"
+msgstr "ذكرت"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost دولار أمريكي"
+
+msgid "Session report"
+msgstr "تقرير الجلسة"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "جميع الإصدارات التي تم إنشاؤها في هذه الجلسة. تجمع إجماليات التكلفة بين الرسوم التي أبلغ عنها مقدم الخدمة والتقديرات التي لم تكن التكلفة المبلغ عنها متاحة فيها."
+
+msgid "Version"
+msgstr "النسخة"
+
+msgid "Source"
+msgstr "المصدر"
+
+msgid "Cost"
+msgstr "كلفة"
+
+msgid "No versions have been generated."
+msgstr "لم يتم إنشاء أي إصدارات."
+
+msgid "Aggregate cost"
+msgstr "التكلفة الإجمالية"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "تم الإبلاغ: $@reported دولار أمريكي · التقديري: $@estimated دولار أمريكي · غير متاح: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "وصلت هذه الجلسة إلى حد التحذير الذي تم تكوينه وهو $@amount بالدولار الأمريكي."
+
+msgid "Reported cost"
+msgstr "التكلفة المبلغ عنها"
+
+msgid "Cost unavailable"
+msgstr "التكلفة غير متوفرة"
+
+msgid "$@cost USD"
+msgstr "$@cost دولار أمريكي"
+
+msgid "Not reported · media-billed"
+msgstr "لم يتم الإبلاغ عنها · تم إصدار فاتورة بها بواسطة وسائل الإعلام"
+
+msgid "in"
+msgstr "في"
+
+msgid "out"
+msgstr "خارج"
+
+msgid "cached"
+msgstr "مخبأة"
+
+msgid "reasoning"
+msgstr "المنطق"
+
+msgid "total"
+msgstr "المجموع"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "النص البديل مطلوب عند نشر صورة على الوسائط."
+
+msgid "Enter a prompt to generate a result."
+msgstr "أدخل مطالبة لإنشاء نتيجة."
+
+msgid "You are not allowed to modify this session."
+msgstr "غير مسموح لك بتعديل هذه الجلسة."
+
+msgid "Select a completed image from this session to refine."
+msgstr "حدد صورة مكتملة من هذه الجلسة لتحسينها."
+
+msgid "Upload a starting image."
+msgstr "قم بتحميل صورة البداية."
+
+msgid "Select a configured provider and model."
+msgstr "حدد الموفر والنموذج الذي تم تكوينه."
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "الموفر والنموذج المحددان غير متاحين لنوع الطلب هذا."
+
+msgid "The image session is unavailable."
+msgstr "جلسة الصورة غير متاحة."
+
+msgid "The video was generated successfully."
+msgstr "تم إنشاء الفيديو بنجاح."
+
+msgid "The image was generated successfully."
+msgstr "تم إنشاء الصورة بنجاح."
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "تبلغ تكلفة هذا الطلب $@cost دولارًا أمريكيًا، بما يتوافق مع حد التحذير الذي تم تكوينه وهو $@threshold."
+
+msgid "Generation failed: @message"
+msgstr "فشل الإنشاء: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "نسخة الصورة المحددة غير متوفرة."
+
+msgid "You are not allowed to publish this result."
+msgstr "لا يسمح لك بنشر هذه النتيجة."
+
+msgid "The result could not be published: @message"
+msgstr "لا يمكن نشر النتيجة: @message"
+
+msgid "Published as Media “@name”."
+msgstr "تم النشر باسم الوسائط \"@name\"."
+
+msgid "Studio interface"
+msgstr "واجهة الاستوديو"
+
+msgid "Default sort in Studio"
+msgstr "الفرز الافتراضي في الاستوديو"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "يضبط الترتيب الأولي لإصدارات الصور عند فتح الجلسة أو عند إنشاء صورة جديدة. يمكن للمستخدمين تغيير الترتيب أثناء عرض الجلسة."
+
+msgid "Open the generation form initially"
+msgstr "افتح نموذج التوليد في البداية"
+
+msgid "Open image settings initially"
+msgstr "افتح إعدادات الصورة في البداية"
+
+msgid "Open video settings initially"
+msgstr "افتح إعدادات الفيديو في البداية"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "إظهار بيانات تعريف الموفر والنموذج والطلب والمعالجة"
+
+msgid "Show token usage when available"
+msgstr "إظهار استخدام الرمز المميز عندما يكون متاحًا"
+
+msgid "Show reported and estimated costs"
+msgstr "عرض التكاليف المبلغ عنها والمقدرة"
+
+msgid "Show the session-wide version and cost report"
+msgstr "إظهار الإصدار على مستوى الجلسة وتقرير التكلفة"
+
+msgid "Generation defaults"
+msgstr "افتراضيات الجيل"
+
+msgid "Default output type"
+msgstr "نوع الإخراج الافتراضي"
+
+msgid "Default aspect ratio"
+msgstr "نسبة العرض إلى الارتفاع الافتراضية"
+
+msgid "Default image resolution"
+msgstr "دقة الصورة الافتراضية"
+
+msgid "Default video resolution"
+msgstr "دقة الفيديو الافتراضية"
+
+msgid "480p"
+msgstr "480 ص"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "مدة الفيديو الافتراضية"
+
+msgid "Request a transparent background by default"
+msgstr "اطلب خلفية شفافة بشكل افتراضي"
+
+msgid "Default image file type"
+msgstr "نوع ملف الصورة الافتراضي"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "يجب أن يدعم الموفر المحدد التنسيق المطلوب. يتم استخدام PNG بشكل افتراضي."
+
+msgid "Show an AI image badge by default"
+msgstr "إظهار شارة صورة AI بشكل افتراضي"
+
+msgid "Default AI image badge text"
+msgstr "نص شارة صورة AI الافتراضية"
+
+msgid "Default Text-to-Image model"
+msgstr "نموذج تحويل النص إلى صورة الافتراضي"
+
+msgid "Default Image-to-Image model"
+msgstr "نموذج الصورة إلى الصورة الافتراضي"
+
+msgid "Default Text-to-Video model"
+msgstr "نموذج تحويل النص إلى فيديو الافتراضي"
+
+msgid "Default Image-to-Video model"
+msgstr "نموذج الصورة إلى الفيديو الافتراضي"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "اتركه كـ \"لا شيء\" لترث الإعداد الافتراضي الذي تم تكوينه بواسطة Drupal AI."
+
+msgid "Draft storage"
+msgstr "مشروع التخزين"
+
+msgid "File scheme"
+msgstr "مخطط الملف"
+
+msgid "Private"
+msgstr "خاص"
+
+msgid "Public"
+msgstr "عام"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "يوصى بالتخزين الخاص لأن المسودات التي تم إنشاؤها قد تحتوي على مواد حساسة."
+
+msgid "File directory"
+msgstr "دليل الملف"
+
+msgid "Limits"
+msgstr "الحدود"
+
+msgid "Maximum prompt length"
+msgstr "الحد الأقصى لطول المطالبة"
+
+msgid "Maximum turns per session"
+msgstr "الحد الأقصى للدورات لكل جلسة"
+
+msgid "Maximum uploaded source image size"
+msgstr "الحد الأقصى لحجم الصورة المصدر التي تم تحميلها"
+
+msgid "MB"
+msgstr "م.بايت"
+
+msgid "Maximum requested video duration"
+msgstr "الحد الأقصى لمدة الفيديو المطلوبة"
+
+msgid "Per-request cost warning"
+msgstr "تحذير التكلفة لكل طلب"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "عرض تحذير بعد وصول الطلب إلى هذه التكلفة. استخدم الصفر للتعطيل."
+
+msgid "Session cost warning"
+msgstr "تحذير من تكلفة الجلسة"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "قم بتمييز إجماليات الجلسة عند هذا المبلغ أو أعلى منه. استخدم الصفر للتعطيل."
+
+msgid "Media publishing"
+msgstr "النشر الإعلامي"
+
+msgid "Image Media type"
+msgstr "نوع وسائط الصورة"
+
+msgid "Image source field machine name"
+msgstr "اسم جهاز حقل مصدر الصورة"
+
+msgid "Require alternative text when publishing images"
+msgstr "طلب نص بديل عند نشر الصور"
+
+msgid "Video Media type"
+msgstr "نوع وسائط الفيديو"
+
+msgid "Video source field machine name"
+msgstr "اسم جهاز حقل مصدر الفيديو"
+
+msgid "1 configured model"
+msgstr "1 نموذج تم تكوينه"
+
+msgid "@count configured models"
+msgstr "@count النماذج التي تم تكوينها"
+
+msgid "Provider diagnostics"
+msgstr "تشخيص الموفر"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "يتم اكتشاف النماذج من Drupal AI وتصفيتها من خلال العملية التي يعلن عنها كل مزود."
+
+msgid "Availability"
+msgstr "التوفر"
+
+msgid "Studio default"
+msgstr "الاستوديو الافتراضي"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "استخدم دليلًا نسبيًا يحتوي فقط على الأحرف والأرقام والشرطات السفلية والشرطات والشرطات المائلة."
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "لا يمكن أن تتجاوز مدة الفيديو الافتراضية الحد الأقصى الذي تم تكوينه."
+
+msgid "The selected Media type must contain this image field."
+msgstr "يجب أن يحتوي نوع الوسائط المحدد على حقل الصورة هذا."
+
+msgid "The selected Media type must contain this video file field."
+msgstr "يجب أن يحتوي نوع الوسائط المحدد على حقل ملف الفيديو هذا."
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (Drupal AI الافتراضي)"
+
+msgid "No model available"
+msgstr "لا يوجد نموذج متاح"
+
+msgid "Image Source"
+msgstr "مصدر الصورة"
+
+msgid "Upload Image"
+msgstr "تحميل الصورة"
+
+msgid "Create in AI Image Studio"
+msgstr "قم بالإنشاء في AI Image Studio"
+
+msgid "Enter a prompt to generate an image."
+msgstr "أدخل مطالبة لإنشاء صورة."
+
+msgid "Enter a Media name."
+msgstr "أدخل اسم الوسائط."
+
+msgid "Enter alternative text for the image."
+msgstr "أدخل النص البديل للصورة."
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "قم بإنشاء صورة باستخدام نموذج AI Image Studio المدمج أدناه."
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "يمكن أن يستغرق إنشاء الفيديو عدة دقائق. أبقِ هذه الصفحة مفتوحة أثناء قيام الموفر بإكمال الطلب."
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "يقوم الموفر بإنشاء صورتك. أبقِ هذه الصفحة مفتوحة حتى اكتمال الطلب."
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "إنشاء الصور والفيديو المحادثة باستخدام موفري Drupal AI."
+
+msgid "AI"
+msgstr "منظمة العفو الدولية"
+
+msgid "Create images and manage refinement sessions."
+msgstr "إنشاء الصور وإدارة جلسات التحسين."
+
+msgid "New image session"
+msgstr "جلسة تصوير جديدة"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "قم بإنشاء صورة وتحسينها من خلال المطالبات المتسلسلة."
+
+msgid "Settings"
+msgstr "الإعدادات"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "تكوين تخزين الصور والحدود ونشر الوسائط."
+
+msgid "Studio settings"
+msgstr "إعدادات الاستوديو"
+
+msgid "Configure AI Image Studio"
+msgstr "تكوين استوديو الصور AI"
+
+msgid "Access AI Image Studio"
+msgstr "الوصول إلى AI Image Studio"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "قم بإنشاء الصور وتحسينها في جلسات الاستوديو المملوكة."
+
+msgid "View any AI Image Studio session"
+msgstr "عرض أي جلسة AI Image Studio"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "احذف جلسات AI Image Studio الخاصة بك"
+
+msgid "Delete any AI Image Studio session"
+msgstr "احذف أي جلسة AI Image Studio"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "نشر صور AI Image Studio على الوسائط"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "نشر مقاطع فيديو AI Image Studio على الوسائط"
+
+msgid "Administer AI Image Studio"
+msgstr "إدارة AI Image Studio"
+

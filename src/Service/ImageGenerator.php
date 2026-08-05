@@ -15,16 +15,25 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\media\MediaInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
  * Generates Studio turns through Drupal AI operation types.
  */
 final class ImageGenerator {
+
+  /**
+   * Translates module-owned messages that may be surfaced to users.
+   */
+  private function translate(string $string, array $arguments = []): string {
+    return (string) new TranslatableMarkup($string, $arguments);
+  }
 
   /**
    * Constructs the generator.
@@ -59,6 +68,16 @@ final class ImageGenerator {
     return isset($options[$default])
       ? $default
       : (string) (array_key_first($options) ?? '');
+  }
+
+  /**
+   * Reports whether the server can render a badge into the requested media.
+   */
+  public function canRenderBadge(bool $is_video): bool {
+    if (!function_exists('imagecreatetruecolor')) {
+      return FALSE;
+    }
+    return !$is_video || (new ExecutableFinder())->find('ffmpeg') !== NULL;
   }
 
   /**
@@ -129,7 +148,9 @@ final class ImageGenerator {
       if (in_array($operation, ['image_to_image', 'image_to_video'], TRUE)) {
         $binary = file_get_contents($source->getFileUri());
         if ($binary === FALSE) {
-          throw new \RuntimeException('The source image could not be read.');
+          throw new \RuntimeException($this->translate(
+            'The source image could not be read.',
+          ));
         }
         $image = new ImageFile($binary, $source->getMimeType(), $source->getFilename());
         if ($operation === 'image_to_video') {
@@ -176,7 +197,9 @@ final class ImageGenerator {
       $generated = reset($outputs);
       if ($output_type === 'video') {
         if (!$generated instanceof VideoFile || $generated->getBinary() === '') {
-          throw new \RuntimeException('The provider returned no generated video.');
+          throw new \RuntimeException($this->translate(
+            'The provider returned no generated video.',
+          ));
         }
         $file = $this->saveGeneratedVideo(
           $generated,
@@ -187,7 +210,9 @@ final class ImageGenerator {
       }
       else {
         if (!$generated instanceof ImageFile || $generated->getBinary() === '') {
-          throw new \RuntimeException('The provider returned no generated image.');
+          throw new \RuntimeException($this->translate(
+            'The provider returned no generated image.',
+          ));
         }
         $file = $this->saveGeneratedFile(
           $generated,
@@ -234,7 +259,9 @@ final class ImageGenerator {
     $is_video = !$turn->get('video')->isEmpty();
     if ($turn->get('status')->value !== 'completed'
       || ($turn->get('image')->isEmpty() && !$is_video)) {
-      throw new \LogicException('Only completed Studio turns can be published.');
+      throw new \LogicException($this->translate(
+        'Only completed Studio turns can be published.',
+      ));
     }
     if (!$turn->get('media_id')->isEmpty()) {
       $media = $turn->get('media_id')->entity;
@@ -252,7 +279,9 @@ final class ImageGenerator {
     );
     $file = $turn->get($is_video ? 'video' : 'image')->entity;
     if (!$file instanceof FileInterface) {
-      throw new \RuntimeException('The generated file is unavailable.');
+      throw new \RuntimeException($this->translate(
+        'The generated file is unavailable.',
+      ));
     }
     if ($render_badge) {
       $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
@@ -284,7 +313,9 @@ final class ImageGenerator {
   private function parseModelOption(string $option): array {
     $parts = explode('__', $option, 2);
     if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
-      throw new \InvalidArgumentException('Select a configured AI provider and model.');
+      throw new \InvalidArgumentException($this->translate(
+        'Select a configured AI provider and model.',
+      ));
     }
     return $parts;
   }
@@ -608,12 +639,16 @@ final class ImageGenerator {
     int $turn_id,
   ): FileInterface {
     if (!function_exists('imagecreatefromstring')) {
-      throw new \RuntimeException('Rendering a badge into an image requires the PHP GD extension.');
+      throw new \RuntimeException($this->translate(
+        'Rendering a badge into an image requires the PHP GD extension.',
+      ));
     }
     $binary = file_get_contents($source->getFileUri());
     $image = $binary === FALSE ? FALSE : @imagecreatefromstring($binary);
     if ($image === FALSE) {
-      throw new \RuntimeException('The generated image could not be opened for badge rendering.');
+      throw new \RuntimeException($this->translate(
+        'The generated image could not be opened for badge rendering.',
+      ));
     }
     $badge = $this->createBadgeImage($text);
     $margin = max(12, (int) round(imagesx($image) * 0.015));
@@ -638,10 +673,10 @@ final class ImageGenerator {
       default => imagepng($image, NULL, 6),
     };
     $output = ob_get_clean();
-    imagedestroy($badge);
-    imagedestroy($image);
     if (!$written || !is_string($output) || $output === '') {
-      throw new \RuntimeException('The badged image could not be encoded.');
+      throw new \RuntimeException($this->translate(
+        'The badged image could not be encoded.',
+      ));
     }
     return $this->saveMediaDerivative($source, $output, $turn_id);
   }
@@ -655,21 +690,26 @@ final class ImageGenerator {
     int $turn_id,
   ): FileInterface {
     if (!function_exists('imagecreatetruecolor')) {
-      throw new \RuntimeException('Rendering a badge into a video requires the PHP GD extension.');
+      throw new \RuntimeException($this->translate(
+        'Rendering a badge into a video requires the PHP GD extension.',
+      ));
     }
     $source_path = $this->fileSystem->realpath($source->getFileUri());
     if ($source_path === FALSE) {
-      throw new \RuntimeException('The generated video could not be opened for badge rendering.');
+      throw new \RuntimeException($this->translate(
+        'The generated video could not be opened for badge rendering.',
+      ));
     }
     $temporary_directory = $this->fileSystem->getTempDirectory();
     $badge_path = tempnam($temporary_directory, 'ai-image-badge-');
     $output_path = tempnam($temporary_directory, 'ai-image-video-');
     if ($badge_path === FALSE || $output_path === FALSE) {
-      throw new \RuntimeException('Temporary files for video badge rendering could not be created.');
+      throw new \RuntimeException($this->translate(
+        'Temporary files for video badge rendering could not be created.',
+      ));
     }
     $badge = $this->createBadgeImage($text);
     imagepng($badge, $badge_path, 6);
-    imagedestroy($badge);
     try {
       $process = new Process([
         'ffmpeg', '-y', '-i', $source_path, '-i', $badge_path,
@@ -680,12 +720,16 @@ final class ImageGenerator {
       $process->setTimeout(300);
       $process->run();
       if (!$process->isSuccessful()) {
-        throw new \RuntimeException('FFmpeg could not render the badge into the video: '
-          . trim($process->getErrorOutput()));
+        throw new \RuntimeException($this->translate(
+          'FFmpeg could not render the badge into the video: @message',
+          ['@message' => trim($process->getErrorOutput())],
+        ));
       }
       $output = file_get_contents($output_path);
       if ($output === FALSE || $output === '') {
-        throw new \RuntimeException('FFmpeg returned an empty badged video.');
+        throw new \RuntimeException($this->translate(
+          'FFmpeg returned an empty badged video.',
+        ));
       }
       return $this->saveMediaDerivative($source, $output, $turn_id);
     }

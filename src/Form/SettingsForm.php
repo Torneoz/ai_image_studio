@@ -341,11 +341,11 @@ final class SettingsForm extends ConfigFormBase {
       );
       $diagnostic_rows[] = [
         $label,
-        $this->formatPlural(
-          count($options),
-          '1 configured model',
-          '@count configured models',
-        ),
+        count($options) === 1
+          ? $this->t('1 configured model')
+          : $this->t('@count configured models', [
+            '@count' => count($options),
+          ]),
         $this->configuredModelLabel($config, $operation, $options),
       ];
     }

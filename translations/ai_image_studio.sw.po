@@ -1,0 +1,977 @@
+# Swahili translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: sw\n"
+"Language-Team: Swahili\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "The source image could not be read."
+msgstr "Picha chanzo haikuweza kusomeka."
+
+msgid "The provider returned no generated video."
+msgstr "Mtoa huduma hakurejesha video iliyotengenezwa."
+
+msgid "The provider returned no generated image."
+msgstr "Mtoa huduma hakurejesha picha iliyozalishwa."
+
+msgid "Only completed Studio turns can be published."
+msgstr "Zamu za Studio zilizokamilishwa pekee ndizo zinazoweza kuchapishwa."
+
+msgid "The generated file is unavailable."
+msgstr "Faili iliyotolewa haipatikani."
+
+msgid "Select a configured AI provider and model."
+msgstr "Chagua mtoa huduma wa AI na modeli iliyosanidiwa."
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "Kutoa beji kwenye picha kunahitaji kiendelezi cha PHP GD."
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "Picha iliyotolewa haikuweza kufunguliwa kwa ajili ya utoaji wa beji."
+
+msgid "The badged image could not be encoded."
+msgstr "Picha yenye beji haikuweza kusimba."
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "Kutoa beji kwenye video kunahitaji kiendelezi cha PHP GD."
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "Video iliyotolewa haikuweza kufunguliwa kwa ajili ya utoaji wa beji."
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "Faili za muda za utoaji beji za video hazikuweza kuundwa."
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg haikuweza kutoa beji kwenye video: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg ilirudisha video tupu yenye beji."
+
+msgid "Open"
+msgstr "Fungua"
+
+msgid "Delete"
+msgstr "Futa"
+
+msgid "Unknown"
+msgstr "Haijulikani"
+
+msgid "Active"
+msgstr "Inayotumika"
+
+msgid "Archived"
+msgstr "Imehifadhiwa"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "Unda picha, kisha uiboresha kupitia maongozi mfuatano. Kila matokeo huhifadhiwa kama zamu katika kipindi."
+
+msgid "Session"
+msgstr "Kikao"
+
+msgid "Owner"
+msgstr "Mmiliki"
+
+msgid "Status"
+msgstr "Hali"
+
+msgid "Updated"
+msgstr "Imesasishwa"
+
+msgid "Operations"
+msgstr "Uendeshaji"
+
+msgid "No image sessions have been created yet."
+msgstr "Bado hakuna vipindi vya picha vilivyoundwa."
+
+msgid "AI Image Studio turn"
+msgstr "Zamu ya Studio ya Picha ya AI"
+
+msgid "AI Image Studio turns"
+msgstr "Studio ya Picha ya AI inageuka"
+
+msgid "image studio turn"
+msgstr "zamu ya studio ya picha"
+
+msgid "image studio turns"
+msgstr "studio ya picha inageuka"
+
+msgid "Parent turn"
+msgstr "Zamu ya mzazi"
+
+msgid "Prompt"
+msgstr "Haraka"
+
+msgid "Generated image"
+msgstr "Picha inayozalishwa"
+
+msgid "Generated video"
+msgstr "Video iliyotolewa"
+
+msgid "Provider"
+msgstr "Mtoa huduma"
+
+msgid "Model"
+msgstr "Mfano"
+
+msgid "Operation"
+msgstr "Operesheni"
+
+msgid "Text to image"
+msgstr "Maandishi kwa picha"
+
+msgid "Image to image"
+msgstr "Picha kwa picha"
+
+msgid "Text to video"
+msgstr "Maandishi kwa video"
+
+msgid "Image to video"
+msgstr "Picha kwa video"
+
+msgid "Generation settings"
+msgstr "Mipangilio ya kizazi"
+
+msgid "Generation duration"
+msgstr "Muda wa kizazi"
+
+msgid "Estimated cost"
+msgstr "Gharama iliyokadiriwa"
+
+msgid "Cost source"
+msgstr "Chanzo cha gharama"
+
+msgid "Provider reported"
+msgstr "Mtoa huduma ameripoti"
+
+msgid "Estimated"
+msgstr "Inakadiriwa"
+
+msgid "Unavailable"
+msgstr "Haipatikani"
+
+msgid "Token usage"
+msgstr "Matumizi ya ishara"
+
+msgid "Pending"
+msgstr "Inasubiri"
+
+msgid "Completed"
+msgstr "Imekamilika"
+
+msgid "Failed"
+msgstr "Imeshindwa"
+
+msgid "Error message"
+msgstr "Ujumbe wa hitilafu"
+
+msgid "Published Media"
+msgstr "Vyombo vya Habari Vilivyochapishwa"
+
+msgid "Created"
+msgstr "Imeundwa"
+
+msgid "AI Image Studio session"
+msgstr "Kipindi cha Studio ya Picha cha AI"
+
+msgid "AI Image Studio sessions"
+msgstr "Vipindi vya Studio ya Picha ya AI"
+
+msgid "image studio session"
+msgstr "kikao cha studio ya picha"
+
+msgid "image studio sessions"
+msgstr "vipindi vya studio vya picha"
+
+msgid "Title"
+msgstr "Kichwa"
+
+msgid "Changed"
+msgstr "Imebadilishwa"
+
+msgid "AI Image Studio"
+msgstr "Studio ya Picha ya AI"
+
+msgid "Provider and model"
+msgstr "Mtoa huduma na mfano"
+
+msgid "Image settings"
+msgstr "Mipangilio ya picha"
+
+msgid "Aspect ratio"
+msgstr "Uwiano wa kipengele"
+
+msgid "Automatic"
+msgstr "Otomatiki"
+
+msgid "Square — 1:1"
+msgstr "Mraba - 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "Mazingira - 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "Picha - 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "Mazingira - 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "Picha - 3:4"
+
+msgid "Resolution"
+msgstr "Azimio"
+
+msgid "1K"
+msgstr "1K"
+
+msgid "2K"
+msgstr "2K"
+
+msgid "Request a transparent background"
+msgstr "Omba mandharinyuma yenye uwazi"
+
+msgid "Generate another"
+msgstr "Tengeneza nyingine"
+
+msgid "Generate image"
+msgstr "Tengeneza picha"
+
+msgid "Generating image…"
+msgstr "Inazalisha picha..."
+
+msgid "Alternative text"
+msgstr "Maandishi mbadala"
+
+msgid "Media name"
+msgstr "Jina la media"
+
+msgid "Continue in full Studio"
+msgstr "Endelea katika Studio nzima"
+
+msgid "Save and select"
+msgstr "Hifadhi na uchague"
+
+msgid "Save to Media Library"
+msgstr "Hifadhi kwenye Maktaba ya Midia"
+
+msgid "Saving image…"
+msgstr "Inahifadhi picha..."
+
+msgid "Image generation failed: @message"
+msgstr "Imeshindwa kuunda picha: @message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "Huruhusiwi kuchapisha picha za Studio."
+
+msgid "Generate an image before saving it."
+msgstr "Tengeneza picha kabla ya kuihifadhi."
+
+msgid "The generated image is unavailable."
+msgstr "Picha iliyotolewa haipatikani."
+
+msgid "Starting generation…"
+msgstr "Kizazi cha kuanzia..."
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "Ombi lako linatumwa kwa mtoaji aliyechaguliwa. Weka ukurasa huu wazi."
+
+msgid "Session title"
+msgstr "Kichwa cha kikao"
+
+msgid "Start from"
+msgstr "Anza kutoka"
+
+msgid "A text prompt"
+msgstr "Agizo la maandishi"
+
+msgid "An uploaded image"
+msgstr "Picha iliyopakiwa"
+
+msgid "Create"
+msgstr "Unda"
+
+msgid "Image"
+msgstr "Picha"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "Uzalishaji wa video ni wa majaribio na huendeshwa kwa usawa. Weka ukurasa wazi hadi ombi likamilike."
+
+msgid "Starting image"
+msgstr "Picha ya kuanzia"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "Hutumia chaguomsingi ya Maandishi-hadi-Picha iliyosanidiwa katika Drupal AI. Watoa huduma na miundo waliosanidiwa pekee ndio walioorodheshwa."
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "Watoa huduma wanaotangaza tu usaidizi wa uhariri wa Picha-kwa-Picha ndio walioorodheshwa."
+
+msgid "Provider and video model"
+msgstr "Mtoa huduma na mtindo wa video"
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "Watoa huduma waliosanidiwa pekee wanaotangaza usaidizi wa Maandishi hadi Video ndio walioorodheshwa."
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "Huhuisha picha iliyopakiwa kwa kutumia mtoa huduma wa Picha-kwa-Video."
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "Eleza picha ya kuunda au jinsi ya kubadilisha upakiaji."
+
+msgid "Generating video…"
+msgstr "Inazalisha video..."
+
+msgid "Version order"
+msgstr "Agizo la toleo"
+
+msgid "Oldest first"
+msgstr "Mzee kwanza"
+
+msgid "Newest first"
+msgstr "Mpya zaidi kwanza"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "Hubadilisha jinsi matoleo ya kipindi hiki yanavyoonyeshwa. Nambari za toleo na uhusiano wa uboreshaji hubaki sawa."
+
+msgid "This session has reached its limit of @count turns."
+msgstr "Kipindi hiki kimefikia kikomo chake cha zamu @count."
+
+msgid "Create from selected image"
+msgstr "Unda kutoka kwa picha iliyochaguliwa"
+
+msgid "Create another result"
+msgstr "Unda matokeo mengine"
+
+msgid "Refining from"
+msgstr "Kusafisha kutoka"
+
+msgid "Version @number · @prompt"
+msgstr "Toleo la @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "Toleo jipya litatawi kutoka kwa picha hii. Chagua chanzo kingine kutoka kwa toleo lolote lililokamilishwa katika matokeo yaliyo hapa chini."
+
+msgid "Refined image"
+msgstr "Picha iliyosafishwa"
+
+msgid "Video from this image"
+msgstr "Video kutoka kwa picha hii"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "Hutumia chaguomsingi ya Maandishi-hadi-Picha iliyosanidiwa katika Drupal AI."
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "Huhuisha picha iliyochaguliwa kwa kutumia mtoa huduma wa Picha-kwa-Video."
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "Hutumia mtoa huduma wa Maandishi hadi Video aliyesanidiwa."
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "Eleza tu mabadiliko unayotaka kufanya kwenye picha iliyochaguliwa."
+
+msgid "Describe the image to create."
+msgstr "Eleza picha ya kuunda."
+
+msgid "Generate"
+msgstr "Tengeneza"
+
+msgid "Delete session"
+msgstr "Futa kipindi"
+
+msgid "Automatic — match source"
+msgstr "Otomatiki - chanzo cha mechi"
+
+msgid "Landscape — 3:2"
+msgstr "Mazingira - 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "Picha - 2:3"
+
+msgid "Wide — 2:1"
+msgstr "Kwa upana - 2:1"
+
+msgid "Tall — 1:2"
+msgstr "Mrefu - 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "Mandhari ya simu - 19.5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "Picha ya simu - 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "Mandhari ya simu - 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "Picha ya simu - 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "Kiotomatiki hutumia uwiano wa picha asili iliyochaguliwa au iliyopakiwa wakati zinaweza kutambuliwa. Bila picha chanzo, mtoa huduma huchagua uwiano wake chaguomsingi. Uwiano dhahiri unasalia kuwa tegemezi kwa mtoaji."
+
+msgid "1K — faster and lower cost"
+msgstr "1K - gharama ya haraka na ya chini"
+
+msgid "2K — higher detail and cost"
+msgstr "2K - maelezo ya juu na gharama"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "Kiotomatiki huchagua kiwango cha karibu kinachotumika kutoka kwa ukingo mrefu zaidi wa picha chanzo. Bila chanzo, hutumia 1K. Grok Imagine inasaidia 1K na 2K; watoa huduma wengine wanaweza ramani au kupuuza mpangilio huu."
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "Inaomba uwazi wakati mtoa huduma anaiunga mkono. Grok anatumia hili kama maelekezo bora ya maandishi-kwa-picha; uhariri wa picha na watoa huduma wengine wanaweza kuupuuza."
+
+msgid "File type"
+msgstr "Aina ya faili"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "JPEG"
+
+msgid "WebP"
+msgstr "WebP"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG ndio chaguo msingi. Upatikanaji wa JPEG na WebP unategemea mtoa huduma aliyechaguliwa."
+
+msgid "Show an AI image badge"
+msgstr "Onyesha beji ya picha ya AI"
+
+msgid "Badge text"
+msgstr "Maandishi ya beji"
+
+msgid "Video settings"
+msgstr "Mipangilio ya video"
+
+msgid "Duration"
+msgstr "Muda"
+
+msgid "seconds"
+msgstr "sekunde"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "Mtoa huduma anaweza kuweka kikomo au kurekebisha muda ulioombwa."
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "Otomatiki inalingana na picha ya chanzo iliyochaguliwa inapowezekana."
+
+msgid "480p — faster and lower cost"
+msgstr "480p - gharama ya haraka na ya chini"
+
+msgid "720p — standard"
+msgstr "720p - kiwango"
+
+msgid "1080p — provider dependent"
+msgstr "1080p - tegemezi la mtoaji"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "Watoa huduma za maandishi kwa video huenda wasitumie 1080p."
+
+msgid "Saved to Media"
+msgstr "Imehifadhiwa kwenye Media"
+
+msgid "Transparent background requested"
+msgstr "Mandharinyuma yenye uwazi yameombwa"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "Uwiano wa kipengele: @ratio · Azimio: @resolution · Aina ya faili: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "Picha ya AI"
+
+msgid "Generated version @number"
+msgstr "Toleo lililotolewa @number"
+
+msgid "Use as refinement source"
+msgstr "Tumia kama chanzo cha uboreshaji"
+
+msgid "Selected source"
+msgstr "Chanzo kilichochaguliwa"
+
+msgid "View published Media"
+msgstr "Tazama Media iliyochapishwa"
+
+msgid "Publish to Media"
+msgstr "Chapisha kwa Media"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "Hiari. Imependekezwa kutoka kwa kichwa cha kikao na kidokezo."
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "Imependekezwa kutoka kwa mada ya kipindi na kidokezo cha toleo hili. Ikague kwa usahihi kabla ya kuichapisha."
+
+msgid "Render the badge into the saved Media file"
+msgstr "Toa beji kwenye faili ya Midia iliyohifadhiwa"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "Huunda faili tofauti ya Midia yenye \"@badge\" iliyopachikwa kabisa. Matokeo ya asili ya Studio yamehifadhiwa."
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "Utoaji wa beji haupatikani kwa sababu PHP GD au FFmpeg haipatikani kwa seva ya wavuti. Video asili bado inaweza kuchapishwa."
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "Utoaji wa beji haupatikani kwa sababu PHP GD haipatikani kwa seva ya wavuti. Picha asili bado inaweza kuchapishwa."
+
+msgid "Publish this version"
+msgstr "Chapisha toleo hili"
+
+msgid "Untitled prompt"
+msgstr "Kidokezo kisicho na jina"
+
+msgid "AI video"
+msgstr "Video ya AI"
+
+msgid "AI image"
+msgstr "Picha ya AI"
+
+msgid "@session — Version @number"
+msgstr "@session - Toleo la @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "Kuhariri picha"
+
+msgid "Video generation"
+msgstr "Uzalishaji wa video"
+
+msgid "Image animation"
+msgstr "Uhuishaji wa picha"
+
+msgid "Image generation"
+msgstr "Uzalishaji wa picha"
+
+msgid "Automatic ratio"
+msgstr "Uwiano otomatiki"
+
+msgid "High detail"
+msgstr "Maelezo ya juu"
+
+msgid "Standard detail"
+msgstr "Maelezo ya kawaida"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration sekunde"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "Muda haupatikani"
+
+msgid "Request"
+msgstr "Ombi"
+
+msgid "Output"
+msgstr "Pato"
+
+msgid "Processing"
+msgstr "Inachakata"
+
+msgid "Tokens"
+msgstr "Ishara"
+
+msgid "Source image"
+msgstr "Chanzo cha picha"
+
+msgid "Version @number"
+msgstr "Toleo la @number"
+
+msgid "Uploaded image"
+msgstr "Picha iliyopakiwa"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "Ujumbe wa maandishi"
+
+msgid "Reported"
+msgstr "Imeripotiwa"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost USD"
+
+msgid "Session report"
+msgstr "Ripoti ya kikao"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "Matoleo yote yaliyotolewa katika kipindi hiki. Jumla ya gharama huchanganya gharama zinazoripotiwa na mtoa huduma na makadirio ambapo gharama iliyoripotiwa haikupatikana."
+
+msgid "Version"
+msgstr "Toleo"
+
+msgid "Source"
+msgstr "Chanzo"
+
+msgid "Cost"
+msgstr "Gharama"
+
+msgid "No versions have been generated."
+msgstr "Hakuna matoleo ambayo yametolewa."
+
+msgid "Aggregate cost"
+msgstr "Gharama ya jumla"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "Imeripotiwa: $@reported USD · Iliyokadiriwa: $@estimated USD · Haipatikani: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "Kipindi hiki kimefikia kiwango cha onyo cha $@amount cha USD kilichowekwa."
+
+msgid "Reported cost"
+msgstr "Gharama iliyoripotiwa"
+
+msgid "Cost unavailable"
+msgstr "Gharama haipatikani"
+
+msgid "$@cost USD"
+msgstr "$@cost USD"
+
+msgid "Not reported · media-billed"
+msgstr "Haijaripotiwa · kutozwa kwa vyombo vya habari"
+
+msgid "in"
+msgstr "katika"
+
+msgid "out"
+msgstr "nje"
+
+msgid "cached"
+msgstr "iliyohifadhiwa"
+
+msgid "reasoning"
+msgstr "hoja"
+
+msgid "total"
+msgstr "jumla"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "Maandishi mbadala yanahitajika wakati wa kuchapisha picha kwenye Media."
+
+msgid "Enter a prompt to generate a result."
+msgstr "Weka kidokezo ili kutoa matokeo."
+
+msgid "You are not allowed to modify this session."
+msgstr "Huruhusiwi kurekebisha kipindi hiki."
+
+msgid "Select a completed image from this session to refine."
+msgstr "Chagua picha iliyokamilishwa kutoka kwa kipindi hiki ili kuboresha."
+
+msgid "Upload a starting image."
+msgstr "Pakia picha ya kuanzia."
+
+msgid "Select a configured provider and model."
+msgstr "Chagua mtoa huduma aliyesanidiwa na modeli."
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "Mtoa huduma na muundo uliochaguliwa haupatikani kwa aina hii ya ombi."
+
+msgid "The image session is unavailable."
+msgstr "Kipindi cha picha hakipatikani."
+
+msgid "The video was generated successfully."
+msgstr "Video ilitengenezwa kwa ufanisi."
+
+msgid "The image was generated successfully."
+msgstr "Picha ilitolewa kwa ufanisi."
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "Ombi hili liligharimu $@cost USD, kufikia kiwango cha onyo cha $@threshold kilichowekwa."
+
+msgid "Generation failed: @message"
+msgstr "Kizazi kimeshindwa: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "Toleo la picha lililochaguliwa halipatikani."
+
+msgid "You are not allowed to publish this result."
+msgstr "Huruhusiwi kuchapisha matokeo haya."
+
+msgid "The result could not be published: @message"
+msgstr "Matokeo hayakuweza kuchapishwa: @message"
+
+msgid "Published as Media “@name”."
+msgstr "Imechapishwa kama Media \"@name\"."
+
+msgid "Studio interface"
+msgstr "Kiolesura cha studio"
+
+msgid "Default sort in Studio"
+msgstr "Upangaji chaguomsingi katika Studio"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "Huweka mpangilio wa awali wa matoleo ya picha kipindi kinapofunguliwa au picha mpya inapotolewa. Watumiaji wanaweza kubadilisha mpangilio wakati wa kutazama kipindi."
+
+msgid "Open the generation form initially"
+msgstr "Fungua fomu ya kizazi mwanzoni"
+
+msgid "Open image settings initially"
+msgstr "Fungua mipangilio ya picha mwanzoni"
+
+msgid "Open video settings initially"
+msgstr "Fungua mipangilio ya video mwanzoni"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "Onyesha mtoa huduma, modeli, ombi na uchakataji metadata"
+
+msgid "Show token usage when available"
+msgstr "Onyesha matumizi ya tokeni inapopatikana"
+
+msgid "Show reported and estimated costs"
+msgstr "Onyesha gharama zilizoripotiwa na makadirio"
+
+msgid "Show the session-wide version and cost report"
+msgstr "Onyesha toleo la kipindi kizima na ripoti ya gharama"
+
+msgid "Generation defaults"
+msgstr "Chaguo-msingi za kizazi"
+
+msgid "Default output type"
+msgstr "Aina chaguo-msingi ya pato"
+
+msgid "Default aspect ratio"
+msgstr "Uwiano wa kipengele chaguomsingi"
+
+msgid "Default image resolution"
+msgstr "Azimio chaguomsingi la picha"
+
+msgid "Default video resolution"
+msgstr "Ubora chaguomsingi wa video"
+
+msgid "480p"
+msgstr "480p"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "Muda chaguomsingi wa video"
+
+msgid "Request a transparent background by default"
+msgstr "Omba mandharinyuma yenye uwazi kwa chaguomsingi"
+
+msgid "Default image file type"
+msgstr "Aina chaguomsingi ya faili ya picha"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "Mtoa huduma aliyechaguliwa lazima aauni umbizo lililoombwa. PNG hutumiwa kwa chaguo-msingi."
+
+msgid "Show an AI image badge by default"
+msgstr "Onyesha beji ya picha ya AI kwa chaguo-msingi"
+
+msgid "Default AI image badge text"
+msgstr "Maandishi chaguomsingi ya beji ya picha ya AI"
+
+msgid "Default Text-to-Image model"
+msgstr "Muundo Chaguomsingi wa Maandishi hadi Picha"
+
+msgid "Default Image-to-Image model"
+msgstr "Muundo chaguomsingi wa Picha-hadi-Picha"
+
+msgid "Default Text-to-Video model"
+msgstr "Muundo chaguomsingi wa Maandishi hadi Video"
+
+msgid "Default Image-to-Video model"
+msgstr "Muundo chaguomsingi wa Picha-hadi-Video"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "Ondoka kama \"Hakuna\" ili kurithi chaguomsingi iliyosanidiwa na Drupal AI."
+
+msgid "Draft storage"
+msgstr "Hifadhi ya rasimu"
+
+msgid "File scheme"
+msgstr "Mpango wa faili"
+
+msgid "Private"
+msgstr "Binafsi"
+
+msgid "Public"
+msgstr "Hadharani"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "Hifadhi ya kibinafsi inapendekezwa kwa sababu rasimu zinazozalishwa zinaweza kuwa na nyenzo nyeti."
+
+msgid "File directory"
+msgstr "Saraka ya faili"
+
+msgid "Limits"
+msgstr "Mipaka"
+
+msgid "Maximum prompt length"
+msgstr "Upeo wa urefu wa haraka"
+
+msgid "Maximum turns per session"
+msgstr "Upeo wa zamu kwa kila kipindi"
+
+msgid "Maximum uploaded source image size"
+msgstr "Upeo wa ukubwa wa picha chanzo uliopakiwa"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "Maximum requested video duration"
+msgstr "Muda wa juu zaidi ulioombwa wa video"
+
+msgid "Per-request cost warning"
+msgstr "Onyo la gharama kwa kila ombi"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "Onyesha onyo baada ya ombi kufikia gharama hii. Tumia sifuri kuzima."
+
+msgid "Session cost warning"
+msgstr "Onyo la gharama ya kikao"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "Angazia jumla ya kipindi kwa au zaidi ya kiasi hiki. Tumia sifuri kuzima."
+
+msgid "Media publishing"
+msgstr "Uchapishaji wa media"
+
+msgid "Image Media type"
+msgstr "Aina ya Media ya Picha"
+
+msgid "Image source field machine name"
+msgstr "Jina la mashine ya sehemu ya chanzo cha picha"
+
+msgid "Require alternative text when publishing images"
+msgstr "Inahitaji maandishi mbadala wakati wa kuchapisha picha"
+
+msgid "Video Media type"
+msgstr "Aina ya Midia ya Video"
+
+msgid "Video source field machine name"
+msgstr "Jina la mashine ya sehemu ya chanzo cha video"
+
+msgid "1 configured model"
+msgstr "Muundo 1 uliosanidiwa"
+
+msgid "@count configured models"
+msgstr "@count miundo iliyosanidiwa"
+
+msgid "Provider diagnostics"
+msgstr "Utambuzi wa mtoaji"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "Miundo hugunduliwa kutoka kwa Drupal AI na kuchujwa na operesheni ambayo kila mtoaji hutangaza."
+
+msgid "Availability"
+msgstr "Upatikanaji"
+
+msgid "Studio default"
+msgstr "Chaguomsingi ya studio"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "Tumia saraka ya jamaa iliyo na herufi, nambari, mistari chini, deshi na kufyeka pekee."
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "Muda chaguomsingi wa video hauwezi kuzidi upeo uliowekwa."
+
+msgid "The selected Media type must contain this image field."
+msgstr "Aina ya Midia iliyochaguliwa lazima iwe na sehemu hii ya picha."
+
+msgid "The selected Media type must contain this video file field."
+msgstr "Aina ya Midia iliyochaguliwa lazima iwe na sehemu hii ya faili ya video."
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (chaguo-msingi Drupal AI)"
+
+msgid "No model available"
+msgstr "Hakuna muundo unaopatikana"
+
+msgid "Image Source"
+msgstr "Chanzo cha Picha"
+
+msgid "Upload Image"
+msgstr "Pakia Picha"
+
+msgid "Create in AI Image Studio"
+msgstr "Unda katika Studio ya Picha ya AI"
+
+msgid "Enter a prompt to generate an image."
+msgstr "Weka kidokezo ili kuunda picha."
+
+msgid "Enter a Media name."
+msgstr "Weka jina la Media."
+
+msgid "Enter alternative text for the image."
+msgstr "Weka maandishi mbadala ya picha."
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "Tengeneza picha ukitumia fomu ya Studio ya Picha ya AI hapa chini."
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "Uzalishaji wa video unaweza kuchukua dakika kadhaa. Weka ukurasa huu wazi wakati mtoa huduma anakamilisha ombi."
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "Mtoa huduma anaunda picha yako. Weka ukurasa huu wazi hadi ombi likamilike."
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "Uundaji wa picha na video za mazungumzo kwa kutumia watoa huduma wa Drupal AI."
+
+msgid "AI"
+msgstr "AI"
+
+msgid "Create images and manage refinement sessions."
+msgstr "Unda picha na udhibiti vipindi vya uboreshaji."
+
+msgid "New image session"
+msgstr "Kipindi kipya cha picha"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "Unda picha na uiboreshe kupitia vidokezo vinavyofuatana."
+
+msgid "Settings"
+msgstr "Mipangilio"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "Sanidi hifadhi ya picha, vikomo, na uchapishaji wa Midia."
+
+msgid "Studio settings"
+msgstr "Mipangilio ya studio"
+
+msgid "Configure AI Image Studio"
+msgstr "Sanidi Studio ya Picha ya AI"
+
+msgid "Access AI Image Studio"
+msgstr "Fikia Studio ya Picha ya AI"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "Unda na uboresha picha katika vipindi vya studio vinavyomilikiwa."
+
+msgid "View any AI Image Studio session"
+msgstr "Tazama kipindi chochote cha Studio ya Picha ya AI"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "Futa vipindi vyako vya Studio ya Picha ya AI"
+
+msgid "Delete any AI Image Studio session"
+msgstr "Futa kipindi chochote cha Studio ya Picha ya AI"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "Chapisha picha za Studio ya Picha ya AI kwa Media"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "Chapisha video za Studio ya Picha ya AI kwa Media"
+
+msgid "Administer AI Image Studio"
+msgstr "Simamia Studio ya Picha ya AI"

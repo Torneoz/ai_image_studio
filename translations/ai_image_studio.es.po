@@ -1,0 +1,978 @@
+# Spanish translation of AI Image Studio
+# Generated from Drupal community translations and completed for AI Image Studio.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Image Studio\n"
+"POT-Creation-Date: 2026-08-06 00:00+0000\n"
+"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"Last-Translator: Torneoz translation team\n"
+"Language: es\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "The source image could not be read."
+msgstr "No se pudo leer la imagen de origen."
+
+msgid "The provider returned no generated video."
+msgstr "El proveedor no devolvió ningún vídeo generado."
+
+msgid "The provider returned no generated image."
+msgstr "El proveedor no devolvió ninguna imagen generada."
+
+msgid "Only completed Studio turns can be published."
+msgstr "Sólo se pueden publicar los turnos de Studio completados."
+
+msgid "The generated file is unavailable."
+msgstr "El archivo generado no está disponible."
+
+msgid "Select a configured AI provider and model."
+msgstr "Seleccione un proveedor y un modelo de IA configurados."
+
+msgid "Rendering a badge into an image requires the PHP GD extension."
+msgstr "Para convertir una insignia en una imagen se requiere la extensión PHP GD."
+
+msgid "The generated image could not be opened for badge rendering."
+msgstr "La imagen generada no se pudo abrir para renderizar la insignia."
+
+msgid "The badged image could not be encoded."
+msgstr "La imagen con distintivo no se pudo codificar."
+
+msgid "Rendering a badge into a video requires the PHP GD extension."
+msgstr "Para renderizar una insignia en un vídeo se requiere la extensión PHP GD."
+
+msgid "The generated video could not be opened for badge rendering."
+msgstr "El vídeo generado no se pudo abrir para renderizar la insignia."
+
+msgid "Temporary files for video badge rendering could not be created."
+msgstr "No se pudieron crear archivos temporales para la representación de insignias de video."
+
+msgid "FFmpeg could not render the badge into the video: @message"
+msgstr "FFmpeg no pudo representar la insignia en el video: @message"
+
+msgid "FFmpeg returned an empty badged video."
+msgstr "FFmpeg devolvió un video con insignia vacía."
+
+msgid "Open"
+msgstr "Abierta"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "Archived"
+msgstr "Archivado"
+
+msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
+msgstr "Cree una imagen y luego refinela mediante indicaciones secuenciales. Cada resultado se conserva como un turno en la sesión."
+
+msgid "Session"
+msgstr "Sesión"
+
+msgid "Owner"
+msgstr "Propietario"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Updated"
+msgstr "Actualizado"
+
+msgid "Operations"
+msgstr "Operaciones"
+
+msgid "No image sessions have been created yet."
+msgstr "Aún no se han creado sesiones de imágenes."
+
+msgid "AI Image Studio turn"
+msgstr "Giro de AI Image Studio"
+
+msgid "AI Image Studio turns"
+msgstr "AI Image Studio gira"
+
+msgid "image studio turn"
+msgstr "turno de estudio de imagen"
+
+msgid "image studio turns"
+msgstr "estudio de imagen gira"
+
+msgid "Parent turn"
+msgstr "turno de padres"
+
+msgid "Prompt"
+msgstr "rápido"
+
+msgid "Generated image"
+msgstr "Imagen generada"
+
+msgid "Generated video"
+msgstr "Vídeo generado"
+
+msgid "Provider"
+msgstr "Proveedor"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid "Operation"
+msgstr "Operación"
+
+msgid "Text to image"
+msgstr "Texto a imagen"
+
+msgid "Image to image"
+msgstr "Imagen a imagen"
+
+msgid "Text to video"
+msgstr "Texto a vídeo"
+
+msgid "Image to video"
+msgstr "Imagen a vídeo"
+
+msgid "Generation settings"
+msgstr "Configuración de generación"
+
+msgid "Generation duration"
+msgstr "Duración de la generación"
+
+msgid "Estimated cost"
+msgstr "Costo estimado"
+
+msgid "Cost source"
+msgstr "fuente de costo"
+
+msgid "Provider reported"
+msgstr "Proveedor reportado"
+
+msgid "Estimated"
+msgstr "Estimado"
+
+msgid "Unavailable"
+msgstr "No disponible"
+
+msgid "Token usage"
+msgstr "Uso de tokens"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Completed"
+msgstr "Completado"
+
+msgid "Failed"
+msgstr "Fallido"
+
+msgid "Error message"
+msgstr "Mensaje de error"
+
+msgid "Published Media"
+msgstr "Medios publicados"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "AI Image Studio session"
+msgstr "Sesión de AI Image Studio"
+
+msgid "AI Image Studio sessions"
+msgstr "Sesiones de AI Image Studio"
+
+msgid "image studio session"
+msgstr "sesión de estudio de imagen"
+
+msgid "image studio sessions"
+msgstr "sesiones de estudio de imagen"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Changed"
+msgstr "Modificado"
+
+msgid "AI Image Studio"
+msgstr "Estudio de imágenes de IA"
+
+msgid "Provider and model"
+msgstr "Proveedor y modelo"
+
+msgid "Image settings"
+msgstr "Configuración de imagen"
+
+msgid "Aspect ratio"
+msgstr "Relación de aspecto"
+
+msgid "Automatic"
+msgstr "Automático"
+
+msgid "Square — 1:1"
+msgstr "Cuadrado — 1:1"
+
+msgid "Landscape — 16:9"
+msgstr "Paisaje - 16:9"
+
+msgid "Portrait — 9:16"
+msgstr "Retrato - 9:16"
+
+msgid "Landscape — 4:3"
+msgstr "Paisaje - 4:3"
+
+msgid "Portrait — 3:4"
+msgstr "Retrato - 3:4"
+
+msgid "Resolution"
+msgstr "Resolución"
+
+msgid "1K"
+msgstr "1K"
+
+msgid "2K"
+msgstr "2K"
+
+msgid "Request a transparent background"
+msgstr "Solicitar un fondo transparente"
+
+msgid "Generate another"
+msgstr "generar otro"
+
+msgid "Generate image"
+msgstr "Generar imagen"
+
+msgid "Generating image…"
+msgstr "Generando imagen…"
+
+msgid "Alternative text"
+msgstr "Texto alternativo"
+
+msgid "Media name"
+msgstr "Nombre del elemento multimedia"
+
+msgid "Continue in full Studio"
+msgstr "Continuar en estudio completo"
+
+msgid "Save and select"
+msgstr "Guardar y seleccionar"
+
+msgid "Save to Media Library"
+msgstr "Guardar en la biblioteca multimedia"
+
+msgid "Saving image…"
+msgstr "Guardando imagen…"
+
+msgid "Image generation failed: @message"
+msgstr "Error al generar la imagen: @message"
+
+msgid "You are not allowed to publish Studio images."
+msgstr "No está permitido publicar imágenes de Studio."
+
+msgid "Generate an image before saving it."
+msgstr "Genera una imagen antes de guardarla."
+
+msgid "The generated image is unavailable."
+msgstr "La imagen generada no está disponible."
+
+msgid "Starting generation…"
+msgstr "Generación inicial..."
+
+msgid "Your request is being sent to the selected provider. Keep this page open."
+msgstr "Su solicitud se envía al proveedor seleccionado. Mantenga esta página abierta."
+
+msgid "Session title"
+msgstr "Título de la sesión"
+
+msgid "Start from"
+msgstr "Empezar desde"
+
+msgid "A text prompt"
+msgstr "Un mensaje de texto"
+
+msgid "An uploaded image"
+msgstr "Una imagen cargada"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "Video"
+msgstr "Vídeo"
+
+msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgstr "La generación de vídeo es experimental y se ejecuta de forma sincrónica. Mantenga la página abierta hasta que se complete la solicitud."
+
+msgid "Starting image"
+msgstr "Imagen inicial"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgstr "Utiliza el valor predeterminado de texto a imagen configurado en Drupal AI. Solo se enumeran los proveedores y modelos configurados."
+
+msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgstr "Sólo se enumeran los proveedores que anuncian compatibilidad con la edición de imagen a imagen."
+
+msgid "Provider and video model"
+msgstr "Proveedor y modelo de vídeo."
+
+msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgstr "Sólo se enumeran los proveedores configurados que anuncian compatibilidad con texto a vídeo."
+
+msgid "Animates the uploaded image using an Image-to-Video provider."
+msgstr "Anima la imagen cargada utilizando un proveedor de imagen a vídeo."
+
+msgid "Describe the image to create or how to transform the upload."
+msgstr "Describe la imagen a crear o cómo transformar la carga."
+
+msgid "Generating video…"
+msgstr "Generando vídeo…"
+
+msgid "Version order"
+msgstr "Orden de versión"
+
+msgid "Oldest first"
+msgstr "Más antiguos primero"
+
+msgid "Newest first"
+msgstr "Más recientes primero"
+
+msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgstr "Cambia la forma en que se muestran las versiones de esta sesión. Los números de versión y las relaciones de refinamiento siguen siendo los mismos."
+
+msgid "This session has reached its limit of @count turns."
+msgstr "Esta sesión ha alcanzado su límite de @count turnos."
+
+msgid "Create from selected image"
+msgstr "Crear a partir de la imagen seleccionada"
+
+msgid "Create another result"
+msgstr "Crear otro resultado"
+
+msgid "Refining from"
+msgstr "refinando desde"
+
+msgid "Version @number · @prompt"
+msgstr "Versión @number · @prompt"
+
+msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgstr "La nueva versión se derivará de esta imagen. Seleccione otra fuente de cualquier versión completa en los resultados a continuación."
+
+msgid "Refined image"
+msgstr "Imagen refinada"
+
+msgid "Video from this image"
+msgstr "Vídeo de esta imagen"
+
+msgid "Uses the Text-to-Image default configured in Drupal AI."
+msgstr "Utiliza el valor predeterminado de texto a imagen configurado en Drupal AI."
+
+msgid "Animates the selected image using an Image-to-Video provider."
+msgstr "Anima la imagen seleccionada utilizando un proveedor de imagen a vídeo."
+
+msgid "Uses a configured Text-to-Video provider."
+msgstr "Utiliza un proveedor de texto a video configurado."
+
+msgid "Describe only the change you want to make to the selected image."
+msgstr "Describe solo el cambio que deseas realizar en la imagen seleccionada."
+
+msgid "Describe the image to create."
+msgstr "Describe la imagen a crear."
+
+msgid "Generate"
+msgstr "Crear"
+
+msgid "Delete session"
+msgstr "Eliminar sesión"
+
+msgid "Automatic — match source"
+msgstr "Automático: fuente de coincidencia"
+
+msgid "Landscape — 3:2"
+msgstr "Paisaje - 3:2"
+
+msgid "Portrait — 2:3"
+msgstr "Retrato - 2:3"
+
+msgid "Wide — 2:1"
+msgstr "Ancho: 2:1"
+
+msgid "Tall — 1:2"
+msgstr "Alto — 1:2"
+
+msgid "Phone landscape — 19.5:9"
+msgstr "Panorama telefónico: 19,5:9"
+
+msgid "Phone portrait — 9:19.5"
+msgstr "Retrato telefónico - 9:19.5"
+
+msgid "Phone landscape — 20:9"
+msgstr "Panorama telefónico - 20:9"
+
+msgid "Phone portrait — 9:20"
+msgstr "Retrato telefónico - 9:20"
+
+msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
+msgstr "Automático utiliza las proporciones de la imagen fuente seleccionada o cargada cuando pueden detectarse. Sin una imagen de origen, el proveedor elige su relación de aspecto predeterminada. Los ratios explícitos siguen dependiendo del proveedor."
+
+msgid "1K — faster and lower cost"
+msgstr "1K: más rápido y con menor costo"
+
+msgid "2K — higher detail and cost"
+msgstr "2K: mayor detalle y coste"
+
+msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
+msgstr "Automático elige el nivel admitido más cercano desde el borde más largo de la imagen de origen. Sin fuente, usa 1K. Grok Imagine admite 1K y 2K; otros proveedores pueden asignar o ignorar esta configuración."
+
+msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
+msgstr "Solicita transparencia cuando el proveedor la apoye. Grok aplica esto como una instrucción de texto a imagen de mejor esfuerzo; La edición de imágenes y otros proveedores pueden ignorarlo."
+
+msgid "File type"
+msgstr "Tipo de archivo"
+
+msgid "PNG"
+msgstr "PNG"
+
+msgid "JPEG"
+msgstr "JPEG"
+
+msgid "WebP"
+msgstr "WebP"
+
+msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgstr "PNG es el valor predeterminado. La disponibilidad de JPEG y WebP depende del proveedor seleccionado."
+
+msgid "Show an AI image badge"
+msgstr "Mostrar una insignia de imagen de IA"
+
+msgid "Badge text"
+msgstr "Texto de la insignia"
+
+msgid "Video settings"
+msgstr "Configuración de vídeo"
+
+msgid "Duration"
+msgstr "Duración"
+
+msgid "seconds"
+msgstr "segundos"
+
+msgid "The provider may limit or adjust the requested duration."
+msgstr "El prestador podrá limitar o ajustar la duración solicitada."
+
+msgid "Automatic matches the selected source image where possible."
+msgstr "Automático coincide con la imagen de origen seleccionada siempre que sea posible."
+
+msgid "480p — faster and lower cost"
+msgstr "480p: más rápido y con menor coste"
+
+msgid "720p — standard"
+msgstr "720p: estándar"
+
+msgid "1080p — provider dependent"
+msgstr "1080p: depende del proveedor"
+
+msgid "Text-to-video providers may not support 1080p."
+msgstr "Es posible que los proveedores de texto a video no admitan 1080p."
+
+msgid "Saved to Media"
+msgstr "Guardado en medios"
+
+msgid "Transparent background requested"
+msgstr "Fondo transparente solicitado"
+
+msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
+msgstr "Relación de aspecto: @ratio · Resolución: @resolution · Tipo de archivo: @file_type@transparent"
+
+msgid "AI Image"
+msgstr "Imagen de IA"
+
+msgid "Generated version @number"
+msgstr "Versión generada @number"
+
+msgid "Use as refinement source"
+msgstr "Usar como fuente de refinamiento"
+
+msgid "Selected source"
+msgstr "Fuente seleccionada"
+
+msgid "View published Media"
+msgstr "Ver medios publicados"
+
+msgid "Publish to Media"
+msgstr "Publicar en medios"
+
+msgid "Optional. Suggested from the session title and prompt."
+msgstr "Opcional. Sugerido por el título y el mensaje de la sesión."
+
+msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgstr "Sugerido por el título de la sesión y el mensaje de esta versión. Revíselo para comprobar su exactitud antes de publicarlo."
+
+msgid "Render the badge into the saved Media file"
+msgstr "Renderice la insignia en el archivo multimedia guardado"
+
+msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgstr "Crea un archivo multimedia independiente con “@badge” incrustado permanentemente. Se conserva el resultado original de Studio."
+
+msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
+msgstr "La representación de insignias no está disponible porque PHP GD o FFmpeg no están disponibles para el servidor web. El vídeo original aún se puede publicar."
+
+msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
+msgstr "La representación de insignias no está disponible porque PHP GD no está disponible para el servidor web. La imagen original aún se puede publicar."
+
+msgid "Publish this version"
+msgstr "Publicar esta versión"
+
+msgid "Untitled prompt"
+msgstr "Mensaje sin título"
+
+msgid "AI video"
+msgstr "Vídeo de IA"
+
+msgid "AI image"
+msgstr "imagen de IA"
+
+msgid "@session — Version @number"
+msgstr "@session — Versión @number"
+
+msgid "@session: @prompt"
+msgstr "@session: @prompt"
+
+msgid "Image edit"
+msgstr "Edición de imagen"
+
+msgid "Video generation"
+msgstr "Generación de vídeo"
+
+msgid "Image animation"
+msgstr "Animación de imagen"
+
+msgid "Image generation"
+msgstr "Generación de imágenes"
+
+msgid "Automatic ratio"
+msgstr "Relación automática"
+
+msgid "High detail"
+msgstr "Alto detalle"
+
+msgid "Standard detail"
+msgstr "Detalle estándar"
+
+msgid "@ratio · @resolution · @duration seconds"
+msgstr "@ratio · @resolution · @duration segundos"
+
+msgid "@ratio · @resolution · @detail · @file_type"
+msgstr "@ratio · @resolution · @detail · @file_type"
+
+msgid "Time unavailable"
+msgstr "Hora no disponible"
+
+msgid "Request"
+msgstr "Solicitud"
+
+msgid "Output"
+msgstr "Salida"
+
+msgid "Processing"
+msgstr "Procesando"
+
+msgid "Tokens"
+msgstr "Comodines"
+
+msgid "Source image"
+msgstr "Imagen de origen"
+
+msgid "Version @number"
+msgstr "Versión @number"
+
+msgid "Uploaded image"
+msgstr "Imagen cargada"
+
+msgid "@ratio · @resolution"
+msgstr "@ratio · @resolution"
+
+msgid "Text prompt"
+msgstr "Mensaje de texto"
+
+msgid "Reported"
+msgstr "Reportado"
+
+msgid "@provider · @model"
+msgstr "@provider · @model"
+
+msgid "@source · $@cost USD"
+msgstr "@source · $@cost USD"
+
+msgid "Session report"
+msgstr "Informe de sesión"
+
+msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
+msgstr "Todas las versiones generadas en esta sesión. Los costos totales combinan los cargos informados por el proveedor con estimaciones donde el costo informado no estaba disponible."
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Source"
+msgstr "Origen"
+
+msgid "Cost"
+msgstr "Coste"
+
+msgid "No versions have been generated."
+msgstr "No se han generado versiones."
+
+msgid "Aggregate cost"
+msgstr "Costo agregado"
+
+msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr "Reportado: $@reported USD · Estimado: $@estimated USD · No disponible: @count"
+
+msgid "This session has reached the configured $@amount USD warning threshold."
+msgstr "Esta sesión ha alcanzado el umbral de advertencia de USD $@amount configurado."
+
+msgid "Reported cost"
+msgstr "Costo reportado"
+
+msgid "Cost unavailable"
+msgstr "Costo no disponible"
+
+msgid "$@cost USD"
+msgstr "$@cost USD"
+
+msgid "Not reported · media-billed"
+msgstr "No reportado · facturado por los medios"
+
+msgid "in"
+msgstr "en"
+
+msgid "out"
+msgstr "fuera"
+
+msgid "cached"
+msgstr "almacenado en caché"
+
+msgid "reasoning"
+msgstr "razonamiento"
+
+msgid "total"
+msgstr "total"
+
+msgid "Alternative text is required when publishing an image to Media."
+msgstr "Se requiere texto alternativo al publicar una imagen en Media."
+
+msgid "Enter a prompt to generate a result."
+msgstr "Ingrese un mensaje para generar un resultado."
+
+msgid "You are not allowed to modify this session."
+msgstr "No está permitido modificar esta sesión."
+
+msgid "Select a completed image from this session to refine."
+msgstr "Seleccione una imagen completa de esta sesión para refinarla."
+
+msgid "Upload a starting image."
+msgstr "Sube una imagen inicial."
+
+msgid "Select a configured provider and model."
+msgstr "Seleccione un proveedor y modelo configurados."
+
+msgid "The selected provider and model is not available for this request type."
+msgstr "El proveedor y modelo seleccionados no están disponibles para este tipo de solicitud."
+
+msgid "The image session is unavailable."
+msgstr "La sesión de imágenes no está disponible."
+
+msgid "The video was generated successfully."
+msgstr "El video se generó exitosamente."
+
+msgid "The image was generated successfully."
+msgstr "La imagen se generó exitosamente."
+
+msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgstr "Esta solicitud costó $@cost USD y cumplió con el umbral de advertencia $@threshold configurado."
+
+msgid "Generation failed: @message"
+msgstr "Error de generación: @message"
+
+msgid "The selected image version is unavailable."
+msgstr "La versión de la imagen seleccionada no está disponible."
+
+msgid "You are not allowed to publish this result."
+msgstr "No tienes permitido publicar este resultado."
+
+msgid "The result could not be published: @message"
+msgstr "El resultado no se pudo publicar: @message"
+
+msgid "Published as Media “@name”."
+msgstr "Publicado como Medio “@name”."
+
+msgid "Studio interface"
+msgstr "Interfaz de estudio"
+
+msgid "Default sort in Studio"
+msgstr "Orden predeterminado en Studio"
+
+msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
+msgstr "Establece el orden inicial de las versiones de las imágenes cuando se abre una sesión o se genera una nueva imagen. Los usuarios pueden cambiar el orden mientras ven una sesión."
+
+msgid "Open the generation form initially"
+msgstr "Abrir el formulario de generación inicialmente."
+
+msgid "Open image settings initially"
+msgstr "Abrir la configuración de imagen inicialmente"
+
+msgid "Open video settings initially"
+msgstr "Abrir la configuración de video inicialmente"
+
+msgid "Show provider, model, request, and processing metadata"
+msgstr "Mostrar metadatos de proveedor, modelo, solicitud y procesamiento"
+
+msgid "Show token usage when available"
+msgstr "Mostrar el uso del token cuando esté disponible"
+
+msgid "Show reported and estimated costs"
+msgstr "Mostrar costos reportados y estimados"
+
+msgid "Show the session-wide version and cost report"
+msgstr "Mostrar la versión para toda la sesión y el informe de costos"
+
+msgid "Generation defaults"
+msgstr "Valores predeterminados de generación"
+
+msgid "Default output type"
+msgstr "Tipo de salida predeterminado"
+
+msgid "Default aspect ratio"
+msgstr "Relación de aspecto predeterminada"
+
+msgid "Default image resolution"
+msgstr "Resolución de imagen predeterminada"
+
+msgid "Default video resolution"
+msgstr "Resolución de vídeo predeterminada"
+
+msgid "480p"
+msgstr "480p"
+
+msgid "720p"
+msgstr "720p"
+
+msgid "1080p"
+msgstr "1080p"
+
+msgid "Default video duration"
+msgstr "Duración del vídeo predeterminada"
+
+msgid "Request a transparent background by default"
+msgstr "Solicitar un fondo transparente por defecto"
+
+msgid "Default image file type"
+msgstr "Tipo de archivo de imagen predeterminado"
+
+msgid "The selected provider must support the requested format. PNG is used by default."
+msgstr "El proveedor seleccionado debe soportar el formato solicitado. PNG se utiliza de forma predeterminada."
+
+msgid "Show an AI image badge by default"
+msgstr "Mostrar una insignia de imagen AI de forma predeterminada"
+
+msgid "Default AI image badge text"
+msgstr "Texto de insignia de imagen AI predeterminado"
+
+msgid "Default Text-to-Image model"
+msgstr "Modelo predeterminado de texto a imagen"
+
+msgid "Default Image-to-Image model"
+msgstr "Modelo predeterminado de imagen a imagen"
+
+msgid "Default Text-to-Video model"
+msgstr "Modelo predeterminado de texto a vídeo"
+
+msgid "Default Image-to-Video model"
+msgstr "Modelo predeterminado de imagen a vídeo"
+
+msgid "Leave as “None” to inherit the default configured by Drupal AI."
+msgstr "Déjelo como \"Ninguno\" para heredar el valor predeterminado configurado por Drupal AI."
+
+msgid "Draft storage"
+msgstr "Almacenamiento de borradores"
+
+msgid "File scheme"
+msgstr "Esquema de archivos"
+
+msgid "Private"
+msgstr "Privado"
+
+msgid "Public"
+msgstr "Público"
+
+msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgstr "Se recomienda el almacenamiento privado porque los borradores generados pueden contener material confidencial."
+
+msgid "File directory"
+msgstr "Directorio de archivos"
+
+msgid "Limits"
+msgstr "Límites"
+
+msgid "Maximum prompt length"
+msgstr "Longitud máxima del mensaje"
+
+msgid "Maximum turns per session"
+msgstr "Giros máximos por sesión"
+
+msgid "Maximum uploaded source image size"
+msgstr "Tamaño máximo de la imagen fuente cargada"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "Maximum requested video duration"
+msgstr "Duración máxima del vídeo solicitado"
+
+msgid "Per-request cost warning"
+msgstr "Advertencia de costo por solicitud"
+
+msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgstr "Muestra una advertencia después de que una solicitud alcance este costo. Utilice cero para desactivar."
+
+msgid "Session cost warning"
+msgstr "Advertencia de costo de sesión"
+
+msgid "Highlight session totals at or above this amount. Use zero to disable."
+msgstr "Resalte los totales de la sesión iguales o superiores a esta cantidad. Utilice cero para desactivar."
+
+msgid "Media publishing"
+msgstr "Publicación de medios"
+
+msgid "Image Media type"
+msgstr "Imagen Tipo de medio"
+
+msgid "Image source field machine name"
+msgstr "Nombre de la máquina del campo de origen de la imagen"
+
+msgid "Require alternative text when publishing images"
+msgstr "Requerir texto alternativo al publicar imágenes"
+
+msgid "Video Media type"
+msgstr "Tipo de medio de vídeo"
+
+msgid "Video source field machine name"
+msgstr "Nombre de la máquina del campo de fuente de vídeo"
+
+msgid "1 configured model"
+msgstr "1 modelo configurado"
+
+msgid "@count configured models"
+msgstr "@count modelos configurados"
+
+msgid "Provider diagnostics"
+msgstr "Diagnóstico del proveedor"
+
+msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgstr "Los modelos se descubren a partir de Drupal AI y se filtran según la operación que anuncia cada proveedor."
+
+msgid "Availability"
+msgstr "Disponibilidad"
+
+msgid "Studio default"
+msgstr "Estudio predeterminado"
+
+msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgstr "Utilice un directorio relativo que contenga únicamente letras, números, guiones bajos, guiones y barras."
+
+msgid "The default video duration cannot exceed the configured maximum."
+msgstr "La duración predeterminada del video no puede exceder el máximo configurado."
+
+msgid "The selected Media type must contain this image field."
+msgstr "El tipo de medio seleccionado debe contener este campo de imagen."
+
+msgid "The selected Media type must contain this video file field."
+msgstr "El tipo de medio seleccionado debe contener este campo de archivo de vídeo."
+
+msgid "@model (Drupal AI default)"
+msgstr "@model (predeterminado de IA de Drupal)"
+
+msgid "No model available"
+msgstr "Ningún modelo disponible"
+
+msgid "Image Source"
+msgstr "Fuente de la imagen"
+
+msgid "Upload Image"
+msgstr "Subir una imagen"
+
+msgid "Create in AI Image Studio"
+msgstr "Crear en AI Image Studio"
+
+msgid "Enter a prompt to generate an image."
+msgstr "Ingrese un mensaje para generar una imagen."
+
+msgid "Enter a Media name."
+msgstr "Ingrese un nombre de medio."
+
+msgid "Enter alternative text for the image."
+msgstr "Introduzca texto alternativo para la imagen."
+
+msgid "Generate an image with the compact AI Image Studio form below."
+msgstr "Genere una imagen con el formulario compacto AI Image Studio a continuación."
+
+msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgstr "La generación de vídeo puede tardar varios minutos. Mantenga esta página abierta mientras el proveedor completa la solicitud."
+
+msgid "The provider is creating your image. Keep this page open until the request completes."
+msgstr "El proveedor está creando su imagen. Mantenga esta página abierta hasta que se complete la solicitud."
+
+msgid "Conversational image and video generation using Drupal AI providers."
+msgstr "Generación de imágenes y videos conversacionales utilizando proveedores de IA de Drupal."
+
+msgid "AI"
+msgstr "IA"
+
+msgid "Create images and manage refinement sessions."
+msgstr "Cree imágenes y gestione sesiones de refinamiento."
+
+msgid "New image session"
+msgstr "Nueva sesión de imagen"
+
+msgid "Create an image and refine it through sequential prompts."
+msgstr "Cree una imagen y refinela mediante indicaciones secuenciales."
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Configure image storage, limits, and Media publishing."
+msgstr "Configure el almacenamiento de imágenes, los límites y la publicación de medios."
+
+msgid "Studio settings"
+msgstr "Configuración de estudio"
+
+msgid "Configure AI Image Studio"
+msgstr "Configurar AI Image Studio"
+
+msgid "Access AI Image Studio"
+msgstr "Acceda a AI Image Studio"
+
+msgid "Create and refine images in owned studio sessions."
+msgstr "Cree y refine imágenes en sesiones de estudio propias."
+
+msgid "View any AI Image Studio session"
+msgstr "Ver cualquier sesión de AI Image Studio"
+
+msgid "Delete own AI Image Studio sessions"
+msgstr "Eliminar sesiones propias de AI Image Studio"
+
+msgid "Delete any AI Image Studio session"
+msgstr "Eliminar cualquier sesión de AI Image Studio"
+
+msgid "Publish AI Image Studio images to Media"
+msgstr "Publicar imágenes de AI Image Studio en medios"
+
+msgid "Publish AI Image Studio videos to Media"
+msgstr "Publicar vídeos de AI Image Studio en medios"
+
+msgid "Administer AI Image Studio"
+msgstr "Administrar AI Image Studio"
+

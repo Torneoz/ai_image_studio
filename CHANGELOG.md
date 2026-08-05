@@ -2,6 +2,16 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-beta4
+
+- Added complete Arabic, Simplified Chinese, French, German, Hindi, Japanese,
+  Portuguese, Russian, Spanish, and Swahili interface translations.
+- Made status, operation, cost-source, validation, and user-facing error text
+  available to Drupal's translation system.
+- Disabled permanent badge rendering when required server tools are unavailable
+  and added clear guidance while keeping normal Media publishing available.
+- Fixed access to private derived image and video files published to Media.
+
 ## 1.0.0-beta3
 
 - Added PNG, JPEG, and WebP output selection, with PNG as the configurable
