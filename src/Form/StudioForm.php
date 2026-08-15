@@ -123,6 +123,7 @@ final class StudioForm extends FormBase {
         '#options' => [
           'prompt' => $this->t('A text prompt'),
           'upload' => $this->t('An uploaded image'),
+          'media' => $this->t('A Media image'),
         ],
         '#default_value' => 'prompt',
       ];
@@ -155,6 +156,26 @@ final class StudioForm extends FormBase {
           ],
         ],
       ];
+      $form['source_media'] = [
+        '#type' => 'entity_autocomplete',
+        '#title' => $this->t('Media image'),
+        '#target_type' => 'media',
+        '#selection_handler' => 'default',
+        '#selection_settings' => [
+          'target_bundles' => [
+            (string) ($settings->get('media_bundle') ?: 'image'),
+          ],
+        ],
+        '#description' => $this->t('Search for an existing image in Media.'),
+        '#states' => [
+          'visible' => [
+            ':input[name="start_mode"]' => ['value' => 'media'],
+          ],
+          'required' => [
+            ':input[name="start_mode"]' => ['value' => 'media'],
+          ],
+        ],
+      ];
       $form['text_model'] = [
         '#type' => 'select',
         '#title' => $this->t('Provider and model'),
@@ -176,7 +197,11 @@ final class StudioForm extends FormBase {
         '#description' => $this->t('Only providers that advertise Image-to-Image editing support are listed.'),
         '#states' => [
           'visible' => [
-            ':input[name="start_mode"]' => ['value' => 'upload'],
+            ':input[name="start_mode"]' => [
+              ['value' => 'upload'],
+              'or',
+              ['value' => 'media'],
+            ],
             ':input[name="output_type"]' => ['value' => 'image'],
           ],
         ],
@@ -199,10 +224,14 @@ final class StudioForm extends FormBase {
         '#title' => $this->t('Provider and video model'),
         '#options' => $this->generator->getModelOptions('image_to_video'),
         '#default_value' => $this->configuredDefaultModel('image_to_video'),
-        '#description' => $this->t('Animates the uploaded image using an Image-to-Video provider.'),
+        '#description' => $this->t('Animates the selected image using an Image-to-Video provider.'),
         '#states' => [
           'visible' => [
-            ':input[name="start_mode"]' => ['value' => 'upload'],
+            ':input[name="start_mode"]' => [
+              ['value' => 'upload'],
+              'or',
+              ['value' => 'media'],
+            ],
             ':input[name="output_type"]' => ['value' => 'video'],
           ],
         ],
@@ -1388,10 +1417,30 @@ final class StudioForm extends FormBase {
       }
     }
     $output_type = (string) ($form_state->getValue('output_type') ?: 'image');
-    if ($session_id === NULL && $form_state->getValue('start_mode') === 'upload') {
+    $start_mode = (string) $form_state->getValue('start_mode');
+    if ($session_id === NULL && in_array($start_mode, ['upload', 'media'], TRUE)) {
       $files = array_filter((array) $form_state->getValue('source_image'));
-      if (!$files) {
+      if ($start_mode === 'upload' && !$files) {
         $form_state->setErrorByName('source_image', $this->t('Upload a starting image.'));
+      }
+      if ($start_mode === 'media' && !$form_state->getValue('source_media')) {
+        $form_state->setErrorByName('source_media', $this->t('Select a Media image.'));
+      }
+      elseif ($start_mode === 'media') {
+        $media = $this->entityTypeManager->getStorage('media')->load(
+          $form_state->getValue('source_media'),
+        );
+        $source_field = (string) ($this->studioConfigFactory
+          ->get('ai_image_studio.settings')
+          ->get('media_source_field') ?: 'field_media_image');
+        if (!$media instanceof MediaInterface
+          || !$media->hasField($source_field)
+          || !$media->get($source_field)->entity instanceof FileInterface) {
+          $form_state->setErrorByName(
+            'source_media',
+            $this->t('Select Media that contains a valid image.'),
+          );
+        }
       }
       $model_key = $output_type === 'video'
         ? 'image_video_model'
@@ -1425,7 +1474,7 @@ final class StudioForm extends FormBase {
 
     if (!$form_state->hasAnyErrors()) {
       $has_source = $session_id !== NULL
-        || $form_state->getValue('start_mode') === 'upload';
+        || in_array($start_mode, ['upload', 'media'], TRUE);
       $operation = match ([$output_type, $has_source]) {
         ['video', TRUE] => 'image_to_video',
         ['video', FALSE] => 'text_to_video',
@@ -1495,6 +1544,17 @@ final class StudioForm extends FormBase {
       if ($form_state->getValue('start_mode') === 'upload') {
         $file_ids = array_filter((array) $form_state->getValue('source_image'));
         $source = $this->entityTypeManager->getStorage('file')->load(reset($file_ids));
+      }
+      elseif ($form_state->getValue('start_mode') === 'media') {
+        $media = $this->entityTypeManager->getStorage('media')->load(
+          $form_state->getValue('source_media'),
+        );
+        $source_field = (string) ($this->studioConfigFactory
+          ->get('ai_image_studio.settings')
+          ->get('media_source_field') ?: 'field_media_image');
+        if ($media instanceof MediaInterface && $media->hasField($source_field)) {
+          $source = $media->get($source_field)->entity;
+        }
       }
       else {
         $model = (string) $form_state->getValue(
