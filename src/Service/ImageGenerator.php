@@ -19,7 +19,9 @@ use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileInterface;
 use Drupal\file\FileRepositoryInterface;
+use Drupal\key\KeyRepositoryInterface;
 use Drupal\media\MediaInterface;
+use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -48,6 +50,8 @@ final class ImageGenerator {
     private readonly TimeInterface $time,
     private readonly LoggerInterface $logger,
     private readonly QueueFactory $queueFactory,
+    private readonly ClientInterface $httpClient,
+    private readonly KeyRepositoryInterface $keyRepository,
     private readonly ?object $pricingCatalog = NULL,
   ) {}
 
@@ -70,6 +74,23 @@ final class ImageGenerator {
     return isset($options[$default])
       ? $default
       : (string) (array_key_first($options) ?? '');
+  }
+
+  /**
+   * Reports whether a selected option supports Grok multi-image editing.
+   */
+  public function supportsMultipleImages(string $model_option): bool {
+    [$provider_id] = $this->parseModelOption($model_option);
+    return $this->isXaiProvider($provider_id);
+  }
+
+  /**
+   * Reports whether a selected option supports Grok reference-to-video.
+   */
+  public function supportsReferenceVideo(string $model_option): bool {
+    [$provider_id, $model_id] = $this->parseModelOption($model_option);
+    return $this->isXaiProvider($provider_id)
+      && !str_contains(strtolower($model_id), 'video-1.5');
   }
 
   /**
@@ -115,22 +136,47 @@ final class ImageGenerator {
     $source ??= $parent && !$parent->get('image')->isEmpty()
       ? $parent->get('image')->entity
       : NULL;
+    $reference_ids = array_values(array_unique(array_filter(array_map(
+      'intval',
+      (array) ($generation_settings['reference_file_ids'] ?? []),
+    ))));
+    if ($source instanceof FileInterface) {
+      array_unshift($reference_ids, (int) $source->id());
+      $reference_ids = array_values(array_unique($reference_ids));
+    }
+    $references = $this->entityTypeManager->getStorage('file')
+      ->loadMultiple($reference_ids);
+    $references = array_values(array_filter(array_map(
+      static fn (int $id): mixed => $references[$id] ?? NULL,
+      $reference_ids,
+    ), static fn (mixed $file): bool => $file instanceof FileInterface));
+    foreach ($references as $reference) {
+      if ($reference->isTemporary()) {
+        $reference->setPermanent();
+        $reference->save();
+      }
+    }
+    $source ??= $references[0] ?? NULL;
     $generation_settings = $this->resolveAutomaticGenerationSettings(
       $generation_settings,
       $source instanceof FileInterface ? $source : NULL,
     );
-    $operation = match ([$output_type, $source instanceof FileInterface]) {
-      ['video', TRUE] => 'image_to_video',
-      ['video', FALSE] => 'text_to_video',
-      ['image', TRUE] => 'image_to_image',
-      default => 'text_to_image',
-    };
+    $video_mode = (string) ($generation_settings['video_mode'] ?? '');
+    $operation = $output_type === 'video'
+      ? ($video_mode === 'reference'
+        ? 'reference_to_video'
+        : ($source instanceof FileInterface ? 'image_to_video' : 'text_to_video'))
+      : ($source instanceof FileInterface ? 'image_to_image' : 'text_to_image');
     [$provider_id, $model_id] = $this->parseModelOption($model_option);
 
     $turn = $this->entityTypeManager->getStorage('ai_image_studio_turn')->create([
       'session_id' => $session->id(),
       'parent_id' => $parent?->id(),
       'source_file_id' => $source?->id(),
+      'source_file_ids' => array_map(
+        static fn (FileInterface $file): array => ['target_id' => $file->id()],
+        $references,
+      ),
       'request_group' => bin2hex(random_bytes(16)),
       'prompt' => $prompt,
       'provider_id' => $provider_id,
@@ -144,10 +190,6 @@ final class ImageGenerator {
     if ($output_type === 'video'
       && $this->configFactory->get('ai_image_studio.settings')
         ->get('async_video_generation') !== FALSE) {
-      if ($source instanceof FileInterface && $source->isTemporary()) {
-        $source->setPermanent();
-        $source->save();
-      }
       $turn->set('status', 'queued');
       $turn->save();
       $this->queueFactory->get('ai_image_studio_generation')
@@ -166,22 +208,57 @@ final class ImageGenerator {
     if ($session === NULL) {
       throw new \RuntimeException($this->translate('The image session is unavailable.'));
     }
-    $source = $turn->get('source_file_id')->entity;
+    $sources = array_values(array_filter(array_map(
+      static fn (mixed $item): mixed => $item->entity,
+      iterator_to_array($turn->get('source_file_ids')),
+    ), static fn (mixed $file): bool => $file instanceof FileInterface));
+    $source = $sources[0] ?? $turn->get('source_file_id')->entity;
     $operation = (string) $turn->get('operation')->value;
-    $output_type = in_array($operation, ['text_to_video', 'image_to_video'], TRUE)
+    $output_type = in_array($operation, [
+      'text_to_video',
+      'image_to_video',
+      'reference_to_video',
+    ], TRUE)
       ? 'video'
       : 'image';
     $prompt = (string) $turn->get('prompt')->value;
     $provider_id = (string) $turn->get('provider_id')->value;
     $model_id = (string) $turn->get('model_id')->value;
     $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
-    $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
+    if ($turn->get('provider_request_id')->isEmpty()) {
+      $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
+    }
     $turn->set('status', 'processing');
     $turn->set('error_message', NULL);
     $turn->save();
     $started_at = hrtime(TRUE);
 
     try {
+      if ($operation === 'reference_to_video' && $this->isXaiProvider($provider_id)) {
+        return $this->processXaiReferenceVideo(
+          $turn,
+          $session,
+          $sources,
+          $prompt,
+          $model_id,
+          $generation_settings,
+          $started_at,
+        );
+      }
+      if ($operation === 'image_to_image'
+        && count($sources) > 1
+        && $this->isXaiProvider($provider_id)) {
+        return $this->processXaiMultiImageEdit(
+          $turn,
+          $session,
+          $sources,
+          $prompt,
+          $provider_id,
+          $model_id,
+          $generation_settings,
+          $started_at,
+        );
+      }
       $provider = $this->providerManager->createInstance($provider_id);
       $provider->setConfiguration($this->normalizeGenerationSettings(
         $provider_id,
@@ -296,6 +373,9 @@ final class ImageGenerator {
     }
     catch (\Throwable $exception) {
       $message = mb_substr($exception->getMessage(), 0, 4000);
+      if (!$turn->get('provider_request_id')->isEmpty()) {
+        $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
+      }
       $turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
       $turn->set('status', 'failed');
       $turn->set('error_message', $message);
@@ -310,6 +390,253 @@ final class ImageGenerator {
   }
 
   /**
+   * Sends a Grok multi-image edit and persists its synchronous response.
+   */
+  private function processXaiMultiImageEdit(
+    object $turn,
+    object $session,
+    array $sources,
+    string $prompt,
+    string $provider_id,
+    string $model_id,
+    array $settings,
+    int $started_at,
+  ): object {
+    $payload = array_filter([
+      'model' => $model_id,
+      'prompt' => $prompt,
+      'images' => array_map(
+        fn (FileInterface $file): array => $this->xaiImageReference($file),
+        array_slice($sources, 0, 3),
+      ),
+      'aspect_ratio' => ($settings['aspect_ratio'] ?? 'auto') === 'auto'
+        ? NULL
+        : $settings['aspect_ratio'],
+      'response_format' => 'url',
+      'n' => max(1, min(4, (int) ($settings['variations'] ?? 1))),
+      'storage_options' => ['filename' => sprintf('studio-turn-%d.png', $turn->id())],
+    ], static fn (mixed $value): bool => $value !== NULL && $value !== '');
+    $response = $this->xaiRequest($provider_id, 'POST', 'images/edits', $payload);
+    $items = array_values((array) ($response['data'] ?? []));
+    if ($items === []) {
+      throw new \RuntimeException($this->translate('Grok returned no edited image.'));
+    }
+
+    $reported_cost = $this->findReportedCost($response);
+    foreach ($items as $index => $item) {
+      $binary = !empty($item['b64_json'])
+        ? base64_decode((string) $item['b64_json'], TRUE)
+        : $this->downloadProviderAsset((string) ($item['url'] ?? ''));
+      if (!is_string($binary) || $binary === '') {
+        throw new \RuntimeException($this->translate('The edited image could not be downloaded.'));
+      }
+      $result_turn = $index === 0 ? $turn : $this->createVariationTurn($turn);
+      $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($binary) ?: 'image/png';
+      $file = $this->saveGeneratedFile(
+        new ImageFile($binary, $mime, sprintf('grok-edit-%d.png', $result_turn->id())),
+        (int) $session->id(),
+        (int) $result_turn->id(),
+      );
+      $result_turn->set('image', ['target_id' => $file->id()]);
+      $result_turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
+      $result_turn->set('estimated_cost', $reported_cost === NULL
+        ? NULL
+        : $reported_cost / count($items));
+      $result_turn->set('cost_source', $reported_cost === NULL ? 'unavailable' : 'reported');
+      $result_turn->set('provider_metadata', [
+        'request_id' => $response['request_id'] ?? NULL,
+        'file_id' => $item['file_id'] ?? $item['file_output']['file_id'] ?? NULL,
+        'input_file_ids' => array_map(
+          static fn (FileInterface $file): int => (int) $file->id(),
+          $sources,
+        ),
+        'input_count' => count($sources),
+        'usage' => $response['usage'] ?? [],
+      ]);
+      $result_turn->set('status', 'completed');
+      $result_turn->save();
+    }
+    $session->setChangedTime($this->time->getRequestTime());
+    $session->save();
+    return $turn;
+  }
+
+  /**
+   * Submits or polls a native asynchronous Grok reference-video request.
+   */
+  private function processXaiReferenceVideo(
+    object $turn,
+    object $session,
+    array $sources,
+    string $prompt,
+    string $model_id,
+    array $settings,
+    int $started_at,
+  ): object {
+    $provider_id = (string) $turn->get('provider_id')->value;
+    $request_id = (string) $turn->get('provider_request_id')->value;
+    if ($request_id === '') {
+      $response = $this->xaiRequest($provider_id, 'POST', 'videos/generations', array_filter([
+        'model' => $model_id,
+        'prompt' => $prompt,
+        'reference_images' => array_map(
+          fn (FileInterface $file): array => $this->xaiImageReference($file),
+          array_slice($sources, 0, 7),
+        ),
+        'duration' => min(10, (int) ($settings['duration'] ?? 5)),
+        'aspect_ratio' => ($settings['aspect_ratio'] ?? 'auto') === 'auto'
+          ? NULL
+          : $settings['aspect_ratio'],
+        'resolution' => $settings['resolution'] ?? '720p',
+      ], static fn (mixed $value): bool => $value !== NULL && $value !== ''));
+      $request_id = (string) ($response['request_id'] ?? '');
+      if ($request_id === '') {
+        throw new \RuntimeException($this->translate('Grok did not return a video request ID.'));
+      }
+      $turn->set('provider_request_id', $request_id);
+      $turn->set('provider_metadata', [
+        'request_id' => $request_id,
+        'provider_status' => 'pending',
+        'input_file_ids' => array_map(
+          static fn (FileInterface $file): int => (int) $file->id(),
+          $sources,
+        ),
+        'input_count' => count($sources),
+      ]);
+      $turn->set('status', 'processing');
+      $turn->save();
+      return $turn;
+    }
+
+    $response = $this->xaiRequest($provider_id, 'GET', 'videos/' . rawurlencode($request_id));
+    $status = (string) ($response['status'] ?? 'pending');
+    if ($status === 'pending') {
+      $metadata = (array) ($turn->get('provider_metadata')->first()?->getValue() ?? []);
+      $metadata['provider_status'] = 'pending';
+      $metadata['progress'] = $response['progress'] ?? NULL;
+      $turn->set('provider_metadata', $metadata);
+      $turn->set('status', 'processing');
+      $turn->save();
+      return $turn;
+    }
+    if (in_array($status, ['failed', 'expired'], TRUE)) {
+      $message = (string) ($response['error']['message'] ?? $response['error'] ?? 'No provider diagnostic was returned.');
+      $turn->set('status', $status);
+      $turn->set('error_message', $message);
+      $turn->set('provider_metadata', $response + [
+        'request_id' => $request_id,
+        'provider_status' => $status,
+      ]);
+      $turn->save();
+      return $turn;
+    }
+    if ($status !== 'done' || empty($response['video']['url'])) {
+      throw new \RuntimeException($this->translate('Grok returned an unknown video status: @status', [
+        '@status' => $status,
+      ]));
+    }
+
+    $binary = $this->downloadProviderAsset((string) $response['video']['url']);
+    $file = $this->saveGeneratedVideo(
+      new VideoFile($binary, 'video/mp4', sprintf('grok-video-%d.mp4', $turn->id())),
+      (int) $session->id(),
+      (int) $turn->id(),
+    );
+    $cost = $this->findReportedCost($response);
+    $turn->set('video', ['target_id' => $file->id()]);
+    $turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
+    $turn->set('estimated_cost', $cost);
+    $turn->set('cost_source', $cost === NULL ? 'unavailable' : 'reported');
+    $turn->set('provider_metadata', $response + ['request_id' => $request_id]);
+    $turn->set('status', 'completed');
+    $turn->save();
+    $session->setChangedTime($this->time->getRequestTime());
+    $session->save();
+    return $turn;
+  }
+
+  /**
+   * Builds a file_id reference when known, otherwise an inline data URI.
+   */
+  private function xaiImageReference(FileInterface $file): array {
+    $turn_ids = $this->entityTypeManager->getStorage('ai_image_studio_turn')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('image', $file->id())
+      ->sort('id', 'DESC')
+      ->range(0, 1)
+      ->execute();
+    if ($turn_ids !== []) {
+      $source_turn = $this->entityTypeManager->getStorage('ai_image_studio_turn')
+        ->load(reset($turn_ids));
+      $metadata = (array) ($source_turn?->get('provider_metadata')->first()?->getValue() ?? []);
+      if (!empty($metadata['file_id'])) {
+        return ['file_id' => (string) $metadata['file_id']];
+      }
+    }
+    $binary = file_get_contents($file->getFileUri());
+    if ($binary === FALSE) {
+      throw new \RuntimeException($this->translate('A reference image could not be read.'));
+    }
+    return [
+      'url' => sprintf(
+      'data:%s;base64,%s',
+      $file->getMimeType() ?: 'image/png',
+      base64_encode($binary),
+      ),
+    ];
+  }
+
+  /**
+   * Sends an authenticated request to the xAI REST API.
+   */
+  private function xaiRequest(
+    string $provider_id,
+    string $method,
+    string $path,
+    array $payload = [],
+  ): array {
+    $provider = $this->providerManager->createInstance($provider_id);
+    $key_id = (string) $provider->getConfig()->get('api_key');
+    $api_key = $this->keyRepository->getKey($key_id)?->getKeyValue();
+    if (!$api_key) {
+      throw new \RuntimeException($this->translate('The configured xAI API key could not be loaded.'));
+    }
+    $options = [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Accept' => 'application/json',
+      ],
+      'timeout' => 60,
+    ];
+    if ($payload !== []) {
+      $options['json'] = $payload;
+    }
+    $response = $this->httpClient->request(
+      $method,
+      'https://api.x.ai/v1/' . ltrim($path, '/'),
+      $options,
+    );
+    $decoded = json_decode((string) $response->getBody(), TRUE, 512, JSON_THROW_ON_ERROR);
+    return is_array($decoded) ? $decoded : [];
+  }
+
+  /**
+   * Downloads a temporary provider asset immediately.
+   */
+  private function downloadProviderAsset(string $url): string {
+    if ($url === '' || !str_starts_with($url, 'https://')) {
+      throw new \RuntimeException($this->translate('The provider returned an invalid asset URL.'));
+    }
+    $response = $this->httpClient->request('GET', $url, ['timeout' => 120]);
+    $binary = (string) $response->getBody();
+    if ($binary === '') {
+      throw new \RuntimeException($this->translate('The provider asset was empty.'));
+    }
+    return $binary;
+  }
+
+  /**
    * Creates a sibling turn for an additional normalized provider output.
    */
   private function createVariationTurn(object $turn): object {
@@ -318,6 +645,7 @@ final class ImageGenerator {
       'session_id',
       'parent_id',
       'source_file_id',
+      'source_file_ids',
       'request_group',
       'prompt',
       'provider_id',
@@ -445,12 +773,16 @@ final class ImageGenerator {
       return [];
     }
 
-    if (in_array($operation, ['text_to_video', 'image_to_video'], TRUE)) {
+    if (in_array($operation, [
+      'text_to_video',
+      'image_to_video',
+      'reference_to_video',
+    ], TRUE)) {
       $normalized = array_filter([
         'duration' => (int) ($settings['duration'] ?? 5),
         'aspect_ratio' => (string) ($settings['aspect_ratio'] ?? ''),
         'resolution' => (string) ($settings['resolution'] ?? ''),
-        'prompt' => $operation === 'image_to_video'
+        'prompt' => in_array($operation, ['image_to_video', 'reference_to_video'], TRUE)
           ? (string) ($settings['prompt'] ?? '')
           : '',
       ], static fn (mixed $value): bool => $value !== '');

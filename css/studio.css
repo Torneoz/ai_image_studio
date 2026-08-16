@@ -414,3 +414,24 @@
     width: 4rem;
   }
 }
+.ai-image-studio-reference-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+}
+
+.ai-image-studio-reference-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #b7bec7;
+  border-radius: 0.35rem;
+  background: #f5f7f9;
+  cursor: grab;
+}
+
+.ai-image-studio-reference-chip button {
+  font-size: 0.8rem;
+}

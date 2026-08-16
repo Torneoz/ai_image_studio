@@ -16,6 +16,10 @@ Drupal Media.
 - Sequential image refinement when the selected provider and model support
   image-to-image requests.
 - Text-to-video and image-to-video generation through compatible providers.
+- Ordered Grok image editing with up to three uploaded, Media, or prior-session
+  images and retained input provenance.
+- Grok reference-to-video with up to seven ordered images, `<IMAGE_N>` prompt
+  tokens, and native submit/poll queue processing.
 - Inline video playback and publishing to a configured Video Media type.
 - Provider and model selectors populated from Drupal AI configuration.
 - Aspect ratio, resolution, quality, and other provider-supported controls.
@@ -104,11 +108,10 @@ A test harness powered by DDEV can be found in the
 
 ## Roadmap
 
-- Add video generation reference images (Grok).
 - Better session forking.
 - Improved Media integration.
 - Improved reporting.
-- Add native provider polling, cancellation, and queue progress reporting.
+- Add provider cancellation and richer queue progress reporting.
 - More AI Providers.
 - Session recording and playback.
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0-beta7
+
+- Added a distinct Grok reference-to-video mode with up to seven ordered
+  reference images and validated `<IMAGE_N>` prompt tokens.
+- Added native xAI video submission and delayed queue polling so workers do not
+  remain occupied while Grok renders a video.
+- Persisted provider request IDs, progress, terminal diagnostics, ordered input
+  provenance, and provider-reported request costs.
+
+## 1.0.0-beta6
+
+- Added ordered Grok multi-image editing with up to three source images through
+  `/v1/images/edits`.
+- Added session-version, Media Library, and upload reference controls with
+  numbered chips, token insertion, and drag/drop ordering for session inputs.
+- Added duplicate, access, format, provider capability, and input-count
+  validation while preserving single-image behavior for other providers.
+
 All notable changes to AI Image Studio will be documented in this file.
 
 ## 1.0.0-beta5

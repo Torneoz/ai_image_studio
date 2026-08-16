@@ -128,6 +128,26 @@
                 videoResolution.value = '720p';
               }
             }
+            const references = studio.querySelector(
+              '[data-ai-image-studio-references]',
+            );
+            if (references) {
+              references.hidden = !isGrok;
+            }
+            const referenceMode = studio.querySelector(
+              'input[name="video_mode"][value="reference"]',
+            );
+            if (referenceMode) {
+              referenceMode.disabled = !isGrok;
+              if (referenceMode.checked && !isGrok) {
+                const animateMode = studio.querySelector(
+                  'input[name="video_mode"][value="animate"]',
+                );
+                if (animateMode) {
+                  animateMode.checked = true;
+                }
+              }
+            }
           };
           modelControls.forEach((control) => {
             control.addEventListener('change', applyModelCapabilities);
@@ -139,6 +159,100 @@
               });
             });
           applyModelCapabilities();
+
+          const referenceOptions = studio.querySelector(
+            '[data-ai-image-studio-reference-options]',
+          );
+          const referenceOrder = studio.querySelector(
+            '[data-ai-image-studio-reference-order]',
+          );
+          const referenceChips = studio.querySelector(
+            '[data-ai-image-studio-reference-chips]',
+          );
+          if (referenceOptions && referenceOrder && referenceChips) {
+            const prompt = studio.querySelector('textarea[name="prompt"]');
+            let orderedIds = referenceOrder.value
+              ? referenceOrder.value.split(',').filter(Boolean)
+              : [];
+            const renderChips = () => {
+              const checked = Array.from(referenceOptions.querySelectorAll(
+                'input[type="checkbox"]:checked',
+              ));
+              const checkedIds = checked.map((input) => input.value);
+              orderedIds = orderedIds.filter((id) => checkedIds.includes(id));
+              checkedIds.forEach((id) => {
+                if (!orderedIds.includes(id)) {
+                  orderedIds.push(id);
+                }
+              });
+              referenceOrder.value = orderedIds.join(',');
+              referenceChips.replaceChildren();
+              const primaryChip = document.createElement('span');
+              primaryChip.className = 'ai-image-studio-reference-chip';
+              primaryChip.textContent = Drupal.t('Image 1: selected source');
+              const primaryInsert = document.createElement('button');
+              primaryInsert.type = 'button';
+              primaryInsert.textContent = Drupal.t('Insert token');
+              primaryInsert.addEventListener('click', () => {
+                if (!prompt) {
+                  return;
+                }
+                const start = prompt.selectionStart || prompt.value.length;
+                prompt.setRangeText(
+                  '<IMAGE_1>',
+                  start,
+                  prompt.selectionEnd || start,
+                  'end',
+                );
+                prompt.focus();
+              });
+              primaryChip.append(primaryInsert);
+              referenceChips.append(primaryChip);
+              orderedIds.forEach((id, index) => {
+                const input = referenceOptions.querySelector(
+                  `input[value="${CSS.escape(id)}"]`,
+                );
+                const chip = document.createElement('span');
+                chip.className = 'ai-image-studio-reference-chip';
+                chip.draggable = true;
+                chip.dataset.referenceId = id;
+                chip.textContent = Drupal.t('Image @number: @label', {
+                  '@number': index + 2,
+                  '@label': input?.labels?.[0]?.textContent?.trim() || id,
+                });
+                const insert = document.createElement('button');
+                insert.type = 'button';
+                insert.textContent = Drupal.t('Insert token');
+                insert.addEventListener('click', () => {
+                  if (!prompt) {
+                    return;
+                  }
+                  const token = `<IMAGE_${index + 2}>`;
+                  const start = prompt.selectionStart || prompt.value.length;
+                  prompt.setRangeText(token, start, prompt.selectionEnd || start, 'end');
+                  prompt.focus();
+                });
+                chip.append(insert);
+                chip.addEventListener('dragstart', (event) => {
+                  event.dataTransfer.setData('text/plain', id);
+                });
+                chip.addEventListener('dragover', (event) => event.preventDefault());
+                chip.addEventListener('drop', (event) => {
+                  event.preventDefault();
+                  const moved = event.dataTransfer.getData('text/plain');
+                  const from = orderedIds.indexOf(moved);
+                  const to = orderedIds.indexOf(id);
+                  if (from >= 0 && to >= 0 && from !== to) {
+                    orderedIds.splice(to, 0, orderedIds.splice(from, 1)[0]);
+                    renderChips();
+                  }
+                });
+                referenceChips.append(chip);
+              });
+            };
+            referenceOptions.addEventListener('change', renderChips);
+            renderChips();
+          }
         });
     },
   };

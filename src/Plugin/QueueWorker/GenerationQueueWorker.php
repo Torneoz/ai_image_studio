@@ -9,6 +9,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\Attribute\QueueWorker;
+use Drupal\Core\Queue\DelayedRequeueException;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\Core\Queue\RequeueException;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -71,7 +72,15 @@ final class GenerationQueueWorker extends QueueWorkerBase implements ContainerFa
     }
 
     $turn = $this->generator->processTurn($turn);
+    if ($turn->get('status')->value === 'processing'
+      && !$turn->get('provider_request_id')->isEmpty()) {
+      throw new DelayedRequeueException(5, 'The provider request is still processing.');
+    }
     if ($turn->get('status')->value !== 'failed') {
+      return;
+    }
+    $provider_metadata = (array) ($turn->get('provider_metadata')->first()?->getValue() ?? []);
+    if (($provider_metadata['provider_status'] ?? '') === 'failed') {
       return;
     }
 

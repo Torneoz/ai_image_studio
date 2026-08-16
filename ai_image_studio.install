@@ -235,3 +235,37 @@ function ai_image_studio_update_10007(): void {
   }
   $config->save(TRUE);
 }
+
+/**
+ * Adds ordered reference inputs and deferred provider request tracking.
+ */
+function ai_image_studio_update_10008(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $source_files = BaseFieldDefinition::create('entity_reference')
+    ->setLabel(new TranslatableMarkup('Ordered source files'))
+    ->setSetting('target_type', 'file')
+    ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED);
+  $manager->installFieldStorageDefinition(
+    'source_file_ids',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $source_files,
+  );
+  $request_id = BaseFieldDefinition::create('string')
+    ->setLabel(new TranslatableMarkup('Provider request ID'))
+    ->setSetting('max_length', 255);
+  $manager->installFieldStorageDefinition(
+    'provider_request_id',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $request_id,
+  );
+
+  $definitions = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('ai_image_studio_turn');
+  $operation = $definitions['operation'];
+  $allowed = $operation->getSetting('allowed_values');
+  $allowed['reference_to_video'] = new TranslatableMarkup('Reference to video');
+  $operation->setSetting('allowed_values', $allowed);
+  $manager->updateFieldStorageDefinition($operation);
+}

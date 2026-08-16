@@ -145,11 +145,12 @@ final class StudioForm extends FormBase {
           'video' => $this->t('Video'),
         ],
         '#default_value' => $default_output_type,
-        '#description' => $this->t('Video generation is experimental and runs synchronously. Keep the page open until the request completes.'),
+        '#description' => $this->t('Video requests are queued. You can leave this page while generation continues.'),
       ];
       $form['source_image'] = [
         '#type' => 'managed_file',
         '#title' => $this->t('Starting image'),
+        '#multiple' => TRUE,
         '#upload_location' => 'temporary://ai-image-studio',
         '#upload_validators' => [
           'FileExtension' => ['extensions' => 'png jpg jpeg webp'],
@@ -166,17 +167,29 @@ final class StudioForm extends FormBase {
           ],
         ],
       ];
-      $form['source_media'] = [
-        '#type' => 'entity_autocomplete',
-        '#title' => $this->t('Media image'),
-        '#target_type' => 'media',
-        '#selection_handler' => 'default',
-        '#selection_settings' => [
-          'target_bundles' => [
-            (string) ($settings->get('media_bundle') ?: 'image'),
-          ],
+      $form['video_mode'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Video mode'),
+        '#options' => [
+          'text' => $this->t('Text to video'),
+          'animate' => $this->t('Animate starting image'),
+          'reference' => $this->t('Generate from references'),
         ],
-        '#description' => $this->t('Search for an existing image in Media.'),
+        '#default_value' => 'text',
+        '#description' => $this->t('Reference images guide subjects and style; they do not become the first frame.'),
+        '#states' => [
+          'visible' => [':input[name="output_type"]' => ['value' => 'video']],
+        ],
+      ];
+      $form['source_media'] = [
+        '#type' => 'ai_image_studio_media_library',
+        '#title' => $this->t('Media image'),
+        '#allowed_bundles' => [
+          (string) ($settings->get('media_bundle') ?: 'image'),
+        ],
+        '#cardinality' => 1,
+        '#default_value' => $form_state->getValue('source_media') ?: NULL,
+        '#description' => $this->t('Choose an existing image or add one through the Media Library.'),
         '#states' => [
           'visible' => [
             ':input[name="start_mode"]' => ['value' => 'media'],
@@ -399,6 +412,84 @@ final class StudioForm extends FormBase {
           'video' => $this->t('Video from this image'),
         ],
         '#default_value' => $default_output_type,
+      ];
+      $form['refine']['video_mode'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Video mode'),
+        '#options' => [
+          'animate' => $this->t('Animate starting image'),
+          'reference' => $this->t('Generate from references'),
+        ],
+        '#default_value' => 'animate',
+        '#description' => $this->t('Animate uses Image 1 as the initial frame. References guide people, products, objects, wardrobe, or style.'),
+        '#states' => [
+          'visible' => [':input[name="output_type"]' => ['value' => 'video']],
+        ],
+      ];
+      $reference_options = [];
+      foreach ($turns as $candidate) {
+        if ((int) $candidate->id() === $selected_turn_id
+          || $candidate->get('status')->value !== 'completed'
+          || $candidate->get('image')->isEmpty()) {
+          continue;
+        }
+        $reference_options[(int) $candidate->id()] = $this->t('Image @number — @prompt', [
+          '@number' => $turn_numbers[(int) $candidate->id()] ?? 1,
+          '@prompt' => $this->promptSummary((string) $candidate->get('prompt')->value),
+        ]);
+      }
+      $form['refine']['references'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Additional reference images'),
+        '#open' => FALSE,
+        '#description' => $this->t('Image order matters. The selected source is Image 1; session images are added in the order shown, followed by Media and uploads.'),
+        '#attributes' => ['data-ai-image-studio-references' => ''],
+        '#states' => [
+          'visible' => [
+            ':input[name="output_type"]' => [
+              ['value' => 'image'],
+              'or',
+              ['value' => 'video'],
+            ],
+          ],
+        ],
+        'turn_ids' => [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Session versions'),
+          '#options' => $reference_options,
+          '#attributes' => ['data-ai-image-studio-reference-options' => ''],
+        ],
+        'order' => [
+          '#type' => 'hidden',
+          '#attributes' => ['data-ai-image-studio-reference-order' => ''],
+        ],
+        'ordered_preview' => [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['ai-image-studio-reference-chips'],
+            'data-ai-image-studio-reference-chips' => '',
+            'aria-live' => 'polite',
+          ],
+        ],
+        'media' => [
+          '#type' => 'ai_image_studio_media_library',
+          '#title' => $this->t('Media reference'),
+          '#allowed_bundles' => [(string) ($settings->get('media_bundle') ?: 'image')],
+          '#default_value' => $form_state->getValue(['references', 'media']) ?: NULL,
+        ],
+        'uploads' => [
+          '#type' => 'managed_file',
+          '#title' => $this->t('Uploaded references'),
+          '#multiple' => TRUE,
+          '#upload_location' => 'temporary://ai-image-studio',
+          '#upload_validators' => [
+            'FileExtension' => ['extensions' => 'png jpg jpeg webp'],
+            'FileSizeLimit' => ['fileLimit' => $max_upload_bytes],
+          ],
+        ],
+        'tokens' => [
+          '#markup' => '<p class="description">' . $this->t('Reference-video prompts can identify inputs as &lt;IMAGE_1&gt;, &lt;IMAGE_2&gt;, and so on.') . '</p>',
+        ],
       ];
       $operation = $selected_source ? 'image_to_image' : 'text_to_image';
       $model_options = $this->generator->getModelOptions($operation);
@@ -1001,6 +1092,7 @@ final class StudioForm extends FormBase {
       'image_to_image' => $this->t('Image edit'),
       'text_to_video' => $this->t('Video generation'),
       'image_to_video' => $this->t('Image animation'),
+      'reference_to_video' => $this->t('Reference video'),
       default => $this->t('Image generation'),
     };
     $ratio = (string) ($settings['aspect_ratio'] ?? 'auto');
@@ -1012,6 +1104,7 @@ final class StudioForm extends FormBase {
     $output_summary = in_array($turn->get('operation')->value, [
       'text_to_video',
       'image_to_video',
+      'reference_to_video',
     ], TRUE)
       ? $this->t('@ratio · @resolution · @duration seconds', [
         '@ratio' => $ratio,
@@ -1075,6 +1168,28 @@ final class StudioForm extends FormBase {
         (string) $provider_metadata['output_count'],
       );
     }
+    $input_count = $turn->hasField('source_file_ids')
+      ? $turn->get('source_file_ids')->count()
+      : 0;
+    if ($input_count > 0) {
+      $input_items = [];
+      foreach ($turn->get('source_file_ids')->referencedEntities() as $index => $file) {
+        if ($file instanceof FileInterface) {
+          $input_items[] = $this->t('Image @number — @name', [
+            '@number' => $index + 1,
+            '@name' => $file->getFilename(),
+          ]);
+        }
+      }
+      $feedback['inputs'] = $this->feedbackItem(
+        $this->t('Ordered inputs'),
+        [
+          '#theme' => 'item_list',
+          '#items' => $input_items,
+          '#attributes' => ['class' => ['ai-image-studio-input-provenance']],
+        ],
+      );
+    }
     if ((int) $turn->get('attempt_count')->value > 1) {
       $feedback['attempts'] = $this->feedbackItem(
         $this->t('Attempts'),
@@ -1110,6 +1225,7 @@ final class StudioForm extends FormBase {
     elseif (in_array($turn->get('operation')->value, [
       'image_to_image',
       'image_to_video',
+      'reference_to_video',
     ], TRUE)) {
       $feedback['source'] = $this->feedbackItem(
         $this->t('Source image'),
@@ -1137,6 +1253,7 @@ final class StudioForm extends FormBase {
       $output = in_array($turn->get('operation')->value, [
         'text_to_video',
         'image_to_video',
+        'reference_to_video',
       ], TRUE)
         ? $this->t('@ratio · @resolution · @duration seconds', [
           '@ratio' => $ratio,
@@ -1155,6 +1272,7 @@ final class StudioForm extends FormBase {
         : (in_array($turn->get('operation')->value, [
           'image_to_image',
           'image_to_video',
+          'reference_to_video',
         ], TRUE)
           ? $this->t('Uploaded image')
           : $this->t('Text prompt'));
@@ -1202,6 +1320,7 @@ final class StudioForm extends FormBase {
           'image_to_image' => $this->t('Image edit'),
           'text_to_video' => $this->t('Video generation'),
           'image_to_video' => $this->t('Image animation'),
+          'reference_to_video' => $this->t('Reference video'),
           default => $this->t('Image generation'),
         },
         'source' => $source,
@@ -1538,7 +1657,7 @@ final class StudioForm extends FormBase {
       }
       elseif ($start_mode === 'media') {
         $media = $this->entityTypeManager->getStorage('media')->load(
-          $form_state->getValue('source_media'),
+          $this->mediaLibrarySelectionId($form_state->getValue('source_media')),
         );
         $source_field = (string) ($this->studioConfigFactory
           ->get('ai_image_studio.settings')
@@ -1603,6 +1722,68 @@ final class StudioForm extends FormBase {
           $this->t('The selected provider and model is not available for this request type.'),
         );
       }
+
+      $reference_files = $this->referenceFilesFromForm($form_state, $session_id);
+      $video_mode = (string) ($form_state->getValue('video_mode') ?: 'animate');
+      $reference_mode = $output_type === 'video' && $video_mode === 'reference';
+      $maximum = $reference_mode ? 7 : 3;
+      if (count($reference_files) > $maximum) {
+        $form_state->setErrorByName('references', $this->t(
+          'This mode accepts at most @count ordered input images.',
+          ['@count' => $maximum],
+        ));
+      }
+      $maximum_bytes = (int) ($this->studioConfigFactory
+        ->get('ai_image_studio.settings')->get('max_source_image_size_mb') ?: 20)
+        * 1024 * 1024;
+      foreach ($reference_files as $reference_file) {
+        if (!in_array($reference_file->getMimeType(), [
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+        ], TRUE)) {
+          $form_state->setErrorByName('references', $this->t('Reference images must be PNG, JPEG, or WebP files.'));
+          break;
+        }
+        if ((int) $reference_file->getSize() > $maximum_bytes) {
+          $form_state->setErrorByName('references', $this->t('A reference image exceeds the configured upload limit.'));
+          break;
+        }
+      }
+      if (count($reference_files) !== count(array_unique(array_map(
+        static fn (FileInterface $file): int => (int) $file->id(),
+        $reference_files,
+      )))) {
+        $form_state->setErrorByName('references', $this->t('The same image cannot be supplied more than once.'));
+      }
+      if (count($reference_files) > 1
+        && !$reference_mode
+        && !$this->generator->supportsMultipleImages($model)) {
+        $form_state->setErrorByName('references', $this->t('The selected provider does not support multiple image inputs.'));
+      }
+      if ($reference_mode) {
+        if (!$this->generator->supportsReferenceVideo($model)) {
+          $form_state->setErrorByName('video_model', $this->t('The selected model does not support reference-to-video.'));
+        }
+        if ($reference_files === []) {
+          $form_state->setErrorByName('references', $this->t('Add at least one reference image.'));
+        }
+        if ((int) $form_state->getValue('duration') > 10) {
+          $form_state->setErrorByName('duration', $this->t('Reference-to-video is limited to 10 seconds.'));
+        }
+        if ($form_state->getValue('video_resolution') === '1080p') {
+          $form_state->setErrorByName('video_resolution', $this->t('Reference-to-video supports 480p or 720p output.'));
+        }
+        preg_match_all('/<IMAGE_(\d+)>/', (string) $form_state->getValue('prompt'), $matches);
+        foreach (array_map('intval', $matches[1] ?? []) as $number) {
+          if ($number < 1 || $number > count($reference_files)) {
+            $form_state->setErrorByName('prompt', $this->t(
+              'The token <IMAGE_@number> has no corresponding reference image.',
+              ['@number' => $number],
+            ));
+          }
+        }
+      }
     }
   }
 
@@ -1656,9 +1837,10 @@ final class StudioForm extends FormBase {
         $source = $this->entityTypeManager->getStorage('file')->load(reset($file_ids));
       }
       elseif ($form_state->getValue('start_mode') === 'media') {
-        $media = $this->entityTypeManager->getStorage('media')->load(
+        $media_id = $this->mediaLibrarySelectionId(
           $form_state->getValue('source_media'),
         );
+        $media = $this->entityTypeManager->getStorage('media')->load($media_id);
         $source_field = (string) ($this->studioConfigFactory
           ->get('ai_image_studio.settings')
           ->get('media_source_field') ?: 'field_media_image');
@@ -1670,6 +1852,15 @@ final class StudioForm extends FormBase {
         $model = (string) $form_state->getValue(
           $output_type === 'video' ? 'text_video_model' : 'text_model',
         );
+      }
+    }
+
+    $reference_files = $this->referenceFilesFromForm($form_state, $session_id);
+    $video_mode = (string) ($form_state->getValue('video_mode') ?: 'animate');
+    if ($output_type === 'video' && $video_mode === 'reference') {
+      preg_match_all('/<IMAGE_(\d+)>/', (string) $form_state->getValue('prompt'), $matches);
+      if (count(array_unique($matches[1] ?? [])) < count($reference_files)) {
+        $this->messenger()->addWarning($this->t('One or more reference images are not named in the prompt. Use <IMAGE_1>, <IMAGE_2>, and so on when the distinction matters.'));
       }
     }
 
@@ -1700,6 +1891,11 @@ final class StudioForm extends FormBase {
         'ai_badge_text' => trim((string) $form_state->getValue(
           $output_type === 'video' ? 'video_ai_badge_text' : 'ai_badge_text',
         )) ?: 'AI Image',
+        'reference_file_ids' => array_map(
+          static fn (FileInterface $file): int => (int) $file->id(),
+          $reference_files,
+        ),
+        'video_mode' => $video_mode,
       ],
       $output_type,
     );
@@ -1736,6 +1932,95 @@ final class StudioForm extends FormBase {
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session->id(),
     ]);
+  }
+
+  /**
+   * Extracts the single entity ID returned by the Media Library form element.
+   */
+  private function mediaLibrarySelectionId(mixed $value): int {
+    $ids = array_values(array_filter(array_map(
+      static fn (string $id): int => (int) trim($id),
+      explode(',', (string) $value),
+    )));
+    return $ids[0] ?? 0;
+  }
+
+  /**
+   * Loads ordered, accessible image inputs selected in the generation form.
+   */
+  private function referenceFilesFromForm(
+    FormStateInterface $form_state,
+    mixed $session_id,
+  ): array {
+    $ids = [];
+    if ($session_id === NULL) {
+      $start_mode = (string) $form_state->getValue('start_mode');
+      if ($start_mode === 'upload') {
+        $ids = array_values(array_filter(array_map(
+          'intval',
+          (array) $form_state->getValue('source_image'),
+        )));
+      }
+      elseif ($start_mode === 'media') {
+        $media_id = $this->mediaLibrarySelectionId($form_state->getValue('source_media'));
+        $media = $this->entityTypeManager->getStorage('media')->load($media_id);
+        $field = (string) ($this->studioConfigFactory
+          ->get('ai_image_studio.settings')->get('media_source_field') ?: 'field_media_image');
+        if ($media instanceof MediaInterface
+          && $media->hasField($field)
+          && $media->get($field)->entity instanceof FileInterface) {
+          $ids[] = (int) $media->get($field)->target_id;
+        }
+      }
+    }
+    else {
+      $primary = $this->completedTurnFromSession(
+        (int) $session_id,
+        (int) $form_state->getValue('source_turn_id'),
+      );
+      if ($primary !== NULL && !$primary->get('image')->isEmpty()) {
+        $ids[] = (int) $primary->get('image')->target_id;
+      }
+      $selected_turn_ids = array_values(array_filter(array_map(
+        'intval',
+        (array) $form_state->getValue('turn_ids'),
+      )));
+      $requested_order = array_values(array_filter(array_map(
+        'intval',
+        explode(',', (string) $form_state->getValue('order')),
+      )));
+      $ordered_turn_ids = array_values(array_intersect($requested_order, $selected_turn_ids));
+      $ordered_turn_ids = array_merge(
+        $ordered_turn_ids,
+        array_values(array_diff($selected_turn_ids, $ordered_turn_ids)),
+      );
+      foreach ($ordered_turn_ids as $turn_id) {
+        $turn = $this->completedTurnFromSession((int) $session_id, (int) $turn_id);
+        if ($turn !== NULL && !$turn->get('image')->isEmpty()) {
+          $ids[] = (int) $turn->get('image')->target_id;
+        }
+      }
+      $media_id = $this->mediaLibrarySelectionId($form_state->getValue('media'));
+      if ($media_id > 0) {
+        $media = $this->entityTypeManager->getStorage('media')->load($media_id);
+        $field = (string) ($this->studioConfigFactory
+          ->get('ai_image_studio.settings')->get('media_source_field') ?: 'field_media_image');
+        if ($media instanceof MediaInterface
+          && $media->hasField($field)
+          && $media->get($field)->entity instanceof FileInterface) {
+          $ids[] = (int) $media->get($field)->target_id;
+        }
+      }
+      $ids = array_merge($ids, array_values(array_filter(array_map(
+        'intval',
+        (array) $form_state->getValue('uploads'),
+      ))));
+    }
+    $files = $this->entityTypeManager->getStorage('file')->loadMultiple($ids);
+    return array_values(array_filter(array_map(
+      static fn (int $id): mixed => $files[$id] ?? NULL,
+      $ids,
+    ), static fn (mixed $file): bool => $file instanceof FileInterface));
   }
 
   /**

@@ -47,6 +47,11 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setLabel(new TranslatableMarkup('Source file'))
       ->setSetting('target_type', 'file');
 
+    $fields['source_file_ids'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Ordered source files'))
+      ->setSetting('target_type', 'file')
+      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED);
+
     $fields['request_group'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Request group'))
       ->setSetting('max_length', 64);
@@ -81,6 +86,7 @@ final class ImageStudioTurn extends ContentEntityBase {
           'image_to_image' => new TranslatableMarkup('Image to image'),
           'text_to_video' => new TranslatableMarkup('Text to video'),
           'image_to_video' => new TranslatableMarkup('Image to video'),
+          'reference_to_video' => new TranslatableMarkup('Reference to video'),
         ],
       ]);
 
@@ -112,6 +118,10 @@ final class ImageStudioTurn extends ContentEntityBase {
 
     $fields['provider_metadata'] = BaseFieldDefinition::create('map')
       ->setLabel(new TranslatableMarkup('Provider metadata'));
+
+    $fields['provider_request_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Provider request ID'))
+      ->setSetting('max_length', 255);
 
     $fields['attempt_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(new TranslatableMarkup('Generation attempts'))

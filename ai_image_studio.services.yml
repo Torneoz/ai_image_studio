@@ -10,6 +10,8 @@ services:
       - '@datetime.time'
       - '@logger.channel.ai_image_studio'
       - '@queue'
+      - '@http_client'
+      - '@key.repository'
       - '@?torneo_ai.pricing_catalog'
 
   logger.channel.ai_image_studio:
@@ -23,3 +25,8 @@ services:
       - '@entity_type.manager'
       - '@config.factory'
       - '@current_user'
+
+  media_library.opener.ai_image_studio_form:
+    class: Drupal\ai_image_studio\MediaLibraryFormOpener
+    tags:
+      - { name: media_library.opener }
