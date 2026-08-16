@@ -75,6 +75,16 @@ final class StudioForm extends FormBase {
 
     $form['#attached']['library'][] = 'ai_image_studio/studio';
     $form['#attributes']['class'][] = 'ai-image-studio-layout';
+    if ($session !== NULL && $this->sessionHasActiveGeneration((int) $session->id())) {
+      $form['#attached']['html_head'][] = [[
+        '#tag' => 'meta',
+        '#attributes' => [
+          'http-equiv' => 'refresh',
+          'content' => '5',
+        ],
+      ], 'ai_image_studio_generation_refresh',
+      ];
+    }
     $form['generation_feedback'] = [
       '#type' => 'container',
       '#weight' => -100,
@@ -544,6 +554,31 @@ final class StudioForm extends FormBase {
         '#default_value' => $defaults['resolution'] ?? ($settings->get('default_image_resolution') ?: 'auto'),
         '#description' => $this->t('Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting.'),
       ],
+      'quality' => [
+        '#type' => 'select',
+        '#title' => $this->t('Generation quality'),
+        '#options' => [
+          'medium' => $this->t('Medium — standard quality'),
+          'low' => $this->t('Low — faster generation'),
+        ],
+        '#default_value' => $defaults['quality'] ?? ($settings->get('default_image_quality') ?: 'medium'),
+        '#description' => $this->t('Supported by Grok Imagine Image 2.0. Other models may ignore this setting.'),
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-quality-control' => '',
+        ],
+      ],
+      'variations' => [
+        '#type' => 'select',
+        '#title' => $this->t('Variations'),
+        '#options' => [
+          1 => '1',
+          2 => '2',
+          3 => '3',
+          4 => '4',
+        ],
+        '#default_value' => (int) ($defaults['variations'] ?? ($settings->get('default_image_variations') ?: 1)),
+        '#description' => $this->t('Requests multiple results in one call when the selected provider supports it. Each result is retained as a separate version.'),
+      ],
       'transparent_background' => [
         '#type' => 'checkbox',
         '#title' => $this->t('Request a transparent background'),
@@ -637,6 +672,9 @@ final class StudioForm extends FormBase {
         ],
         '#default_value' => $defaults['resolution'] ?? ($settings->get('default_video_resolution') ?: '720p'),
         '#description' => $this->t('Text-to-video providers may not support 1080p.'),
+        '#attributes' => [
+          'data-ai-image-studio-video-resolution' => '',
+        ],
       ],
       'video_show_ai_badge' => [
         '#type' => 'checkbox',
@@ -733,6 +771,8 @@ final class StudioForm extends FormBase {
       'data-ai-image-studio-model' => $this->turnModelOption($turn),
       'data-ai-image-studio-aspect-ratio' => (string) ($settings['aspect_ratio'] ?? ''),
       'data-ai-image-studio-resolution' => (string) ($settings['resolution'] ?? ''),
+      'data-ai-image-studio-quality' => (string) ($settings['quality'] ?? ''),
+      'data-ai-image-studio-variations' => (string) ($settings['variations'] ?? '1'),
       'data-ai-image-studio-duration' => (string) ($settings['duration'] ?? ''),
       'data-ai-image-studio-transparent-background' => !empty($settings['transparent_background']) ? '1' : '0',
       'data-ai-image-studio-file-type' => (string) ($settings['file_type'] ?? 'png'),
@@ -988,6 +1028,15 @@ final class StudioForm extends FormBase {
     $duration = $duration_ms > 0
       ? number_format($duration_ms / 1000, 1) . 's'
       : $this->t('Time unavailable');
+    $provider_metadata = (array) ($turn->get('provider_metadata')->first()?->getValue() ?? []);
+    $requested_model = (string) $turn->get('model_id')->value;
+    $actual_model = (string) ($provider_metadata['actual_model'] ?? '');
+    $model_summary = $actual_model !== '' && $actual_model !== $requested_model
+      ? $this->t('@requested → @actual', [
+        '@requested' => $requested_model,
+        '@actual' => $actual_model,
+      ])
+      : $requested_model;
     $feedback = [
       '#type' => 'container',
       '#attributes' => ['class' => ['ai-image-studio-feedback']],
@@ -997,7 +1046,7 @@ final class StudioForm extends FormBase {
       ),
       'model' => $this->feedbackItem(
         $this->t('Model'),
-        (string) $turn->get('model_id')->value,
+        (string) $model_summary,
       ),
       'operation' => $this->feedbackItem($this->t('Request'), (string) $operation),
       'output' => $this->feedbackItem(
@@ -1006,6 +1055,32 @@ final class StudioForm extends FormBase {
       ),
       'duration' => $this->feedbackItem($this->t('Processing'), (string) $duration),
     ];
+    if (isset($provider_metadata['respect_moderation'])) {
+      $feedback['moderation'] = $this->feedbackItem(
+        $this->t('Moderation'),
+        $provider_metadata['respect_moderation']
+          ? $this->t('Passed')
+          : $this->t('Filtered'),
+      );
+    }
+    if (!empty($provider_metadata['request_id'])) {
+      $feedback['request_id'] = $this->feedbackItem(
+        $this->t('Provider request'),
+        (string) $provider_metadata['request_id'],
+      );
+    }
+    if ((int) ($provider_metadata['output_count'] ?? 1) > 1) {
+      $feedback['outputs'] = $this->feedbackItem(
+        $this->t('Request outputs'),
+        (string) $provider_metadata['output_count'],
+      );
+    }
+    if ((int) $turn->get('attempt_count')->value > 1) {
+      $feedback['attempts'] = $this->feedbackItem(
+        $this->t('Attempts'),
+        (string) $turn->get('attempt_count')->value,
+      );
+    }
     if ($this->studioConfigFactory->get('ai_image_studio.settings')
       ->get('show_token_usage') !== FALSE) {
       $feedback['tokens'] = $this->feedbackItem(
@@ -1219,8 +1294,12 @@ final class StudioForm extends FormBase {
     $status = (string) $turn->get('status')->value;
     $label = match ($status) {
       'pending' => $this->t('Pending'),
+      'queued' => $this->t('Queued'),
+      'processing' => $this->t('Processing'),
       'completed' => $this->t('Completed'),
       'failed' => $this->t('Failed'),
+      'expired' => $this->t('Expired'),
+      'cancelled' => $this->t('Cancelled'),
       default => $this->t('Unknown'),
     };
     return [
@@ -1295,6 +1374,21 @@ final class StudioForm extends FormBase {
       ],
       'value' => $value_element,
     ];
+  }
+
+  /**
+   * Reports whether a session has queued or processing turns.
+   */
+  private function sessionHasActiveGeneration(int $session_id): bool {
+    $count = $this->entityTypeManager
+      ->getStorage('ai_image_studio_turn')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $session_id)
+      ->condition('status', ['queued', 'processing'], 'IN')
+      ->count()
+      ->execute();
+    return (int) $count > 0;
   }
 
   /**
@@ -1399,10 +1493,13 @@ final class StudioForm extends FormBase {
       $max_turns = (int) ($this->studioConfigFactory
         ->get('ai_image_studio.settings')
         ->get('max_turns') ?: 25);
-      if ($this->countTurns((int) $session_id) >= $max_turns) {
+      $requested_turns = (string) ($form_state->getValue('output_type') ?: 'image') === 'image'
+        ? max(1, (int) ($form_state->getValue('variations') ?: 1))
+        : 1;
+      if ($this->countTurns((int) $session_id) + $requested_turns > $max_turns) {
         $form_state->setErrorByName(
-          'prompt',
-          $this->t('This session has reached its limit of @count turns.', [
+          'variations',
+          $this->t('This request would exceed the session limit of @count turns.', [
             '@count' => $max_turns,
           ]),
         );
@@ -1417,6 +1514,19 @@ final class StudioForm extends FormBase {
       }
     }
     $output_type = (string) ($form_state->getValue('output_type') ?: 'image');
+    if ($session_id === NULL && $output_type === 'image') {
+      $max_turns = (int) ($this->studioConfigFactory
+        ->get('ai_image_studio.settings')
+        ->get('max_turns') ?: 25);
+      if ((int) ($form_state->getValue('variations') ?: 1) > $max_turns) {
+        $form_state->setErrorByName(
+          'variations',
+          $this->t('This request would exceed the session limit of @count turns.', [
+            '@count' => $max_turns,
+          ]),
+        );
+      }
+    }
     $start_mode = (string) $form_state->getValue('start_mode');
     if ($session_id === NULL && in_array($start_mode, ['upload', 'media'], TRUE)) {
       $files = array_filter((array) $form_state->getValue('source_image'));
@@ -1576,6 +1686,10 @@ final class StudioForm extends FormBase {
         'resolution' => $output_type === 'video'
           ? $form_state->getValue('video_resolution')
           : $form_state->getValue('resolution'),
+        'quality' => $form_state->getValue('quality') ?: 'medium',
+        'variations' => $output_type === 'image'
+          ? (int) ($form_state->getValue('variations') ?: 1)
+          : 1,
         'duration' => $form_state->getValue('duration'),
         'prompt' => trim((string) $form_state->getValue('prompt')),
         'transparent_background' => $form_state->getValue('transparent_background'),
@@ -1608,6 +1722,11 @@ final class StudioForm extends FormBase {
           ],
         ));
       }
+    }
+    elseif ($turn->get('status')->value === 'queued') {
+      $this->messenger()->addStatus($this->t(
+        'The video was queued. This page refreshes while a queue worker processes it.',
+      ));
     }
     else {
       $this->messenger()->addError($this->t('Generation failed: @message', [

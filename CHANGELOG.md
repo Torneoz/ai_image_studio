@@ -2,6 +2,24 @@
 
 All notable changes to AI Image Studio will be documented in this file.
 
+## 1.0.0-beta5
+
+- Moved video generation to Drupal's queue by default so browser requests no
+  longer remain open for long-running provider calls, with configurable retry
+  limits and automatic Studio refresh while work is active.
+- Added one-to-four image variation requests and retained every normalized
+  provider output as a separately publishable version in a shared request
+  group.
+- Added Grok Imagine Image 2.0 quality controls and model-aware safeguards for
+  Grok video resolution, including 1080p support on Video 1.5.
+- Recognized both Grok- and xAI-named provider plugin IDs when mapping provider
+  settings and cost estimates.
+- Persisted provider request IDs, resolved model aliases, revised prompts,
+  moderation results, output counts, and generation attempt counts for better
+  provenance and diagnostics.
+- Expanded turn states to distinguish queued, processing, expired, and
+  cancelled generation work.
+
 ## 1.0.0-beta4
 
 - Added complete Arabic, Simplified Chinese, French, German, Hindi, Japanese,

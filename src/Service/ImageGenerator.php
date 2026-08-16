@@ -15,6 +15,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileInterface;
 use Drupal\file\FileRepositoryInterface;
@@ -46,6 +47,7 @@ final class ImageGenerator {
     private readonly ConfigFactoryInterface $configFactory,
     private readonly TimeInterface $time,
     private readonly LoggerInterface $logger,
+    private readonly QueueFactory $queueFactory,
     private readonly ?object $pricingCatalog = NULL,
   ) {}
 
@@ -128,6 +130,8 @@ final class ImageGenerator {
     $turn = $this->entityTypeManager->getStorage('ai_image_studio_turn')->create([
       'session_id' => $session->id(),
       'parent_id' => $parent?->id(),
+      'source_file_id' => $source?->id(),
+      'request_group' => bin2hex(random_bytes(16)),
       'prompt' => $prompt,
       'provider_id' => $provider_id,
       'model_id' => $model_id,
@@ -136,6 +140,45 @@ final class ImageGenerator {
       'status' => 'pending',
     ]);
     $turn->save();
+
+    if ($output_type === 'video'
+      && $this->configFactory->get('ai_image_studio.settings')
+        ->get('async_video_generation') !== FALSE) {
+      if ($source instanceof FileInterface && $source->isTemporary()) {
+        $source->setPermanent();
+        $source->save();
+      }
+      $turn->set('status', 'queued');
+      $turn->save();
+      $this->queueFactory->get('ai_image_studio_generation')
+        ->createItem(['turn_id' => (int) $turn->id()]);
+      return $turn;
+    }
+
+    return $this->processTurn($turn);
+  }
+
+  /**
+   * Processes a pending or queued generation turn.
+   */
+  public function processTurn(object $turn): object {
+    $session = $turn->get('session_id')->entity;
+    if ($session === NULL) {
+      throw new \RuntimeException($this->translate('The image session is unavailable.'));
+    }
+    $source = $turn->get('source_file_id')->entity;
+    $operation = (string) $turn->get('operation')->value;
+    $output_type = in_array($operation, ['text_to_video', 'image_to_video'], TRUE)
+      ? 'video'
+      : 'image';
+    $prompt = (string) $turn->get('prompt')->value;
+    $provider_id = (string) $turn->get('provider_id')->value;
+    $model_id = (string) $turn->get('model_id')->value;
+    $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
+    $turn->set('status', 'processing');
+    $turn->set('error_message', NULL);
+    $turn->save();
     $started_at = hrtime(TRUE);
 
     try {
@@ -143,6 +186,7 @@ final class ImageGenerator {
       $provider->setConfiguration($this->normalizeGenerationSettings(
         $provider_id,
         $operation,
+        $model_id,
         $generation_settings,
       ));
       if (in_array($operation, ['image_to_image', 'image_to_video'], TRUE)) {
@@ -193,42 +237,60 @@ final class ImageGenerator {
         $metadata,
       );
 
-      $outputs = $output->getNormalized();
-      $generated = reset($outputs);
-      if ($output_type === 'video') {
-        if (!$generated instanceof VideoFile || $generated->getBinary() === '') {
-          throw new \RuntimeException($this->translate(
-            'The provider returned no generated video.',
-          ));
-        }
-        $file = $this->saveGeneratedVideo(
-          $generated,
-          (int) $session->id(),
-          (int) $turn->id(),
-        );
-        $turn->set('video', ['target_id' => $file->id()]);
+      $outputs = array_values(array_filter(
+        (array) $output->getNormalized(),
+        static fn (mixed $item): bool => $output_type === 'video'
+          ? $item instanceof VideoFile && $item->getBinary() !== ''
+          : $item instanceof ImageFile && $item->getBinary() !== '',
+      ));
+      if ($outputs === []) {
+        throw new \RuntimeException($this->translate(
+          $output_type === 'video'
+            ? 'The provider returned no generated video.'
+            : 'The provider returned no generated image.',
+        ));
       }
-      else {
-        if (!$generated instanceof ImageFile || $generated->getBinary() === '') {
-          throw new \RuntimeException($this->translate(
-            'The provider returned no generated image.',
-          ));
-        }
-        $file = $this->saveGeneratedFile(
-          $generated,
-          (int) $session->id(),
-          (int) $turn->id(),
-        );
-        $turn->set('image', ['target_id' => $file->id()]);
+
+      $provider_metadata = array_filter([
+        'actual_model' => $this->findNestedScalarValue($raw_output, 'model')
+        ?? $this->findNestedScalarValue($metadata, 'model'),
+        'request_id' => $this->findNestedScalarValue($raw_output, 'request_id')
+        ?? $this->findNestedScalarValue($metadata, 'request_id'),
+        'revised_prompt' => $this->findNestedScalarValue($raw_output, 'revised_prompt'),
+        'respect_moderation' => $this->findNestedScalarValue($raw_output, 'respect_moderation')
+        ?? $this->findNestedScalarValue($metadata, 'respect_moderation'),
+        'output_count' => count($outputs),
+      ], static fn (mixed $value): bool => $value !== NULL && $value !== '');
+      $cost_per_output = $estimated_cost === NULL
+        ? NULL
+        : $estimated_cost / count($outputs);
+
+      foreach ($outputs as $index => $generated) {
+        $result_turn = $index === 0
+          ? $turn
+          : $this->createVariationTurn($turn);
+        $file = $output_type === 'video'
+          ? $this->saveGeneratedVideo(
+            $generated,
+            (int) $session->id(),
+            (int) $result_turn->id(),
+          )
+          : $this->saveGeneratedFile(
+            $generated,
+            (int) $session->id(),
+            (int) $result_turn->id(),
+          );
+        $result_turn->set($output_type, ['target_id' => $file->id()]);
+        $result_turn->set('duration_ms', $duration_ms);
+        $result_turn->set('estimated_cost', $cost_per_output);
+        $result_turn->set('token_usage', $index === 0 ? $token_usage : []);
+        $result_turn->set('provider_metadata', $provider_metadata);
+        $result_turn->set('cost_source', $reported_cost !== NULL
+          ? 'reported'
+          : ($estimated_cost !== NULL ? 'estimated' : 'unavailable'));
+        $result_turn->set('status', 'completed');
+        $result_turn->save();
       }
-      $turn->set('duration_ms', $duration_ms);
-      $turn->set('estimated_cost', $estimated_cost);
-      $turn->set('token_usage', $token_usage);
-      $turn->set('cost_source', $reported_cost !== NULL
-        ? 'reported'
-        : ($estimated_cost !== NULL ? 'estimated' : 'unavailable'));
-      $turn->set('status', 'completed');
-      $turn->save();
       $session->setChangedTime($this->time->getRequestTime());
       $session->save();
     }
@@ -245,6 +307,35 @@ final class ImageGenerator {
     }
 
     return $turn;
+  }
+
+  /**
+   * Creates a sibling turn for an additional normalized provider output.
+   */
+  private function createVariationTurn(object $turn): object {
+    $values = [];
+    foreach ([
+      'session_id',
+      'parent_id',
+      'source_file_id',
+      'request_group',
+      'prompt',
+      'provider_id',
+      'model_id',
+      'operation',
+      'generation_settings',
+      'attempt_count',
+    ] as $field) {
+      if (!$turn->get($field)->isEmpty()) {
+        $values[$field] = $turn->get($field)->getValue();
+      }
+    }
+    $values['status'] = 'processing';
+    $variation = $this->entityTypeManager
+      ->getStorage('ai_image_studio_turn')
+      ->create($values);
+    $variation->save();
+    return $variation;
   }
 
   /**
@@ -326,6 +417,7 @@ final class ImageGenerator {
   private function normalizeGenerationSettings(
     string $provider_id,
     string $operation,
+    string $model_id,
     array $settings,
   ): array {
     if (str_contains($provider_id, 'openai')
@@ -349,7 +441,7 @@ final class ImageGenerator {
 
     // Do not send unknown configuration keys to providers that have not
     // declared a compatible mapping because some APIs reject them.
-    if (!str_contains($provider_id, 'grok')) {
+    if (!$this->isXaiProvider($provider_id)) {
       return [];
     }
 
@@ -365,12 +457,18 @@ final class ImageGenerator {
       if (($normalized['aspect_ratio'] ?? '') === 'auto') {
         unset($normalized['aspect_ratio']);
       }
+      if (($normalized['resolution'] ?? '') === '1080p'
+        && !str_contains(strtolower($model_id), 'video-1.5')) {
+        $normalized['resolution'] = '720p';
+      }
       return $normalized;
     }
 
     $normalized = array_filter([
       'aspect_ratio' => (string) ($settings['aspect_ratio'] ?? ''),
       'resolution' => (string) ($settings['resolution'] ?? ''),
+      'quality' => (string) ($settings['quality'] ?? ''),
+      'n' => max(1, min(4, (int) ($settings['variations'] ?? 1))),
       'transparent_background' => !empty($settings['transparent_background']),
     ], static fn (mixed $value): bool => $value !== '' && $value !== FALSE);
 
@@ -383,6 +481,9 @@ final class ImageGenerator {
     // Transparency is a Grok text-to-image prompting feature.
     if ($operation !== 'text_to_image') {
       unset($normalized['transparent_background']);
+    }
+    if (!str_contains(strtolower($model_id), 'image-2.0')) {
+      unset($normalized['quality']);
     }
 
     return $normalized;
@@ -535,6 +636,24 @@ final class ImageGenerator {
   }
 
   /**
+   * Recursively finds a scalar response value suitable for persisted metadata.
+   */
+  private function findNestedScalarValue(array $data, string $key): mixed {
+    if (array_key_exists($key, $data) && is_scalar($data[$key])) {
+      return $data[$key];
+    }
+    foreach ($data as $value) {
+      if (is_array($value)) {
+        $found = $this->findNestedScalarValue($value, $key);
+        if ($found !== NULL) {
+          return $found;
+        }
+      }
+    }
+    return NULL;
+  }
+
+  /**
    * Estimates cost through Torneo's shared pricing catalogue when available.
    */
   private function estimateCost(
@@ -549,7 +668,7 @@ final class ImageGenerator {
       return NULL;
     }
     $provider = match (TRUE) {
-      str_contains($provider_id, 'grok') => 'grok',
+      $this->isXaiProvider($provider_id) => 'grok',
       str_contains($provider_id, 'openai') => 'openai',
       str_contains($provider_id, 'anthropic') => 'anthropic',
       default => $provider_id,
@@ -571,6 +690,16 @@ final class ImageGenerator {
       ]);
       return NULL;
     }
+  }
+
+  /**
+   * Identifies xAI/Grok provider plugin IDs without assuming one exact ID.
+   */
+  private function isXaiProvider(string $provider_id): bool {
+    $provider_id = strtolower($provider_id);
+    return str_contains($provider_id, 'grok')
+      || str_contains($provider_id, 'xai')
+      || str_contains($provider_id, 'x_ai');
   }
 
   /**

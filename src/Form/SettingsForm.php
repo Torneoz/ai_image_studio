@@ -149,6 +149,22 @@ final class SettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('default_image_resolution') ?: 'auto',
     ];
+    $form['generation']['default_image_quality'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default image quality'),
+      '#options' => [
+        'medium' => $this->t('Medium'),
+        'low' => $this->t('Low'),
+      ],
+      '#default_value' => $config->get('default_image_quality') ?: 'medium',
+      '#description' => $this->t('Grok Imagine Image 2.0 supports low and medium quality. Other models may ignore this setting.'),
+    ];
+    $form['generation']['default_image_variations'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default image variations'),
+      '#options' => [1 => '1', 2 => '2', 3 => '3', 4 => '4'],
+      '#default_value' => (int) ($config->get('default_image_variations') ?: 1),
+    ];
     $form['generation']['default_video_resolution'] = [
       '#type' => 'select',
       '#title' => $this->t('Default video resolution'),
@@ -268,6 +284,20 @@ final class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('max_video_duration') ?: 15,
       '#min' => 1,
       '#max' => 15,
+      '#required' => TRUE,
+    ];
+    $form['limits']['async_video_generation'] = $this->checkbox(
+      $this->t('Queue video generation'),
+      $config->get('async_video_generation'),
+      TRUE,
+    );
+    $form['limits']['async_video_generation']['#description'] = $this->t('Recommended. Video requests run through Drupal’s queue and no longer hold the browser request open. Ensure cron or another queue runner is configured.');
+    $form['limits']['generation_retry_limit'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Generation retry limit'),
+      '#default_value' => $config->get('generation_retry_limit') ?: 3,
+      '#min' => 1,
+      '#max' => 10,
       '#required' => TRUE,
     ];
     $form['limits']['request_cost_warning'] = [
@@ -425,6 +455,8 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_output_type', $form_state->getValue('default_output_type'))
       ->set('default_aspect_ratio', $form_state->getValue('default_aspect_ratio'))
       ->set('default_image_resolution', $form_state->getValue('default_image_resolution'))
+      ->set('default_image_quality', $form_state->getValue('default_image_quality'))
+      ->set('default_image_variations', (int) $form_state->getValue('default_image_variations'))
       ->set('default_video_resolution', $form_state->getValue('default_video_resolution'))
       ->set('default_video_duration', (int) $form_state->getValue('default_video_duration'))
       ->set('default_transparent_background', (bool) $form_state->getValue('default_transparent_background'))
@@ -437,6 +469,8 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_image_to_video_model', $form_state->getValue('default_image_to_video_model'))
       ->set('max_source_image_size_mb', (int) $form_state->getValue('max_source_image_size_mb'))
       ->set('max_video_duration', (int) $form_state->getValue('max_video_duration'))
+      ->set('async_video_generation', (bool) $form_state->getValue('async_video_generation'))
+      ->set('generation_retry_limit', (int) $form_state->getValue('generation_retry_limit'))
       ->set('request_cost_warning', (float) $form_state->getValue('request_cost_warning'))
       ->set('session_cost_warning', (float) $form_state->getValue('session_cost_warning'))
       ->set('media_bundle', $form_state->getValue('media_bundle'))

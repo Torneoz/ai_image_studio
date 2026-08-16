@@ -9,6 +9,7 @@ services:
       - '@config.factory'
       - '@datetime.time'
       - '@logger.channel.ai_image_studio'
+      - '@queue'
       - '@?torneo_ai.pricing_catalog'
 
   logger.channel.ai_image_studio:

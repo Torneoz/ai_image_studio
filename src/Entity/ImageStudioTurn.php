@@ -43,6 +43,14 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setLabel(new TranslatableMarkup('Parent turn'))
       ->setSetting('target_type', 'ai_image_studio_turn');
 
+    $fields['source_file_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Source file'))
+      ->setSetting('target_type', 'file');
+
+    $fields['request_group'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Request group'))
+      ->setSetting('max_length', 64);
+
     $fields['prompt'] = BaseFieldDefinition::create('string_long')
       ->setLabel(new TranslatableMarkup('Prompt'))
       ->setRequired(TRUE);
@@ -102,14 +110,26 @@ final class ImageStudioTurn extends ContentEntityBase {
     $fields['token_usage'] = BaseFieldDefinition::create('map')
       ->setLabel(new TranslatableMarkup('Token usage'));
 
+    $fields['provider_metadata'] = BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Provider metadata'));
+
+    $fields['attempt_count'] = BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Generation attempts'))
+      ->setSetting('unsigned', TRUE)
+      ->setDefaultValue(0);
+
     $fields['status'] = BaseFieldDefinition::create('list_string')
       ->setLabel(new TranslatableMarkup('Status'))
       ->setRequired(TRUE)
       ->setSettings([
         'allowed_values' => [
           'pending' => new TranslatableMarkup('Pending'),
+          'queued' => new TranslatableMarkup('Queued'),
+          'processing' => new TranslatableMarkup('Processing'),
           'completed' => new TranslatableMarkup('Completed'),
           'failed' => new TranslatableMarkup('Failed'),
+          'expired' => new TranslatableMarkup('Expired'),
+          'cancelled' => new TranslatableMarkup('Cancelled'),
         ],
       ])
       ->setDefaultValue('pending');

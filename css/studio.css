@@ -188,8 +188,15 @@
   color: #ef746b;
 }
 
-.ai-image-studio-status.is-pending {
+.ai-image-studio-status.is-pending,
+.ai-image-studio-status.is-queued,
+.ai-image-studio-status.is-processing {
   color: #e4b84f;
+}
+
+.ai-image-studio-status.is-expired,
+.ai-image-studio-status.is-cancelled {
+  color: #8b95a5;
 }
 
 .ai-image-studio-media-status {

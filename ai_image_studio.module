@@ -284,7 +284,26 @@ function ai_image_studio_entity_predelete(EntityInterface $entity): void {
       ->condition('session_id', $entity->id())
       ->execute();
     if ($ids) {
-      $storage->delete($storage->loadMultiple($ids));
+      $turns = $storage->loadMultiple($ids);
+      $uploaded_sources = [];
+      foreach ($turns as $turn) {
+        $source = $turn->get('source_file_id')->entity;
+        if ($source instanceof FileInterface
+          && str_starts_with($source->getFileUri(), 'temporary://ai-image-studio/')) {
+          $uploaded_sources[(int) $source->id()] = $source;
+        }
+      }
+      $storage->delete($turns);
+      foreach ($uploaded_sources as $file_id => $source) {
+        $references = $storage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('source_file_id', $file_id)
+          ->count()
+          ->execute();
+        if ((int) $references === 0) {
+          $source->delete();
+        }
+      }
     }
   }
 
@@ -295,6 +314,27 @@ function ai_image_studio_entity_predelete(EntityInterface $entity): void {
         $file = $entity->get($field_name)->entity;
         if ($file instanceof FileInterface) {
           $file->delete();
+        }
+      }
+    }
+
+    // Queued requests make uploaded temporary source files permanent so they
+    // remain available to cron. Remove a Studio-owned upload after its final
+    // referencing turn is deleted, without touching Media or prior outputs.
+    if (!$entity->get('source_file_id')->isEmpty()) {
+      $source = $entity->get('source_file_id')->entity;
+      if ($source instanceof FileInterface
+        && str_starts_with($source->getFileUri(), 'temporary://ai-image-studio/')) {
+        $references = \Drupal::entityTypeManager()
+          ->getStorage('ai_image_studio_turn')
+          ->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('source_file_id', $source->id())
+          ->condition('id', $entity->id(), '<>')
+          ->count()
+          ->execute();
+        if ((int) $references === 0) {
+          $source->delete();
         }
       }
     }

@@ -13,6 +13,8 @@ show_session_report: true
 default_output_type: image
 default_aspect_ratio: auto
 default_image_resolution: auto
+default_image_quality: medium
+default_image_variations: 1
 default_video_resolution: 720p
 default_video_duration: 5
 default_transparent_background: false
@@ -25,6 +27,8 @@ default_text_to_video_model: ''
 default_image_to_video_model: ''
 max_source_image_size_mb: 20
 max_video_duration: 15
+async_video_generation: true
+generation_retry_limit: 3
 request_cost_warning: 0
 session_cost_warning: 0
 media_bundle: image

@@ -55,6 +55,8 @@
               model: selectedCard.dataset.aiImageStudioModel,
               aspect_ratio: selectedCard.dataset.aiImageStudioAspectRatio,
               resolution: selectedCard.dataset.aiImageStudioResolution,
+              quality: selectedCard.dataset.aiImageStudioQuality,
+              variations: selectedCard.dataset.aiImageStudioVariations,
               duration: selectedCard.dataset.aiImageStudioDuration,
               transparent_background:
                 selectedCard.dataset.aiImageStudioTransparentBackground,
@@ -98,6 +100,45 @@
             orderControl.addEventListener('change', applyHistoryOrder);
             applyHistoryOrder();
           }
+
+          const modelControls = studio.querySelectorAll(
+            'select[name$="model"]',
+          );
+          const applyModelCapabilities = () => {
+            const visibleModel = Array.from(modelControls).find(
+              (control) => control.offsetParent !== null,
+            );
+            const model = (visibleModel?.value || '').toLowerCase();
+            const isGrok = model.includes('grok') || model.includes('xai');
+            const quality = studio.querySelector(
+              '[data-ai-image-studio-quality-control] select',
+            );
+            if (quality) {
+              quality.disabled = isGrok && !model.includes('image-2.0');
+            }
+            const videoResolution = studio.querySelector(
+              '[data-ai-image-studio-video-resolution]',
+            );
+            const fullHd = videoResolution?.querySelector(
+              'option[value="1080p"]',
+            );
+            if (fullHd) {
+              fullHd.disabled = isGrok && !model.includes('video-1.5');
+              if (fullHd.disabled && videoResolution.value === '1080p') {
+                videoResolution.value = '720p';
+              }
+            }
+          };
+          modelControls.forEach((control) => {
+            control.addEventListener('change', applyModelCapabilities);
+          });
+          studio.querySelectorAll('input[name="output_type"], input[name="start_mode"]')
+            .forEach((control) => {
+              control.addEventListener('change', () => {
+                window.setTimeout(applyModelCapabilities, 0);
+              });
+            });
+          applyModelCapabilities();
         });
     },
   };

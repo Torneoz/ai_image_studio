@@ -177,3 +177,61 @@ function ai_image_studio_update_10006(): void {
   }
   $config->save(TRUE);
 }
+
+/**
+ * Adds queued generation, request grouping, and provider provenance fields.
+ */
+function ai_image_studio_update_10007(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $fields = [
+    'source_file_id' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Source file'))
+      ->setSetting('target_type', 'file'),
+    'request_group' => BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Request group'))
+      ->setSetting('max_length', 64),
+    'provider_metadata' => BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Provider metadata')),
+    'attempt_count' => BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Generation attempts'))
+      ->setSetting('unsigned', TRUE)
+      ->setDefaultValue(0),
+  ];
+  foreach ($fields as $name => $definition) {
+    $manager->installFieldStorageDefinition(
+      $name,
+      'ai_image_studio_turn',
+      'ai_image_studio',
+      $definition,
+    );
+  }
+
+  $definitions = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('ai_image_studio_turn');
+  $status = $definitions['status'];
+  $status->setSetting('allowed_values', [
+    'pending' => new TranslatableMarkup('Pending'),
+    'queued' => new TranslatableMarkup('Queued'),
+    'processing' => new TranslatableMarkup('Processing'),
+    'completed' => new TranslatableMarkup('Completed'),
+    'failed' => new TranslatableMarkup('Failed'),
+    'expired' => new TranslatableMarkup('Expired'),
+    'cancelled' => new TranslatableMarkup('Cancelled'),
+  ]);
+  $manager->updateFieldStorageDefinition($status);
+
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  $defaults = [
+    'default_image_quality' => 'medium',
+    'default_image_variations' => 1,
+    'async_video_generation' => TRUE,
+    'generation_retry_limit' => 3,
+  ];
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+    }
+  }
+  $config->save(TRUE);
+}

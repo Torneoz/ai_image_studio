@@ -47,6 +47,12 @@ ai_image_studio.settings:
     default_image_resolution:
       type: string
       label: 'Default image resolution'
+    default_image_quality:
+      type: string
+      label: 'Default image quality'
+    default_image_variations:
+      type: integer
+      label: 'Default number of image variations'
     default_video_resolution:
       type: string
       label: 'Default video resolution'
@@ -83,6 +89,12 @@ ai_image_studio.settings:
     max_video_duration:
       type: integer
       label: 'Maximum video duration'
+    async_video_generation:
+      type: boolean
+      label: 'Queue video generation'
+    generation_retry_limit:
+      type: integer
+      label: 'Generation retry limit'
     request_cost_warning:
       type: float
       label: 'Per-request cost warning threshold'

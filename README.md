@@ -19,6 +19,10 @@ Drupal Media.
 - Inline video playback and publishing to a configured Video Media type.
 - Provider and model selectors populated from Drupal AI configuration.
 - Aspect ratio, resolution, quality, and other provider-supported controls.
+- Up to four image variations per request when supported, retained as separate
+  versions in the same request group.
+- Queued video generation with configurable automatic retries, allowing users
+  to leave the Studio page while cron or another queue runner processes work.
 - Optional, configurable AI badges with the choice to embed them permanently
   in image or video files when publishing to Media.
 - PNG, JPEG, and WebP output selection for compatible image providers.
@@ -31,8 +35,10 @@ Drupal Media.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
   and per-operation model overrides.
 
-Image and video requests currently run synchronously. Keep the Studio page open
-until the selected provider completes the request.
+Image requests run synchronously. Video requests are queued by default and are
+processed by Drupal cron or another queue runner. Sites using video generation
+must run cron regularly; administrators can restore synchronous video requests
+from the module settings for development or provider troubleshooting.
 
 Embedding badges in Media images requires PHP GD. Embedding badges in Media
 videos additionally requires the `ffmpeg` executable to be available to PHP.
@@ -78,7 +84,8 @@ the module's access permission.
 
 1. Create a Studio session.
 2. Select a provider and model exposed by Drupal AI.
-3. Choose image or video output and submit an initial prompt.
+3. Choose image or video output and submit an initial prompt. Image requests
+   can return up to four separately retained variations.
 4. Enter follow-up prompts to refine or animate a selected image.
 5. Review the version history and select the preferred result.
 6. Save the preferred image or video to Media. Images require alternative text
@@ -101,7 +108,7 @@ A test harness powered by DDEV can be found in the
 - Better session forking.
 - Improved Media integration.
 - Improved reporting.
-- Improved asynchronous generation.
+- Add native provider polling, cancellation, and queue progress reporting.
 - More AI Providers.
 - Session recording and playback.
 
