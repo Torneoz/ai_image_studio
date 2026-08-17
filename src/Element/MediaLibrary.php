@@ -79,10 +79,13 @@ final class MediaLibrary extends FormElementBase {
 
     $element['#attributes']['id'] = $wrapper_id;
     $element['#attributes']['class'][] = 'media-library-widget';
-    $element['#attached']['library'][] = 'media_library/view';
+    $element['#attached']['library'][] = 'ai_image_studio/media_library_element';
     $element['selection'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['media-library-selection']],
+      '#attributes' => [
+        'class' => ['media-library-selection'],
+        'data-ai-image-studio-media-selection' => $widget_id,
+      ],
     ];
     if ($media instanceof MediaInterface) {
       $element['selection']['preview'] = [
@@ -120,6 +123,11 @@ final class MediaLibrary extends FormElementBase {
       '#type' => 'button',
       '#value' => $media instanceof MediaInterface ? t('Replace media') : t('Add media'),
       '#name' => $widget_id . '-open',
+      '#attributes' => [
+        'class' => ['media-library-open-button', 'js-media-library-open-button'],
+        'data-disable-refocus' => 'true',
+        'data-ai-image-studio-media-open' => $widget_id,
+      ],
       '#media_library_state' => $state,
       '#ajax' => [
         'callback' => [self::class, 'openMediaLibrary'],

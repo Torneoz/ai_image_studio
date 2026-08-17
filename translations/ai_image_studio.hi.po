@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AI Image Studio\n"
-"POT-Creation-Date: 2026-08-06 00:00+0000\n"
-"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"POT-Creation-Date: 2026-08-17 00:00+0000\n"
+"PO-Revision-Date: 2026-08-17 00:00+0000\n"
 "Last-Translator: Torneoz translation team\n"
 "Language: hi\n"
 "Language-Team: Hindi\n"
@@ -70,8 +70,12 @@ msgstr "सक्रिय"
 msgid "Archived"
 msgstr "संग्रहीत"
 
-msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
-msgstr "एक छवि बनाएं, फिर उसे अनुक्रमिक संकेतों के माध्यम से परिष्कृत करें। प्रत्येक परिणाम को सत्र में एक मोड़ के रूप में रखा जाता है।"
+msgid ""
+"Create an image, then refine it through sequential prompts. Each result is "
+"retained as a turn in the session."
+msgstr ""
+"एक छवि बनाएं, फिर उसे अनुक्रमिक संकेतों के माध्यम से परिष्कृत करें। प्रत्येक परिणाम को सत्र में "
+"एक मोड़ के रूप में रखा जाता है।"
 
 msgid "Session"
 msgstr "सेशन"
@@ -280,7 +284,8 @@ msgstr "उत्पन्न छवि अनुपलब्ध है."
 msgid "Starting generation…"
 msgstr "आरंभिक पीढ़ी..."
 
-msgid "Your request is being sent to the selected provider. Keep this page open."
+msgid ""
+"Your request is being sent to the selected provider. Keep this page open."
 msgstr "आपका अनुरोध चयनित प्रदाता को भेजा जा रहा है। इस पेज को खुला रखें."
 
 msgid "Session title"
@@ -304,23 +309,33 @@ msgstr "चित्र"
 msgid "Video"
 msgstr "वीडियो"
 
-msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
-msgstr "वीडियो निर्माण प्रायोगिक है और समकालिक रूप से चलता है। अनुरोध पूरा होने तक पेज खुला रखें।"
+msgid ""
+"Video generation is experimental and runs synchronously. Keep the page open "
+"until the request completes."
+msgstr ""
+"वीडियो निर्माण प्रायोगिक है और समकालिक रूप से चलता है। अनुरोध पूरा होने तक पेज खुला रखें।"
 
 msgid "Starting image"
 msgstr "आरंभिक छवि"
 
-msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
-msgstr "Drupal AI में कॉन्फ़िगर किए गए टेक्स्ट-टू-इमेज डिफ़ॉल्ट का उपयोग करता है। केवल कॉन्फ़िगर किए गए प्रदाता और मॉडल सूचीबद्ध हैं।"
+msgid ""
+"Uses the Text-to-Image default configured in Drupal AI. Only configured "
+"providers and models are listed."
+msgstr ""
+"Drupal AI में कॉन्फ़िगर किए गए टेक्स्ट-टू-इमेज डिफ़ॉल्ट का उपयोग करता है। केवल कॉन्फ़िगर "
+"किए गए प्रदाता और मॉडल सूचीबद्ध हैं।"
 
-msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgid ""
+"Only providers that advertise Image-to-Image editing support are listed."
 msgstr "केवल वे प्रदाता जो छवि-से-छवि संपादन समर्थन का विज्ञापन करते हैं, सूचीबद्ध हैं।"
 
 msgid "Provider and video model"
 msgstr "प्रदाता और वीडियो मॉडल"
 
-msgid "Only configured providers that advertise Text-to-Video support are listed."
-msgstr "केवल कॉन्फ़िगर किए गए प्रदाता जो टेक्स्ट-टू-वीडियो समर्थन का विज्ञापन करते हैं, सूचीबद्ध हैं।"
+msgid ""
+"Only configured providers that advertise Text-to-Video support are listed."
+msgstr ""
+"केवल कॉन्फ़िगर किए गए प्रदाता जो टेक्स्ट-टू-वीडियो समर्थन का विज्ञापन करते हैं, सूचीबद्ध हैं।"
 
 msgid "Animates the uploaded image using an Image-to-Video provider."
 msgstr "इमेज-टू-वीडियो प्रदाता का उपयोग करके अपलोड की गई छवि को एनिमेट करता है।"
@@ -340,8 +355,12 @@ msgstr "पहले सबसे पुराना"
 msgid "Newest first"
 msgstr "पहले सबसे नया"
 
-msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
-msgstr "इस सत्र के संस्करण प्रदर्शित होने का तरीका बदलता है। संस्करण संख्याएँ और परिशोधन संबंध समान रहते हैं।"
+msgid ""
+"Changes how this session’s versions are displayed. Version numbers and "
+"refinement relationships stay the same."
+msgstr ""
+"इस सत्र के संस्करण प्रदर्शित होने का तरीका बदलता है। संस्करण संख्याएँ और परिशोधन संबंध समान "
+"रहते हैं।"
 
 msgid "This session has reached its limit of @count turns."
 msgstr "यह सत्र @count टर्न की अपनी सीमा तक पहुंच गया है।"
@@ -358,8 +377,12 @@ msgstr "से परिष्कृत करना"
 msgid "Version @number · @prompt"
 msgstr "संस्करण @number · @prompt"
 
-msgid "The new version will branch from this image. Select another source from any completed version in the results below."
-msgstr "नया संस्करण इस छवि से शाखाबद्ध होगा. नीचे दिए गए परिणामों में किसी भी पूर्ण संस्करण से किसी अन्य स्रोत का चयन करें।"
+msgid ""
+"The new version will branch from this image. Select another source from any "
+"completed version in the results below."
+msgstr ""
+"नया संस्करण इस छवि से शाखाबद्ध होगा. नीचे दिए गए परिणामों में किसी भी पूर्ण संस्करण से "
+"किसी अन्य स्रोत का चयन करें।"
 
 msgid "Refined image"
 msgstr "परिष्कृत छवि"
@@ -415,8 +438,14 @@ msgstr "फ़ोन परिदृश्य - 20:9"
 msgid "Phone portrait — 9:20"
 msgstr "फोन पोर्ट्रेट- 9:20"
 
-msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
-msgstr "स्वचालित रूप से चयनित या अपलोड की गई स्रोत छवि के अनुपात का उपयोग तब किया जाता है जब उनका पता लगाया जा सके। स्रोत छवि के बिना, प्रदाता अपना डिफ़ॉल्ट पहलू अनुपात चुनता है। स्पष्ट अनुपात प्रदाता-निर्भर रहता है।"
+msgid ""
+"Automatic uses the selected or uploaded source image’s proportions when they "
+"can be detected. Without a source image, the provider chooses its default "
+"aspect ratio. Explicit ratios remain provider-dependent."
+msgstr ""
+"स्वचालित रूप से चयनित या अपलोड की गई स्रोत छवि के अनुपात का उपयोग तब किया जाता है "
+"जब उनका पता लगाया जा सके। स्रोत छवि के बिना, प्रदाता अपना डिफ़ॉल्ट पहलू अनुपात चुनता "
+"है। स्पष्ट अनुपात प्रदाता-निर्भर रहता है।"
 
 msgid "1K — faster and lower cost"
 msgstr "1K - तेज़ और कम लागत"
@@ -424,11 +453,23 @@ msgstr "1K - तेज़ और कम लागत"
 msgid "2K — higher detail and cost"
 msgstr "2K - उच्च विवरण और लागत"
 
-msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
-msgstr "स्वचालित स्रोत छवि के सबसे लंबे किनारे से निकटतम समर्थित स्तर चुनता है। बिना किसी स्रोत के, यह 1K का उपयोग करता है। ग्रोक इमेजिन 1K और 2K का समर्थन करता है; अन्य प्रदाता इस सेटिंग को मैप या अनदेखा कर सकते हैं।"
+msgid ""
+"Automatic chooses the closest supported tier from the source image’s longest "
+"edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other "
+"providers may map or ignore this setting."
+msgstr ""
+"स्वचालित स्रोत छवि के सबसे लंबे किनारे से निकटतम समर्थित स्तर चुनता है। बिना किसी स्रोत "
+"के, यह 1K का उपयोग करता है। ग्रोक इमेजिन 1K और 2K का समर्थन करता है; अन्य प्रदाता इस "
+"सेटिंग को मैप या अनदेखा कर सकते हैं।"
 
-msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
-msgstr "जब प्रदाता इसका समर्थन करता है तो पारदर्शिता का अनुरोध करता है। ग्रोक इसे सर्वोत्तम प्रयास वाले टेक्स्ट-टू-इमेज निर्देश के रूप में लागू करता है; छवि संपादन और अन्य प्रदाता इसे अनदेखा कर सकते हैं।"
+msgid ""
+"Requests transparency when the provider supports it. Grok applies this as a "
+"best-effort text-to-image instruction; image editing and other providers may "
+"ignore it."
+msgstr ""
+"जब प्रदाता इसका समर्थन करता है तो पारदर्शिता का अनुरोध करता है। ग्रोक इसे सर्वोत्तम "
+"प्रयास वाले टेक्स्ट-टू-इमेज निर्देश के रूप में लागू करता है; छवि संपादन और अन्य प्रदाता इसे "
+"अनदेखा कर सकते हैं।"
 
 msgid "File type"
 msgstr "फ़ाइल प्रकार"
@@ -442,7 +483,9 @@ msgstr "जेपीईजी"
 msgid "WebP"
 msgstr "वेबपी"
 
-msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgid ""
+"PNG is the default. Availability of JPEG and WebP depends on the selected "
+"provider."
 msgstr "पीएनजी डिफ़ॉल्ट है. JPEG और WebP की उपलब्धता चयनित प्रदाता पर निर्भर करती है।"
 
 msgid "Show an AI image badge"
@@ -484,8 +527,12 @@ msgstr "मीडिया में सहेजा गया"
 msgid "Transparent background requested"
 msgstr "पारदर्शी पृष्ठभूमि का अनुरोध किया गया"
 
-msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
-msgstr "पहलू अनुपात: @ratio · रिज़ॉल्यूशन: @resolution · फ़ाइल प्रकार: @file_type@transparent"
+msgid ""
+"Aspect ratio: @ratio · Resolution: @resolution · File type: "
+"@file_type@transparent"
+msgstr ""
+"पहलू अनुपात: @ratio · रिज़ॉल्यूशन: @resolution · फ़ाइल प्रकार: "
+"@file_type@transparent"
 
 msgid "AI Image"
 msgstr "एआई छवि"
@@ -508,20 +555,36 @@ msgstr "मीडिया में प्रकाशित करें"
 msgid "Optional. Suggested from the session title and prompt."
 msgstr "वैकल्पिक. सत्र शीर्षक और संकेत से सुझाया गया।"
 
-msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
-msgstr "सत्र शीर्षक और इस संस्करण के संकेत से सुझाया गया। प्रकाशन से पहले सटीकता के लिए इसकी समीक्षा करें।"
+msgid ""
+"Suggested from the session title and this version’s prompt. Review it for "
+"accuracy before publishing."
+msgstr ""
+"सत्र शीर्षक और इस संस्करण के संकेत से सुझाया गया। प्रकाशन से पहले सटीकता के लिए इसकी "
+"समीक्षा करें।"
 
 msgid "Render the badge into the saved Media file"
 msgstr "बैज को सहेजी गई मीडिया फ़ाइल में प्रस्तुत करें"
 
-msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
-msgstr "स्थायी रूप से एम्बेडेड \"@badge\" के साथ एक अलग मीडिया फ़ाइल बनाता है। मूल स्टूडियो परिणाम संरक्षित है।"
+msgid ""
+"Creates a separate Media file with “@badge” permanently embedded. The "
+"original Studio result is preserved."
+msgstr ""
+"स्थायी रूप से एम्बेडेड \"@badge\" के साथ एक अलग मीडिया फ़ाइल बनाता है। मूल स्टूडियो "
+"परिणाम संरक्षित है।"
 
-msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
-msgstr "बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD या FFmpeg वेब सर्वर पर उपलब्ध नहीं है। मूल वीडियो अभी भी प्रकाशित किया जा सकता है."
+msgid ""
+"Badge rendering is unavailable because PHP GD or FFmpeg is not available to "
+"the web server. The original video can still be published."
+msgstr ""
+"बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD या FFmpeg वेब सर्वर पर उपलब्ध नहीं है। मूल वीडियो "
+"अभी भी प्रकाशित किया जा सकता है."
 
-msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
-msgstr "बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD वेब सर्वर पर उपलब्ध नहीं है। मूल छवि अभी भी प्रकाशित की जा सकती है."
+msgid ""
+"Badge rendering is unavailable because PHP GD is not available to the web "
+"server. The original image can still be published."
+msgstr ""
+"बैज रेंडरिंग अनुपलब्ध है क्योंकि PHP GD वेब सर्वर पर उपलब्ध नहीं है। मूल छवि अभी भी प्रकाशित "
+"की जा सकती है."
 
 msgid "Publish this version"
 msgstr "इस संस्करण को प्रकाशित करें"
@@ -610,8 +673,12 @@ msgstr "@source · $@cost USD"
 msgid "Session report"
 msgstr "सत्र रिपोर्ट"
 
-msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
-msgstr "इस सत्र में सभी जेनरेट किए गए संस्करण। कुल लागत प्रदाता द्वारा रिपोर्ट किए गए शुल्कों को उन अनुमानों के साथ जोड़ती है जहां रिपोर्ट की गई लागत अनुपलब्ध थी।"
+msgid ""
+"All generated versions in this session. Cost totals combine provider-"
+"reported charges with estimates where reported cost was unavailable."
+msgstr ""
+"इस सत्र में सभी जेनरेट किए गए संस्करण। कुल लागत प्रदाता द्वारा रिपोर्ट किए गए शुल्कों को "
+"उन अनुमानों के साथ जोड़ती है जहां रिपोर्ट की गई लागत अनुपलब्ध थी।"
 
 msgid "Version"
 msgstr "संस्करण"
@@ -628,8 +695,10 @@ msgstr "कोई संस्करण तैयार नहीं किय�
 msgid "Aggregate cost"
 msgstr "कुल लागत"
 
-msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
-msgstr "रिपोर्ट किया गया: $@reported USD · अनुमानित: $@estimated USD · अनुपलब्ध: @count"
+msgid ""
+"Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr ""
+"रिपोर्ट किया गया: $@reported USD · अनुमानित: $@estimated USD · अनुपलब्ध: @count"
 
 msgid "This session has reached the configured $@amount USD warning threshold."
 msgstr "यह सत्र कॉन्फ़िगर $@amount USD चेतावनी सीमा तक पहुंच गया है।"
@@ -691,8 +760,12 @@ msgstr "वीडियो सफलतापूर्वक तैयार क
 msgid "The image was generated successfully."
 msgstr "छवि सफलतापूर्वक तैयार की गई."
 
-msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
-msgstr "इस अनुरोध की लागत $@cost USD है, जो कॉन्फ़िगर की गई $@threshold चेतावनी सीमा को पूरा करती है।"
+msgid ""
+"This request cost $@cost USD, meeting the configured $@threshold warning "
+"threshold."
+msgstr ""
+"इस अनुरोध की लागत $@cost USD है, जो कॉन्फ़िगर की गई $@threshold चेतावनी सीमा को "
+"पूरा करती है।"
 
 msgid "Generation failed: @message"
 msgstr "जनरेशन विफल: @message"
@@ -715,8 +788,12 @@ msgstr "स्टूडियो इंटरफ़ेस"
 msgid "Default sort in Studio"
 msgstr "स्टूडियो में डिफ़ॉल्ट सॉर्ट"
 
-msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
-msgstr "जब कोई सत्र खोला जाता है या कोई नई छवि उत्पन्न होती है तो छवि संस्करणों का प्रारंभिक क्रम सेट करता है। उपयोगकर्ता सत्र देखते समय ऑर्डर बदल सकते हैं।"
+msgid ""
+"Sets the initial order of image versions when a session is opened or a new "
+"image is generated. Users can change the order while viewing a session."
+msgstr ""
+"जब कोई सत्र खोला जाता है या कोई नई छवि उत्पन्न होती है तो छवि संस्करणों का प्रारंभिक "
+"क्रम सेट करता है। उपयोगकर्ता सत्र देखते समय ऑर्डर बदल सकते हैं।"
 
 msgid "Open the generation form initially"
 msgstr "सबसे पहले जनरेशन फॉर्म खोलें"
@@ -772,8 +849,12 @@ msgstr "डिफ़ॉल्ट रूप से पारदर्शी प�
 msgid "Default image file type"
 msgstr "डिफ़ॉल्ट छवि फ़ाइल प्रकार"
 
-msgid "The selected provider must support the requested format. PNG is used by default."
-msgstr "चयनित प्रदाता को अनुरोधित प्रारूप का समर्थन करना होगा। पीएनजी का उपयोग डिफ़ॉल्ट रूप से किया जाता है।"
+msgid ""
+"The selected provider must support the requested format. PNG is used by "
+"default."
+msgstr ""
+"चयनित प्रदाता को अनुरोधित प्रारूप का समर्थन करना होगा। पीएनजी का उपयोग डिफ़ॉल्ट रूप "
+"से किया जाता है।"
 
 msgid "Show an AI image badge by default"
 msgstr "डिफ़ॉल्ट रूप से AI छवि बैज दिखाएँ"
@@ -794,7 +875,9 @@ msgid "Default Image-to-Video model"
 msgstr "डिफ़ॉल्ट छवि-से-वीडियो मॉडल"
 
 msgid "Leave as “None” to inherit the default configured by Drupal AI."
-msgstr "Drupal AI द्वारा कॉन्फ़िगर किए गए डिफ़ॉल्ट को इनहेरिट करने के लिए \"कोई नहीं\" के रूप में छोड़ें।"
+msgstr ""
+"Drupal AI द्वारा कॉन्फ़िगर किए गए डिफ़ॉल्ट को इनहेरिट करने के लिए \"कोई नहीं\" के रूप में "
+"छोड़ें।"
 
 msgid "Draft storage"
 msgstr "ड्राफ्ट भंडारण"
@@ -808,8 +891,11 @@ msgstr "व्यक्तिगत"
 msgid "Public"
 msgstr "सार्वजनिक"
 
-msgid "Private storage is recommended because generated drafts may contain sensitive material."
-msgstr "निजी भंडारण की अनुशंसा की जाती है क्योंकि उत्पन्न ड्राफ्ट में संवेदनशील सामग्री हो सकती है।"
+msgid ""
+"Private storage is recommended because generated drafts may contain "
+"sensitive material."
+msgstr ""
+"निजी भंडारण की अनुशंसा की जाती है क्योंकि उत्पन्न ड्राफ्ट में संवेदनशील सामग्री हो सकती है।"
 
 msgid "File directory"
 msgstr "फ़ाइल निर्देशिका"
@@ -835,14 +921,19 @@ msgstr "अधिकतम अनुरोधित वीडियो अवध
 msgid "Per-request cost warning"
 msgstr "प्रति-अनुरोध लागत चेतावनी"
 
-msgid "Display a warning after a request reaches this cost. Use zero to disable."
-msgstr "अनुरोध के इस लागत तक पहुंचने के बाद एक चेतावनी प्रदर्शित करें। अक्षम करने के लिए शून्य का उपयोग करें."
+msgid ""
+"Display a warning after a request reaches this cost. Use zero to disable."
+msgstr ""
+"अनुरोध के इस लागत तक पहुंचने के बाद एक चेतावनी प्रदर्शित करें। अक्षम करने के लिए शून्य का "
+"उपयोग करें."
 
 msgid "Session cost warning"
 msgstr "सत्र लागत चेतावनी"
 
 msgid "Highlight session totals at or above this amount. Use zero to disable."
-msgstr "इस राशि पर या इससे ऊपर सत्र के कुल योग को हाइलाइट करें। अक्षम करने के लिए शून्य का उपयोग करें."
+msgstr ""
+"इस राशि पर या इससे ऊपर सत्र के कुल योग को हाइलाइट करें। अक्षम करने के लिए शून्य का "
+"उपयोग करें."
 
 msgid "Media publishing"
 msgstr "मीडिया प्रकाशन"
@@ -871,8 +962,12 @@ msgstr "@count कॉन्फ़िगर किए गए मॉडल"
 msgid "Provider diagnostics"
 msgstr "प्रदाता निदान"
 
-msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
-msgstr "मॉडल Drupal AI से खोजे जाते हैं और प्रत्येक प्रदाता द्वारा विज्ञापित ऑपरेशन द्वारा फ़िल्टर किए जाते हैं।"
+msgid ""
+"Models are discovered from Drupal AI and filtered by the operation each "
+"provider advertises."
+msgstr ""
+"मॉडल Drupal AI से खोजे जाते हैं और प्रत्येक प्रदाता द्वारा विज्ञापित ऑपरेशन द्वारा फ़िल्टर "
+"किए जाते हैं।"
 
 msgid "Availability"
 msgstr "उपलब्धता"
@@ -880,8 +975,11 @@ msgstr "उपलब्धता"
 msgid "Studio default"
 msgstr "स्टूडियो डिफ़ॉल्ट"
 
-msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
-msgstr "एक सापेक्ष निर्देशिका का उपयोग करें जिसमें केवल अक्षर, संख्याएँ, अंडरस्कोर, डैश और स्लैश हों।"
+msgid ""
+"Use a relative directory containing only letters, numbers, underscores, "
+"dashes, and slashes."
+msgstr ""
+"एक सापेक्ष निर्देशिका का उपयोग करें जिसमें केवल अक्षर, संख्याएँ, अंडरस्कोर, डैश और स्लैश हों।"
 
 msgid "The default video duration cannot exceed the configured maximum."
 msgstr "डिफ़ॉल्ट वीडियो अवधि कॉन्फ़िगर की गई अधिकतम अवधि से अधिक नहीं हो सकती."
@@ -919,10 +1017,16 @@ msgstr "छवि के लिए वैकल्पिक पाठ दर्�
 msgid "Generate an image with the compact AI Image Studio form below."
 msgstr "नीचे दिए गए कॉम्पैक्ट एआई इमेज स्टूडियो फॉर्म के साथ एक छवि बनाएं।"
 
-msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
-msgstr "वीडियो निर्माण में कई मिनट लग सकते हैं. प्रदाता द्वारा अनुरोध पूरा करने तक इस पृष्ठ को खुला रखें।"
+msgid ""
+"Video generation can take several minutes. Keep this page open while the "
+"provider completes the request."
+msgstr ""
+"वीडियो निर्माण में कई मिनट लग सकते हैं. प्रदाता द्वारा अनुरोध पूरा करने तक इस पृष्ठ को "
+"खुला रखें।"
 
-msgid "The provider is creating your image. Keep this page open until the request completes."
+msgid ""
+"The provider is creating your image. Keep this page open until the request "
+"completes."
 msgstr "प्रदाता आपकी छवि बना रहा है. अनुरोध पूरा होने तक इस पृष्ठ को खुला रखें।"
 
 msgid "Conversational image and video generation using Drupal AI providers."
@@ -976,3 +1080,328 @@ msgstr "मीडिया पर एआई इमेज स्टूडिय�
 msgid "Administer AI Image Studio"
 msgstr "एआई इमेज स्टूडियो का प्रबंधन करें"
 
+#: src/Form/StudioForm.php:1140
+msgid "@requested → @actual"
+msgstr ""
+
+#: src/Form/StudioForm.php:136
+msgid "A Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:1761
+msgid "A reference image exceeds the configured upload limit."
+msgstr ""
+
+#: src/Plugin/QueueWorker/GenerationQueueWorker.php:23
+msgid "AI Image Studio generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:1781
+msgid "Add at least one reference image."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:124
+msgid "Add media"
+msgstr ""
+
+#: src/Form/StudioForm.php:443
+msgid "Additional reference images"
+msgstr ""
+
+#: src/Form/StudioForm.php:175 src/Form/StudioForm.php:420
+msgid "Animate starting image"
+msgstr ""
+
+#: src/Form/StudioForm.php:424
+msgid ""
+"Animate uses Image 1 as the initial frame. References guide people, "
+"products, objects, wardrobe, or style."
+msgstr ""
+
+#: src/Form/StudioForm.php:1207
+msgid "Attempts"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:142 src/Form/StudioForm.php:1433
+msgid "Cancelled"
+msgstr ""
+
+#: src/Form/StudioForm.php:192
+msgid "Choose an existing image or add one through the Media Library."
+msgstr ""
+
+#: src/Form/SettingsForm.php:154
+msgid "Default image quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:164
+msgid "Default image variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:1020
+msgid "Download Media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:141 src/Form/StudioForm.php:1432
+msgid "Expired"
+msgstr ""
+
+#: src/Form/StudioForm.php:1168
+msgid "Filtered"
+msgstr ""
+
+#: src/Form/StudioForm.php:176 src/Form/StudioForm.php:421
+msgid "Generate from references"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:127
+msgid "Generation attempts"
+msgstr ""
+
+#: src/Form/StudioForm.php:650
+msgid "Generation quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:297
+msgid "Generation retry limit"
+msgstr ""
+
+#: src/Form/SettingsForm.php:160
+msgid ""
+"Grok Imagine Image 2.0 supports low and medium quality. Other models may "
+"ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1190
+msgid "Image @number — @name"
+msgstr ""
+
+#: src/Form/StudioForm.php:436
+msgid "Image @number — @prompt"
+msgstr ""
+
+#: src/Form/StudioForm.php:445
+msgid ""
+"Image order matters. The selected source is Image 1; session images are "
+"added in the order shown, followed by Media and uploads."
+msgstr ""
+
+#: src/Form/SettingsForm.php:157
+msgid "Low"
+msgstr ""
+
+#: src/Form/StudioForm.php:653
+msgid "Low — faster generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:186
+msgid "Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:476
+msgid "Media reference"
+msgstr ""
+
+#: src/Form/SettingsForm.php:156
+msgid "Medium"
+msgstr ""
+
+#: src/Form/StudioForm.php:652
+msgid "Medium — standard quality"
+msgstr ""
+
+#: src/Form/StudioForm.php:1165
+msgid "Moderation"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:57 src/Element/MediaLibrary.php:118
+msgid "No media item selected."
+msgstr ""
+
+#: src/Form/StudioForm.php:1875
+msgid ""
+"One or more reference images are not named in the prompt. Use <IMAGE_1>, "
+"<IMAGE_2>, and so on when the distinction matters."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:134
+msgid "Opening media library."
+msgstr ""
+
+#: src/Form/StudioForm.php:1197
+msgid "Ordered inputs"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:51
+msgid "Ordered source files"
+msgstr ""
+
+#: src/Form/StudioForm.php:1167
+msgid "Passed"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:120
+msgid "Provider metadata"
+msgstr ""
+
+#: src/Form/StudioForm.php:1173
+msgid "Provider request"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:123
+msgid "Provider request ID"
+msgstr ""
+
+#: src/Form/StudioForm.php:973
+msgid "Publish Media"
+msgstr ""
+
+#: src/Form/SettingsForm.php:290
+msgid "Queue video generation"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:137 src/Form/StudioForm.php:1428
+msgid "Queued"
+msgstr ""
+
+#: src/Form/SettingsForm.php:294
+msgid ""
+"Recommended. Studio starts queued video work after the browser response and "
+"advances provider polling during status refreshes. Drupal cron remains a "
+"fallback."
+msgstr ""
+
+#: src/Form/StudioForm.php:179
+msgid ""
+"Reference images guide subjects and style; they do not become the first "
+"frame."
+msgstr ""
+
+#: src/Form/StudioForm.php:1757
+msgid "Reference images must be PNG, JPEG, or WebP files."
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:89
+msgid "Reference to video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1107 src/Form/StudioForm.php:1335
+msgid "Reference video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1784
+msgid "Reference-to-video is limited to 10 seconds."
+msgstr ""
+
+#: src/Form/StudioForm.php:1787
+msgid "Reference-to-video supports 480p or 720p output."
+msgstr ""
+
+#: src/Form/StudioForm.php:491
+msgid ""
+"Reference-video prompts can identify inputs as &lt;IMAGE_1&gt;, "
+"&lt;IMAGE_2&gt;, and so on."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:99
+msgid "Remove"
+msgstr ""
+
+#: src/Element/MediaLibrary.php:103
+msgid "Remove @label"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:62 src/Element/MediaLibrary.php:124
+msgid "Replace media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:56
+msgid "Request group"
+msgstr ""
+
+#: src/Form/StudioForm.php:1179
+msgid "Request outputs"
+msgstr ""
+
+#: src/Form/StudioForm.php:671
+msgid ""
+"Requests multiple results in one call when the selected provider supports "
+"it. Each result is retained as a separate version."
+msgstr ""
+
+#: src/Form/StudioForm.php:1682
+msgid "Select Media that contains a valid image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1668
+msgid "Select a Media image."
+msgstr ""
+
+#: src/Form/StudioForm.php:458
+msgid "Session versions"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:47
+msgid "Source file"
+msgstr ""
+
+#: src/Form/StudioForm.php:656
+msgid ""
+"Supported by Grok Imagine Image 2.0. Other models may ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1769
+msgid "The same image cannot be supplied more than once."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:217
+msgid "The selected media item is not available."
+msgstr ""
+
+#: src/Form/StudioForm.php:1778
+msgid "The selected model does not support reference-to-video."
+msgstr ""
+
+#: src/Form/StudioForm.php:1774
+msgid "The selected provider does not support multiple image inputs."
+msgstr ""
+
+#: src/Form/StudioForm.php:1793
+msgid "The token <IMAGE_@number> has no corresponding reference image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1936
+msgid ""
+"The video was queued. Studio starts it in the background and refreshes this "
+"page while it processes."
+msgstr ""
+
+#: src/Form/StudioForm.php:1744
+msgid "This mode accepts at most @count ordered input images."
+msgstr ""
+
+#: src/Form/StudioForm.php:1633 src/Form/StudioForm.php:1655
+msgid "This request would exceed the session limit of @count turns."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:145
+msgid "Update media selection"
+msgstr ""
+
+#: src/Form/StudioForm.php:482
+msgid "Uploaded references"
+msgstr ""
+
+#: src/Form/StudioForm.php:663
+msgid "Variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:172 src/Form/StudioForm.php:418
+msgid "Video mode"
+msgstr ""
+
+#: src/Form/StudioForm.php:148
+msgid ""
+"Video requests are queued. You can leave this page while generation "
+"continues."
+msgstr ""

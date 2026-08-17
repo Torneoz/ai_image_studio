@@ -25,10 +25,10 @@ final class StudioForm extends FormBase {
    * Constructs the Studio form.
    */
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
-    private readonly ImageGenerator $generator,
-    private readonly ConfigFactoryInterface $studioConfigFactory,
-    private readonly AccountProxyInterface $currentUserProxy,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected ImageGenerator $generator,
+    protected ConfigFactoryInterface $studioConfigFactory,
+    protected AccountProxyInterface $currentUserProxy,
   ) {}
 
   /**
@@ -970,7 +970,7 @@ final class StudioForm extends FormBase {
         $build['publish'] = [
           '#type' => 'details',
           '#tree' => TRUE,
-          '#title' => $this->t('Publish to Media'),
+          '#title' => $this->t('Publish Media'),
           'name' => [
             '#type' => 'textfield',
             '#title' => $this->t('Media name'),
@@ -1001,17 +1001,29 @@ final class StudioForm extends FormBase {
                 ? $this->t('Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published.')
                 : $this->t('Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published.')),
           ],
-          'submit' => [
-            '#type' => 'submit',
-            '#value' => $this->t('Publish this version'),
-            '#name' => 'publish_turn_' . $turn->id(),
-            '#studio_action' => 'publish',
-            '#turn_id' => $turn->id(),
-            '#limit_validation_errors' => [
-              ['history', 'turn_' . $turn->id(), 'publish', 'name'],
-              ['history', 'turn_' . $turn->id(), 'publish', 'alt'],
-              ['history', 'turn_' . $turn->id(), 'publish', 'render_badge'],
+          'actions' => [
+            '#type' => 'actions',
+            'submit' => [
+              '#type' => 'submit',
+              '#value' => $this->t('Publish to Media'),
+              '#name' => 'publish_turn_' . $turn->id(),
+              '#studio_action' => 'publish',
+              '#turn_id' => $turn->id(),
+              '#limit_validation_errors' => [
+                ['history', 'turn_' . $turn->id(), 'publish', 'name'],
+                ['history', 'turn_' . $turn->id(), 'publish', 'alt'],
+                ['history', 'turn_' . $turn->id(), 'publish', 'render_badge'],
+              ],
             ],
+            'download' => $file instanceof FileInterface ? [
+              '#type' => 'link',
+              '#title' => $this->t('Download Media'),
+              '#url' => Url::fromUserInput($file->createFileUrl()),
+              '#attributes' => [
+                'class' => ['button'],
+                'download' => TRUE,
+              ],
+            ] : [],
           ],
         ];
       }
@@ -1921,7 +1933,7 @@ final class StudioForm extends FormBase {
     }
     elseif ($turn->get('status')->value === 'queued') {
       $this->messenger()->addStatus($this->t(
-        'The video was queued. This page refreshes while a queue worker processes it.',
+        'The video was queued. Studio starts it in the background and refreshes this page while it processes.',
       ));
     }
     else {

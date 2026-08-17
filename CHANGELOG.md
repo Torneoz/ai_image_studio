@@ -1,5 +1,7 @@
 # Changelog
 
+All notable changes to AI Image Studio are documented in this file.
+
 ## 1.0.0-beta7
 
 - Added a distinct Grok reference-to-video mode with up to seven ordered
@@ -8,6 +10,18 @@
   remain occupied while Grok renders a video.
 - Persisted provider request IDs, progress, terminal diagnostics, ordered input
   provenance, and provider-reported request costs.
+- Added a Studio-owned post-response queue runner so video requests start and
+  native provider polling advances without requiring Drupal cron. Cron remains
+  a compatible fallback.
+- Replaced Media autocomplete inputs with a standalone core Media Library
+  control that does not depend on Media Library Form Element or another
+  contributed module.
+- Fixed Studio and settings forms under modules that serialize form objects,
+  including Autosave Form, by making injected services available to Drupal's
+  dependency serialization.
+- Renamed the result publishing panel to Publish Media, clarified its publish
+  action, and added a direct Download Media action beside it.
+- Fixed Media Library dialog dependencies and immediate selected-item previews.
 
 ## 1.0.0-beta6
 
@@ -17,8 +31,6 @@
   numbered chips, token insertion, and drag/drop ordering for session inputs.
 - Added duplicate, access, format, provider capability, and input-count
   validation while preserving single-image behavior for other providers.
-
-All notable changes to AI Image Studio will be documented in this file.
 
 ## 1.0.0-beta5
 

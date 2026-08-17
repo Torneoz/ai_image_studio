@@ -18,6 +18,15 @@ services:
     parent: logger.channel_base
     arguments: ['ai_image_studio']
 
+  ai_image_studio.generation_queue_subscriber:
+    class: Drupal\ai_image_studio\EventSubscriber\GenerationQueueSubscriber
+    arguments:
+      - '@queue'
+      - '@plugin.manager.queue_worker'
+      - '@logger.channel.ai_image_studio'
+    tags:
+      - { name: event_subscriber }
+
   ai_image_studio.compact_media_form:
     class: Drupal\ai_image_studio\Form\CompactMediaForm
     arguments:
@@ -28,5 +37,7 @@ services:
 
   media_library.opener.ai_image_studio_form:
     class: Drupal\ai_image_studio\MediaLibraryFormOpener
+    arguments:
+      - '@entity_type.manager'
     tags:
       - { name: media_library.opener }

@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AI Image Studio\n"
-"POT-Creation-Date: 2026-08-06 00:00+0000\n"
-"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"POT-Creation-Date: 2026-08-17 00:00+0000\n"
+"PO-Revision-Date: 2026-08-17 00:00+0000\n"
 "Last-Translator: Torneoz translation team\n"
 "Language: zh-hans\n"
 "Language-Team: Chinese, Simplified\n"
@@ -70,8 +70,11 @@ msgstr "有效"
 msgid "Archived"
 msgstr "已存档"
 
-msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
-msgstr "创建图像，然后通过顺序提示对其进行优化。每个结果都会在会话中保留为一个回合。"
+msgid ""
+"Create an image, then refine it through sequential prompts. Each result is "
+"retained as a turn in the session."
+msgstr ""
+"创建图像，然后通过顺序提示对其进行优化。每个结果都会在会话中保留为一个回合。"
 
 msgid "Session"
 msgstr "会话"
@@ -280,7 +283,8 @@ msgstr "生成的图像不可用。"
 msgid "Starting generation…"
 msgstr "开始世代…"
 
-msgid "Your request is being sent to the selected provider. Keep this page open."
+msgid ""
+"Your request is being sent to the selected provider. Keep this page open."
 msgstr "您的请求正在发送给选定的提供商。保持此页面打开。"
 
 msgid "Session title"
@@ -304,22 +308,28 @@ msgstr "图像"
 msgid "Video"
 msgstr "视频"
 
-msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
+msgid ""
+"Video generation is experimental and runs synchronously. Keep the page open "
+"until the request completes."
 msgstr "视频生成是实验性的并且同步运行。保持页面打开，直到请求完成。"
 
 msgid "Starting image"
 msgstr "起始图像"
 
-msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
+msgid ""
+"Uses the Text-to-Image default configured in Drupal AI. Only configured "
+"providers and models are listed."
 msgstr "使用 Drupal AI 中配置的默认文本到图像。仅列出配置的提供程序和模型。"
 
-msgid "Only providers that advertise Image-to-Image editing support are listed."
+msgid ""
+"Only providers that advertise Image-to-Image editing support are listed."
 msgstr "仅列出宣传图像到图像编辑支持的提供商。"
 
 msgid "Provider and video model"
 msgstr "提供商和视频模型"
 
-msgid "Only configured providers that advertise Text-to-Video support are listed."
+msgid ""
+"Only configured providers that advertise Text-to-Video support are listed."
 msgstr "仅列出宣传文本转视频支持的已配置提供商。"
 
 msgid "Animates the uploaded image using an Image-to-Video provider."
@@ -340,7 +350,9 @@ msgstr "旧的先"
 msgid "Newest first"
 msgstr "由新到旧"
 
-msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
+msgid ""
+"Changes how this session’s versions are displayed. Version numbers and "
+"refinement relationships stay the same."
 msgstr "更改此会话版本的显示方式。版本号和细化关系保持不变。"
 
 msgid "This session has reached its limit of @count turns."
@@ -358,7 +370,9 @@ msgstr "精炼自"
 msgid "Version @number · @prompt"
 msgstr "版本 @number · @prompt"
 
-msgid "The new version will branch from this image. Select another source from any completed version in the results below."
+msgid ""
+"The new version will branch from this image. Select another source from any "
+"completed version in the results below."
 msgstr "新版本将从该图像分支。从下面结果中的任何已完成版本中选择另一个来源。"
 
 msgid "Refined image"
@@ -415,8 +429,13 @@ msgstr "手机风景 — 20:9"
 msgid "Phone portrait — 9:20"
 msgstr "手机肖像 — 9:20"
 
-msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
-msgstr "当可以检测到时，自动使用所选或上传的源图像的比例。如果没有源图像，提供商将选择其默认宽高比。明确的比率仍然取决于提供商。"
+msgid ""
+"Automatic uses the selected or uploaded source image’s proportions when they "
+"can be detected. Without a source image, the provider chooses its default "
+"aspect ratio. Explicit ratios remain provider-dependent."
+msgstr ""
+"当可以检测到时，自动使用所选或上传的源图像的比例。如果没有源图像，提供商将选"
+"择其默认宽高比。明确的比率仍然取决于提供商。"
 
 msgid "1K — faster and lower cost"
 msgstr "1K — 更快、成本更低"
@@ -424,11 +443,21 @@ msgstr "1K — 更快、成本更低"
 msgid "2K — higher detail and cost"
 msgstr "2K — 更高的细节和成本"
 
-msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
-msgstr "自动从源图像的最长边缘中选择最接近的受支持层。如果没有来源，则使用 1K。 Grok Imagine 支持 1K 和 2K；其他提供商可能会映射或忽略此设置。"
+msgid ""
+"Automatic chooses the closest supported tier from the source image’s longest "
+"edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other "
+"providers may map or ignore this setting."
+msgstr ""
+"自动从源图像的最长边缘中选择最接近的受支持层。如果没有来源，则使用 1K。 Grok "
+"Imagine 支持 1K 和 2K；其他提供商可能会映射或忽略此设置。"
 
-msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
-msgstr "当提供商支持时要求透明度。 Grok 将此作为尽力而为的文本到图像指令；图像编辑和其他提供商可能会忽略它。"
+msgid ""
+"Requests transparency when the provider supports it. Grok applies this as a "
+"best-effort text-to-image instruction; image editing and other providers may "
+"ignore it."
+msgstr ""
+"当提供商支持时要求透明度。 Grok 将此作为尽力而为的文本到图像指令；图像编辑和"
+"其他提供商可能会忽略它。"
 
 msgid "File type"
 msgstr "文件类型"
@@ -442,7 +471,9 @@ msgstr "JPEG"
 msgid "WebP"
 msgstr "网络P"
 
-msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
+msgid ""
+"PNG is the default. Availability of JPEG and WebP depends on the selected "
+"provider."
 msgstr "PNG 是默认值。 JPEG 和 WebP 的可用性取决于所选的提供商。"
 
 msgid "Show an AI image badge"
@@ -484,8 +515,11 @@ msgstr "保存到媒体"
 msgid "Transparent background requested"
 msgstr "要求透明背景"
 
-msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
-msgstr "宽高比：@ratio · 分辨率：@resolution · 文件类型：@file_type@transparent"
+msgid ""
+"Aspect ratio: @ratio · Resolution: @resolution · File type: "
+"@file_type@transparent"
+msgstr ""
+"宽高比：@ratio · 分辨率：@resolution · 文件类型：@file_type@transparent"
 
 msgid "AI Image"
 msgstr "人工智能图像"
@@ -508,20 +542,31 @@ msgstr "发布到媒体"
 msgid "Optional. Suggested from the session title and prompt."
 msgstr "可选。根据会话标题和提示建议。"
 
-msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
+msgid ""
+"Suggested from the session title and this version’s prompt. Review it for "
+"accuracy before publishing."
 msgstr "根据会话标题和此版本的提示建议。在发布之前检查其准确性。"
 
 msgid "Render the badge into the saved Media file"
 msgstr "将徽章渲染到保存的媒体文件中"
 
-msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
+msgid ""
+"Creates a separate Media file with “@badge” permanently embedded. The "
+"original Studio result is preserved."
 msgstr "创建一个永久嵌入“@badge”的单独媒体文件。原始 Studio 结果将被保留。"
 
-msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
-msgstr "由于 Web 服务器无法使用 PHP GD 或 FFmpeg，因此徽章渲染不可用。原视频仍然可以发布。"
+msgid ""
+"Badge rendering is unavailable because PHP GD or FFmpeg is not available to "
+"the web server. The original video can still be published."
+msgstr ""
+"由于 Web 服务器无法使用 PHP GD 或 FFmpeg，因此徽章渲染不可用。原视频仍然可以"
+"发布。"
 
-msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
-msgstr "徽章渲染不可用，因为 PHP GD 不可用于 Web 服务器。原始图像仍然可以发布。"
+msgid ""
+"Badge rendering is unavailable because PHP GD is not available to the web "
+"server. The original image can still be published."
+msgstr ""
+"徽章渲染不可用，因为 PHP GD 不可用于 Web 服务器。原始图像仍然可以发布。"
 
 msgid "Publish this version"
 msgstr "发布此版本"
@@ -610,8 +655,12 @@ msgstr "@source · $@cost 美元"
 msgid "Session report"
 msgstr "会议报告"
 
-msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
-msgstr "此会话中所有生成的版本。成本总计将提供商报告的费用与无法获得报告成本的情况下的估计费用结合起来。"
+msgid ""
+"All generated versions in this session. Cost totals combine provider-"
+"reported charges with estimates where reported cost was unavailable."
+msgstr ""
+"此会话中所有生成的版本。成本总计将提供商报告的费用与无法获得报告成本的情况下"
+"的估计费用结合起来。"
 
 msgid "Version"
 msgstr "版本"
@@ -628,7 +677,8 @@ msgstr "尚未生成任何版本。"
 msgid "Aggregate cost"
 msgstr "总成本"
 
-msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgid ""
+"Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
 msgstr "报告：$@reported 美元 · 估计：$@estimated 美元 · 不可用：@count"
 
 msgid "This session has reached the configured $@amount USD warning threshold."
@@ -691,7 +741,9 @@ msgstr "视频已成功生成。"
 msgid "The image was generated successfully."
 msgstr "图像已成功生成。"
 
-msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
+msgid ""
+"This request cost $@cost USD, meeting the configured $@threshold warning "
+"threshold."
 msgstr "此请求花费 $@cost 美元，满足配置的 $@threshold 警告阈值。"
 
 msgid "Generation failed: @message"
@@ -715,8 +767,11 @@ msgstr "工作室界面"
 msgid "Default sort in Studio"
 msgstr "Studio 中的默认排序"
 
-msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
-msgstr "设置打开会话或生成新映像时映像版本的初始顺序。用户可以在查看会话时更改顺序。"
+msgid ""
+"Sets the initial order of image versions when a session is opened or a new "
+"image is generated. Users can change the order while viewing a session."
+msgstr ""
+"设置打开会话或生成新映像时映像版本的初始顺序。用户可以在查看会话时更改顺序。"
 
 msgid "Open the generation form initially"
 msgstr "最初打开生成表单"
@@ -772,7 +827,9 @@ msgstr "默认请求透明背景"
 msgid "Default image file type"
 msgstr "默认图像文件类型"
 
-msgid "The selected provider must support the requested format. PNG is used by default."
+msgid ""
+"The selected provider must support the requested format. PNG is used by "
+"default."
 msgstr "所选提供商必须支持所请求的格式。默认使用 PNG。"
 
 msgid "Show an AI image badge by default"
@@ -808,7 +865,9 @@ msgstr "私有"
 msgid "Public"
 msgstr "公开"
 
-msgid "Private storage is recommended because generated drafts may contain sensitive material."
+msgid ""
+"Private storage is recommended because generated drafts may contain "
+"sensitive material."
 msgstr "建议使用私人存储，因为生成的草稿可能包含敏感材料。"
 
 msgid "File directory"
@@ -835,7 +894,8 @@ msgstr "请求的最大视频时长"
 msgid "Per-request cost warning"
 msgstr "每个请求的成本警告"
 
-msgid "Display a warning after a request reaches this cost. Use zero to disable."
+msgid ""
+"Display a warning after a request reaches this cost. Use zero to disable."
 msgstr "请求达到此成本后显示警告。使用零来禁用。"
 
 msgid "Session cost warning"
@@ -871,7 +931,9 @@ msgstr "@count 配置型号"
 msgid "Provider diagnostics"
 msgstr "提供商诊断"
 
-msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
+msgid ""
+"Models are discovered from Drupal AI and filtered by the operation each "
+"provider advertises."
 msgstr "模型是从 Drupal AI 中发现的，并通过每个提供商宣传的操作进行过滤。"
 
 msgid "Availability"
@@ -880,7 +942,9 @@ msgstr "可用性"
 msgid "Studio default"
 msgstr "工作室默认"
 
-msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
+msgid ""
+"Use a relative directory containing only letters, numbers, underscores, "
+"dashes, and slashes."
 msgstr "使用仅包含字母、数字、下划线、破折号和斜杠的相对目录。"
 
 msgid "The default video duration cannot exceed the configured maximum."
@@ -919,10 +983,14 @@ msgstr "输入图像的替代文本。"
 msgid "Generate an image with the compact AI Image Studio form below."
 msgstr "使用下面的紧凑型 AI Image Studio 表单生成图像。"
 
-msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
+msgid ""
+"Video generation can take several minutes. Keep this page open while the "
+"provider completes the request."
 msgstr "视频生成可能需要几分钟的时间。当提供商完成请求时，请保持此页面打开。"
 
-msgid "The provider is creating your image. Keep this page open until the request completes."
+msgid ""
+"The provider is creating your image. Keep this page open until the request "
+"completes."
 msgstr "提供商正在创建您的形象。保持此页面打开，直到请求完成。"
 
 msgid "Conversational image and video generation using Drupal AI providers."
@@ -976,3 +1044,328 @@ msgstr "将 AI Image Studio 视频发布到媒体"
 msgid "Administer AI Image Studio"
 msgstr "管理 AI Image Studio"
 
+#: src/Form/StudioForm.php:1140
+msgid "@requested → @actual"
+msgstr ""
+
+#: src/Form/StudioForm.php:136
+msgid "A Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:1761
+msgid "A reference image exceeds the configured upload limit."
+msgstr ""
+
+#: src/Plugin/QueueWorker/GenerationQueueWorker.php:23
+msgid "AI Image Studio generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:1781
+msgid "Add at least one reference image."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:124
+msgid "Add media"
+msgstr ""
+
+#: src/Form/StudioForm.php:443
+msgid "Additional reference images"
+msgstr ""
+
+#: src/Form/StudioForm.php:175 src/Form/StudioForm.php:420
+msgid "Animate starting image"
+msgstr ""
+
+#: src/Form/StudioForm.php:424
+msgid ""
+"Animate uses Image 1 as the initial frame. References guide people, "
+"products, objects, wardrobe, or style."
+msgstr ""
+
+#: src/Form/StudioForm.php:1207
+msgid "Attempts"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:142 src/Form/StudioForm.php:1433
+msgid "Cancelled"
+msgstr ""
+
+#: src/Form/StudioForm.php:192
+msgid "Choose an existing image or add one through the Media Library."
+msgstr ""
+
+#: src/Form/SettingsForm.php:154
+msgid "Default image quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:164
+msgid "Default image variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:1020
+msgid "Download Media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:141 src/Form/StudioForm.php:1432
+msgid "Expired"
+msgstr ""
+
+#: src/Form/StudioForm.php:1168
+msgid "Filtered"
+msgstr ""
+
+#: src/Form/StudioForm.php:176 src/Form/StudioForm.php:421
+msgid "Generate from references"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:127
+msgid "Generation attempts"
+msgstr ""
+
+#: src/Form/StudioForm.php:650
+msgid "Generation quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:297
+msgid "Generation retry limit"
+msgstr ""
+
+#: src/Form/SettingsForm.php:160
+msgid ""
+"Grok Imagine Image 2.0 supports low and medium quality. Other models may "
+"ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1190
+msgid "Image @number — @name"
+msgstr ""
+
+#: src/Form/StudioForm.php:436
+msgid "Image @number — @prompt"
+msgstr ""
+
+#: src/Form/StudioForm.php:445
+msgid ""
+"Image order matters. The selected source is Image 1; session images are "
+"added in the order shown, followed by Media and uploads."
+msgstr ""
+
+#: src/Form/SettingsForm.php:157
+msgid "Low"
+msgstr ""
+
+#: src/Form/StudioForm.php:653
+msgid "Low — faster generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:186
+msgid "Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:476
+msgid "Media reference"
+msgstr ""
+
+#: src/Form/SettingsForm.php:156
+msgid "Medium"
+msgstr ""
+
+#: src/Form/StudioForm.php:652
+msgid "Medium — standard quality"
+msgstr ""
+
+#: src/Form/StudioForm.php:1165
+msgid "Moderation"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:57 src/Element/MediaLibrary.php:118
+msgid "No media item selected."
+msgstr ""
+
+#: src/Form/StudioForm.php:1875
+msgid ""
+"One or more reference images are not named in the prompt. Use <IMAGE_1>, "
+"<IMAGE_2>, and so on when the distinction matters."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:134
+msgid "Opening media library."
+msgstr ""
+
+#: src/Form/StudioForm.php:1197
+msgid "Ordered inputs"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:51
+msgid "Ordered source files"
+msgstr ""
+
+#: src/Form/StudioForm.php:1167
+msgid "Passed"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:120
+msgid "Provider metadata"
+msgstr ""
+
+#: src/Form/StudioForm.php:1173
+msgid "Provider request"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:123
+msgid "Provider request ID"
+msgstr ""
+
+#: src/Form/StudioForm.php:973
+msgid "Publish Media"
+msgstr ""
+
+#: src/Form/SettingsForm.php:290
+msgid "Queue video generation"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:137 src/Form/StudioForm.php:1428
+msgid "Queued"
+msgstr ""
+
+#: src/Form/SettingsForm.php:294
+msgid ""
+"Recommended. Studio starts queued video work after the browser response and "
+"advances provider polling during status refreshes. Drupal cron remains a "
+"fallback."
+msgstr ""
+
+#: src/Form/StudioForm.php:179
+msgid ""
+"Reference images guide subjects and style; they do not become the first "
+"frame."
+msgstr ""
+
+#: src/Form/StudioForm.php:1757
+msgid "Reference images must be PNG, JPEG, or WebP files."
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:89
+msgid "Reference to video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1107 src/Form/StudioForm.php:1335
+msgid "Reference video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1784
+msgid "Reference-to-video is limited to 10 seconds."
+msgstr ""
+
+#: src/Form/StudioForm.php:1787
+msgid "Reference-to-video supports 480p or 720p output."
+msgstr ""
+
+#: src/Form/StudioForm.php:491
+msgid ""
+"Reference-video prompts can identify inputs as &lt;IMAGE_1&gt;, "
+"&lt;IMAGE_2&gt;, and so on."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:99
+msgid "Remove"
+msgstr ""
+
+#: src/Element/MediaLibrary.php:103
+msgid "Remove @label"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:62 src/Element/MediaLibrary.php:124
+msgid "Replace media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:56
+msgid "Request group"
+msgstr ""
+
+#: src/Form/StudioForm.php:1179
+msgid "Request outputs"
+msgstr ""
+
+#: src/Form/StudioForm.php:671
+msgid ""
+"Requests multiple results in one call when the selected provider supports "
+"it. Each result is retained as a separate version."
+msgstr ""
+
+#: src/Form/StudioForm.php:1682
+msgid "Select Media that contains a valid image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1668
+msgid "Select a Media image."
+msgstr ""
+
+#: src/Form/StudioForm.php:458
+msgid "Session versions"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:47
+msgid "Source file"
+msgstr ""
+
+#: src/Form/StudioForm.php:656
+msgid ""
+"Supported by Grok Imagine Image 2.0. Other models may ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1769
+msgid "The same image cannot be supplied more than once."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:217
+msgid "The selected media item is not available."
+msgstr ""
+
+#: src/Form/StudioForm.php:1778
+msgid "The selected model does not support reference-to-video."
+msgstr ""
+
+#: src/Form/StudioForm.php:1774
+msgid "The selected provider does not support multiple image inputs."
+msgstr ""
+
+#: src/Form/StudioForm.php:1793
+msgid "The token <IMAGE_@number> has no corresponding reference image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1936
+msgid ""
+"The video was queued. Studio starts it in the background and refreshes this "
+"page while it processes."
+msgstr ""
+
+#: src/Form/StudioForm.php:1744
+msgid "This mode accepts at most @count ordered input images."
+msgstr ""
+
+#: src/Form/StudioForm.php:1633 src/Form/StudioForm.php:1655
+msgid "This request would exceed the session limit of @count turns."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:145
+msgid "Update media selection"
+msgstr ""
+
+#: src/Form/StudioForm.php:482
+msgid "Uploaded references"
+msgstr ""
+
+#: src/Form/StudioForm.php:663
+msgid "Variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:172 src/Form/StudioForm.php:418
+msgid "Video mode"
+msgstr ""
+
+#: src/Form/StudioForm.php:148
+msgid ""
+"Video requests are queued. You can leave this page while generation "
+"continues."
+msgstr ""

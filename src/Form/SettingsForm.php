@@ -24,9 +24,9 @@ final class SettingsForm extends ConfigFormBase {
   public function __construct(
     ConfigFactoryInterface $config_factory,
     TypedConfigManagerInterface $typed_config_manager,
-    private readonly EntityTypeBundleInfoInterface $bundleInfo,
-    private readonly EntityFieldManagerInterface $fieldManager,
-    private readonly ImageGenerator $generator,
+    protected EntityTypeBundleInfoInterface $bundleInfo,
+    protected EntityFieldManagerInterface $fieldManager,
+    protected ImageGenerator $generator,
   ) {
     parent::__construct($config_factory, $typed_config_manager);
   }
@@ -291,7 +291,7 @@ final class SettingsForm extends ConfigFormBase {
       $config->get('async_video_generation'),
       TRUE,
     );
-    $form['limits']['async_video_generation']['#description'] = $this->t('Recommended. Video requests run through Drupal’s queue and no longer hold the browser request open. Ensure cron or another queue runner is configured.');
+    $form['limits']['async_video_generation']['#description'] = $this->t('Recommended. Studio starts queued video work after the browser response and advances provider polling during status refreshes. Drupal cron remains a fallback.');
     $form['limits']['generation_retry_limit'] = [
       '#type' => 'number',
       '#title' => $this->t('Generation retry limit'),

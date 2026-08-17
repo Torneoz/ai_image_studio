@@ -3,15 +3,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AI Image Studio\n"
-"POT-Creation-Date: 2026-08-06 00:00+0000\n"
-"PO-Revision-Date: 2026-08-06 00:00+0000\n"
+"POT-Creation-Date: 2026-08-17 00:00+0000\n"
+"PO-Revision-Date: 2026-08-17 00:00+0000\n"
 "Last-Translator: Torneoz translation team\n"
 "Language: ru\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "The source image could not be read."
 msgstr "Исходное изображение не удалось прочитать."
@@ -70,8 +71,12 @@ msgstr "Активно"
 msgid "Archived"
 msgstr "В архиве"
 
-msgid "Create an image, then refine it through sequential prompts. Each result is retained as a turn in the session."
-msgstr "Создайте изображение, а затем уточните его с помощью последовательных подсказок. Каждый результат сохраняется как ход в сеансе."
+msgid ""
+"Create an image, then refine it through sequential prompts. Each result is "
+"retained as a turn in the session."
+msgstr ""
+"Создайте изображение, а затем уточните его с помощью последовательных "
+"подсказок. Каждый результат сохраняется как ход в сеансе."
 
 msgid "Session"
 msgstr "Сессия"
@@ -280,8 +285,10 @@ msgstr "Сгенерированное изображение недоступн
 msgid "Starting generation…"
 msgstr "Начало поколения…"
 
-msgid "Your request is being sent to the selected provider. Keep this page open."
-msgstr "Ваш запрос отправляется выбранному провайдеру. Держите эту страницу открытой."
+msgid ""
+"Your request is being sent to the selected provider. Keep this page open."
+msgstr ""
+"Ваш запрос отправляется выбранному провайдеру. Держите эту страницу открытой."
 
 msgid "Session title"
 msgstr "Название сессии"
@@ -304,29 +311,45 @@ msgstr "Изображение"
 msgid "Video"
 msgstr "Видео"
 
-msgid "Video generation is experimental and runs synchronously. Keep the page open until the request completes."
-msgstr "Генерация видео является экспериментальной и выполняется синхронно. Держите страницу открытой до завершения запроса."
+msgid ""
+"Video generation is experimental and runs synchronously. Keep the page open "
+"until the request completes."
+msgstr ""
+"Генерация видео является экспериментальной и выполняется синхронно. Держите "
+"страницу открытой до завершения запроса."
 
 msgid "Starting image"
 msgstr "Начальное изображение"
 
-msgid "Uses the Text-to-Image default configured in Drupal AI. Only configured providers and models are listed."
-msgstr "Использует преобразование текста в изображение по умолчанию, настроенное в Drupal AI. В списке указаны только настроенные поставщики и модели."
+msgid ""
+"Uses the Text-to-Image default configured in Drupal AI. Only configured "
+"providers and models are listed."
+msgstr ""
+"Использует преобразование текста в изображение по умолчанию, настроенное в "
+"Drupal AI. В списке указаны только настроенные поставщики и модели."
 
-msgid "Only providers that advertise Image-to-Image editing support are listed."
-msgstr "В списке указаны только поставщики, рекламирующие поддержку редактирования изображений в изображениях."
+msgid ""
+"Only providers that advertise Image-to-Image editing support are listed."
+msgstr ""
+"В списке указаны только поставщики, рекламирующие поддержку редактирования "
+"изображений в изображениях."
 
 msgid "Provider and video model"
 msgstr "Провайдер и модель видео"
 
-msgid "Only configured providers that advertise Text-to-Video support are listed."
-msgstr "В списке указаны только настроенные поставщики, рекламирующие поддержку преобразования текста в видео."
+msgid ""
+"Only configured providers that advertise Text-to-Video support are listed."
+msgstr ""
+"В списке указаны только настроенные поставщики, рекламирующие поддержку "
+"преобразования текста в видео."
 
 msgid "Animates the uploaded image using an Image-to-Video provider."
-msgstr "Анимирует загруженное изображение с помощью поставщика изображения в видео."
+msgstr ""
+"Анимирует загруженное изображение с помощью поставщика изображения в видео."
 
 msgid "Describe the image to create or how to transform the upload."
-msgstr "Опишите изображение, которое нужно создать, или как преобразовать загрузку."
+msgstr ""
+"Опишите изображение, которое нужно создать, или как преобразовать загрузку."
 
 msgid "Generating video…"
 msgstr "Создание видео…"
@@ -340,8 +363,12 @@ msgstr "Старые сначала"
 msgid "Newest first"
 msgstr "Новые сначала"
 
-msgid "Changes how this session’s versions are displayed. Version numbers and refinement relationships stay the same."
-msgstr "Изменяет способ отображения версий этого сеанса. Номера версий и отношения уточнений остаются прежними."
+msgid ""
+"Changes how this session’s versions are displayed. Version numbers and "
+"refinement relationships stay the same."
+msgstr ""
+"Изменяет способ отображения версий этого сеанса. Номера версий и отношения "
+"уточнений остаются прежними."
 
 msgid "This session has reached its limit of @count turns."
 msgstr "Этот сеанс достиг своего предела в @count ходов."
@@ -358,8 +385,12 @@ msgstr "Переработка из"
 msgid "Version @number · @prompt"
 msgstr "Версия @number · @prompt"
 
-msgid "The new version will branch from this image. Select another source from any completed version in the results below."
-msgstr "Новая версия будет ответвлением от этого образа. Выберите другой источник из любой завершенной версии в результатах ниже."
+msgid ""
+"The new version will branch from this image. Select another source from any "
+"completed version in the results below."
+msgstr ""
+"Новая версия будет ответвлением от этого образа. Выберите другой источник из "
+"любой завершенной версии в результатах ниже."
 
 msgid "Refined image"
 msgstr "Утонченное изображение"
@@ -368,16 +399,21 @@ msgid "Video from this image"
 msgstr "Видео с этого изображения"
 
 msgid "Uses the Text-to-Image default configured in Drupal AI."
-msgstr "Использует преобразование текста в изображение по умолчанию, настроенное в Drupal AI."
+msgstr ""
+"Использует преобразование текста в изображение по умолчанию, настроенное в "
+"Drupal AI."
 
 msgid "Animates the selected image using an Image-to-Video provider."
-msgstr "Анимирует выбранное изображение с помощью поставщика изображения в видео."
+msgstr ""
+"Анимирует выбранное изображение с помощью поставщика изображения в видео."
 
 msgid "Uses a configured Text-to-Video provider."
 msgstr "Использует настроенного поставщика преобразования текста в видео."
 
 msgid "Describe only the change you want to make to the selected image."
-msgstr "Опишите только то изменение, которое вы хотите внести в выбранное изображение."
+msgstr ""
+"Опишите только то изменение, которое вы хотите внести в выбранное "
+"изображение."
 
 msgid "Describe the image to create."
 msgstr "Опишите образ, который нужно создать."
@@ -415,8 +451,15 @@ msgstr "Телефон в альбомной ориентации — 20:9"
 msgid "Phone portrait — 9:20"
 msgstr "Телефонный портрет — 9:20"
 
-msgid "Automatic uses the selected or uploaded source image’s proportions when they can be detected. Without a source image, the provider chooses its default aspect ratio. Explicit ratios remain provider-dependent."
-msgstr "Автоматически используются пропорции выбранного или загруженного исходного изображения, когда их можно обнаружить. Без исходного изображения поставщик выбирает соотношение сторон по умолчанию. Явные соотношения остаются зависимыми от поставщика услуг."
+msgid ""
+"Automatic uses the selected or uploaded source image’s proportions when they "
+"can be detected. Without a source image, the provider chooses its default "
+"aspect ratio. Explicit ratios remain provider-dependent."
+msgstr ""
+"Автоматически используются пропорции выбранного или загруженного исходного "
+"изображения, когда их можно обнаружить. Без исходного изображения поставщик "
+"выбирает соотношение сторон по умолчанию. Явные соотношения остаются "
+"зависимыми от поставщика услуг."
 
 msgid "1K — faster and lower cost"
 msgstr "1К — быстрее и дешевле"
@@ -424,11 +467,24 @@ msgstr "1К — быстрее и дешевле"
 msgid "2K — higher detail and cost"
 msgstr "2К — выше детализация и стоимость"
 
-msgid "Automatic chooses the closest supported tier from the source image’s longest edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other providers may map or ignore this setting."
-msgstr "Автоматически выбирается ближайший поддерживаемый уровень от самого длинного края исходного изображения. Без источника используется 1К. Grok Imagine поддерживает 1K и 2K; другие поставщики могут сопоставить или игнорировать этот параметр."
+msgid ""
+"Automatic chooses the closest supported tier from the source image’s longest "
+"edge. Without a source, it uses 1K. Grok Imagine supports 1K and 2K; other "
+"providers may map or ignore this setting."
+msgstr ""
+"Автоматически выбирается ближайший поддерживаемый уровень от самого длинного "
+"края исходного изображения. Без источника используется 1К. Grok Imagine "
+"поддерживает 1K и 2K; другие поставщики могут сопоставить или игнорировать "
+"этот параметр."
 
-msgid "Requests transparency when the provider supports it. Grok applies this as a best-effort text-to-image instruction; image editing and other providers may ignore it."
-msgstr "Запрашивает прозрачность, если поставщик ее поддерживает. Грок применяет это как оптимальную инструкцию по преобразованию текста в изображение; редактирование изображений и другие поставщики могут игнорировать это."
+msgid ""
+"Requests transparency when the provider supports it. Grok applies this as a "
+"best-effort text-to-image instruction; image editing and other providers may "
+"ignore it."
+msgstr ""
+"Запрашивает прозрачность, если поставщик ее поддерживает. Грок применяет это "
+"как оптимальную инструкцию по преобразованию текста в изображение; "
+"редактирование изображений и другие поставщики могут игнорировать это."
 
 msgid "File type"
 msgstr "Тип файла"
@@ -442,8 +498,12 @@ msgstr "JPEG"
 msgid "WebP"
 msgstr "ВебП"
 
-msgid "PNG is the default. Availability of JPEG and WebP depends on the selected provider."
-msgstr "PNG — значение по умолчанию. Доступность JPEG и WebP зависит от выбранного провайдера."
+msgid ""
+"PNG is the default. Availability of JPEG and WebP depends on the selected "
+"provider."
+msgstr ""
+"PNG — значение по умолчанию. Доступность JPEG и WebP зависит от выбранного "
+"провайдера."
 
 msgid "Show an AI image badge"
 msgstr "Показать значок изображения AI"
@@ -461,10 +521,13 @@ msgid "seconds"
 msgstr "секунд"
 
 msgid "The provider may limit or adjust the requested duration."
-msgstr "Поставщик может ограничить или скорректировать запрошенную продолжительность."
+msgstr ""
+"Поставщик может ограничить или скорректировать запрошенную продолжительность."
 
 msgid "Automatic matches the selected source image where possible."
-msgstr "Автоматически соответствует выбранному исходному изображению, где это возможно."
+msgstr ""
+"Автоматически соответствует выбранному исходному изображению, где это "
+"возможно."
 
 msgid "480p — faster and lower cost"
 msgstr "480p — быстрее и дешевле"
@@ -484,8 +547,12 @@ msgstr "Сохранено на носителе"
 msgid "Transparent background requested"
 msgstr "Требуется прозрачный фон"
 
-msgid "Aspect ratio: @ratio · Resolution: @resolution · File type: @file_type@transparent"
-msgstr "Соотношение сторон: @ratio · Разрешение: @resolution · Тип файла: @file_type@transparent"
+msgid ""
+"Aspect ratio: @ratio · Resolution: @resolution · File type: "
+"@file_type@transparent"
+msgstr ""
+"Соотношение сторон: @ratio · Разрешение: @resolution · Тип файла: "
+"@file_type@transparent"
 
 msgid "AI Image"
 msgstr "AI-изображение"
@@ -508,20 +575,36 @@ msgstr "Публикация в СМИ"
 msgid "Optional. Suggested from the session title and prompt."
 msgstr "Необязательно. Предлагается из названия сеанса и подсказки."
 
-msgid "Suggested from the session title and this version’s prompt. Review it for accuracy before publishing."
-msgstr "Предлагается из названия сеанса и подсказки этой версии. Перед публикацией проверьте его точность."
+msgid ""
+"Suggested from the session title and this version’s prompt. Review it for "
+"accuracy before publishing."
+msgstr ""
+"Предлагается из названия сеанса и подсказки этой версии. Перед публикацией "
+"проверьте его точность."
 
 msgid "Render the badge into the saved Media file"
 msgstr "Преобразуйте значок в сохраненный медиа-файл."
 
-msgid "Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved."
-msgstr "Создает отдельный медиа-файл с постоянно внедренным «@badge». Исходный результат Studio сохраняется."
+msgid ""
+"Creates a separate Media file with “@badge” permanently embedded. The "
+"original Studio result is preserved."
+msgstr ""
+"Создает отдельный медиа-файл с постоянно внедренным «@badge». Исходный "
+"результат Studio сохраняется."
 
-msgid "Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published."
-msgstr "Отрисовка значков недоступна, поскольку PHP GD или FFmpeg недоступен веб-серверу. Оригинальное видео еще можно опубликовать."
+msgid ""
+"Badge rendering is unavailable because PHP GD or FFmpeg is not available to "
+"the web server. The original video can still be published."
+msgstr ""
+"Отрисовка значков недоступна, поскольку PHP GD или FFmpeg недоступен веб-"
+"серверу. Оригинальное видео еще можно опубликовать."
 
-msgid "Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published."
-msgstr "Отрисовка значков недоступна, поскольку PHP GD недоступен веб-серверу. Исходное изображение все еще можно опубликовать."
+msgid ""
+"Badge rendering is unavailable because PHP GD is not available to the web "
+"server. The original image can still be published."
+msgstr ""
+"Отрисовка значков недоступна, поскольку PHP GD недоступен веб-серверу. "
+"Исходное изображение все еще можно опубликовать."
 
 msgid "Publish this version"
 msgstr "Опубликовать эту версию"
@@ -610,8 +693,13 @@ msgstr "@source · $@cost долл. США"
 msgid "Session report"
 msgstr "Отчет о сессии"
 
-msgid "All generated versions in this session. Cost totals combine provider-reported charges with estimates where reported cost was unavailable."
-msgstr "Все созданные версии в этом сеансе. Общие затраты объединяют расходы, заявленные поставщиком услуг, с оценками, в которых заявленная стоимость была недоступна."
+msgid ""
+"All generated versions in this session. Cost totals combine provider-"
+"reported charges with estimates where reported cost was unavailable."
+msgstr ""
+"Все созданные версии в этом сеансе. Общие затраты объединяют расходы, "
+"заявленные поставщиком услуг, с оценками, в которых заявленная стоимость "
+"была недоступна."
 
 msgid "Version"
 msgstr "Версия"
@@ -628,11 +716,14 @@ msgstr "Версии не созданы."
 msgid "Aggregate cost"
 msgstr "Совокупная стоимость"
 
-msgid "Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
-msgstr "Сообщено: $@reported USD · Расчетное: $@estimated USD · Недоступно: @count"
+msgid ""
+"Reported: $@reported USD · Estimated: $@estimated USD · Unavailable: @count"
+msgstr ""
+"Сообщено: $@reported USD · Расчетное: $@estimated USD · Недоступно: @count"
 
 msgid "This session has reached the configured $@amount USD warning threshold."
-msgstr "Этот сеанс достиг настроенного порога предупреждения $@amount в долларах США."
+msgstr ""
+"Этот сеанс достиг настроенного порога предупреждения $@amount в долларах США."
 
 msgid "Reported cost"
 msgstr "Заявленная стоимость"
@@ -691,8 +782,12 @@ msgstr "Видео было успешно создано."
 msgid "The image was generated successfully."
 msgstr "Изображение было успешно создано."
 
-msgid "This request cost $@cost USD, meeting the configured $@threshold warning threshold."
-msgstr "Этот запрос стоил $@cost долларов США, что соответствует настроенному порогу предупреждения $@threshold."
+msgid ""
+"This request cost $@cost USD, meeting the configured $@threshold warning "
+"threshold."
+msgstr ""
+"Этот запрос стоил $@cost долларов США, что соответствует настроенному порогу "
+"предупреждения $@threshold."
 
 msgid "Generation failed: @message"
 msgstr "Генерация не удалась: @message"
@@ -715,8 +810,13 @@ msgstr "Интерфейс студии"
 msgid "Default sort in Studio"
 msgstr "Сортировка по умолчанию в Studio"
 
-msgid "Sets the initial order of image versions when a session is opened or a new image is generated. Users can change the order while viewing a session."
-msgstr "Устанавливает первоначальный порядок версий изображений при открытии сеанса или создании нового изображения. Пользователи могут изменить порядок во время просмотра сеанса."
+msgid ""
+"Sets the initial order of image versions when a session is opened or a new "
+"image is generated. Users can change the order while viewing a session."
+msgstr ""
+"Устанавливает первоначальный порядок версий изображений при открытии сеанса "
+"или создании нового изображения. Пользователи могут изменить порядок во "
+"время просмотра сеанса."
 
 msgid "Open the generation form initially"
 msgstr "Сначала откройте форму генерации"
@@ -772,8 +872,12 @@ msgstr "Запросить прозрачный фон по умолчанию"
 msgid "Default image file type"
 msgstr "Тип файла изображения по умолчанию"
 
-msgid "The selected provider must support the requested format. PNG is used by default."
-msgstr "Выбранный провайдер должен поддерживать запрошенный формат. PNG используется по умолчанию."
+msgid ""
+"The selected provider must support the requested format. PNG is used by "
+"default."
+msgstr ""
+"Выбранный провайдер должен поддерживать запрошенный формат. PNG используется "
+"по умолчанию."
 
 msgid "Show an AI image badge by default"
 msgstr "Показывать значок изображения AI по умолчанию"
@@ -794,7 +898,9 @@ msgid "Default Image-to-Video model"
 msgstr "Модель преобразования изображения в видео по умолчанию"
 
 msgid "Leave as “None” to inherit the default configured by Drupal AI."
-msgstr "Оставьте значение «Нет», чтобы унаследовать значение по умолчанию, настроенное Drupal AI."
+msgstr ""
+"Оставьте значение «Нет», чтобы унаследовать значение по умолчанию, "
+"настроенное Drupal AI."
 
 msgid "Draft storage"
 msgstr "Черновое хранилище"
@@ -808,8 +914,12 @@ msgstr "Приватный"
 msgid "Public"
 msgstr "Общедоступный"
 
-msgid "Private storage is recommended because generated drafts may contain sensitive material."
-msgstr "Рекомендуется хранить в частном порядке, поскольку созданные черновики могут содержать конфиденциальный материал."
+msgid ""
+"Private storage is recommended because generated drafts may contain "
+"sensitive material."
+msgstr ""
+"Рекомендуется хранить в частном порядке, поскольку созданные черновики могут "
+"содержать конфиденциальный материал."
 
 msgid "File directory"
 msgstr "Каталог файлов"
@@ -835,14 +945,19 @@ msgstr "Максимальная запрошенная продолжитель
 msgid "Per-request cost warning"
 msgstr "Предупреждение о стоимости каждого запроса"
 
-msgid "Display a warning after a request reaches this cost. Use zero to disable."
-msgstr "Отобразить предупреждение после того, как запрос достигнет этой стоимости. Используйте ноль для отключения."
+msgid ""
+"Display a warning after a request reaches this cost. Use zero to disable."
+msgstr ""
+"Отобразить предупреждение после того, как запрос достигнет этой стоимости. "
+"Используйте ноль для отключения."
 
 msgid "Session cost warning"
 msgstr "Предупреждение о стоимости сеанса"
 
 msgid "Highlight session totals at or above this amount. Use zero to disable."
-msgstr "Выделите общие суммы сеансов, равные этой сумме или превышающие ее. Используйте ноль для отключения."
+msgstr ""
+"Выделите общие суммы сеансов, равные этой сумме или превышающие ее. "
+"Используйте ноль для отключения."
 
 msgid "Media publishing"
 msgstr "Публикации в СМИ"
@@ -871,8 +986,12 @@ msgstr "@count настроенные модели"
 msgid "Provider diagnostics"
 msgstr "Диагностика провайдера"
 
-msgid "Models are discovered from Drupal AI and filtered by the operation each provider advertises."
-msgstr "Модели обнаруживаются с помощью Drupal AI и фильтруются по операции, которую рекламирует каждый поставщик."
+msgid ""
+"Models are discovered from Drupal AI and filtered by the operation each "
+"provider advertises."
+msgstr ""
+"Модели обнаруживаются с помощью Drupal AI и фильтруются по операции, которую "
+"рекламирует каждый поставщик."
 
 msgid "Availability"
 msgstr "Доступность"
@@ -880,11 +999,16 @@ msgstr "Доступность"
 msgid "Studio default"
 msgstr "Студия по умолчанию"
 
-msgid "Use a relative directory containing only letters, numbers, underscores, dashes, and slashes."
-msgstr "Используйте относительный каталог, содержащий только буквы, цифры, символы подчеркивания, тире и косую черту."
+msgid ""
+"Use a relative directory containing only letters, numbers, underscores, "
+"dashes, and slashes."
+msgstr ""
+"Используйте относительный каталог, содержащий только буквы, цифры, символы "
+"подчеркивания, тире и косую черту."
 
 msgid "The default video duration cannot exceed the configured maximum."
-msgstr "Продолжительность видео по умолчанию не может превышать настроенный максимум."
+msgstr ""
+"Продолжительность видео по умолчанию не может превышать настроенный максимум."
 
 msgid "The selected Media type must contain this image field."
 msgstr "Выбранный тип носителя должен содержать это поле изображения."
@@ -919,14 +1043,24 @@ msgstr "Введите альтернативный текст для изобр
 msgid "Generate an image with the compact AI Image Studio form below."
 msgstr "Создайте изображение с помощью компактной формы AI Image Studio ниже."
 
-msgid "Video generation can take several minutes. Keep this page open while the provider completes the request."
-msgstr "Создание видео может занять несколько минут. Держите эту страницу открытой, пока поставщик выполнит запрос."
+msgid ""
+"Video generation can take several minutes. Keep this page open while the "
+"provider completes the request."
+msgstr ""
+"Создание видео может занять несколько минут. Держите эту страницу открытой, "
+"пока поставщик выполнит запрос."
 
-msgid "The provider is creating your image. Keep this page open until the request completes."
-msgstr "Провайдер создает ваш имидж. Держите эту страницу открытой до завершения запроса."
+msgid ""
+"The provider is creating your image. Keep this page open until the request "
+"completes."
+msgstr ""
+"Провайдер создает ваш имидж. Держите эту страницу открытой до завершения "
+"запроса."
 
 msgid "Conversational image and video generation using Drupal AI providers."
-msgstr "Генерация диалоговых изображений и видео с использованием провайдеров Drupal AI."
+msgstr ""
+"Генерация диалоговых изображений и видео с использованием провайдеров Drupal "
+"AI."
 
 msgid "AI"
 msgstr "ИИ"
@@ -938,7 +1072,8 @@ msgid "New image session"
 msgstr "Новая сессия изображений"
 
 msgid "Create an image and refine it through sequential prompts."
-msgstr "Создайте изображение и уточните его с помощью последовательных подсказок."
+msgstr ""
+"Создайте изображение и уточните его с помощью последовательных подсказок."
 
 msgid "Settings"
 msgstr "Настройки"
@@ -956,7 +1091,8 @@ msgid "Access AI Image Studio"
 msgstr "Доступ к AI Image Studio"
 
 msgid "Create and refine images in owned studio sessions."
-msgstr "Создавайте и улучшайте изображения во время сеансов в собственной студии."
+msgstr ""
+"Создавайте и улучшайте изображения во время сеансов в собственной студии."
 
 msgid "View any AI Image Studio session"
 msgstr "Просмотр любого сеанса AI Image Studio"
@@ -976,3 +1112,328 @@ msgstr "Публикуйте видео AI Image Studio в медиа"
 msgid "Administer AI Image Studio"
 msgstr "Администрирование AI Image Studio"
 
+#: src/Form/StudioForm.php:1140
+msgid "@requested → @actual"
+msgstr ""
+
+#: src/Form/StudioForm.php:136
+msgid "A Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:1761
+msgid "A reference image exceeds the configured upload limit."
+msgstr ""
+
+#: src/Plugin/QueueWorker/GenerationQueueWorker.php:23
+msgid "AI Image Studio generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:1781
+msgid "Add at least one reference image."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:124
+msgid "Add media"
+msgstr ""
+
+#: src/Form/StudioForm.php:443
+msgid "Additional reference images"
+msgstr ""
+
+#: src/Form/StudioForm.php:175 src/Form/StudioForm.php:420
+msgid "Animate starting image"
+msgstr ""
+
+#: src/Form/StudioForm.php:424
+msgid ""
+"Animate uses Image 1 as the initial frame. References guide people, "
+"products, objects, wardrobe, or style."
+msgstr ""
+
+#: src/Form/StudioForm.php:1207
+msgid "Attempts"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:142 src/Form/StudioForm.php:1433
+msgid "Cancelled"
+msgstr ""
+
+#: src/Form/StudioForm.php:192
+msgid "Choose an existing image or add one through the Media Library."
+msgstr ""
+
+#: src/Form/SettingsForm.php:154
+msgid "Default image quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:164
+msgid "Default image variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:1020
+msgid "Download Media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:141 src/Form/StudioForm.php:1432
+msgid "Expired"
+msgstr ""
+
+#: src/Form/StudioForm.php:1168
+msgid "Filtered"
+msgstr ""
+
+#: src/Form/StudioForm.php:176 src/Form/StudioForm.php:421
+msgid "Generate from references"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:127
+msgid "Generation attempts"
+msgstr ""
+
+#: src/Form/StudioForm.php:650
+msgid "Generation quality"
+msgstr ""
+
+#: src/Form/SettingsForm.php:297
+msgid "Generation retry limit"
+msgstr ""
+
+#: src/Form/SettingsForm.php:160
+msgid ""
+"Grok Imagine Image 2.0 supports low and medium quality. Other models may "
+"ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1190
+msgid "Image @number — @name"
+msgstr ""
+
+#: src/Form/StudioForm.php:436
+msgid "Image @number — @prompt"
+msgstr ""
+
+#: src/Form/StudioForm.php:445
+msgid ""
+"Image order matters. The selected source is Image 1; session images are "
+"added in the order shown, followed by Media and uploads."
+msgstr ""
+
+#: src/Form/SettingsForm.php:157
+msgid "Low"
+msgstr ""
+
+#: src/Form/StudioForm.php:653
+msgid "Low — faster generation"
+msgstr ""
+
+#: src/Form/StudioForm.php:186
+msgid "Media image"
+msgstr ""
+
+#: src/Form/StudioForm.php:476
+msgid "Media reference"
+msgstr ""
+
+#: src/Form/SettingsForm.php:156
+msgid "Medium"
+msgstr ""
+
+#: src/Form/StudioForm.php:652
+msgid "Medium — standard quality"
+msgstr ""
+
+#: src/Form/StudioForm.php:1165
+msgid "Moderation"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:57 src/Element/MediaLibrary.php:118
+msgid "No media item selected."
+msgstr ""
+
+#: src/Form/StudioForm.php:1875
+msgid ""
+"One or more reference images are not named in the prompt. Use <IMAGE_1>, "
+"<IMAGE_2>, and so on when the distinction matters."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:134
+msgid "Opening media library."
+msgstr ""
+
+#: src/Form/StudioForm.php:1197
+msgid "Ordered inputs"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:51
+msgid "Ordered source files"
+msgstr ""
+
+#: src/Form/StudioForm.php:1167
+msgid "Passed"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:120
+msgid "Provider metadata"
+msgstr ""
+
+#: src/Form/StudioForm.php:1173
+msgid "Provider request"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:123
+msgid "Provider request ID"
+msgstr ""
+
+#: src/Form/StudioForm.php:973
+msgid "Publish Media"
+msgstr ""
+
+#: src/Form/SettingsForm.php:290
+msgid "Queue video generation"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:137 src/Form/StudioForm.php:1428
+msgid "Queued"
+msgstr ""
+
+#: src/Form/SettingsForm.php:294
+msgid ""
+"Recommended. Studio starts queued video work after the browser response and "
+"advances provider polling during status refreshes. Drupal cron remains a "
+"fallback."
+msgstr ""
+
+#: src/Form/StudioForm.php:179
+msgid ""
+"Reference images guide subjects and style; they do not become the first "
+"frame."
+msgstr ""
+
+#: src/Form/StudioForm.php:1757
+msgid "Reference images must be PNG, JPEG, or WebP files."
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:89
+msgid "Reference to video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1107 src/Form/StudioForm.php:1335
+msgid "Reference video"
+msgstr ""
+
+#: src/Form/StudioForm.php:1784
+msgid "Reference-to-video is limited to 10 seconds."
+msgstr ""
+
+#: src/Form/StudioForm.php:1787
+msgid "Reference-to-video supports 480p or 720p output."
+msgstr ""
+
+#: src/Form/StudioForm.php:491
+msgid ""
+"Reference-video prompts can identify inputs as &lt;IMAGE_1&gt;, "
+"&lt;IMAGE_2&gt;, and so on."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:99
+msgid "Remove"
+msgstr ""
+
+#: src/Element/MediaLibrary.php:103
+msgid "Remove @label"
+msgstr ""
+
+#: src/MediaLibraryFormOpener.php:62 src/Element/MediaLibrary.php:124
+msgid "Replace media"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:56
+msgid "Request group"
+msgstr ""
+
+#: src/Form/StudioForm.php:1179
+msgid "Request outputs"
+msgstr ""
+
+#: src/Form/StudioForm.php:671
+msgid ""
+"Requests multiple results in one call when the selected provider supports "
+"it. Each result is retained as a separate version."
+msgstr ""
+
+#: src/Form/StudioForm.php:1682
+msgid "Select Media that contains a valid image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1668
+msgid "Select a Media image."
+msgstr ""
+
+#: src/Form/StudioForm.php:458
+msgid "Session versions"
+msgstr ""
+
+#: src/Entity/ImageStudioTurn.php:47
+msgid "Source file"
+msgstr ""
+
+#: src/Form/StudioForm.php:656
+msgid ""
+"Supported by Grok Imagine Image 2.0. Other models may ignore this setting."
+msgstr ""
+
+#: src/Form/StudioForm.php:1769
+msgid "The same image cannot be supplied more than once."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:217
+msgid "The selected media item is not available."
+msgstr ""
+
+#: src/Form/StudioForm.php:1778
+msgid "The selected model does not support reference-to-video."
+msgstr ""
+
+#: src/Form/StudioForm.php:1774
+msgid "The selected provider does not support multiple image inputs."
+msgstr ""
+
+#: src/Form/StudioForm.php:1793
+msgid "The token <IMAGE_@number> has no corresponding reference image."
+msgstr ""
+
+#: src/Form/StudioForm.php:1936
+msgid ""
+"The video was queued. Studio starts it in the background and refreshes this "
+"page while it processes."
+msgstr ""
+
+#: src/Form/StudioForm.php:1744
+msgid "This mode accepts at most @count ordered input images."
+msgstr ""
+
+#: src/Form/StudioForm.php:1633 src/Form/StudioForm.php:1655
+msgid "This request would exceed the session limit of @count turns."
+msgstr ""
+
+#: src/Element/MediaLibrary.php:145
+msgid "Update media selection"
+msgstr ""
+
+#: src/Form/StudioForm.php:482
+msgid "Uploaded references"
+msgstr ""
+
+#: src/Form/StudioForm.php:663
+msgid "Variations"
+msgstr ""
+
+#: src/Form/StudioForm.php:172 src/Form/StudioForm.php:418
+msgid "Video mode"
+msgstr ""
+
+#: src/Form/StudioForm.php:148
+msgid ""
+"Video requests are queued. You can leave this page while generation "
+"continues."
+msgstr ""

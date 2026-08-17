@@ -17,3 +17,9 @@ media_source:
   css:
     theme:
       css/media-source.css: {}
+
+media_library_element:
+  dependencies:
+    - core/drupal.dialog.ajax
+    - media_library/widget
+    - media_library/view

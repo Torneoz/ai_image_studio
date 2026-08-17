@@ -20,13 +20,15 @@ Drupal Media.
   images and retained input provenance.
 - Grok reference-to-video with up to seven ordered images, `<IMAGE_N>` prompt
   tokens, and native submit/poll queue processing.
+- Core Media Library selection for starting and reference images without a
+  dependency on a contributed Media Library form-element module.
 - Inline video playback and publishing to a configured Video Media type.
 - Provider and model selectors populated from Drupal AI configuration.
 - Aspect ratio, resolution, quality, and other provider-supported controls.
 - Up to four image variations per request when supported, retained as separate
   versions in the same request group.
-- Queued video generation with configurable automatic retries, allowing users
-  to leave the Studio page while cron or another queue runner processes work.
+- Queued video generation with configurable automatic retries and a built-in
+  post-response runner; Drupal cron remains an optional fallback.
 - Optional, configurable AI badges with the choice to embed them permanently
   in image or video files when publishing to Media.
 - PNG, JPEG, and WebP output selection for compatible image providers.
@@ -34,15 +36,19 @@ Drupal Media.
   processing time, status, token usage, and reported or estimated cost.
 - Media Library saving with alternative text required only when an image is
   saved as Media.
+- Direct image and video downloads from each unpublished result's Publish Media
+  panel.
 - Compact image generation directly in image Media forms and Media Library
   dialogs, with or without the AI Media Image module.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
   and per-operation model overrides.
 
-Image requests run synchronously. Video requests are queued by default and are
-processed by Drupal cron or another queue runner. Sites using video generation
-must run cron regularly; administrators can restore synchronous video requests
-from the module settings for development or provider troubleshooting.
+Image requests run synchronously. Video requests are queued by default. Studio
+starts one queued item after each web response and its five-second status
+refresh advances native provider polling. Drupal cron or another queue runner
+can process the same queue as a fallback, but is not required to start videos.
+Administrators can restore synchronous video requests from the module settings
+for development or provider troubleshooting.
 
 Embedding badges in Media images requires PHP GD. Embedding badges in Media
 videos additionally requires the `ffmpeg` executable to be available to PHP.
@@ -72,6 +78,8 @@ drush en ai_image_studio
 ```
 
 Configure a compatible provider through Drupal AI before creating a session.
+Core File, Media, and Media Library are enabled as module dependencies. No
+additional Media Library widget module is required.
 
 ## Configuration
 
@@ -90,10 +98,14 @@ the module's access permission.
 2. Select a provider and model exposed by Drupal AI.
 3. Choose image or video output and submit an initial prompt. Image requests
    can return up to four separately retained variations.
-4. Enter follow-up prompts to refine or animate a selected image.
-5. Review the version history and select the preferred result.
-6. Save the preferred image or video to Media. Images require alternative text
-   when that policy is enabled.
+4. For Grok image editing, add and order up to three session, Media Library, or
+   uploaded inputs.
+5. For Grok reference video, choose Generate from references, order up to seven
+   images, and identify them in the prompt with `<IMAGE_N>` tokens.
+6. Enter follow-up prompts to refine or animate a selected image.
+7. Review the version history and select the preferred result.
+8. Open Publish Media to download the original result or publish it to Drupal
+   Media. Images require alternative text when that policy is enabled.
 
 ## Similar projects
 
