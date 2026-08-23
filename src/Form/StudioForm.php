@@ -573,6 +573,40 @@ final class StudioForm extends FormBase {
       '#type' => 'container',
       '#attributes' => ['class' => ['ai-image-studio-actions']],
     ];
+    $completed_assets = array_filter($turns, static function (object $turn): bool {
+      return $turn->get('status')->value === 'completed'
+        && (!$turn->get('image')->isEmpty() || !$turn->get('video')->isEmpty());
+    });
+    $unpublished_assets = array_filter($completed_assets, static fn (object $turn): bool =>
+      $turn->get('media_id')->isEmpty());
+    $can_publish_images = $this->currentUserProxy
+      ->hasPermission('publish ai image studio image');
+    $can_publish_videos = $this->currentUserProxy
+      ->hasPermission('publish ai image studio video');
+    $has_publishable_asset = array_filter(
+      $unpublished_assets,
+      static fn (object $turn): bool => $turn->get('video')->isEmpty()
+        ? $can_publish_images
+        : $can_publish_videos,
+    ) !== [];
+    if ($session->access('update') && $has_publishable_asset) {
+      $form['session_actions']['publish_all'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save all results to Media'),
+        '#studio_action' => 'publish_all',
+        '#limit_validation_errors' => [],
+      ];
+    }
+    if ($completed_assets !== []) {
+      $form['session_actions']['download_all'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download all images and videos'),
+        '#url' => Url::fromRoute('ai_image_studio.download_all', [
+          'ai_image_studio_session' => $session->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+      ];
+    }
     if ($session->access('delete')) {
       $form['session_actions']['delete'] = [
         '#type' => 'link',
@@ -1857,6 +1891,10 @@ final class StudioForm extends FormBase {
       $this->publishTurn($form_state, (int) $trigger['#turn_id']);
       return;
     }
+    if (($trigger['#studio_action'] ?? '') === 'publish_all') {
+      $this->publishAllTurns($form_state);
+      return;
+    }
 
     $session_id = $form_state->get('session_id');
     $storage = $this->entityTypeManager->getStorage('ai_image_studio_session');
@@ -2142,6 +2180,73 @@ final class StudioForm extends FormBase {
     $this->messenger()->addStatus($this->t('Published as Media “@name”.', [
       '@name' => $media->label(),
     ]));
+    $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
+      'ai_image_studio_session' => $session_id,
+    ]);
+  }
+
+  /**
+   * Publishes every eligible result in the current session to Media.
+   */
+  private function publishAllTurns(FormStateInterface $form_state): void {
+    $session_id = (int) $form_state->get('session_id');
+    $session = $this->entityTypeManager
+      ->getStorage('ai_image_studio_session')
+      ->load($session_id);
+    if ($session === NULL || !$session->access('update')) {
+      $this->messenger()->addError($this->t('The image session is unavailable.'));
+      $form_state->setRedirect('entity.ai_image_studio_session.collection');
+      return;
+    }
+
+    $published = 0;
+    $failed = 0;
+    foreach (array_values($this->loadTurns($session_id)) as $index => $turn) {
+      $is_video = !$turn->get('video')->isEmpty();
+      $has_asset = $is_video || !$turn->get('image')->isEmpty();
+      $permission = $is_video
+        ? 'publish ai image studio video'
+        : 'publish ai image studio image';
+      if ($turn->get('status')->value !== 'completed' || !$has_asset
+        || !$turn->get('media_id')->isEmpty()
+        || !$this->currentUserProxy->hasPermission($permission)) {
+        continue;
+      }
+      try {
+        $this->generator->publish(
+          $turn,
+          $this->defaultMediaName($turn, $index + 1),
+          $is_video ? '' : $this->suggestedAltText($turn),
+          FALSE,
+        );
+        $published++;
+      }
+      catch (\Throwable $exception) {
+        $failed++;
+        $this->getLogger('ai_image_studio')->error(
+          'Could not publish Studio turn @turn to Media: @message',
+          ['@turn' => $turn->id(), '@message' => $exception->getMessage()],
+        );
+      }
+    }
+
+    if ($published > 0) {
+      $this->messenger()->addStatus($this->formatPlural(
+        $published,
+        'Saved 1 result to Media.',
+        'Saved @count results to Media.',
+      ));
+    }
+    if ($failed > 0) {
+      $this->messenger()->addError($this->formatPlural(
+        $failed,
+        '1 result could not be saved. Check the log for details.',
+        '@count results could not be saved. Check the log for details.',
+      ));
+    }
+    if ($published === 0 && $failed === 0) {
+      $this->messenger()->addStatus($this->t('All eligible results are already saved to Media.'));
+    }
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session_id,
     ]);

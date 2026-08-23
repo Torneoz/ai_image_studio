@@ -15,6 +15,7 @@
         }
     ],
     "require": {
+        "ext-zip": "*",
         "php": ">=8.1",
         "drupal/core": "^10.3 || ^11",
         "drupal/ai": "^1.4"

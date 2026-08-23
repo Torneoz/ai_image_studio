@@ -38,6 +38,17 @@ entity.ai_image_studio_session.delete_form:
       ai_image_studio_session:
         type: entity:ai_image_studio_session
 
+ai_image_studio.download_all:
+  path: '/admin/content/ai-image-studio/{ai_image_studio_session}/download-all'
+  defaults:
+    _controller: '\Drupal\ai_image_studio\Controller\SessionDownloadController::download'
+  requirements:
+    _entity_access: 'ai_image_studio_session.view'
+  options:
+    parameters:
+      ai_image_studio_session:
+        type: entity:ai_image_studio_session
+
 ai_image_studio.settings:
   path: '/admin/config/ai/image-studio'
   defaults:
