@@ -106,6 +106,23 @@
           );
           const checkedValue = (name, fallback) =>
             studio.querySelector(`input[name="${name}"]:checked`)?.value || fallback;
+          const activeModelControl = () => {
+            const outputType = checkedValue('output_type', 'image');
+            const startModeControl = studio.querySelector('input[name="start_mode"]');
+            let modelName;
+            if (startModeControl) {
+              const startMode = checkedValue('start_mode', 'prompt');
+              modelName = outputType === 'video'
+                ? (startMode === 'prompt' ? 'text_video_model' : 'image_video_model')
+                : (startMode === 'prompt' ? 'text_model' : 'image_model');
+            }
+            else {
+              modelName = outputType === 'video'
+                ? 'video_model'
+                : (outputType === 'prompt' ? 'text_model' : 'model');
+            }
+            return studio.querySelector(`select[name="${modelName}"]`);
+          };
           const applyFormVisibility = () => {
             const startMode = checkedValue('start_mode', 'prompt');
             const outputType = checkedValue('output_type', 'image');
@@ -122,11 +139,13 @@
               });
           };
           const applyModelCapabilities = () => {
-            const visibleModel = Array.from(modelControls).find(
-              (control) => control.offsetParent !== null,
-            );
+            const visibleModel = activeModelControl()
+              || Array.from(modelControls).find(
+                (control) => control.offsetParent !== null,
+              );
             const model = (visibleModel?.value || '').toLowerCase();
             const isGrok = model.includes('grok') || model.includes('xai');
+            const outputType = checkedValue('output_type', 'image');
             const variationsControl = studio.querySelector(
               '[data-ai-image-studio-variations-control]',
             );
@@ -175,7 +194,11 @@
               '[data-ai-image-studio-references]',
             );
             if (references) {
-              references.hidden = !isGrok;
+              const referenceVideo = outputType === 'video'
+                && checkedValue('video_mode', 'animate') === 'reference';
+              references.hidden = !isGrok
+                || outputType === 'prompt'
+                || (outputType === 'video' && !referenceVideo);
             }
             const referenceMode = studio.querySelector(
               'input[name="video_mode"][value="reference"]',
@@ -195,7 +218,9 @@
           modelControls.forEach((control) => {
             control.addEventListener('change', applyModelCapabilities);
           });
-          studio.querySelectorAll('input[name="output_type"], input[name="start_mode"]')
+          studio.querySelectorAll(
+            'input[name="output_type"], input[name="start_mode"], input[name="video_mode"]',
+          )
             .forEach((control) => {
               control.addEventListener('change', () => {
                 applyFormVisibility();

@@ -1,6 +1,6 @@
 .ai-image-studio-layout {
   display: grid;
-  gap: 1rem;
+  gap: .625rem;
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -30,6 +30,21 @@
 
 .ai-image-studio-layout [data-ai-image-studio-conditional] {
   margin-block: 0;
+}
+
+.ai-image-studio-layout > .form-item,
+.ai-image-studio-layout > .form-wrapper {
+  margin-block: 0;
+}
+
+.ai-image-studio-layout .media-library-widget {
+  justify-items: start;
+  max-inline-size: 36rem;
+}
+
+.ai-image-studio-layout .media-library-open-button {
+  inline-size: fit-content;
+  max-inline-size: 100%;
 }
 
 .ai-image-studio-turns {

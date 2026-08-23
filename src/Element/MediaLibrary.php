@@ -79,6 +79,11 @@ final class MediaLibrary extends FormElementBase {
 
     $element['#attributes']['id'] = $wrapper_id;
     $element['#attributes']['class'][] = 'media-library-widget';
+    foreach (['data-ai-image-studio-conditional', 'data-ai-image-studio-start-mode', 'data-ai-image-studio-output-type'] as $attribute) {
+      if (isset($element['#wrapper_attributes'][$attribute])) {
+        $element['#attributes'][$attribute] = $element['#wrapper_attributes'][$attribute];
+      }
+    }
     $element['#attached']['library'][] = 'ai_image_studio/media_library_element';
     $element['selection'] = [
       '#type' => 'container',
