@@ -87,6 +87,30 @@ final class ImageGenerator {
   }
 
   /**
+   * Returns the maximum number of outputs supported by an image model.
+   */
+  public function getMaxVariations(string $model_option): int {
+    [$provider_id, $model_id] = $this->parseModelOption($model_option);
+    $model = strtolower($model_id);
+
+    if ($this->isXaiProvider($provider_id)) {
+      return 10;
+    }
+    if (str_contains($model, 'dall-e-3')) {
+      return 1;
+    }
+    if (str_contains($model, 'gpt-image')
+      || str_contains($model, 'dall-e-2')) {
+      return 10;
+    }
+    if (str_contains($model, 'imagen-')) {
+      return 4;
+    }
+    // Models without a known multi-output API default to one result.
+    return 1;
+  }
+
+  /**
    * Reports whether a selected option supports Grok reference-to-video.
    */
   public function supportsReferenceVideo(string $model_option): bool {
@@ -414,7 +438,10 @@ final class ImageGenerator {
     if ($is_edit && $aspect_ratio === 'auto') {
       $aspect_ratio = '';
     }
-    $variation_count = max(1, min(4, (int) ($settings['variations'] ?? 1)));
+    $variation_count = max(1, min(
+      $this->getMaxVariations($provider_id . '__' . $model_id),
+      (int) ($settings['variations'] ?? 1),
+    ));
     $payload = array_filter([
       'model' => $model_id,
       'prompt' => $prompt,
@@ -797,6 +824,10 @@ final class ImageGenerator {
           ? 'high'
           : 'auto',
         'output_format' => (string) ($settings['file_type'] ?? 'png'),
+        'n' => max(1, min(
+          $this->getMaxVariations($provider_id . '__' . $model_id),
+          (int) ($settings['variations'] ?? 1),
+        )),
       ];
     }
 
@@ -833,7 +864,10 @@ final class ImageGenerator {
       'aspect_ratio' => (string) ($settings['aspect_ratio'] ?? ''),
       'resolution' => (string) ($settings['resolution'] ?? ''),
       'quality' => (string) ($settings['quality'] ?? ''),
-      'n' => max(1, min(4, (int) ($settings['variations'] ?? 1))),
+      'n' => max(1, min(
+        $this->getMaxVariations($provider_id . '__' . $model_id),
+        (int) ($settings['variations'] ?? 1),
+      )),
       'transparent_background' => !empty($settings['transparent_background']),
     ], static fn (mixed $value): bool => $value !== '' && $value !== FALSE);
 

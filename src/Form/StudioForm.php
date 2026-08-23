@@ -74,6 +74,13 @@ final class StudioForm extends FormBase {
     $default_output_type = (string) ($settings->get('default_output_type') ?: 'image');
 
     $form['#attached']['library'][] = 'ai_image_studio/studio';
+    $variation_limits = [];
+    foreach (['text_to_image', 'image_to_image'] as $operation) {
+      foreach (array_keys($this->generator->getModelOptions($operation)) as $model) {
+        $variation_limits[$model] = $this->generator->getMaxVariations($model);
+      }
+    }
+    $form['#attached']['drupalSettings']['aiImageStudio']['variationLimits'] = $variation_limits;
     $form['#attributes']['class'][] = 'ai-image-studio-layout';
     if ($session !== NULL && $this->sessionHasActiveGeneration((int) $session->id())) {
       $form['#attached']['html_head'][] = [[
@@ -718,14 +725,12 @@ final class StudioForm extends FormBase {
       'variations' => [
         '#type' => 'select',
         '#title' => $this->t('Variations'),
-        '#options' => [
-          1 => '1',
-          2 => '2',
-          3 => '3',
-          4 => '4',
-        ],
+        '#options' => array_combine(range(1, 10), range(1, 10)),
         '#default_value' => (int) ($defaults['variations'] ?? ($settings->get('default_image_variations') ?: 1)),
         '#description' => $this->t('Requests multiple results in one call when the selected provider supports it. Each result is retained as a separate version.'),
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-variations-control' => '',
+        ],
       ],
       'transparent_background' => [
         '#type' => 'checkbox',
@@ -1816,6 +1821,16 @@ final class StudioForm extends FormBase {
           $model_key,
           $this->t('The selected provider and model is not available for this request type.'),
         );
+      }
+      elseif ($output_type === 'image') {
+        $variations = max(1, (int) ($form_state->getValue('variations') ?: 1));
+        $maximum_variations = $this->generator->getMaxVariations($model);
+        if ($variations > $maximum_variations) {
+          $form_state->setErrorByName('variations', $this->t(
+            'The selected model supports at most @count variations per request.',
+            ['@count' => $maximum_variations],
+          ));
+        }
       }
 
       $reference_files = $this->referenceFilesFromForm($form_state, $session_id);

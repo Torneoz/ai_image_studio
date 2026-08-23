@@ -4,6 +4,9 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta7
 
+- Made the image variation selector model-aware, with per-request limits of 10
+  for Grok and GPT Image/DALL-E 2, one for DALL-E 3 and unknown models, and
+  four for Imagen models.
 - Added a distinct Grok reference-to-video mode with up to seven ordered
   reference images and validated `<IMAGE_N>` prompt tokens.
 - Added native xAI video submission and delayed queue polling so workers do not

@@ -6,6 +6,7 @@ studio:
     js/studio.js: {}
   dependencies:
     - core/drupal
+    - core/drupalSettings
     - core/once
 
 collection:

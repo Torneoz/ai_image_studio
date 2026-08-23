@@ -1,4 +1,4 @@
-(function (Drupal, once) {
+(function (Drupal, once, drupalSettings) {
   'use strict';
 
   Drupal.behaviors.aiImageStudioSource = {
@@ -110,6 +110,32 @@
             );
             const model = (visibleModel?.value || '').toLowerCase();
             const isGrok = model.includes('grok') || model.includes('xai');
+            const variationsControl = studio.querySelector(
+              '[data-ai-image-studio-variations-control]',
+            );
+            const variations = variationsControl?.querySelector('select');
+            const variationLimits =
+              drupalSettings.aiImageStudio?.variationLimits || {};
+            const maximumVariations = Number(
+              variationLimits[visibleModel?.value] || 1,
+            );
+            if (variations) {
+              Array.from(variations.options).forEach((option) => {
+                option.disabled = Number(option.value) > maximumVariations;
+              });
+              if (Number(variations.value) > maximumVariations) {
+                variations.value = String(maximumVariations);
+              }
+              const description = variationsControl.querySelector('.description');
+              if (description) {
+                description.textContent = maximumVariations === 1
+                  ? Drupal.t('The selected model returns one image per request.')
+                  : Drupal.t(
+                    'The selected model supports up to @count variations per request. Each result is retained as a separate version.',
+                    { '@count': maximumVariations },
+                  );
+              }
+            }
             const quality = studio.querySelector(
               '[data-ai-image-studio-quality-control] select',
             );
@@ -337,4 +363,4 @@
       });
     },
   };
-})(Drupal, once);
+})(Drupal, once, drupalSettings);

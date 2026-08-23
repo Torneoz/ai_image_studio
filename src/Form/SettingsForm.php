@@ -162,7 +162,7 @@ final class SettingsForm extends ConfigFormBase {
     $form['generation']['default_image_variations'] = [
       '#type' => 'select',
       '#title' => $this->t('Default image variations'),
-      '#options' => [1 => '1', 2 => '2', 3 => '3', 4 => '4'],
+      '#options' => array_combine(range(1, 10), range(1, 10)),
       '#default_value' => (int) ($config->get('default_image_variations') ?: 1),
     ];
     $form['generation']['default_video_resolution'] = [
