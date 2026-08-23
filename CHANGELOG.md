@@ -2,13 +2,22 @@
 
 All notable changes to AI Image Studio are documented in this file.
 
-## 1.0.0-beta7
+## 1.0.0-beta8
 
 - Tightened the creation form layout and made source, model, and video controls
   collapse reliably when their start mode or output type is inactive.
 - Made the image variation selector model-aware, with per-request limits of 10
   for Grok and GPT Image/DALL-E 2, one for DALL-E 3 and unknown models, and
   four for Imagen models.
+- Added session-wide actions to save every completed result to Media or
+  download all completed images and videos in a ZIP archive.
+- Added a New asset from prompt workflow inside existing sessions without
+  inheriting a source image or refinement parent.
+- Improved generated filenames and retained direct downloads for results after
+  they have been published to Media.
+
+## 1.0.0-beta7
+
 - Added a distinct Grok reference-to-video mode with up to seven ordered
   reference images and validated `<IMAGE_N>` prompt tokens.
 - Added native xAI video submission and delayed queue polling so workers do not

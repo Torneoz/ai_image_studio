@@ -25,8 +25,9 @@ Drupal Media.
 - Inline video playback and publishing to a configured Video Media type.
 - Provider and model selectors populated from Drupal AI configuration.
 - Aspect ratio, resolution, quality, and other provider-supported controls.
-- Up to four image variations per request when supported, retained as separate
-  versions in the same request group.
+- Model-aware image variation counts, including up to ten results for Grok,
+  GPT Image, and DALL-E 2, retained as separate versions in the same request
+  group.
 - Queued video generation with configurable automatic retries and a built-in
   post-response runner; Drupal cron remains an optional fallback.
 - Optional, configurable AI badges with the choice to embed them permanently
@@ -38,6 +39,8 @@ Drupal Media.
   saved as Media.
 - Direct image and video downloads from each unpublished result's Publish Media
   panel.
+- Session-wide actions to save every completed result to Media or download all
+  completed images and videos as a ZIP archive.
 - Compact image generation directly in image Media forms and Media Library
   dialogs, with or without the AI Media Image module.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
@@ -97,7 +100,7 @@ the module's access permission.
 1. Create a Studio session.
 2. Select a provider and model exposed by Drupal AI.
 3. Choose image or video output and submit an initial prompt. Image requests
-   can return up to four separately retained variations.
+   offer only the variation counts supported by the selected model.
 4. For Grok image editing, add and order up to three session, Media Library, or
    uploaded inputs.
 5. For Grok reference video, choose Generate from references, order up to seven
@@ -105,7 +108,8 @@ the module's access permission.
 6. Enter follow-up prompts to refine or animate a selected image.
 7. Review the version history and select the preferred result.
 8. Open Publish Media to download the original result or publish it to Drupal
-   Media. Images require alternative text when that policy is enabled.
+   Media, or use the session actions to save or download every result. Images
+   require alternative text when that policy is enabled.
 
 ## Similar projects
 
