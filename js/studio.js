@@ -134,8 +134,13 @@
                   || requiredStart === startMode
                   || (requiredStart === 'source'
                     && ['upload', 'media'].includes(startMode));
-                control.hidden = !(startMatches
-                  && (!requiredOutput || requiredOutput === outputType));
+                const visible = startMatches
+                  && (!requiredOutput || requiredOutput === outputType);
+                control.hidden = !visible;
+                const formItem = control.closest('.js-form-item, .form-item');
+                if (formItem && formItem !== control) {
+                  formItem.hidden = !visible;
+                }
               });
           };
           const applyModelCapabilities = () => {

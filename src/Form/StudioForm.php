@@ -231,6 +231,10 @@ final class StudioForm extends FormBase {
           'data-ai-image-studio-conditional' => '',
           'data-ai-image-studio-start-mode' => 'media',
         ],
+        '#attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'media',
+        ],
       ];
       $form['text_model'] = [
         '#type' => 'select',
