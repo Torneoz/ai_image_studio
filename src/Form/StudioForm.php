@@ -76,9 +76,15 @@ final class StudioForm extends FormBase {
     $form['#attached']['library'][] = 'ai_image_studio/studio';
     $variation_limits = [];
     foreach (['text_to_image', 'image_to_image'] as $operation) {
-      foreach (array_keys($this->generator->getModelOptions($operation)) as $model) {
-        $variation_limits[$model] = $this->generator->getMaxVariations($model);
-      }
+      $model_options = $this->generator->getModelOptions($operation);
+      array_walk_recursive(
+        $model_options,
+        function (mixed $label, string|int $model) use (&$variation_limits): void {
+          if (is_string($model) && str_contains($model, '__')) {
+            $variation_limits[$model] = $this->generator->getMaxVariations($model);
+          }
+        },
+      );
     }
     $form['#attached']['drupalSettings']['aiImageStudio']['variationLimits'] = $variation_limits;
     $form['#attributes']['class'][] = 'ai-image-studio-layout';

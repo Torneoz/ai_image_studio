@@ -90,7 +90,12 @@ final class ImageGenerator {
    * Returns the maximum number of outputs supported by an image model.
    */
   public function getMaxVariations(string $model_option): int {
-    [$provider_id, $model_id] = $this->parseModelOption($model_option);
+    try {
+      [$provider_id, $model_id] = $this->parseModelOption($model_option);
+    }
+    catch (\InvalidArgumentException) {
+      return 1;
+    }
     $model = strtolower($model_id);
 
     if ($this->isXaiProvider($provider_id)) {
