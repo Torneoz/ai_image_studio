@@ -11,6 +11,7 @@ use Drupal\ai\OperationType\ImageToImage\ImageToImageInput;
 use Drupal\ai\OperationType\ImageToVideo\ImageToVideoInput;
 use Drupal\ai\OperationType\TextToImage\TextToImageInput;
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileExists;
@@ -52,6 +53,7 @@ final class ImageGenerator {
     private readonly QueueFactory $queueFactory,
     private readonly ClientInterface $httpClient,
     private readonly KeyRepositoryInterface $keyRepository,
+    private readonly TransliterationInterface $transliteration,
     private readonly ?object $pricingCatalog = NULL,
   ) {}
 
@@ -245,10 +247,11 @@ final class ImageGenerator {
           $started_at,
         );
       }
-      if ($operation === 'image_to_image'
-        && count($sources) > 1
-        && $this->isXaiProvider($provider_id)) {
-        return $this->processXaiMultiImageEdit(
+      if (in_array($operation, ['text_to_image', 'image_to_image'], TRUE)
+        && $this->isXaiProvider($provider_id)
+        && ((int) ($generation_settings['variations'] ?? 1) > 1
+          || count($sources) > 1)) {
+        return $this->processXaiImageRequest(
           $turn,
           $session,
           $sources,
@@ -349,12 +352,12 @@ final class ImageGenerator {
         $file = $output_type === 'video'
           ? $this->saveGeneratedVideo(
             $generated,
-            (int) $session->id(),
+            $session,
             (int) $result_turn->id(),
           )
           : $this->saveGeneratedFile(
             $generated,
-            (int) $session->id(),
+            $session,
             (int) $result_turn->id(),
           );
         $result_turn->set($output_type, ['target_id' => $file->id()]);
@@ -390,9 +393,9 @@ final class ImageGenerator {
   }
 
   /**
-   * Sends a Grok multi-image edit and persists its synchronous response.
+   * Sends a native Grok image request and persists every returned variation.
    */
-  private function processXaiMultiImageEdit(
+  private function processXaiImageRequest(
     object $turn,
     object $session,
     array $sources,
@@ -402,50 +405,80 @@ final class ImageGenerator {
     array $settings,
     int $started_at,
   ): object {
+    $is_edit = $sources !== [];
+    $image_references = array_map(
+      fn (FileInterface $file): array => $this->xaiImageReference($file),
+      array_slice($sources, 0, 3),
+    );
+    $aspect_ratio = (string) ($settings['aspect_ratio'] ?? 'auto');
+    if ($is_edit && $aspect_ratio === 'auto') {
+      $aspect_ratio = '';
+    }
+    $variation_count = max(1, min(4, (int) ($settings['variations'] ?? 1)));
     $payload = array_filter([
       'model' => $model_id,
       'prompt' => $prompt,
-      'images' => array_map(
-        fn (FileInterface $file): array => $this->xaiImageReference($file),
-        array_slice($sources, 0, 3),
-      ),
-      'aspect_ratio' => ($settings['aspect_ratio'] ?? 'auto') === 'auto'
-        ? NULL
-        : $settings['aspect_ratio'],
+      'image' => $is_edit && count($sources) === 1
+        ? $image_references[0]
+        : NULL,
+      'images' => count($sources) > 1
+        ? $image_references
+        : NULL,
+      'aspect_ratio' => $aspect_ratio,
+      'resolution' => $settings['resolution'] ?? NULL,
+      'quality' => str_contains(strtolower($model_id), 'image-2.0')
+        ? ($settings['quality'] ?? NULL)
+        : NULL,
       'response_format' => 'url',
-      'n' => max(1, min(4, (int) ($settings['variations'] ?? 1))),
+      'n' => $variation_count,
       'storage_options' => ['filename' => sprintf('studio-turn-%d.png', $turn->id())],
     ], static fn (mixed $value): bool => $value !== NULL && $value !== '');
-    $response = $this->xaiRequest($provider_id, 'POST', 'images/edits', $payload);
+    $response = $this->xaiRequest(
+      $provider_id,
+      'POST',
+      $is_edit ? 'images/edits' : 'images/generations',
+      $payload,
+    );
     $items = array_values((array) ($response['data'] ?? []));
     if ($items === []) {
-      throw new \RuntimeException($this->translate('Grok returned no edited image.'));
+      throw new \RuntimeException($this->translate('Grok returned no generated image.'));
     }
 
     $reported_cost = $this->findReportedCost($response);
+    $estimated_cost = $reported_cost ?? $this->estimateCost(
+      $provider_id,
+      $is_edit ? 'image_to_image' : 'text_to_image',
+      $model_id,
+      $settings,
+      $response,
+    );
     foreach ($items as $index => $item) {
       $binary = !empty($item['b64_json'])
         ? base64_decode((string) $item['b64_json'], TRUE)
         : $this->downloadProviderAsset((string) ($item['url'] ?? ''));
       if (!is_string($binary) || $binary === '') {
-        throw new \RuntimeException($this->translate('The edited image could not be downloaded.'));
+        throw new \RuntimeException($this->translate('The generated image could not be downloaded.'));
       }
       $result_turn = $index === 0 ? $turn : $this->createVariationTurn($turn);
       $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($binary) ?: 'image/png';
       $file = $this->saveGeneratedFile(
-        new ImageFile($binary, $mime, sprintf('grok-edit-%d.png', $result_turn->id())),
-        (int) $session->id(),
+        new ImageFile($binary, $mime, sprintf('grok-image-%d.png', $result_turn->id())),
+        $session,
         (int) $result_turn->id(),
       );
       $result_turn->set('image', ['target_id' => $file->id()]);
       $result_turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
-      $result_turn->set('estimated_cost', $reported_cost === NULL
+      $result_turn->set('estimated_cost', $estimated_cost === NULL
         ? NULL
-        : $reported_cost / count($items));
-      $result_turn->set('cost_source', $reported_cost === NULL ? 'unavailable' : 'reported');
+        : $estimated_cost / count($items));
+      $result_turn->set('cost_source', $reported_cost !== NULL
+        ? 'reported'
+        : ($estimated_cost !== NULL ? 'estimated' : 'unavailable'));
       $result_turn->set('provider_metadata', [
         'request_id' => $response['request_id'] ?? NULL,
         'file_id' => $item['file_id'] ?? $item['file_output']['file_id'] ?? NULL,
+        'requested_output_count' => $variation_count,
+        'output_count' => count($items),
         'input_file_ids' => array_map(
           static fn (FileInterface $file): int => (int) $file->id(),
           $sources,
@@ -539,7 +572,7 @@ final class ImageGenerator {
     $binary = $this->downloadProviderAsset((string) $response['video']['url']);
     $file = $this->saveGeneratedVideo(
       new VideoFile($binary, 'video/mp4', sprintf('grok-video-%d.mp4', $turn->id())),
-      (int) $session->id(),
+      $session,
       (int) $turn->id(),
     );
     $cost = $this->findReportedCost($response);
@@ -1037,11 +1070,16 @@ final class ImageGenerator {
   /**
    * Writes a normalized image to managed file storage.
    */
-  private function saveGeneratedFile(ImageFile $image, int $session_id, int $turn_id): FileInterface {
+  private function saveGeneratedFile(ImageFile $image, object $session, int $turn_id): FileInterface {
     $settings = $this->configFactory->get('ai_image_studio.settings');
     $scheme = (string) ($settings->get('file_scheme') ?: 'private');
     $directory = trim((string) ($settings->get('file_directory') ?: 'ai-image-studio'), '/');
-    $destination_directory = sprintf('%s://%s/%d', $scheme, $directory, $session_id);
+    $destination_directory = sprintf(
+      '%s://%s/%s',
+      $scheme,
+      $directory,
+      $this->safeSessionName($session),
+    );
     $this->fileSystem->prepareDirectory(
       $destination_directory,
       FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
@@ -1069,13 +1107,18 @@ final class ImageGenerator {
    */
   private function saveGeneratedVideo(
     VideoFile $video,
-    int $session_id,
+    object $session,
     int $turn_id,
   ): FileInterface {
     $settings = $this->configFactory->get('ai_image_studio.settings');
     $scheme = (string) ($settings->get('file_scheme') ?: 'private');
     $directory = trim((string) ($settings->get('file_directory') ?: 'ai-image-studio'), '/');
-    $destination_directory = sprintf('%s://%s/%d', $scheme, $directory, $session_id);
+    $destination_directory = sprintf(
+      '%s://%s/%s',
+      $scheme,
+      $directory,
+      $this->safeSessionName($session),
+    );
     $this->fileSystem->prepareDirectory(
       $destination_directory,
       FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
@@ -1089,6 +1132,18 @@ final class ImageGenerator {
     $file->setPermanent();
     $file->save();
     return $file;
+  }
+
+  /**
+   * Returns a filesystem-safe directory name derived from the session title.
+   */
+  private function safeSessionName(object $session): string {
+    $name = strtolower($this->transliteration->transliterate(
+      trim((string) $session->label()),
+      'en',
+    ));
+    $name = trim((string) preg_replace('/[^a-z0-9]+/', '-', $name), '-');
+    return mb_substr($name !== '' ? $name : 'session-' . $session->id(), 0, 100);
   }
 
   /**

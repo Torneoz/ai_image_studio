@@ -12,6 +12,7 @@ services:
       - '@queue'
       - '@http_client'
       - '@key.repository'
+      - '@transliteration'
       - '@?torneo_ai.pricing_catalog'
 
   logger.channel.ai_image_studio:

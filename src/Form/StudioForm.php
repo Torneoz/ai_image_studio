@@ -369,6 +369,11 @@ final class StudioForm extends FormBase {
             'class' => ['ai-image-studio-source-preview'],
             'data-ai-image-studio-source-preview' => '',
           ],
+          '#states' => [
+            'invisible' => [
+              ':input[name="output_type"]' => ['value' => 'prompt'],
+            ],
+          ],
           'image' => $source_file instanceof FileInterface
             ? [
               '#theme' => 'image',
@@ -410,6 +415,7 @@ final class StudioForm extends FormBase {
         '#options' => [
           'image' => $this->t('Refined image'),
           'video' => $this->t('Video from this image'),
+          'prompt' => $this->t('New asset from prompt'),
         ],
         '#default_value' => $default_output_type,
       ];
@@ -513,6 +519,19 @@ final class StudioForm extends FormBase {
           ],
         ],
       ];
+      $form['refine']['text_model'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Provider and model'),
+        '#options' => $this->generator->getModelOptions('text_to_image'),
+        '#default_value' => $this->configuredDefaultModel('text_to_image'),
+        '#description' => $this->t('Creates a new image from the prompt without using a previous version as its source.'),
+        '#required' => TRUE,
+        '#states' => [
+          'visible' => [
+            ':input[name="output_type"]' => ['value' => 'prompt'],
+          ],
+        ],
+      ];
       $video_operation = $selected_source ? 'image_to_video' : 'text_to_video';
       $form['refine']['video_model'] = [
         '#type' => 'select',
@@ -609,7 +628,11 @@ final class StudioForm extends FormBase {
       '#open' => $settings->get('image_settings_open') !== FALSE,
       '#states' => [
         'visible' => [
-          ':input[name="output_type"]' => ['value' => 'image'],
+          ':input[name="output_type"]' => [
+            ['value' => 'image'],
+            'or',
+            ['value' => 'prompt'],
+          ],
         ],
       ],
       'aspect_ratio' => [
@@ -959,6 +982,17 @@ final class StudioForm extends FormBase {
         $build['published'] = $published_media
           ->toLink($this->t('View published Media'))
           ->toRenderable();
+        if ($file instanceof FileInterface) {
+          $build['download'] = [
+            '#type' => 'link',
+            '#title' => $this->t('Download Media'),
+            '#url' => Url::fromUserInput($file->createFileUrl()),
+            '#attributes' => [
+              'class' => ['button'],
+              'download' => TRUE,
+            ],
+          ];
+        }
       }
       elseif ($turn->get('session_id')->entity?->access('update')
         && $this->currentUserProxy->hasPermission(
@@ -1624,7 +1658,8 @@ final class StudioForm extends FormBase {
       $max_turns = (int) ($this->studioConfigFactory
         ->get('ai_image_studio.settings')
         ->get('max_turns') ?: 25);
-      $requested_turns = (string) ($form_state->getValue('output_type') ?: 'image') === 'image'
+      $creation_mode = (string) ($form_state->getValue('output_type') ?: 'image');
+      $requested_turns = $creation_mode !== 'video'
         ? max(1, (int) ($form_state->getValue('variations') ?: 1))
         : 1;
       if ($this->countTurns((int) $session_id) + $requested_turns > $max_turns) {
@@ -1637,14 +1672,16 @@ final class StudioForm extends FormBase {
         return;
       }
       $source_turn_id = (int) $form_state->getValue('source_turn_id');
-      if ($this->completedTurnFromSession((int) $session_id, $source_turn_id) === NULL) {
+      if ($creation_mode !== 'prompt'
+        && $this->completedTurnFromSession((int) $session_id, $source_turn_id) === NULL) {
         $form_state->setErrorByName(
           'source_turn_id',
           $this->t('Select a completed image from this session to refine.'),
         );
       }
     }
-    $output_type = (string) ($form_state->getValue('output_type') ?: 'image');
+    $creation_mode = (string) ($form_state->getValue('output_type') ?: 'image');
+    $output_type = $creation_mode === 'prompt' ? 'image' : $creation_mode;
     if ($session_id === NULL && $output_type === 'image') {
       $max_turns = (int) ($this->studioConfigFactory
         ->get('ai_image_studio.settings')
@@ -1704,17 +1741,22 @@ final class StudioForm extends FormBase {
         );
       }
     }
-    elseif (!$form_state->getValue(
-      $output_type === 'video' ? 'video_model' : 'model',
-    )) {
-      $form_state->setErrorByName(
-        $output_type === 'video' ? 'video_model' : 'model',
-        $this->t('Select a configured provider and model.'),
-      );
+    else {
+      $model_key = match ($creation_mode) {
+        'video' => 'video_model',
+        'prompt' => 'text_model',
+        default => 'model',
+      };
+      if (!$form_state->getValue($model_key)) {
+        $form_state->setErrorByName(
+          $model_key,
+          $this->t('Select a configured provider and model.'),
+        );
+      }
     }
 
     if (!$form_state->hasAnyErrors()) {
-      $has_source = $session_id !== NULL
+      $has_source = ($session_id !== NULL && $creation_mode !== 'prompt')
         || in_array($start_mode, ['upload', 'media'], TRUE);
       $operation = match ([$output_type, $has_source]) {
         ['video', TRUE] => 'image_to_video',
@@ -1722,11 +1764,18 @@ final class StudioForm extends FormBase {
         ['image', TRUE] => 'image_to_image',
         default => 'text_to_image',
       };
-      $model_key = $session_id !== NULL
-        ? ($output_type === 'video' ? 'video_model' : 'model')
-        : ($has_source
+      if ($session_id !== NULL) {
+        $model_key = match ($creation_mode) {
+          'video' => 'video_model',
+          'prompt' => 'text_model',
+          default => 'model',
+        };
+      }
+      else {
+        $model_key = $has_source
           ? ($output_type === 'video' ? 'image_video_model' : 'image_model')
-          : ($output_type === 'video' ? 'text_video_model' : 'text_model'));
+          : ($output_type === 'video' ? 'text_video_model' : 'text_model');
+      }
       $model = (string) $form_state->getValue($model_key);
       if (!isset($this->generator->getModelOptions($operation)[$model])) {
         $form_state->setErrorByName(
@@ -1828,21 +1877,24 @@ final class StudioForm extends FormBase {
       }
     }
 
-    $parent = $session_id === NULL
+    $creation_mode = (string) ($form_state->getValue('output_type') ?: 'image');
+    $parent = $session_id === NULL || $creation_mode === 'prompt'
       ? NULL
       : $this->completedTurnFromSession(
         (int) $session->id(),
         (int) $form_state->getValue('source_turn_id'),
       );
     $source = NULL;
-    $output_type = (string) ($form_state->getValue('output_type') ?: 'image');
+    $output_type = $creation_mode === 'prompt' ? 'image' : $creation_mode;
     $model = $session_id === NULL
       ? (string) $form_state->getValue(
         $output_type === 'video' ? 'image_video_model' : 'image_model',
       )
-      : (string) $form_state->getValue(
-        $output_type === 'video' ? 'video_model' : 'model',
-      );
+      : (string) $form_state->getValue(match ($creation_mode) {
+        'video' => 'video_model',
+        'prompt' => 'text_model',
+        default => 'model',
+      });
     if ($session_id === NULL) {
       if ($form_state->getValue('start_mode') === 'upload') {
         $file_ids = array_filter((array) $form_state->getValue('source_image'));
@@ -1986,6 +2038,9 @@ final class StudioForm extends FormBase {
       }
     }
     else {
+      if ($form_state->getValue('output_type') === 'prompt') {
+        return [];
+      }
       $primary = $this->completedTurnFromSession(
         (int) $session_id,
         (int) $form_state->getValue('source_turn_id'),
