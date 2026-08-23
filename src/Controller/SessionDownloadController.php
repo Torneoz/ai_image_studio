@@ -23,7 +23,7 @@ final class SessionDownloadController extends ControllerBase {
    * Constructs the session download controller.
    */
   public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeManagerInterface $studioEntityTypeManager,
     protected FileSystemInterface $fileSystem,
     protected TransliterationInterface $transliteration,
   ) {}
@@ -43,7 +43,8 @@ final class SessionDownloadController extends ControllerBase {
    * Returns a ZIP containing every completed image and video result.
    */
   public function download(object $ai_image_studio_session): BinaryFileResponse {
-    $turn_storage = $this->entityTypeManager->getStorage('ai_image_studio_turn');
+    $turn_storage = $this->studioEntityTypeManager
+      ->getStorage('ai_image_studio_turn');
     $turn_ids = $turn_storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('session_id', $ai_image_studio_session->id())
