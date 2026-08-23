@@ -1,7 +1,35 @@
 .ai-image-studio-layout {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   grid-template-columns: minmax(0, 1fr);
+}
+
+.ai-image-studio-layout [hidden] {
+  display: none !important;
+}
+
+.ai-image-studio-choice-group {
+  margin-block: 0;
+}
+
+.ai-image-studio-choice-group .form-radios,
+.ai-image-studio-choice-group .fieldset__wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.5rem;
+}
+
+.ai-image-studio-choice-group .form-item {
+  margin-block: 0;
+}
+
+.ai-image-studio-choice-group .description {
+  flex-basis: 100%;
+  margin-block-start: .35rem;
+}
+
+.ai-image-studio-layout [data-ai-image-studio-conditional] {
+  margin-block: 0;
 }
 
 .ai-image-studio-turns {

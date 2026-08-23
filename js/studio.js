@@ -104,6 +104,23 @@
           const modelControls = studio.querySelectorAll(
             'select[name$="model"]',
           );
+          const checkedValue = (name, fallback) =>
+            studio.querySelector(`input[name="${name}"]:checked`)?.value || fallback;
+          const applyFormVisibility = () => {
+            const startMode = checkedValue('start_mode', 'prompt');
+            const outputType = checkedValue('output_type', 'image');
+            studio.querySelectorAll('[data-ai-image-studio-conditional]')
+              .forEach((control) => {
+                const requiredStart = control.dataset.aiImageStudioStartMode;
+                const requiredOutput = control.dataset.aiImageStudioOutputType;
+                const startMatches = !requiredStart
+                  || requiredStart === startMode
+                  || (requiredStart === 'source'
+                    && ['upload', 'media'].includes(startMode));
+                control.hidden = !(startMatches
+                  && (!requiredOutput || requiredOutput === outputType));
+              });
+          };
           const applyModelCapabilities = () => {
             const visibleModel = Array.from(modelControls).find(
               (control) => control.offsetParent !== null,
@@ -181,9 +198,11 @@
           studio.querySelectorAll('input[name="output_type"], input[name="start_mode"]')
             .forEach((control) => {
               control.addEventListener('change', () => {
+                applyFormVisibility();
                 window.setTimeout(applyModelCapabilities, 0);
               });
             });
+          applyFormVisibility();
           applyModelCapabilities();
 
           const referenceOptions = studio.querySelector(

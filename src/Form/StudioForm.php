@@ -149,6 +149,10 @@ final class StudioForm extends FormBase {
           'media' => $this->t('A Media image'),
         ],
         '#default_value' => 'prompt',
+        '#wrapper_attributes' => [
+          'class' => ['ai-image-studio-choice-group'],
+          'data-ai-image-studio-choice-group' => '',
+        ],
       ];
       $form['output_type'] = [
         '#type' => 'radios',
@@ -159,6 +163,10 @@ final class StudioForm extends FormBase {
         ],
         '#default_value' => $default_output_type,
         '#description' => $this->t('Video requests are queued. You can leave this page while generation continues.'),
+        '#wrapper_attributes' => [
+          'class' => ['ai-image-studio-choice-group'],
+          'data-ai-image-studio-choice-group' => '',
+        ],
       ];
       $form['source_image'] = [
         '#type' => 'managed_file',
@@ -179,6 +187,10 @@ final class StudioForm extends FormBase {
             ':input[name="start_mode"]' => ['value' => 'upload'],
           ],
         ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'upload',
+        ],
       ];
       $form['video_mode'] = [
         '#type' => 'radios',
@@ -192,6 +204,10 @@ final class StudioForm extends FormBase {
         '#description' => $this->t('Reference images guide subjects and style; they do not become the first frame.'),
         '#states' => [
           'visible' => [':input[name="output_type"]' => ['value' => 'video']],
+        ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-output-type' => 'video',
         ],
       ];
       $form['source_media'] = [
@@ -211,6 +227,10 @@ final class StudioForm extends FormBase {
             ':input[name="start_mode"]' => ['value' => 'media'],
           ],
         ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'media',
+        ],
       ];
       $form['text_model'] = [
         '#type' => 'select',
@@ -223,6 +243,11 @@ final class StudioForm extends FormBase {
             ':input[name="start_mode"]' => ['value' => 'prompt'],
             ':input[name="output_type"]' => ['value' => 'image'],
           ],
+        ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'prompt',
+          'data-ai-image-studio-output-type' => 'image',
         ],
       ];
       $form['image_model'] = [
@@ -241,6 +266,11 @@ final class StudioForm extends FormBase {
             ':input[name="output_type"]' => ['value' => 'image'],
           ],
         ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'source',
+          'data-ai-image-studio-output-type' => 'image',
+        ],
       ];
       $form['text_video_model'] = [
         '#type' => 'select',
@@ -253,6 +283,11 @@ final class StudioForm extends FormBase {
             ':input[name="start_mode"]' => ['value' => 'prompt'],
             ':input[name="output_type"]' => ['value' => 'video'],
           ],
+        ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'prompt',
+          'data-ai-image-studio-output-type' => 'video',
         ],
       ];
       $form['image_video_model'] = [
@@ -270,6 +305,11 @@ final class StudioForm extends FormBase {
             ],
             ':input[name="output_type"]' => ['value' => 'video'],
           ],
+        ],
+        '#wrapper_attributes' => [
+          'data-ai-image-studio-conditional' => '',
+          'data-ai-image-studio-start-mode' => 'source',
+          'data-ai-image-studio-output-type' => 'video',
         ],
       ];
       $form['prompt'] = $this->promptElement(

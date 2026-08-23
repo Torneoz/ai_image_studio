@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta7
 
+- Tightened the creation form layout and made source, model, and video controls
+  collapse reliably when their start mode or output type is inactive.
 - Made the image variation selector model-aware, with per-request limits of 10
   for Grok and GPT Image/DALL-E 2, one for DALL-E 3 and unknown models, and
   four for Imagen models.
