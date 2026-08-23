@@ -92,6 +92,14 @@ final class MediaLibrary extends FormElementBase {
         'data-ai-image-studio-media-selection' => $widget_id,
       ],
     ];
+    if (!empty($element['#states'])) {
+      $element['selection']['#states'] = $element['#states'];
+    }
+    foreach (['data-ai-image-studio-conditional', 'data-ai-image-studio-start-mode', 'data-ai-image-studio-output-type'] as $attribute) {
+      if (array_key_exists($attribute, $element['#attributes'])) {
+        $element['selection']['#attributes'][$attribute] = $element['#attributes'][$attribute];
+      }
+    }
     if ($media instanceof MediaInterface) {
       $element['selection']['preview'] = [
         '#type' => 'container',
@@ -140,6 +148,14 @@ final class MediaLibrary extends FormElementBase {
       ],
       '#limit_validation_errors' => [],
     ];
+    if (!empty($element['#states'])) {
+      $element['open']['#states'] = $element['#states'];
+    }
+    foreach (['data-ai-image-studio-conditional', 'data-ai-image-studio-start-mode', 'data-ai-image-studio-output-type'] as $attribute) {
+      if (array_key_exists($attribute, $element['#attributes'])) {
+        $element['open']['#attributes'][$attribute] = $element['#attributes'][$attribute];
+      }
+    }
     $element['selection_id'] = [
       '#type' => 'hidden',
       '#value' => $selection_id ?: '',
