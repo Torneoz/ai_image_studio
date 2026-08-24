@@ -269,3 +269,14 @@ function ai_image_studio_update_10008(): void {
   $operation->setSetting('allowed_values', $allowed);
   $manager->updateFieldStorageDefinition($operation);
 }
+
+/**
+ * Adds automatic image-level adjustment defaults.
+ */
+function ai_image_studio_update_10009(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  if ($config->get('default_auto_levels') === NULL) {
+    $config->set('default_auto_levels', FALSE)->save(TRUE);
+  }
+}

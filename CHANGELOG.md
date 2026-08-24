@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta8
 
+- Added optional RGB auto levels for generated images in the full Studio and
+  compact Media workflow, with a configurable administrator default.
 - Tightened the creation form layout and made source, model, and video controls
   collapse reliably when their start mode or output type is inactive.
 - Made the image variation selector model-aware, with per-request limits of 10

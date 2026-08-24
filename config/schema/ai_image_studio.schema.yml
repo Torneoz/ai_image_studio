@@ -65,6 +65,9 @@ ai_image_studio.settings:
     default_image_file_type:
       type: string
       label: 'Default image file type'
+    default_auto_levels:
+      type: boolean
+      label: 'Apply auto levels by default'
     default_show_ai_badge:
       type: boolean
       label: 'Show an AI image badge by default'

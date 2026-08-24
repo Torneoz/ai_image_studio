@@ -801,6 +801,17 @@ final class StudioForm extends FormBase {
         '#default_value' => $defaults['file_type'] ?? ($settings->get('default_image_file_type') ?: 'png'),
         '#description' => $this->t('PNG is the default. Availability of JPEG and WebP depends on the selected provider.'),
       ],
+      'auto_levels' => [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Apply auto levels to the result'),
+        '#default_value' => array_key_exists('auto_levels', $defaults)
+          ? (bool) $defaults['auto_levels']
+          : (bool) $settings->get('default_auto_levels'),
+        '#disabled' => !$this->generator->canAutoLevels(),
+        '#description' => $this->generator->canAutoLevels()
+          ? $this->t('Automatically expands the RGB tonal range after generation. Transparency is preserved.')
+          : $this->t('Auto levels is unavailable because the PHP Imagick extension is not installed.'),
+      ],
       'show_ai_badge' => [
         '#type' => 'checkbox',
         '#title' => $this->t('Show an AI image badge'),
@@ -979,6 +990,7 @@ final class StudioForm extends FormBase {
       'data-ai-image-studio-duration' => (string) ($settings['duration'] ?? ''),
       'data-ai-image-studio-transparent-background' => !empty($settings['transparent_background']) ? '1' : '0',
       'data-ai-image-studio-file-type' => (string) ($settings['file_type'] ?? 'png'),
+      'data-ai-image-studio-auto-levels' => !empty($settings['auto_levels']) ? '1' : '0',
     ];
     if ($settings) {
       $build['settings'] = [
@@ -2052,6 +2064,7 @@ final class StudioForm extends FormBase {
         'prompt' => trim((string) $form_state->getValue('prompt')),
         'transparent_background' => $form_state->getValue('transparent_background'),
         'file_type' => $form_state->getValue('file_type') ?: 'png',
+        'auto_levels' => (bool) $form_state->getValue('auto_levels'),
         'show_ai_badge' => (bool) $form_state->getValue(
           $output_type === 'video' ? 'video_show_ai_badge' : 'show_ai_badge',
         ),

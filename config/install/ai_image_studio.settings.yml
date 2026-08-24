@@ -19,6 +19,7 @@ default_video_resolution: 720p
 default_video_duration: 5
 default_transparent_background: false
 default_image_file_type: png
+default_auto_levels: false
 default_show_ai_badge: false
 default_ai_badge_text: 'AI Image'
 default_text_to_image_model: ''

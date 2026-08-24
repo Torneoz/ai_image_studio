@@ -117,6 +117,15 @@ final class CompactMediaForm {
           '#title' => t('Request a transparent background'),
           '#default_value' => (bool) $settings->get('default_transparent_background'),
         ],
+        'auto_levels' => [
+          '#type' => 'checkbox',
+          '#title' => t('Apply auto levels to the result'),
+          '#default_value' => (bool) $settings->get('default_auto_levels'),
+          '#disabled' => !$this->generator->canAutoLevels(),
+          '#description' => $this->generator->canAutoLevels()
+            ? t('Automatically expands the RGB tonal range after generation.')
+            : t('Requires the PHP Imagick extension.'),
+        ],
       ],
       'actions' => [
         '#type' => 'actions',

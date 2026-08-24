@@ -135,6 +135,14 @@ final class ImageGenerator {
   }
 
   /**
+   * Reports whether generated images can be auto-levelled on this server.
+   */
+  public function canAutoLevels(): bool {
+    return class_exists(\Imagick::class)
+      && method_exists(\Imagick::class, 'autoLevelImage');
+  }
+
+  /**
    * Generates and persists a turn.
    *
    * @param \Drupal\ai_image_studio\Entity\ImageStudioSession $session
@@ -388,6 +396,7 @@ final class ImageGenerator {
             $generated,
             $session,
             (int) $result_turn->id(),
+            $generation_settings,
           );
         $result_turn->set($output_type, ['target_id' => $file->id()]);
         $result_turn->set('duration_ms', $duration_ms);
@@ -497,6 +506,7 @@ final class ImageGenerator {
         new ImageFile($binary, $mime, sprintf('grok-image-%d.png', $result_turn->id())),
         $session,
         (int) $result_turn->id(),
+        $settings,
       );
       $result_turn->set('image', ['target_id' => $file->id()]);
       $result_turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
@@ -1109,7 +1119,15 @@ final class ImageGenerator {
   /**
    * Writes a normalized image to managed file storage.
    */
-  private function saveGeneratedFile(ImageFile $image, object $session, int $turn_id): FileInterface {
+  private function saveGeneratedFile(
+    ImageFile $image,
+    object $session,
+    int $turn_id,
+    array $generation_settings = [],
+  ): FileInterface {
+    if (!empty($generation_settings['auto_levels'])) {
+      $image = $this->autoLevelImage($image);
+    }
     $settings = $this->configFactory->get('ai_image_studio.settings');
     $scheme = (string) ($settings->get('file_scheme') ?: 'private');
     $directory = trim((string) ($settings->get('file_directory') ?: 'ai-image-studio'), '/');
@@ -1139,6 +1157,47 @@ final class ImageGenerator {
     $file->setPermanent();
     $file->save();
     return $file;
+  }
+
+  /**
+   * Expands the generated image's RGB channels to their available tonal range.
+   */
+  private function autoLevelImage(ImageFile $image): ImageFile {
+    if (!$this->canAutoLevels()) {
+      throw new \RuntimeException($this->translate(
+        'Auto levels requires the PHP Imagick extension.',
+      ));
+    }
+
+    try {
+      $processed = new \Imagick();
+      $processed->readImageBlob($image->getBinary());
+      $processed->autoLevelImage(
+        \Imagick::CHANNEL_RED
+        | \Imagick::CHANNEL_GREEN
+        | \Imagick::CHANNEL_BLUE,
+      );
+      $binary = $processed->getImagesBlob();
+      $processed->clear();
+      $processed->destroy();
+    }
+    catch (\ImagickException $exception) {
+      throw new \RuntimeException($this->translate(
+        'The generated image could not be auto-levelled: @message',
+        ['@message' => $exception->getMessage()],
+      ), 0, $exception);
+    }
+
+    if ($binary === '') {
+      throw new \RuntimeException($this->translate(
+        'The auto-levelled image could not be encoded.',
+      ));
+    }
+    return new ImageFile(
+      $binary,
+      $image->getMimeType(),
+      $image->getFilename(),
+    );
   }
 
   /**

@@ -199,6 +199,15 @@ final class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('default_image_file_type') ?: 'png',
       '#description' => $this->t('The selected provider must support the requested format. PNG is used by default.'),
     ];
+    $form['generation']['default_auto_levels'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Apply auto levels by default'),
+      '#default_value' => (bool) $config->get('default_auto_levels'),
+      '#disabled' => !$this->generator->canAutoLevels(),
+      '#description' => $this->generator->canAutoLevels()
+        ? $this->t('Expands the RGB tonal range of generated images before they are saved.')
+        : $this->t('Requires the PHP Imagick extension.'),
+    ];
     $form['generation']['default_show_ai_badge'] = $this->checkbox(
       $this->t('Show an AI image badge by default'),
       $config->get('default_show_ai_badge'),
@@ -461,6 +470,7 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_video_duration', (int) $form_state->getValue('default_video_duration'))
       ->set('default_transparent_background', (bool) $form_state->getValue('default_transparent_background'))
       ->set('default_image_file_type', $form_state->getValue('default_image_file_type'))
+      ->set('default_auto_levels', (bool) $form_state->getValue('default_auto_levels'))
       ->set('default_show_ai_badge', (bool) $form_state->getValue('default_show_ai_badge'))
       ->set('default_ai_badge_text', trim((string) $form_state->getValue('default_ai_badge_text')) ?: 'AI Image')
       ->set('default_text_to_image_model', $form_state->getValue('default_text_to_image_model'))

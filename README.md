@@ -33,6 +33,7 @@ Drupal Media.
 - Optional, configurable AI badges with the choice to embed them permanently
   in image or video files when publishing to Media.
 - PNG, JPEG, and WebP output selection for compatible image providers.
+- Optional RGB auto levels for generated images, with a configurable default.
 - Version feedback for provider, model, request type, output settings,
   processing time, status, token usage, and reported or estimated cost.
 - Media Library saving with alternative text required only when an image is
@@ -55,6 +56,7 @@ for development or provider troubleshooting.
 
 Embedding badges in Media images requires PHP GD. Embedding badges in Media
 videos additionally requires the `ffmpeg` executable to be available to PHP.
+Applying auto levels requires the PHP Imagick extension.
 
 ## Requirements
 

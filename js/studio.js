@@ -60,6 +60,7 @@
               duration: selectedCard.dataset.aiImageStudioDuration,
               transparent_background:
                 selectedCard.dataset.aiImageStudioTransparentBackground,
+              auto_levels: selectedCard.dataset.aiImageStudioAutoLevels,
             };
             Object.entries(inherited).forEach(([name, value]) => {
               if (value === undefined || value === '') {
