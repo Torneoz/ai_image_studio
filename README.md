@@ -113,6 +113,25 @@ the module's access permission.
    Media, or use the session actions to save or download every result. Images
    require alternative text when that policy is enabled.
 
+## Views Bulk Operations integration
+
+The optional AI Image Studio VBO submodule adds a **Generate images with AI
+Image Studio** action to Views Bulk Operations node views. Install Views Bulk
+Operations, enable `ai_image_studio_vbo`, and add the action to a View's
+**Global: Views bulk operations** field.
+
+Editors can use a common prompt containing Drupal node tokens, optionally take
+an image from an image, file, or Media reference field, and optionally publish
+completed results to Media. The VBO request only snapshots and queues the
+selected nodes; Drupal cron performs the provider requests in the background.
+Job progress is available under **Content > Bulk image jobs**.
+
+Install the optional dependency with Composer:
+
+```shell
+composer require drupal/views_bulk_operations:^4.4
+```
+
 ## Similar projects
 
 AI Image Studio differs from one-shot image generators by preserving a

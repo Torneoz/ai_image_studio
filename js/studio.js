@@ -352,9 +352,11 @@
             return;
           }
 
-          const output = studio.querySelector(
-            'input[name="output_type"]:checked',
-          )?.value || 'image';
+          const output = submitter.dataset.aiImageStudioOutputType
+            || studio.querySelector(
+              'input[name="output_type"]:checked',
+            )?.value
+            || 'image';
           const isVideo = output === 'video';
           const feedback = studio.querySelector(
             '[data-ai-image-studio-generation-feedback]',

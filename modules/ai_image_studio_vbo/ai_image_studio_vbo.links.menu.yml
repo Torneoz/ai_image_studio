@@ -1,0 +1,6 @@
+ai_image_studio_vbo.jobs:
+  title: 'Bulk image jobs'
+  description: 'Review image generation jobs started through Views Bulk Operations.'
+  route_name: ai_image_studio_vbo.jobs
+  parent: system.admin_content
+

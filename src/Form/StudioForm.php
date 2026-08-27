@@ -343,6 +343,10 @@ final class StudioForm extends FormBase {
     foreach (array_values($turns) as $index => $turn) {
       $turn_numbers[(int) $turn->id()] = $index + 1;
     }
+    $regenerate_video = $this->completedVideoTurnFromSession(
+      (int) $session->id(),
+      (int) $this->getRequest()->query->get('regenerate_video'),
+    );
     $selected_turn_id = (int) (
       $form_state->getValue('source_turn_id') ?: $latest?->id()
     );
@@ -388,6 +392,13 @@ final class StudioForm extends FormBase {
         $turn_numbers,
       );
       $version_number++;
+    }
+    if ($regenerate_video !== NULL && $session->access('update')) {
+      $form['video_regeneration'] = $this->buildVideoRegenerationForm(
+        $regenerate_video,
+        $turn_numbers[(int) $regenerate_video->id()] ?? 1,
+        $max_length,
+      );
     }
     if ($settings->get('show_session_report') !== FALSE
       && $settings->get('show_costs') !== FALSE) {
@@ -610,6 +621,22 @@ final class StudioForm extends FormBase {
           : $this->t('Describe the image to create.'),
         $max_length,
       );
+      $form['refine']['prompt']['#states'] = [
+        'disabled' => [
+          ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
+        ],
+      ];
+      $form['refine']['regenerate_with_new_settings'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Regenerate with new settings'),
+        '#description' => $this->t('Reuse the selected version’s prompt and apply the settings below.'),
+        '#default_value' => FALSE,
+        '#states' => [
+          'visible' => [
+            ':input[name="source_turn_id"]' => ['!value' => ''],
+          ],
+        ],
+      ];
       $form['refine']['generation_controls'] = $this->generationControls($selected_settings);
       $form['refine']['video_controls'] = $this->videoControls($selected_settings);
       $form['refine']['actions'] = ['#type' => 'actions'];
@@ -912,6 +939,85 @@ final class StudioForm extends FormBase {
   }
 
   /**
+   * Builds controls for repeating a completed video request.
+   */
+  private function buildVideoRegenerationForm(
+    object $turn,
+    int $number,
+    int $max_length,
+  ): array {
+    $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $operation = (string) $turn->get('operation')->value === 'text_to_video'
+      ? 'text_to_video'
+      : 'image_to_video';
+    $models = $this->generator->getModelOptions($operation);
+    $inherited_model = $this->turnModelOption($turn);
+    $video_controls = $this->videoControls($settings);
+    unset($video_controls['#states']);
+    $video_controls['video_show_ai_badge']['#parents'] = [
+      'video_regeneration',
+      'settings',
+      'video_show_ai_badge',
+    ];
+    $video_controls['video_ai_badge_text']['#states'] = [
+      'visible' => [
+        ':input[name="video_regeneration[settings][video_show_ai_badge]"]' => [
+          'checked' => TRUE,
+        ],
+      ],
+    ];
+
+    return [
+      '#type' => 'details',
+      '#tree' => TRUE,
+      '#weight' => -45,
+      '#open' => TRUE,
+      '#attributes' => ['id' => 'edit-video-regeneration'],
+      '#title' => $this->t('Regenerate video version @number', [
+        '@number' => $number,
+      ]),
+      '#description' => $this->t('This repeats the original video request using its original image inputs. It does not edit the generated video.'),
+      'turn_id' => [
+        '#type' => 'hidden',
+        '#value' => (int) $turn->id(),
+      ],
+      'model' => [
+        '#type' => 'select',
+        '#title' => $this->t('Provider and video model'),
+        '#options' => $models,
+        '#default_value' => isset($models[$inherited_model])
+          ? $inherited_model
+          : $this->configuredDefaultModel($operation),
+        '#required' => TRUE,
+      ],
+      'prompt' => [
+        '#type' => 'textarea',
+        '#title' => $this->t('Replacement prompt'),
+        '#description' => $this->t('Optional. Leave blank to reuse the previous prompt: @prompt', [
+          '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
+        ]),
+        '#maxlength' => $max_length,
+        '#rows' => 5,
+      ],
+      'settings' => $video_controls,
+      'actions' => [
+        '#type' => 'actions',
+        'generate' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Regenerate video'),
+          '#button_type' => 'primary',
+          '#studio_action' => 'regenerate_video',
+          '#attributes' => [
+            'data-ai-image-studio-generate' => '',
+            'data-ai-image-studio-output-type' => 'video',
+            'data-generating-video-label' => $this->t('Generating video…'),
+          ],
+        ],
+      ],
+    ];
+  }
+
+  /**
    * Builds one conversation turn.
    */
   private function buildTurn(
@@ -1077,6 +1183,23 @@ final class StudioForm extends FormBase {
             '#markup' => '<span class="ai-image-studio-source-badge">'
             . $this->t('Selected source') . '</span>',
           ],
+        ];
+      }
+      else {
+        $build['regenerate_video'] = [
+          '#type' => 'link',
+          '#title' => $this->t('Regenerate with new settings'),
+          '#url' => Url::fromRoute(
+            'entity.ai_image_studio_session.canonical',
+            [
+              'ai_image_studio_session' => $turn->get('session_id')->target_id,
+            ],
+            [
+              'query' => ['regenerate_video' => (int) $turn->id()],
+              'fragment' => 'edit-video-regeneration',
+            ],
+          ),
+          '#attributes' => ['class' => ['button']],
         ];
       }
       if ($published_media instanceof MediaInterface) {
@@ -1710,6 +1833,57 @@ final class StudioForm extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $trigger = $form_state->getTriggeringElement();
+    if (($trigger['#studio_action'] ?? '') === 'regenerate_video') {
+      $values = (array) $form_state->getValue('video_regeneration');
+      $turn = $this->completedVideoTurnFromSession(
+        (int) $form_state->get('session_id'),
+        (int) ($values['turn_id'] ?? 0),
+      );
+      if ($turn === NULL) {
+        $form_state->setErrorByName(
+          'video_regeneration][turn_id',
+          $this->t('The video selected for regeneration is unavailable.'),
+        );
+        return;
+      }
+      $max_turns = (int) ($this->studioConfigFactory
+        ->get('ai_image_studio.settings')
+        ->get('max_turns') ?: 25);
+      if ($this->countTurns((int) $form_state->get('session_id')) >= $max_turns) {
+        $form_state->setErrorByName(
+          'video_regeneration][turn_id',
+          $this->t('This session has reached its limit of @count turns.', [
+            '@count' => $max_turns,
+          ]),
+        );
+      }
+      if ($turn->get('operation')->value !== 'text_to_video'
+        && $turn->get('source_file_ids')->referencedEntities() === []
+        && !$turn->get('source_file_id')->entity instanceof FileInterface) {
+        $form_state->setErrorByName(
+          'video_regeneration][turn_id',
+          $this->t('The original image inputs for this video are unavailable.'),
+        );
+      }
+      $operation = (string) $turn->get('operation')->value === 'text_to_video'
+        ? 'text_to_video'
+        : 'image_to_video';
+      $model = (string) ($values['model'] ?? '');
+      if (!isset($this->generator->getModelOptions($operation)[$model])) {
+        $form_state->setErrorByName(
+          'video_regeneration][model',
+          $this->t('The selected provider and model is not available for this request type.'),
+        );
+      }
+      elseif ($turn->get('operation')->value === 'reference_to_video'
+        && !$this->generator->supportsReferenceVideo($model)) {
+        $form_state->setErrorByName(
+          'video_regeneration][model',
+          $this->t('The selected model does not support reference-to-video.'),
+        );
+      }
+      return;
+    }
     if (($trigger['#studio_action'] ?? '') === 'publish') {
       $turn_id = (int) ($trigger['#turn_id'] ?? 0);
       $turn = $this->entityTypeManager
@@ -1737,7 +1911,7 @@ final class StudioForm extends FormBase {
       return;
     }
 
-    if (trim((string) $form_state->getValue('prompt')) === '') {
+    if ($this->generationPrompt($form_state) === '') {
       $form_state->setErrorByName(
         'prompt',
         $this->t('Enter a prompt to generate a result.'),
@@ -1946,7 +2120,7 @@ final class StudioForm extends FormBase {
         if ($form_state->getValue('video_resolution') === '1080p') {
           $form_state->setErrorByName('video_resolution', $this->t('Reference-to-video supports 480p or 720p output.'));
         }
-        preg_match_all('/<IMAGE_(\d+)>/', (string) $form_state->getValue('prompt'), $matches);
+        preg_match_all('/<IMAGE_(\d+)>/', $this->generationPrompt($form_state), $matches);
         foreach (array_map('intval', $matches[1] ?? []) as $number) {
           if ($number < 1 || $number > count($reference_files)) {
             $form_state->setErrorByName('prompt', $this->t(
@@ -1970,6 +2144,10 @@ final class StudioForm extends FormBase {
     }
     if (($trigger['#studio_action'] ?? '') === 'publish_all') {
       $this->publishAllTurns($form_state);
+      return;
+    }
+    if (($trigger['#studio_action'] ?? '') === 'regenerate_video') {
+      $this->regenerateVideo($form_state);
       return;
     }
 
@@ -2036,8 +2214,9 @@ final class StudioForm extends FormBase {
 
     $reference_files = $this->referenceFilesFromForm($form_state, $session_id);
     $video_mode = (string) ($form_state->getValue('video_mode') ?: 'animate');
+    $prompt = $this->generationPrompt($form_state);
     if ($output_type === 'video' && $video_mode === 'reference') {
-      preg_match_all('/<IMAGE_(\d+)>/', (string) $form_state->getValue('prompt'), $matches);
+      preg_match_all('/<IMAGE_(\d+)>/', $prompt, $matches);
       if (count(array_unique($matches[1] ?? [])) < count($reference_files)) {
         $this->messenger()->addWarning($this->t('One or more reference images are not named in the prompt. Use <IMAGE_1>, <IMAGE_2>, and so on when the distinction matters.'));
       }
@@ -2045,7 +2224,7 @@ final class StudioForm extends FormBase {
 
     $turn = $this->generator->generate(
       $session,
-      trim((string) $form_state->getValue('prompt')),
+      $prompt,
       $model,
       $parent,
       $source instanceof FileInterface ? $source : NULL,
@@ -2061,7 +2240,7 @@ final class StudioForm extends FormBase {
           ? (int) ($form_state->getValue('variations') ?: 1)
           : 1,
         'duration' => $form_state->getValue('duration'),
-        'prompt' => trim((string) $form_state->getValue('prompt')),
+        'prompt' => $prompt,
         'transparent_background' => $form_state->getValue('transparent_background'),
         'file_type' => $form_state->getValue('file_type') ?: 'png',
         'auto_levels' => (bool) $form_state->getValue('auto_levels'),
@@ -2112,6 +2291,90 @@ final class StudioForm extends FormBase {
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session->id(),
     ]);
+  }
+
+  /**
+   * Repeats a completed video request with updated settings and prompt.
+   */
+  private function regenerateVideo(FormStateInterface $form_state): void {
+    $session_id = (int) $form_state->get('session_id');
+    $values = (array) $form_state->getValue('video_regeneration');
+    $turn = $this->completedVideoTurnFromSession(
+      $session_id,
+      (int) ($values['turn_id'] ?? 0),
+    );
+    $session = $this->entityTypeManager
+      ->getStorage('ai_image_studio_session')
+      ->load($session_id);
+    if ($turn === NULL || $session === NULL || !$session->access('update')) {
+      $this->messenger()->addError($this->t('The video selected for regeneration is unavailable.'));
+      return;
+    }
+
+    $sources = array_values(array_filter(
+      $turn->get('source_file_ids')->referencedEntities(),
+      static fn (mixed $file): bool => $file instanceof FileInterface,
+    ));
+    if ($sources === [] && $turn->get('source_file_id')->entity instanceof FileInterface) {
+      $sources[] = $turn->get('source_file_id')->entity;
+    }
+    $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $submitted_settings = (array) ($values['settings'] ?? []);
+    $settings = array_replace($settings, [
+      'duration' => $submitted_settings['duration'] ?? $settings['duration'] ?? NULL,
+      'aspect_ratio' => $submitted_settings['video_aspect_ratio'] ?? $settings['aspect_ratio'] ?? 'auto',
+      'resolution' => $submitted_settings['video_resolution'] ?? $settings['resolution'] ?? '720p',
+      'show_ai_badge' => !empty($submitted_settings['video_show_ai_badge']),
+      'ai_badge_text' => trim((string) ($submitted_settings['video_ai_badge_text'] ?? '')) ?: 'AI Image',
+      'reference_file_ids' => array_map(
+        static fn (FileInterface $file): int => (int) $file->id(),
+        $sources,
+      ),
+    ]);
+    $prompt = trim((string) ($values['prompt'] ?? ''));
+    if ($prompt === '') {
+      $prompt = trim((string) $turn->get('prompt')->value);
+    }
+    $parent = $turn->get('parent_id')->entity;
+    $result = $this->generator->generate(
+      $session,
+      $prompt,
+      (string) ($values['model'] ?? ''),
+      $parent,
+      $sources[0] ?? NULL,
+      $settings,
+      'video',
+    );
+    if ($result->get('status')->value === 'queued') {
+      $this->messenger()->addStatus($this->t('The regenerated video was queued.'));
+    }
+    elseif ($result->get('status')->value === 'completed') {
+      $this->messenger()->addStatus($this->t('The video was regenerated successfully.'));
+    }
+    else {
+      $this->messenger()->addError($this->t('Video regeneration failed: @message', [
+        '@message' => $result->get('error_message')->value,
+      ]));
+    }
+    $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
+      'ai_image_studio_session' => $session_id,
+    ]);
+  }
+
+  /**
+   * Resolves the prompt submitted for a generation request.
+   */
+  private function generationPrompt(FormStateInterface $form_state): string {
+    if (!$form_state->getValue('regenerate_with_new_settings')) {
+      return trim((string) $form_state->getValue('prompt'));
+    }
+
+    $session_id = (int) $form_state->get('session_id');
+    $source = $this->completedTurnFromSession(
+      $session_id,
+      (int) $form_state->getValue('source_turn_id'),
+    );
+    return trim((string) ($source?->get('prompt')->value ?? ''));
   }
 
   /**
@@ -2392,6 +2655,29 @@ final class StudioForm extends FormBase {
       || (int) $turn->get('session_id')->target_id !== $session_id
       || $turn->get('status')->value !== 'completed'
       || $turn->get('image')->isEmpty()) {
+      return NULL;
+    }
+    return $turn;
+  }
+
+  /**
+   * Loads a completed video turn belonging to the requested session.
+   */
+  private function completedVideoTurnFromSession(
+    int $session_id,
+    int $turn_id,
+  ): ?object {
+    if ($turn_id <= 0) {
+      return NULL;
+    }
+
+    $turn = $this->entityTypeManager
+      ->getStorage('ai_image_studio_turn')
+      ->load($turn_id);
+    if ($turn === NULL
+      || (int) $turn->get('session_id')->target_id !== $session_id
+      || $turn->get('status')->value !== 'completed'
+      || $turn->get('video')->isEmpty()) {
       return NULL;
     }
     return $turn;

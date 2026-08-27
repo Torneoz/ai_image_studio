@@ -1,0 +1,10 @@
+name: 'AI Image Studio VBO'
+type: module
+description: 'Queues AI Image Studio image generation for nodes selected with Views Bulk Operations.'
+package: 'AI'
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - ai_image_studio:ai_image_studio
+  - drupal:node
+  - views_bulk_operations:views_bulk_operations
+

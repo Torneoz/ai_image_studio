@@ -1,0 +1,10 @@
+services:
+  ai_image_studio_vbo.batch_manager:
+    class: Drupal\ai_image_studio_vbo\Service\BulkGenerationManager
+    arguments:
+      - '@database'
+      - '@entity_type.manager'
+      - '@queue'
+      - '@token'
+      - '@datetime.time'
+

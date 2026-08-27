@@ -1,0 +1,11 @@
+run ai image studio vbo generation:
+  title: 'Run AI Image Studio bulk generation'
+  description: 'Generate images for nodes selected through Views Bulk Operations.'
+
+view ai image studio vbo jobs:
+  title: 'View own AI Image Studio bulk jobs'
+
+view any ai image studio vbo job:
+  title: 'View any AI Image Studio bulk job'
+  restrict access: true
+

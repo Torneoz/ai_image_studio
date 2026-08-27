@@ -1,0 +1,17 @@
+ai_image_studio_vbo.jobs:
+  path: '/admin/content/ai-image-studio/bulk'
+  defaults:
+    _controller: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::listing'
+    _title: 'AI Image Studio bulk jobs'
+  requirements:
+    _permission: 'view ai image studio vbo jobs+view any ai image studio vbo job'
+
+ai_image_studio_vbo.job:
+  path: '/admin/content/ai-image-studio/bulk/{job_id}'
+  defaults:
+    _controller: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::view'
+    _title_callback: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::title'
+  requirements:
+    _custom_access: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::access'
+    job_id: '\d+'
+
