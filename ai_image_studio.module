@@ -7,10 +7,74 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
 use Drupal\media\Entity\MediaType;
+
+/**
+ * Implements hook_query_ai_image_studio_session_access_alter().
+ */
+function ai_image_studio_query_ai_image_studio_session_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai image studio')
+    || $account->hasPermission('view any ai image studio session')) {
+    return;
+  }
+
+  if (!$account->hasPermission('access ai image studio')) {
+    $query->where('1 = 0');
+    return;
+  }
+
+  foreach (ai_image_studio_query_table_aliases($query, 'ai_image_studio_session') as $alias) {
+    $query->condition($alias . '.uid', $account->id());
+  }
+}
+
+/**
+ * Implements hook_query_ai_image_studio_turn_access_alter().
+ */
+function ai_image_studio_query_ai_image_studio_turn_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai image studio')
+    || $account->hasPermission('view any ai image studio session')) {
+    return;
+  }
+
+  if (!$account->hasPermission('access ai image studio')) {
+    $query->where('1 = 0');
+    return;
+  }
+
+  $connection = \Drupal::database();
+  foreach (ai_image_studio_query_table_aliases($query, 'ai_image_studio_turn') as $alias) {
+    $session_query = $connection->select('ai_image_studio_session', 'ais_access');
+    $session_query->addExpression('1');
+    $session_query->where(
+      'ais_access.id = ' . $connection->escapeTable($alias) . '.session_id',
+    );
+    $session_query->condition('ais_access.uid', $account->id());
+    $query->exists($session_query);
+  }
+}
+
+/**
+ * Finds every alias at which a Views access-tagged table was joined.
+ *
+ * @return string[]
+ *   Query table aliases.
+ */
+function ai_image_studio_query_table_aliases(AlterableInterface $query, string $table_name): array {
+  $aliases = [];
+  foreach ($query->getTables() as $alias => $table) {
+    if (($table['table'] ?? NULL) === $table_name) {
+      $aliases[] = $alias;
+    }
+  }
+  return $aliases;
+}
 
 /**
  * Implements hook_module_implements_alter().

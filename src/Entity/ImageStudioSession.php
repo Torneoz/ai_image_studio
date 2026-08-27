@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_image_studio\Entity;
 
+use Drupal\ai_image_studio\Entity\Views\ImageStudioSessionViewsData;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -24,6 +25,7 @@ use Drupal\user\EntityOwnerTrait;
   label_plural: new TranslatableMarkup('image studio sessions'),
   handlers: [
     'access' => 'Drupal\ai_image_studio\Access\SessionAccessControlHandler',
+    'views_data' => ImageStudioSessionViewsData::class,
     'form' => [
       'delete' => 'Drupal\ai_image_studio\Form\SessionDeleteForm',
     ],

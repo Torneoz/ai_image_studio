@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\ai_image_studio\Entity;
 
+use Drupal\ai_image_studio\Access\TurnAccessControlHandler;
+use Drupal\ai_image_studio\Entity\Views\ImageStudioTurnViewsData;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -19,6 +21,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   label_collection: new TranslatableMarkup('AI Image Studio turns'),
   label_singular: new TranslatableMarkup('image studio turn'),
   label_plural: new TranslatableMarkup('image studio turns'),
+  handlers: [
+    'access' => TurnAccessControlHandler::class,
+    'views_data' => ImageStudioTurnViewsData::class,
+  ],
   base_table: 'ai_image_studio_turn',
   entity_keys: [
     'id' => 'id',

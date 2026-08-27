@@ -113,6 +113,19 @@ the module's access permission.
    Media, or use the session actions to save or download every result. Images
    require alternative text when that policy is enabled.
 
+## Views integration
+
+Views can use **AI Image Studio sessions** or **AI Image Studio turns** as its
+base data source. Session views include a **Session turns** relationship, while
+turn views can relate to their session, parent turn, files, and published
+Media. Turn fields include readable generation duration and estimated cost,
+plus safe JSON displays for generation settings, token usage, and provider
+metadata.
+
+Views queries follow Studio access: administrators and users with the
+**View any AI Image Studio session** permission can see all records; other
+Studio users see only their own sessions and turns.
+
 ## Views Bulk Operations integration
 
 The optional AI Image Studio VBO submodule adds a **Generate images with AI
