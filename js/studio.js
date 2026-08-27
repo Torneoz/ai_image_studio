@@ -405,14 +405,16 @@
           if (feedback) {
             feedback.hidden = false;
           }
-          const processingTarget = studio.querySelector(
-            '.ai-image-studio-turns',
-          ) || feedback;
-          if (processingTarget) {
-            processingTarget.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-            });
+          if (isVideo) {
+            const processingTarget = studio.querySelector(
+              '.ai-image-studio-turns',
+            ) || feedback;
+            if (processingTarget) {
+              processingTarget.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
+            }
           }
 
           // Wait until the browser has serialized the clicked submit button.

@@ -2364,9 +2364,9 @@ final class StudioForm extends FormBase {
     }
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session->id(),
-    ], [
-      'fragment' => 'ai-image-studio-turn-' . $turn->id(),
-    ]);
+    ], $output_type === 'video'
+      ? ['fragment' => 'ai-image-studio-turn-' . $turn->id()]
+      : []);
   }
 
   /**
