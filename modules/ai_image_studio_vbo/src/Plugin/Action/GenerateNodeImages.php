@@ -26,7 +26,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'ai_image_studio_generate_node_images',
   label: new TranslatableMarkup('Generate images with AI Image Studio'),
   type: 'node',
-  confirm: TRUE,
 )]
 final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
 
