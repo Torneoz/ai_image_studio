@@ -1160,18 +1160,23 @@ final class StudioForm extends FormBase {
       if ($is_video) {
         $file = $turn->get('video')->entity;
         if ($file instanceof FileInterface) {
+          $video_attributes = [
+            'class' => ['ai-image-studio-turn__video'],
+            'controls' => 'controls',
+            'preload' => 'auto',
+            'src' => $file->createFileUrl(),
+          ];
+          $poster = $turn->get('source_file_id')->entity;
+          if ($poster instanceof FileInterface) {
+            $video_attributes['poster'] = $poster->createFileUrl();
+          }
           $build['video'] = [
             '#type' => 'container',
             '#attributes' => ['class' => ['ai-image-studio-turn__image-wrapper']],
             'asset' => [
               '#type' => 'html_tag',
               '#tag' => 'video',
-              '#attributes' => [
-                'class' => ['ai-image-studio-turn__video'],
-                'controls' => 'controls',
-                'preload' => 'metadata',
-                'src' => $file->createFileUrl(),
-              ],
+              '#attributes' => $video_attributes,
             ],
             'badge' => !empty($settings['show_ai_badge']) ? [
               '#type' => 'html_tag',
