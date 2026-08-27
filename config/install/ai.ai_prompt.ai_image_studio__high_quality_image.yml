@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio__high_quality_image
+label: 'High-quality image'
+type: ai_image_studio
+prompt: >-
+  Create a polished, high-quality image with a clear focal subject, balanced
+  composition, coherent lighting, and carefully rendered detail. Do not include
+  text, captions, watermarks, or logos.
+

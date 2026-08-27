@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio
+label: 'AI Image Studio prompt'
+variables: {  }
+tokens: {  }
+

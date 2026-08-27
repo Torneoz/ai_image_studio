@@ -15,6 +15,11 @@ services:
       - '@transliteration'
       - '@?torneo_ai.pricing_catalog'
 
+  ai_image_studio.prompt_resolver:
+    class: Drupal\ai_image_studio\Service\PromptResolver
+    arguments:
+      - '@config.factory'
+
   logger.channel.ai_image_studio:
     parent: logger.channel_base
     arguments: ['ai_image_studio']
@@ -35,6 +40,7 @@ services:
       - '@entity_type.manager'
       - '@config.factory'
       - '@current_user'
+      - '@ai_image_studio.prompt_resolver'
 
   media_library.opener.ai_image_studio_form:
     class: Drupal\ai_image_studio\MediaLibraryFormOpener

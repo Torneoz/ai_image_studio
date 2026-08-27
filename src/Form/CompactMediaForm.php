@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ai_image_studio\Form;
 
 use Drupal\ai_image_studio\Service\ImageGenerator;
+use Drupal\ai_image_studio\Service\PromptResolver;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
@@ -27,6 +28,7 @@ final class CompactMediaForm {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ConfigFactoryInterface $configFactory,
     private readonly AccountProxyInterface $currentUser,
+    private readonly PromptResolver $promptResolver,
   ) {}
 
   /**
@@ -68,15 +70,14 @@ final class CompactMediaForm {
         '#weight' => -100,
       ],
       'prompt' => [
-        '#type' => 'textarea',
+        '#type' => 'ai_prompt',
         '#title' => t('Prompt'),
-        '#rows' => 3,
-        '#maxlength' => (int) ($settings->get('max_prompt_length') ?: 4000),
+        '#prompt_types' => [PromptResolver::PROMPT_TYPE],
         '#required' => TRUE,
         '#default_value' => $form_state->getValue([
           'ai_image_studio_compact',
           'prompt',
-        ]),
+        ]) ?: PromptResolver::DEFAULT_PROMPT,
       ],
       'model' => [
         '#type' => 'select',
@@ -256,9 +257,21 @@ final class CompactMediaForm {
    */
   public function generate(array &$form, FormStateInterface $form_state): void {
     $values = (array) $form_state->getValue('ai_image_studio_compact');
-    $prompt = trim((string) ($values['prompt'] ?? ''));
+    $prompt = $this->promptResolver->resolve($values['prompt'] ?? '');
     $model = (string) ($values['model'] ?? '');
     if ($prompt === '' || $model === '') {
+      return;
+    }
+    $maximum = (int) ($this->configFactory
+      ->get('ai_image_studio.settings')
+      ->get('max_prompt_length') ?: 4000);
+    if (mb_strlen($prompt) > $maximum) {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][prompt',
+        t('The selected prompt exceeds the maximum length of @count characters.', [
+          '@count' => $maximum,
+        ]),
+      );
       return;
     }
 

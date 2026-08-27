@@ -282,7 +282,9 @@
                 );
                 prompt.focus();
               });
-              primaryChip.append(primaryInsert);
+              if (prompt) {
+                primaryChip.append(primaryInsert);
+              }
               referenceChips.append(primaryChip);
               orderedIds.forEach((id, index) => {
                 const input = referenceOptions.querySelector(
@@ -308,7 +310,9 @@
                   prompt.setRangeText(token, start, prompt.selectionEnd || start, 'end');
                   prompt.focus();
                 });
-                chip.append(insert);
+                if (prompt) {
+                  chip.append(insert);
+                }
                 chip.addEventListener('dragstart', (event) => {
                   event.dataTransfer.setData('text/plain', id);
                 });

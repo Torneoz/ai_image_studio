@@ -280,3 +280,12 @@ function ai_image_studio_update_10009(): void {
     $config->set('default_auto_levels', FALSE)->save(TRUE);
   }
 }
+
+/**
+ * Installs the reusable Studio prompt type and default prompt.
+ */
+function ai_image_studio_update_10010(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio');
+}

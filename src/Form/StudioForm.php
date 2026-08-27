@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ai_image_studio\Form;
 
 use Drupal\ai_image_studio\Service\ImageGenerator;
+use Drupal\ai_image_studio\Service\PromptResolver;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -29,6 +30,7 @@ final class StudioForm extends FormBase {
     protected ImageGenerator $generator,
     protected ConfigFactoryInterface $studioConfigFactory,
     protected AccountProxyInterface $currentUserProxy,
+    protected PromptResolver $promptResolver,
   ) {}
 
   /**
@@ -40,6 +42,7 @@ final class StudioForm extends FormBase {
       $container->get('ai_image_studio.generator'),
       $container->get('config.factory'),
       $container->get('current_user'),
+      $container->get('ai_image_studio.prompt_resolver'),
     );
   }
 
@@ -68,7 +71,6 @@ final class StudioForm extends FormBase {
     $session = $ai_image_studio_session;
     $form_state->set('session_id', $session?->id());
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
-    $max_length = (int) ($settings->get('max_prompt_length') ?: 4000);
     $max_upload_bytes = (int) ($settings->get('max_source_image_size_mb') ?: 20)
       * 1024 * 1024;
     $default_output_type = (string) ($settings->get('default_output_type') ?: 'image');
@@ -318,7 +320,6 @@ final class StudioForm extends FormBase {
       ];
       $form['prompt'] = $this->promptElement(
         $this->t('Describe the image to create or how to transform the upload.'),
-        $max_length,
       );
       $form['generation_controls'] = $this->generationControls();
       $form['video_controls'] = $this->videoControls();
@@ -397,7 +398,6 @@ final class StudioForm extends FormBase {
       $form['video_regeneration'] = $this->buildVideoRegenerationForm(
         $regenerate_video,
         $turn_numbers[(int) $regenerate_video->id()] ?? 1,
-        $max_length,
       );
     }
     if ($settings->get('show_session_report') !== FALSE
@@ -619,7 +619,6 @@ final class StudioForm extends FormBase {
         $selected_source
           ? $this->t('Describe only the change you want to make to the selected image.')
           : $this->t('Describe the image to create.'),
-        $max_length,
       );
       $form['refine']['prompt']['#states'] = [
         'disabled' => [
@@ -708,17 +707,17 @@ final class StudioForm extends FormBase {
   /**
    * Creates the reusable prompt element.
    */
-  private function promptElement(string|\Stringable $description, int $max_length): array {
+  private function promptElement(string|\Stringable $description): array {
     return [
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
       '#title' => $this->t('Prompt'),
       '#description' => $description,
+      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
+      '#default_value' => PromptResolver::DEFAULT_PROMPT,
       // Validate this only for generation submissions. HTML's required
       // attribute would otherwise block the per-version Media submit buttons
       // before Drupal can apply their limited validation scope.
       '#required' => FALSE,
-      '#maxlength' => $max_length,
-      '#rows' => 5,
     ];
   }
 
@@ -944,7 +943,6 @@ final class StudioForm extends FormBase {
   private function buildVideoRegenerationForm(
     object $turn,
     int $number,
-    int $max_length,
   ): array {
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
     $operation = (string) $turn->get('operation')->value === 'text_to_video'
@@ -990,15 +988,7 @@ final class StudioForm extends FormBase {
           : $this->configuredDefaultModel($operation),
         '#required' => TRUE,
       ],
-      'prompt' => [
-        '#type' => 'textarea',
-        '#title' => $this->t('Replacement prompt'),
-        '#description' => $this->t('Optional. Leave blank to reuse the previous prompt: @prompt', [
-          '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
-        ]),
-        '#maxlength' => $max_length,
-        '#rows' => 5,
-      ],
+      'prompt' => $this->replacementPromptElement($turn),
       'settings' => $video_controls,
       'actions' => [
         '#type' => 'actions',
@@ -1882,6 +1872,24 @@ final class StudioForm extends FormBase {
           $this->t('The selected model does not support reference-to-video.'),
         );
       }
+      $replacement_id = (string) ($values['prompt'] ?? '');
+      if ($replacement_id !== '') {
+        $replacement = $this->promptResolver->resolve($replacement_id);
+        if ($replacement === '') {
+          $form_state->setErrorByName(
+            'video_regeneration][prompt',
+            $this->t('Select a valid AI Image Studio prompt.'),
+          );
+        }
+        elseif (mb_strlen($replacement) > $this->maximumPromptLength()) {
+          $form_state->setErrorByName(
+            'video_regeneration][prompt',
+            $this->t('The selected prompt exceeds the maximum length of @count characters.', [
+              '@count' => $this->maximumPromptLength(),
+            ]),
+          );
+        }
+      }
       return;
     }
     if (($trigger['#studio_action'] ?? '') === 'publish') {
@@ -1915,6 +1923,14 @@ final class StudioForm extends FormBase {
       $form_state->setErrorByName(
         'prompt',
         $this->t('Enter a prompt to generate a result.'),
+      );
+    }
+    elseif (mb_strlen($this->generationPrompt($form_state)) > $this->maximumPromptLength()) {
+      $form_state->setErrorByName(
+        'prompt',
+        $this->t('The selected prompt exceeds the maximum length of @count characters.', [
+          '@count' => $this->maximumPromptLength(),
+        ]),
       );
     }
 
@@ -2331,7 +2347,7 @@ final class StudioForm extends FormBase {
         $sources,
       ),
     ]);
-    $prompt = trim((string) ($values['prompt'] ?? ''));
+    $prompt = $this->promptResolver->resolve($values['prompt'] ?? '');
     if ($prompt === '') {
       $prompt = trim((string) $turn->get('prompt')->value);
     }
@@ -2366,7 +2382,7 @@ final class StudioForm extends FormBase {
    */
   private function generationPrompt(FormStateInterface $form_state): string {
     if (!$form_state->getValue('regenerate_with_new_settings')) {
-      return trim((string) $form_state->getValue('prompt'));
+      return $this->promptResolver->resolve($form_state->getValue('prompt'));
     }
 
     $session_id = (int) $form_state->get('session_id');
@@ -2375,6 +2391,31 @@ final class StudioForm extends FormBase {
       (int) $form_state->getValue('source_turn_id'),
     );
     return trim((string) ($source?->get('prompt')->value ?? ''));
+  }
+
+  /**
+   * Builds an optional managed prompt for video regeneration.
+   */
+  private function replacementPromptElement(object $turn): array {
+    return [
+      '#type' => 'ai_prompt',
+      '#title' => $this->t('Replacement prompt'),
+      '#description' => $this->t('Optional. Leave blank to reuse the previous prompt: @prompt', [
+        '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
+      ]),
+      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
+      '#default_value' => '',
+      '#required' => FALSE,
+    ];
+  }
+
+  /**
+   * Returns the configured prompt length limit.
+   */
+  private function maximumPromptLength(): int {
+    return (int) ($this->studioConfigFactory
+      ->get('ai_image_studio.settings')
+      ->get('max_prompt_length') ?: 4000);
   }
 
   /**
