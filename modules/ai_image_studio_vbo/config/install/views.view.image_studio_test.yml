@@ -1,8 +1,10 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
   module:
-    - ai_image_studio_vbo
     - node
     - user
     - views_bulk_operations
