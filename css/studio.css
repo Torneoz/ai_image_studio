@@ -291,14 +291,14 @@
 .ai-image-studio-turn img {
   display: block;
   height: auto;
-  max-height: 48rem;
+  max-height: 36rem;
   max-width: 100%;
 }
 
 .ai-image-studio-turn__video {
   background: #111;
   display: block;
-  max-height: 75vh;
+  max-height: 36rem;
   width: 100%;
 }
 
@@ -361,8 +361,13 @@
 
 .ai-image-studio-turn__image-wrapper {
   display: inline-block;
+  inline-size: min(100%, 36rem);
   max-width: 100%;
   position: relative;
+}
+
+.ai-image-studio-turn__image-wrapper img {
+  width: 100%;
 }
 
 .ai-image-studio-ai-badge {
