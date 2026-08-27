@@ -127,6 +127,7 @@
 }
 
 .ai-image-studio-turn {
+  scroll-margin-block-start: 1rem;
   border: 1px solid var(--color-gray-200, #d8d9da);
   border-radius: .5rem;
   padding: 1rem;

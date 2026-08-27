@@ -404,9 +404,14 @@
           }
           if (feedback) {
             feedback.hidden = false;
-            feedback.scrollIntoView({
+          }
+          const processingTarget = studio.querySelector(
+            '.ai-image-studio-turns',
+          ) || feedback;
+          if (processingTarget) {
+            processingTarget.scrollIntoView({
               behavior: 'smooth',
-              block: 'nearest',
+              block: 'start',
             });
           }
 
