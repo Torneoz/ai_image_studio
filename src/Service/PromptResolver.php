@@ -13,8 +13,6 @@ final class PromptResolver {
 
   public const PROMPT_TYPE = 'ai_image_studio';
 
-  public const DEFAULT_PROMPT = 'ai_image_studio__high_quality_image';
-
   /**
    * Constructs the prompt resolver.
    */
@@ -36,6 +34,16 @@ final class PromptResolver {
       return '';
     }
     return trim((string) $prompt->get('prompt'));
+  }
+
+  /**
+   * Combines editor-written instructions with an optional managed prompt.
+   */
+  public function compose(mixed $start, mixed $prompt_id): string {
+    return implode("\n\n", array_filter([
+      trim((string) $start),
+      $this->resolve($prompt_id),
+    ], static fn (string $part): bool => $part !== ''));
   }
 
 }

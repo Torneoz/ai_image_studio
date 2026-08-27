@@ -246,7 +246,7 @@
             '[data-ai-image-studio-reference-chips]',
           );
           if (referenceOptions && referenceOrder && referenceChips) {
-            const prompt = studio.querySelector('textarea[name="prompt"]');
+            const prompt = studio.querySelector('textarea[name="prompt_start"]');
             let orderedIds = referenceOrder.value
               ? referenceOrder.value.split(',').filter(Boolean)
               : [];

@@ -318,9 +318,10 @@ final class StudioForm extends FormBase {
           'data-ai-image-studio-output-type' => 'video',
         ],
       ];
-      $form['prompt'] = $this->promptElement(
+      $form['prompt_start'] = $this->promptStartElement(
         $this->t('Describe the image to create or how to transform the upload.'),
       );
+      $form['prompt'] = $this->promptElement();
       $form['generation_controls'] = $this->generationControls();
       $form['video_controls'] = $this->videoControls();
       $form['actions'] = ['#type' => 'actions'];
@@ -615,11 +616,17 @@ final class StudioForm extends FormBase {
           ],
         ],
       ];
-      $form['refine']['prompt'] = $this->promptElement(
+      $form['refine']['prompt_start'] = $this->promptStartElement(
         $selected_source
           ? $this->t('Describe only the change you want to make to the selected image.')
           : $this->t('Describe the image to create.'),
       );
+      $form['refine']['prompt'] = $this->promptElement();
+      $form['refine']['prompt_start']['#states'] = [
+        'disabled' => [
+          ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
+        ],
+      ];
       $form['refine']['prompt']['#states'] = [
         'disabled' => [
           ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
@@ -705,15 +712,29 @@ final class StudioForm extends FormBase {
   }
 
   /**
-   * Creates the reusable prompt element.
+   * Creates the editor-written first portion of a prompt.
    */
-  private function promptElement(string|\Stringable $description): array {
+  private function promptStartElement(string|\Stringable $description): array {
+    return [
+      '#type' => 'textarea',
+      '#title' => $this->t('Start prompt'),
+      '#description' => $description,
+      '#required' => FALSE,
+      '#maxlength' => $this->maximumPromptLength(),
+      '#rows' => 5,
+    ];
+  }
+
+  /**
+   * Creates the reusable portion appended after the editor prompt.
+   */
+  private function promptElement(): array {
     return [
       '#type' => 'ai_prompt',
-      '#title' => $this->t('Prompt'),
-      '#description' => $description,
+      '#title' => $this->t('After prompt'),
+      '#description' => $this->t('Optionally append a reusable style or instruction prompt after the start prompt.'),
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
-      '#default_value' => PromptResolver::DEFAULT_PROMPT,
+      '#default_value' => '',
       // Validate this only for generation submissions. HTML's required
       // attribute would otherwise block the per-version Media submit buttons
       // before Drupal can apply their limited validation scope.
@@ -987,6 +1008,15 @@ final class StudioForm extends FormBase {
           ? $inherited_model
           : $this->configuredDefaultModel($operation),
         '#required' => TRUE,
+      ],
+      'prompt_start' => [
+        '#type' => 'textarea',
+        '#title' => $this->t('Replacement start prompt'),
+        '#description' => $this->t('Optional. Leave both replacement prompt fields empty to reuse the previous prompt: @prompt', [
+          '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
+        ]),
+        '#maxlength' => $this->maximumPromptLength(),
+        '#rows' => 5,
       ],
       'prompt' => $this->replacementPromptElement($turn),
       'settings' => $video_controls,
@@ -1873,17 +1903,21 @@ final class StudioForm extends FormBase {
         );
       }
       $replacement_id = (string) ($values['prompt'] ?? '');
-      if ($replacement_id !== '') {
-        $replacement = $this->promptResolver->resolve($replacement_id);
+      $replacement_start = trim((string) ($values['prompt_start'] ?? ''));
+      if ($replacement_id !== '' || $replacement_start !== '') {
+        $replacement = $this->promptResolver->compose(
+          $replacement_start,
+          $replacement_id,
+        );
         if ($replacement === '') {
           $form_state->setErrorByName(
-            'video_regeneration][prompt',
+            'video_regeneration][prompt_start',
             $this->t('Select a valid AI Image Studio prompt.'),
           );
         }
         elseif (mb_strlen($replacement) > $this->maximumPromptLength()) {
           $form_state->setErrorByName(
-            'video_regeneration][prompt',
+            'video_regeneration][prompt_start',
             $this->t('The selected prompt exceeds the maximum length of @count characters.', [
               '@count' => $this->maximumPromptLength(),
             ]),
@@ -1921,13 +1955,13 @@ final class StudioForm extends FormBase {
 
     if ($this->generationPrompt($form_state) === '') {
       $form_state->setErrorByName(
-        'prompt',
+        'prompt_start',
         $this->t('Enter a prompt to generate a result.'),
       );
     }
     elseif (mb_strlen($this->generationPrompt($form_state)) > $this->maximumPromptLength()) {
       $form_state->setErrorByName(
-        'prompt',
+        'prompt_start',
         $this->t('The selected prompt exceeds the maximum length of @count characters.', [
           '@count' => $this->maximumPromptLength(),
         ]),
@@ -2139,7 +2173,7 @@ final class StudioForm extends FormBase {
         preg_match_all('/<IMAGE_(\d+)>/', $this->generationPrompt($form_state), $matches);
         foreach (array_map('intval', $matches[1] ?? []) as $number) {
           if ($number < 1 || $number > count($reference_files)) {
-            $form_state->setErrorByName('prompt', $this->t(
+            $form_state->setErrorByName('prompt_start', $this->t(
               'The token <IMAGE_@number> has no corresponding reference image.',
               ['@number' => $number],
             ));
@@ -2347,7 +2381,10 @@ final class StudioForm extends FormBase {
         $sources,
       ),
     ]);
-    $prompt = $this->promptResolver->resolve($values['prompt'] ?? '');
+    $prompt = $this->promptResolver->compose(
+      $values['prompt_start'] ?? '',
+      $values['prompt'] ?? '',
+    );
     if ($prompt === '') {
       $prompt = trim((string) $turn->get('prompt')->value);
     }
@@ -2382,7 +2419,10 @@ final class StudioForm extends FormBase {
    */
   private function generationPrompt(FormStateInterface $form_state): string {
     if (!$form_state->getValue('regenerate_with_new_settings')) {
-      return $this->promptResolver->resolve($form_state->getValue('prompt'));
+      return $this->promptResolver->compose(
+        $form_state->getValue('prompt_start'),
+        $form_state->getValue('prompt'),
+      );
     }
 
     $session_id = (int) $form_state->get('session_id');
@@ -2399,10 +2439,8 @@ final class StudioForm extends FormBase {
   private function replacementPromptElement(object $turn): array {
     return [
       '#type' => 'ai_prompt',
-      '#title' => $this->t('Replacement prompt'),
-      '#description' => $this->t('Optional. Leave blank to reuse the previous prompt: @prompt', [
-        '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
-      ]),
+      '#title' => $this->t('Replacement after prompt'),
+      '#description' => $this->t('Optionally append a reusable prompt after the replacement start prompt.'),
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#default_value' => '',
       '#required' => FALSE,

@@ -69,15 +69,27 @@ final class CompactMediaForm {
         '#type' => 'status_messages',
         '#weight' => -100,
       ],
+      'prompt_start' => [
+        '#type' => 'textarea',
+        '#title' => t('Start prompt'),
+        '#description' => t('Describe the image to create.'),
+        '#rows' => 3,
+        '#maxlength' => (int) ($settings->get('max_prompt_length') ?: 4000),
+        '#default_value' => $form_state->getValue([
+          'ai_image_studio_compact',
+          'prompt_start',
+        ]),
+      ],
       'prompt' => [
         '#type' => 'ai_prompt',
-        '#title' => t('Prompt'),
+        '#title' => t('After prompt'),
+        '#description' => t('Optionally append a reusable style or instruction prompt after the start prompt.'),
         '#prompt_types' => [PromptResolver::PROMPT_TYPE],
-        '#required' => TRUE,
+        '#required' => FALSE,
         '#default_value' => $form_state->getValue([
           'ai_image_studio_compact',
           'prompt',
-        ]) ?: PromptResolver::DEFAULT_PROMPT,
+        ]) ?: '',
       ],
       'model' => [
         '#type' => 'select',
@@ -138,6 +150,7 @@ final class CompactMediaForm {
           '#studio_compact_action' => 'generate',
           '#submit' => ['ai_image_studio_compact_generate_submit'],
           '#limit_validation_errors' => [
+            ['ai_image_studio_compact', 'prompt_start'],
             ['ai_image_studio_compact', 'prompt'],
             ['ai_image_studio_compact', 'model'],
             ['ai_image_studio_compact', 'settings'],
@@ -257,9 +270,19 @@ final class CompactMediaForm {
    */
   public function generate(array &$form, FormStateInterface $form_state): void {
     $values = (array) $form_state->getValue('ai_image_studio_compact');
-    $prompt = $this->promptResolver->resolve($values['prompt'] ?? '');
+    $prompt = $this->promptResolver->compose(
+      $values['prompt_start'] ?? '',
+      $values['prompt'] ?? '',
+    );
     $model = (string) ($values['model'] ?? '');
-    if ($prompt === '' || $model === '') {
+    if ($prompt === '') {
+      $form_state->setErrorByName(
+        'ai_image_studio_compact][prompt_start',
+        t('Enter a start prompt or select an after prompt.'),
+      );
+      return;
+    }
+    if ($model === '') {
       return;
     }
     $maximum = (int) ($this->configFactory
