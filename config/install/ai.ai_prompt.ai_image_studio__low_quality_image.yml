@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio__low_quality_image
+label: 'Low Quality Image'
+type: ai_image_studio
+prompt: >-
+  Keep the image simple and economical to render. Use a clear subject, basic
+  composition, limited fine detail, straightforward lighting, and minimal
+  background complexity. Do not include text, captions, watermarks, or logos.
+

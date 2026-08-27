@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio__low_fi_video
+label: 'Low FI Video'
+type: ai_image_studio
+prompt: >-
+  Create a simple low-fidelity video with one clear subject, restrained camera
+  movement, limited scene changes, uncomplicated lighting, and stable motion.
+  Prioritize visual coherence and fast rendering over fine detail. Do not
+  include text, captions, watermarks, or logos.

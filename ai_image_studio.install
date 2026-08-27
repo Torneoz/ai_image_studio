@@ -289,3 +289,12 @@ function ai_image_studio_update_10010(): void {
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio');
 }
+
+/**
+ * Adds image and video fidelity prompts to the Studio prompt library.
+ */
+function ai_image_studio_update_10011(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio');
+}

@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio__hi_fi_video
+label: 'Hi Fi Video'
+type: ai_image_studio
+prompt: >-
+  Create a polished high-fidelity cinematic video with consistent subjects,
+  natural motion, deliberate camera movement, detailed environments, coherent
+  lighting, realistic depth, and smooth temporal continuity. Avoid flicker,
+  warping, abrupt changes, text, captions, watermarks, and logos.
