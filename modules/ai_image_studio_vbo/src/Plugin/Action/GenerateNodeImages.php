@@ -8,6 +8,7 @@ use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio_vbo\Service\BulkGenerationManager;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\Attribute\Action;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -39,6 +40,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     private readonly BulkGenerationManager $bulkManager,
     private readonly ImageGenerator $generator,
     private readonly AccountProxyInterface $currentUser,
+    private readonly ConfigFactoryInterface $configFactory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -54,6 +56,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       $container->get('ai_image_studio_vbo.batch_manager'),
       $container->get('ai_image_studio.generator'),
       $container->get('current_user'),
+      $container->get('config.factory'),
     );
   }
 
@@ -62,7 +65,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
    */
   public function defaultConfiguration(): array {
     return [
-      'prompt_template' => 'Create an editorial image for [node:title]. Do not include text or logos.',
+      'prompt_id' => 'ai_image_studio_vbo__editorial_image',
       'source_field' => '',
       'text_model' => '',
       'image_model' => '',
@@ -84,12 +87,12 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $form['intro'] = [
       '#markup' => '<p>' . $this->t('One image request will be queued for each selected node. Drupal tokens such as [node:title] may be used in text fields.') . '</p>',
     ];
-    $form['prompt_template'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Prompt template'),
-      '#default_value' => $configuration['prompt_template'],
+    $form['prompt_id'] = [
+      '#type' => 'ai_prompt',
+      '#title' => $this->t('Prompt'),
+      '#prompt_types' => ['ai_image_studio_vbo'],
+      '#default_value' => $configuration['prompt_id'],
       '#required' => TRUE,
-      '#rows' => 8,
     ];
     $form['source_field'] = [
       '#type' => 'textfield',
@@ -201,8 +204,13 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
-    if (trim((string) $form_state->getValue('prompt_template')) === '') {
-      $form_state->setErrorByName('prompt_template', $this->t('Enter a prompt template.'));
+    $prompt_id = (string) $form_state->getValue('prompt_id');
+    $prompt = $this->configFactory->get('ai.ai_prompt.' . $prompt_id);
+    if ($prompt_id === '' || $prompt->isNew() || trim((string) $prompt->get('prompt')) === '') {
+      $form_state->setErrorByName('prompt_id', $this->t('Select a valid prompt.'));
+    }
+    elseif ((string) $prompt->get('type') !== 'ai_image_studio_vbo') {
+      $form_state->setErrorByName('prompt_id', $this->t('Select an AI Image Studio bulk image prompt.'));
     }
     if ($form_state->getValue('publish_media')
       && !$this->currentUser->hasPermission('publish ai image studio image')) {
@@ -215,9 +223,11 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
     parent::submitConfigurationForm($form, $form_state);
+    $prompt_id = (string) $this->configuration['prompt_id'];
+    $prompt = $this->configFactory->get('ai.ai_prompt.' . $prompt_id);
     $this->configuration['run_uuid'] = bin2hex(random_bytes(16));
     $this->configuration['initiating_uid'] = (int) $this->currentUser->id();
-    $this->configuration['prompt_template'] = trim((string) $this->configuration['prompt_template']);
+    $this->configuration['prompt_template'] = trim((string) $prompt->get('prompt'));
     $this->configuration['source_field'] = trim((string) $this->configuration['source_field']);
     $this->configuration['variations'] = 1;
   }

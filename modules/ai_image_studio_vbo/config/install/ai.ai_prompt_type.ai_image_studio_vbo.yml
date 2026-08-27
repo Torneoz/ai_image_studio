@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
+id: ai_image_studio_vbo
+label: 'AI Image Studio bulk image prompt'
+variables: {  }
+tokens:
+  -
+    name: node:title
+    help_text: 'The selected node title'
+    required: false
+  -
+    name: node:summary
+    help_text: 'The selected node summary when available'
+    required: false
+  -
+    name: node:body
+    help_text: 'The selected node body when available'
+    required: false
+  -
+    name: node:url
+    help_text: 'The selected node URL'
+    required: false
+

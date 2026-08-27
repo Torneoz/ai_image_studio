@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
+id: ai_image_studio_vbo__editorial_image
+label: 'Editorial image'
+type: ai_image_studio_vbo
+prompt: >-
+  Create an editorial image for [node:title]. Use a clear, engaging composition
+  appropriate for the subject. Do not include text, captions, watermarks, or
+  logos in the image.
+
