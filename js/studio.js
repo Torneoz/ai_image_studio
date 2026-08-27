@@ -14,6 +14,9 @@
           const previewImage = studio.querySelector(
             '[data-ai-image-studio-source-preview-image]',
           );
+          const previewLinks = studio.querySelectorAll(
+            '[data-ai-image-studio-source-preview-link]',
+          );
           const history = studio.querySelector('.ai-image-studio-turns');
           const orderControl = studio.querySelector(
             '[data-ai-image-studio-history-order]',
@@ -29,6 +32,10 @@
             if (!selectedCard) {
               return;
             }
+
+            previewLinks.forEach((link) => {
+              link.href = `#${selectedCard.id}`;
+            });
 
             studio.querySelectorAll('[data-ai-image-studio-turn]')
               .forEach((card) => {

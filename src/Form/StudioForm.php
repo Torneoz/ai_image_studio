@@ -432,6 +432,9 @@ final class StudioForm extends FormBase {
         $source_number = $turn_numbers[(int) $selected_source->id()] ?? 1;
         $source_prompt = (string) $selected_source->get('prompt')->value;
         $source_file = $selected_source->get('image')->entity;
+        $source_url = Url::fromRoute('<none>', [], [
+          'fragment' => 'ai-image-studio-turn-' . $selected_source->id(),
+        ]);
         $form['refine']['source'] = [
           '#type' => 'container',
           '#attributes' => [
@@ -445,11 +448,19 @@ final class StudioForm extends FormBase {
           ],
           'image' => $source_file instanceof FileInterface
             ? [
-              '#theme' => 'image',
-              '#uri' => $source_file->getFileUri(),
-              '#alt' => $source_prompt,
+              '#type' => 'link',
+              '#title' => [
+                '#theme' => 'image',
+                '#uri' => $source_file->getFileUri(),
+                '#alt' => $source_prompt,
+                '#attributes' => [
+                  'data-ai-image-studio-source-preview-image' => '',
+                ],
+              ],
+              '#url' => $source_url,
               '#attributes' => [
-                'data-ai-image-studio-source-preview-image' => '',
+                'class' => ['ai-image-studio-source-preview__link'],
+                'data-ai-image-studio-source-preview-link' => '',
               ],
             ]
             : [],
@@ -460,14 +471,22 @@ final class StudioForm extends FormBase {
               . $this->t('Refining from') . '</span>',
             ],
             'title' => [
-              '#type' => 'html_tag',
-              '#tag' => 'strong',
-              '#value' => $this->t('Version @number · @prompt', [
-                '@number' => $source_number,
-                '@prompt' => $this->promptSummary($source_prompt),
-              ]),
+              '#type' => 'link',
+              '#title' => [
+                '#type' => 'html_tag',
+                '#tag' => 'strong',
+                '#value' => $this->t('Version @number · @prompt', [
+                  '@number' => $source_number,
+                  '@prompt' => $this->promptSummary($source_prompt),
+                ]),
+                '#attributes' => [
+                  'data-ai-image-studio-source-preview-title' => '',
+                ],
+              ],
+              '#url' => $source_url,
               '#attributes' => [
-                'data-ai-image-studio-source-preview-title' => '',
+                'class' => ['ai-image-studio-source-preview__link'],
+                'data-ai-image-studio-source-preview-link' => '',
               ],
             ],
             'description' => [

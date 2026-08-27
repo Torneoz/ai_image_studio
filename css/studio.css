@@ -432,6 +432,17 @@
   width: 7rem;
 }
 
+.ai-image-studio-source-preview__link {
+  color: inherit;
+  display: block;
+  text-decoration-thickness: .08em;
+  text-underline-offset: .15em;
+}
+
+.ai-image-studio-source-preview > .ai-image-studio-source-preview__link {
+  width: max-content;
+}
+
 .ai-image-studio-source-preview__eyebrow {
   display: block;
   font-size: .7rem;
