@@ -8,6 +8,50 @@
   display: none !important;
 }
 
+.ai-image-studio-layout .form-type-ai-prompt table {
+  table-layout: fixed;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt th,
+.ai-image-studio-layout .form-type-ai-prompt td {
+  font-size: .875rem;
+  line-height: 1.35;
+  padding: .5rem .625rem;
+  vertical-align: middle;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt th:first-child {
+  width: 2.5rem;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt th:nth-child(2) {
+  width: 10rem;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt th:last-child {
+  width: 4.75rem;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt td:nth-child(3) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt td:first-child .form-item {
+  margin: 0;
+}
+
+.ai-image-studio-layout .form-type-ai-prompt td:last-child .button {
+  margin: 0;
+}
+
+@media (max-width: 48rem) {
+  .ai-image-studio-layout .form-type-ai-prompt th:nth-child(2) {
+    width: 7rem;
+  }
+}
+
 .ai-image-studio-choice-group {
   margin-block: 0;
 }
