@@ -966,7 +966,7 @@ final class StudioForm extends FormBase {
       ],
       'video_show_ai_badge' => [
         '#type' => 'checkbox',
-        '#title' => $this->t('Show an AI image badge'),
+        '#title' => $this->t('Show an AI video badge'),
         '#default_value' => array_key_exists('show_ai_badge', $defaults)
           ? (bool) $defaults['show_ai_badge']
           : (bool) $settings->get('default_show_ai_badge'),

@@ -70,7 +70,7 @@ ai_image_studio.settings:
       label: 'Apply auto levels by default'
     default_show_ai_badge:
       type: boolean
-      label: 'Show an AI image badge by default'
+      label: 'Show an AI badge by default'
     default_ai_badge_text:
       type: string
       label: 'Default AI image badge text'

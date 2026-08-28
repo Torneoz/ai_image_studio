@@ -209,7 +209,7 @@ final class SettingsForm extends ConfigFormBase {
         : $this->t('Requires the PHP Imagick extension.'),
     ];
     $form['generation']['default_show_ai_badge'] = $this->checkbox(
-      $this->t('Show an AI image badge by default'),
+      $this->t('Show an AI badge by default'),
       $config->get('default_show_ai_badge'),
     );
     $form['generation']['default_ai_badge_text'] = [
