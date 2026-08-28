@@ -142,7 +142,12 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
 
       $media_id = NULL;
       $status = 'completed';
-      if (!empty($configuration['publish_media'])) {
+      $destination_field = (string) ($configuration['destination_field'] ?? '');
+      $destination_bundle = (string) ($configuration['destination_bundle'] ?? '');
+      $destination_is_media = $destination_field !== ''
+        && $node->hasField($destination_field)
+        && $node->get($destination_field)->getFieldDefinition()->getType() === 'entity_reference';
+      if (!empty($configuration['publish_media']) || $destination_is_media) {
         $account = $this->entityTypeManager->getStorage('user')->load((int) $job->uid);
         if ($account === NULL || !$account->hasPermission('publish ai image studio image')) {
           throw new \RuntimeException('The initiating user may no longer publish generated images.');
@@ -161,6 +166,17 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
         $media_id = (int) $media->id();
         $status = 'published';
       }
+      if ($destination_field !== '') {
+        $this->attachResult(
+          $node,
+          $turn,
+          $destination_bundle,
+          $destination_field,
+          $media_id,
+          (int) $job->uid,
+          (string) ($configuration['alt_template'] ?? ''),
+        );
+      }
       $this->database->update('ai_image_studio_vbo_item')
         ->fields([
           'status' => $status,
@@ -178,6 +194,52 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
     catch (\Throwable $exception) {
       $this->retryOrFail($item_id, $attempt, $exception->getMessage());
     }
+  }
+
+  /**
+   * Replaces the configured node field with the generated result.
+   */
+  private function attachResult(
+    NodeInterface $node,
+    object $turn,
+    string $bundle,
+    string $field_name,
+    ?int $media_id,
+    int $uid,
+    string $alt_template,
+  ): void {
+    if ($node->bundle() !== $bundle || !$node->hasField($field_name)) {
+      throw new \RuntimeException('The selected node does not have the configured destination field.');
+    }
+    $account = $this->entityTypeManager->getStorage('user')->load($uid);
+    if ($account === NULL || !$node->access('update', $account)) {
+      throw new \RuntimeException('The initiating user may no longer update the selected content.');
+    }
+    $definition = $node->get($field_name)->getFieldDefinition();
+    if ($definition->getType() === 'image') {
+      $file = $turn->get('image')->entity;
+      if (!$file instanceof FileInterface) {
+        throw new \RuntimeException('The generated image file is unavailable.');
+      }
+      $alt = trim($this->token->replace(
+        $alt_template,
+        ['node' => $node],
+        ['clear' => TRUE],
+      ));
+      $node->set($field_name, [
+        'target_id' => $file->id(),
+        'alt' => $alt,
+      ]);
+    }
+    elseif ($definition->getType() === 'entity_reference'
+      && $definition->getSetting('target_type') === 'media'
+      && $media_id !== NULL) {
+      $node->set($field_name, ['target_id' => $media_id]);
+    }
+    else {
+      throw new \RuntimeException('The configured destination field is not an image or Media reference field.');
+    }
+    $node->save();
   }
 
   /**
