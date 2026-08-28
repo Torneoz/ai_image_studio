@@ -1,6 +1,13 @@
+ai_image_studio_vbo.content:
+  title: 'Image Studio Content'
+  description: 'Select content for bulk AI image generation.'
+  route_name: view.image_studio_content.page_1
+  parent: ai_image_studio.collection
+  weight: -5
+
 ai_image_studio_vbo.jobs:
   title: 'Bulk image jobs'
   description: 'Review image generation jobs started through Views Bulk Operations.'
   route_name: ai_image_studio_vbo.jobs
   parent: ai_image_studio.collection
-
+  weight: 0
