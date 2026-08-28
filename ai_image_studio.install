@@ -333,3 +333,11 @@ function ai_image_studio_update_10013(): void {
     )
     ->save(TRUE);
 }
+
+/**
+ * Restores missing Studio prompt configuration after config synchronization.
+ */
+function ai_image_studio_update_10014(): void {
+  \Drupal::service('config.installer')
+    ->installDefaultConfig('module', 'ai_image_studio');
+}

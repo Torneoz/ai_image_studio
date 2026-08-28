@@ -189,3 +189,11 @@ function ai_image_studio_vbo_update_10002(): void {
     ->getEditable('views.view.image_studio_test')
     ->delete();
 }
+
+/**
+ * Restores missing VBO prompt configuration after config synchronization.
+ */
+function ai_image_studio_vbo_update_10003(): void {
+  \Drupal::service('config.installer')
+    ->installDefaultConfig('module', 'ai_image_studio_vbo');
+}
