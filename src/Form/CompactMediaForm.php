@@ -141,11 +141,15 @@ final class CompactMediaForm {
         ],
       ],
       'actions' => [
-        '#type' => 'actions',
+        // Do not use an actions element here. Drupal's dialog integration
+        // extracts submit buttons from .form-actions and hides the originals.
+        // Since this form is nested inside Media Library's add form, that can
+        // leave the generator without a visible submit button.
+        '#type' => 'container',
         '#attributes' => ['class' => ['ai-image-studio-compact__actions']],
         'generate' => [
           '#type' => 'submit',
-          '#value' => $turn ? t('Generate another') : t('Generate image'),
+          '#value' => $turn ? t('Generate Another') : t('Generate Image'),
           '#name' => 'ai_image_studio_compact_generate',
           '#studio_compact_action' => 'generate',
           '#submit' => ['ai_image_studio_compact_generate_submit'],

@@ -175,10 +175,11 @@ function ai_image_studio_media_source_validate(
   $action = $trigger['#studio_compact_action'] ?? NULL;
   if ($action === 'generate') {
     $values = (array) $form_state->getValue('ai_image_studio_compact');
-    if (trim((string) ($values['prompt'] ?? '')) === '') {
+    if (trim((string) ($values['prompt_start'] ?? '')) === ''
+      && trim((string) ($values['prompt'] ?? '')) === '') {
       $form_state->setErrorByName(
-        'ai_image_studio_compact][prompt',
-        t('Enter a prompt to generate an image.'),
+        'ai_image_studio_compact][prompt_start',
+        t('Enter a start prompt or select an after prompt.'),
       );
     }
     if (empty($values['model'])) {
