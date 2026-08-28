@@ -69,7 +69,7 @@ final class BulkJobController extends ControllerBase {
     }
     return [
       'description' => [
-        '#markup' => '<p>' . $this->t('Jobs are created by the “Generate images with AI Image Studio” Views Bulk Operations action. Drupal cron processes the queued image requests.') . '</p>',
+        '#markup' => '<p>' . $this->t('Jobs are created by the “Generate images with AI Image Studio” Views Bulk Operations action. Active job pages advance the queue while they refresh; Drupal cron remains a fallback.') . '</p>',
       ],
       'table' => [
         '#type' => 'table',
@@ -167,6 +167,18 @@ final class BulkJobController extends ControllerBase {
       '#cache' => ['max-age' => 0],
     ];
     if ($active !== []) {
+      $build['processing'] = [
+        '#theme' => 'status_messages',
+        '#message_list' => [
+          'status' => [
+            $this->t('Image generation is in progress. This page refreshes every 5 seconds until the job finishes.'),
+          ],
+        ],
+        '#status_headings' => [
+          'status' => $this->t('Status message'),
+        ],
+        '#weight' => -10,
+      ];
       $build['#attached']['html_head'][] = [
         [
           '#tag' => 'meta',
