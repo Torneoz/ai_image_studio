@@ -1,0 +1,16 @@
+.ai-image-studio-views-preview__link {
+  display: inline-block;
+}
+
+.ai-image-studio-views-preview__image,
+.ai-image-studio-views-preview__video {
+  block-size: auto;
+  display: block;
+  inline-size: min(100%, 14rem);
+  max-block-size: 10rem;
+  object-fit: contain;
+}
+
+.ai-image-studio-views-preview__video {
+  background: #111;
+}

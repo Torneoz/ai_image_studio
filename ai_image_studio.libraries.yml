@@ -14,6 +14,11 @@ collection:
     theme:
       css/collection.css: {}
 
+views_previews:
+  css:
+    theme:
+      css/views-previews.css: {}
+
 media_source:
   css:
     theme:

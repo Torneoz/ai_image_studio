@@ -309,3 +309,27 @@ function ai_image_studio_update_10012(): void {
     $config->set('default_video_ai_badge_text', 'AI Video')->save(TRUE);
   }
 }
+
+/**
+ * Displays generated assets as previews in the default Turns View.
+ */
+function ai_image_studio_update_10013(): void {
+  \Drupal::service('config.installer')
+    ->installDefaultConfig('module', 'ai_image_studio');
+
+  $view = \Drupal::configFactory()
+    ->getEditable('views.view.image_studio_turns');
+  if ($view->isNew()) {
+    return;
+  }
+  $view
+    ->set(
+      'display.default.display_options.fields.image__target_id.plugin_id',
+      'ai_image_studio_image_preview',
+    )
+    ->set(
+      'display.default.display_options.fields.video__target_id.plugin_id',
+      'ai_image_studio_video_preview',
+    )
+    ->save(TRUE);
+}

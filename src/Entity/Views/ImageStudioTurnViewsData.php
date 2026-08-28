@@ -30,6 +30,10 @@ final class ImageStudioTurnViewsData extends EntityViewsData {
     $data[$table]['duration_ms']['field']['help'] = $this->t('Displays generation time using a readable unit.');
     $data[$table]['estimated_cost']['field']['id'] = 'ai_image_studio_cost';
     $data[$table]['estimated_cost']['field']['help'] = $this->t('Displays the estimated generation cost as a dollar amount.');
+    $data[$table]['image']['field']['id'] = 'ai_image_studio_image_preview';
+    $data[$table]['image']['field']['help'] = $this->t('Displays the generated image as a linked preview.');
+    $data[$table]['video']['field']['id'] = 'ai_image_studio_video_preview';
+    $data[$table]['video']['field']['help'] = $this->t('Displays the generated video with playback controls.');
 
     foreach ([
       'generation_settings' => $this->t('Generation settings'),

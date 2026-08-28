@@ -276,7 +276,7 @@ display:
           admin_label: ''
           entity_type: ai_image_studio_turn
           entity_field: image
-          plugin_id: field
+          plugin_id: ai_image_studio_image_preview
           label: 'Generated image'
           exclude: false
           alter:
@@ -341,7 +341,7 @@ display:
           admin_label: ''
           entity_type: ai_image_studio_turn
           entity_field: video
-          plugin_id: field
+          plugin_id: ai_image_studio_video_preview
           label: 'Generated video'
           exclude: false
           alter:
