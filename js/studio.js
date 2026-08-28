@@ -151,6 +151,18 @@
                 }
               });
           };
+          const applyOutputLabels = () => {
+            const isVideo = checkedValue('output_type', 'image') === 'video';
+            studio.querySelectorAll('[data-ai-image-studio-generate]')
+              .forEach((button) => {
+                const label = isVideo
+                  ? button.dataset.generateVideoLabel
+                  : button.dataset.generateImageLabel;
+                if (label) {
+                  button.value = label;
+                }
+              });
+          };
           const applyModelCapabilities = () => {
             const visibleModel = activeModelControl()
               || Array.from(modelControls).find(
@@ -237,10 +249,12 @@
             .forEach((control) => {
               control.addEventListener('change', () => {
                 applyFormVisibility();
+                applyOutputLabels();
                 window.setTimeout(applyModelCapabilities, 0);
               });
             });
           applyFormVisibility();
+          applyOutputLabels();
           applyModelCapabilities();
 
           const referenceOptions = studio.querySelector(

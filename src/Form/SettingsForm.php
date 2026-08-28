@@ -223,6 +223,17 @@ final class SettingsForm extends ConfigFormBase {
         ],
       ],
     ];
+    $form['generation']['default_video_ai_badge_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Default AI video badge text'),
+      '#default_value' => $config->get('default_video_ai_badge_text') ?: 'AI Video',
+      '#maxlength' => 80,
+      '#states' => [
+        'visible' => [
+          ':input[name="default_show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     foreach ([
       'text_to_image' => $this->t('Default Text-to-Image model'),
       'image_to_image' => $this->t('Default Image-to-Image model'),
@@ -473,6 +484,7 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_auto_levels', (bool) $form_state->getValue('default_auto_levels'))
       ->set('default_show_ai_badge', (bool) $form_state->getValue('default_show_ai_badge'))
       ->set('default_ai_badge_text', trim((string) $form_state->getValue('default_ai_badge_text')) ?: 'AI Image')
+      ->set('default_video_ai_badge_text', trim((string) $form_state->getValue('default_video_ai_badge_text')) ?: 'AI Video')
       ->set('default_text_to_image_model', $form_state->getValue('default_text_to_image_model'))
       ->set('default_image_to_image_model', $form_state->getValue('default_image_to_image_model'))
       ->set('default_text_to_video_model', $form_state->getValue('default_text_to_video_model'))

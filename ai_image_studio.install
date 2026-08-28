@@ -298,3 +298,14 @@ function ai_image_studio_update_10011(): void {
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio');
 }
+
+/**
+ * Adds a distinct default badge label for generated videos.
+ */
+function ai_image_studio_update_10012(): void {
+  $config = \Drupal::configFactory()
+    ->getEditable('ai_image_studio.settings');
+  if ($config->get('default_video_ai_badge_text') === NULL) {
+    $config->set('default_video_ai_badge_text', 'AI Video')->save(TRUE);
+  }
+}

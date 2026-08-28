@@ -74,6 +74,9 @@ ai_image_studio.settings:
     default_ai_badge_text:
       type: string
       label: 'Default AI image badge text'
+    default_video_ai_badge_text:
+      type: string
+      label: 'Default AI video badge text'
     default_text_to_image_model:
       type: string
       label: 'Default Text-to-Image model'

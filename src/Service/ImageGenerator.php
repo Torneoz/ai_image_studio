@@ -779,7 +779,9 @@ final class ImageGenerator {
     }
     if ($render_badge) {
       $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
-      $badge_text = trim((string) ($generation_settings['ai_badge_text'] ?? 'AI Image'));
+      $badge_text = trim((string) ($generation_settings['ai_badge_text'] ?? (
+        $is_video ? 'AI Video' : 'AI Image'
+      )));
       $file = $is_video
         ? $this->createBadgedVideo($file, $badge_text, (int) $turn->id())
         : $this->createBadgedImage($file, $badge_text, (int) $turn->id());

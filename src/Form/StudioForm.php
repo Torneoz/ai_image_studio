@@ -327,11 +327,15 @@ final class StudioForm extends FormBase {
       $form['actions'] = ['#type' => 'actions'];
       $form['actions']['generate'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Create'),
+        '#value' => $default_output_type === 'video'
+          ? $this->t('Generate Video')
+          : $this->t('Generate Image'),
         '#button_type' => 'primary',
         '#studio_action' => 'generate',
         '#attributes' => [
           'data-ai-image-studio-generate' => '',
+          'data-generate-image-label' => $this->t('Generate Image'),
+          'data-generate-video-label' => $this->t('Generate Video'),
           'data-generating-image-label' => $this->t('Generating image…'),
           'data-generating-video-label' => $this->t('Generating video…'),
         ],
@@ -667,11 +671,15 @@ final class StudioForm extends FormBase {
       $form['refine']['actions'] = ['#type' => 'actions'];
       $form['refine']['actions']['generate'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Generate'),
+        '#value' => $default_output_type === 'video'
+          ? $this->t('Generate Video')
+          : $this->t('Generate Image'),
         '#button_type' => 'primary',
         '#studio_action' => 'generate',
         '#attributes' => [
           'data-ai-image-studio-generate' => '',
+          'data-generate-image-label' => $this->t('Generate Image'),
+          'data-generate-video-label' => $this->t('Generate Video'),
           'data-generating-image-label' => $this->t('Generating image…'),
           'data-generating-video-label' => $this->t('Generating video…'),
         ],
@@ -966,7 +974,7 @@ final class StudioForm extends FormBase {
       'video_ai_badge_text' => [
         '#type' => 'textfield',
         '#title' => $this->t('Badge text'),
-        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_ai_badge_text') ?: 'AI Image'),
+        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_video_ai_badge_text') ?: 'AI Video'),
         '#maxlength' => 80,
         '#states' => [
           'visible' => [
@@ -1181,7 +1189,7 @@ final class StudioForm extends FormBase {
             'badge' => !empty($settings['show_ai_badge']) ? [
               '#type' => 'html_tag',
               '#tag' => 'span',
-              '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Image'))),
+              '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Video'))),
               '#attributes' => ['class' => ['ai-image-studio-ai-badge']],
             ] : [],
           ];
@@ -1297,7 +1305,9 @@ final class StudioForm extends FormBase {
             '#disabled' => !$can_render_badge,
             '#description' => $can_render_badge
               ? $this->t('Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved.', [
-                '@badge' => $settings['ai_badge_text'] ?? $this->t('AI Image'),
+                '@badge' => $settings['ai_badge_text'] ?? ($is_video
+                  ? $this->t('AI Video')
+                  : $this->t('AI Image')),
               ])
               : ($is_video
                 ? $this->t('Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published.')
@@ -2323,7 +2333,7 @@ final class StudioForm extends FormBase {
         ),
         'ai_badge_text' => trim((string) $form_state->getValue(
           $output_type === 'video' ? 'video_ai_badge_text' : 'ai_badge_text',
-        )) ?: 'AI Image',
+        )) ?: ($output_type === 'video' ? 'AI Video' : 'AI Image'),
         'reference_file_ids' => array_map(
           static fn (FileInterface $file): int => (int) $file->id(),
           $reference_files,
@@ -2401,7 +2411,7 @@ final class StudioForm extends FormBase {
       'aspect_ratio' => $submitted_settings['video_aspect_ratio'] ?? $settings['aspect_ratio'] ?? 'auto',
       'resolution' => $submitted_settings['video_resolution'] ?? $settings['resolution'] ?? '720p',
       'show_ai_badge' => !empty($submitted_settings['video_show_ai_badge']),
-      'ai_badge_text' => trim((string) ($submitted_settings['video_ai_badge_text'] ?? '')) ?: 'AI Image',
+      'ai_badge_text' => trim((string) ($submitted_settings['video_ai_badge_text'] ?? '')) ?: 'AI Video',
       'reference_file_ids' => array_map(
         static fn (FileInterface $file): int => (int) $file->id(),
         $sources,

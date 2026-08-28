@@ -22,6 +22,7 @@ default_image_file_type: png
 default_auto_levels: false
 default_show_ai_badge: false
 default_ai_badge_text: 'AI Image'
+default_video_ai_badge_text: 'AI Video'
 default_text_to_image_model: ''
 default_image_to_image_model: ''
 default_text_to_video_model: ''
