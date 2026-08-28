@@ -178,3 +178,14 @@ function ai_image_studio_vbo_update_10001(): void {
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio_vbo');
 }
+
+/**
+ * Renames the default content View and removes site-specific filtering.
+ */
+function ai_image_studio_vbo_update_10002(): void {
+  \Drupal::service('config.installer')
+    ->installDefaultConfig('module', 'ai_image_studio_vbo');
+  \Drupal::configFactory()
+    ->getEditable('views.view.image_studio_test')
+    ->delete();
+}

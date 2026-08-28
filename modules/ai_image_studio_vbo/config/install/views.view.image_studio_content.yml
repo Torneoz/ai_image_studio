@@ -1,9 +1,6 @@
 langcode: en
 status: true
 dependencies:
-  config:
-    - node.type.city
-    - node.type.competition
   module:
     - node
     - user
@@ -11,7 +8,7 @@ dependencies:
   enforced:
     module:
       - ai_image_studio_vbo
-id: image_studio_test
+id: image_studio_content
 label: 'Image Studio Content'
 module: views
 description: ''
@@ -258,49 +255,6 @@ display:
           group: 1
           expose:
             operator: ''
-        type:
-          id: type
-          table: node_field_data
-          field: type
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: node
-          entity_field: type
-          plugin_id: bundle
-          operator: in
-          value:
-            city: city
-            competition: competition
-          group: 1
-          exposed: true
-          expose:
-            operator_id: type_op
-            label: 'Content type'
-            description: ''
-            use_operator: false
-            operator: type_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: type
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            reduce: false
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
         title:
           id: title
           table: node_field_data
