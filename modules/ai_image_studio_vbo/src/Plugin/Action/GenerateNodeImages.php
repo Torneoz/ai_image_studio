@@ -16,9 +16,11 @@ use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Queues image generation for nodes selected in a View.
@@ -240,8 +242,13 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       return ['message' => $this->t('Skipped a non-node result.'), 'type' => 'warning'];
     }
     try {
-      $this->bulkManager->enqueue($entity, $this->configuration);
-      return $this->t('Queued an image for @label.', ['@label' => $entity->label()]);
+      $item_id = $this->bulkManager->enqueue($entity, $this->configuration);
+      return [
+        'message' => $this->t('Queued an image for @label.', [
+          '@label' => $entity->label(),
+        ]),
+        'job_id' => $this->bulkManager->jobIdForItem($item_id),
+      ];
     }
     catch (\Throwable $exception) {
       return [
@@ -252,6 +259,26 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         'type' => 'error',
       ];
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function finished($success, array $results, array $operations): ?RedirectResponse {
+    parent::finished($success, $results, $operations);
+    if (!$success) {
+      return NULL;
+    }
+    foreach ($results['operations'] ?? [] as $result) {
+      $job_id = (int) ($result['job_id'] ?? 0);
+      if ($job_id > 0) {
+        return new RedirectResponse(Url::fromRoute(
+          'ai_image_studio_vbo.job',
+          ['job_id' => $job_id],
+        )->toString());
+      }
+    }
+    return NULL;
   }
 
   /**

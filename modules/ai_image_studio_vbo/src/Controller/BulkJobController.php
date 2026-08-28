@@ -132,7 +132,15 @@ final class BulkJobController extends ControllerBase {
         ['data' => ['#plain_text' => (string) ($item->error_message ?? '')]],
       ];
     }
-    return [
+    $active = array_filter(
+      $items,
+      static fn (object $item): bool => in_array(
+        $item->status,
+        ['queued', 'processing'],
+        TRUE,
+      ),
+    );
+    $build = [
       'summary' => [
         '#theme' => 'item_list',
         '#items' => [
@@ -158,6 +166,19 @@ final class BulkJobController extends ControllerBase {
       ],
       '#cache' => ['max-age' => 0],
     ];
+    if ($active !== []) {
+      $build['#attached']['html_head'][] = [
+        [
+          '#tag' => 'meta',
+          '#attributes' => [
+            'http-equiv' => 'refresh',
+            'content' => '5',
+          ],
+        ],
+        'ai_image_studio_vbo_job_refresh',
+      ];
+    }
+    return $build;
   }
 
   /**

@@ -93,6 +93,17 @@ final class BulkGenerationManager {
   }
 
   /**
+   * Returns the parent job ID for a queued item.
+   */
+  public function jobIdForItem(int $item_id): int {
+    return (int) $this->database->select('ai_image_studio_vbo_item', 'i')
+      ->fields('i', ['job_id'])
+      ->condition('id', $item_id)
+      ->execute()
+      ->fetchField();
+  }
+
+  /**
    * Returns the job ID, creating the job and its Studio session as needed.
    */
   private function ensureJob(array $configuration): int {

@@ -8,3 +8,9 @@ services:
       - '@token'
       - '@datetime.time'
 
+  ai_image_studio_vbo.generation_queue_subscriber:
+    class: Drupal\ai_image_studio_vbo\EventSubscriber\BulkGenerationQueueSubscriber
+    arguments:
+      - '@ai_image_studio.queue_runner'
+    tags:
+      - { name: event_subscriber }

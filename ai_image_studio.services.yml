@@ -24,12 +24,17 @@ services:
     parent: logger.channel_base
     arguments: ['ai_image_studio']
 
-  ai_image_studio.generation_queue_subscriber:
-    class: Drupal\ai_image_studio\EventSubscriber\GenerationQueueSubscriber
+  ai_image_studio.queue_runner:
+    class: Drupal\ai_image_studio\Service\QueueRunner
     arguments:
       - '@queue'
       - '@plugin.manager.queue_worker'
       - '@logger.channel.ai_image_studio'
+
+  ai_image_studio.generation_queue_subscriber:
+    class: Drupal\ai_image_studio\EventSubscriber\GenerationQueueSubscriber
+    arguments:
+      - '@ai_image_studio.queue_runner'
     tags:
       - { name: event_subscriber }
 
