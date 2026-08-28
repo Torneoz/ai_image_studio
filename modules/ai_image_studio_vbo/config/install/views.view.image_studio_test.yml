@@ -1,15 +1,18 @@
 langcode: en
 status: true
 dependencies:
-  enforced:
-    module:
-      - ai_image_studio_vbo
+  config:
+    - node.type.city
+    - node.type.competition
   module:
     - node
     - user
     - views_bulk_operations
+  enforced:
+    module:
+      - ai_image_studio_vbo
 id: image_studio_test
-label: 'Image Studio Test'
+label: 'Image Studio Content'
 module: views
 description: ''
 tag: ''
@@ -22,7 +25,7 @@ display:
     display_plugin: default
     position: 0
     display_options:
-      title: 'Image Studio Test'
+      title: 'Image Studio Content'
       fields:
         views_bulk_operations_bulk_form:
           id: views_bulk_operations_bulk_form
@@ -220,7 +223,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access content'
+          perm: 'access administration pages'
       cache:
         type: tag
         options: {  }
@@ -255,6 +258,90 @@ display:
           group: 1
           expose:
             operator: ''
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          operator: in
+          value:
+            city: city
+            competition: competition
+          group: 1
+          exposed: true
+          expose:
+            operator_id: type_op
+            label: 'Content type'
+            description: ''
+            use_operator: false
+            operator: type_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: type
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+        title:
+          id: title
+          table: node_field_data
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          entity_field: title
+          plugin_id: string
+          operator: contains
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: title_op
+            label: Title
+            description: ''
+            use_operator: false
+            operator: title_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: title
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            placeholder: ''
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
       style:
         type: table
       row:
@@ -276,6 +363,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
         - 'user.node_grants:view'
         - user.permissions
@@ -287,12 +375,13 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: admin/content/image-studio-test
+      path: admin/content/image-studio-content
     cache_metadata:
       max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
         - 'user.node_grants:view'
         - user.permissions
