@@ -9,6 +9,31 @@ declare(strict_types=1);
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Component\Serialization\Yaml;
+
+/**
+ * Implements hook_install().
+ */
+function ai_image_studio_install(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio');
+  _ai_image_studio_install_views();
+}
+
+/**
+ * Creates any missing Views shipped by the module.
+ */
+function _ai_image_studio_install_views(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  foreach (glob(__DIR__ . '/config/install/views.view.*.yml') ?: [] as $file) {
+    $data = Yaml::decode((string) file_get_contents($file));
+    $id = (string) ($data['id'] ?? '');
+    if ($id !== '' && $storage->load($id) === NULL) {
+      $storage->create($data)->save();
+    }
+  }
+}
 
 /**
  * Adds persisted image generation settings to existing installations.
@@ -349,4 +374,12 @@ function ai_image_studio_update_10015(): void {
   /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio');
+  _ai_image_studio_install_views();
+}
+
+/**
+ * Restores Views missed by recipe-based module installation.
+ */
+function ai_image_studio_update_10016(): void {
+  _ai_image_studio_install_views();
 }

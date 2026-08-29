@@ -7,6 +7,32 @@
 
 declare(strict_types=1);
 
+use Drupal\Component\Serialization\Yaml;
+
+/**
+ * Implements hook_install().
+ */
+function ai_image_studio_vbo_install(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio_vbo');
+  _ai_image_studio_vbo_install_views();
+}
+
+/**
+ * Creates any missing Views shipped by the VBO integration.
+ */
+function _ai_image_studio_vbo_install_views(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  foreach (glob(__DIR__ . '/config/install/views.view.*.yml') ?: [] as $file) {
+    $data = Yaml::decode((string) file_get_contents($file));
+    $id = (string) ($data['id'] ?? '');
+    if ($id !== '' && $storage->load($id) === NULL) {
+      $storage->create($data)->save();
+    }
+  }
+}
+
 /**
  * Implements hook_schema().
  */
@@ -205,4 +231,12 @@ function ai_image_studio_vbo_update_10004(): void {
   /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio_vbo');
+  _ai_image_studio_vbo_install_views();
+}
+
+/**
+ * Restores the VBO View missed by recipe-based module installation.
+ */
+function ai_image_studio_vbo_update_10005(): void {
+  _ai_image_studio_vbo_install_views();
 }
