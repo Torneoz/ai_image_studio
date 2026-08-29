@@ -197,3 +197,12 @@ function ai_image_studio_vbo_update_10003(): void {
   \Drupal::service('config.installer')
     ->installDefaultConfig('module', 'ai_image_studio_vbo');
 }
+
+/**
+ * Restores managed VBO prompt configuration removed by configuration imports.
+ */
+function ai_image_studio_vbo_update_10004(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio_vbo');
+}

@@ -756,6 +756,9 @@ final class StudioForm extends FormBase {
    * Creates the reusable portion appended after the editor prompt.
    */
   private function promptElement(): array {
+    if (!$this->promptResolver->promptTypeExists()) {
+      return $this->unavailablePromptElement($this->t('After prompt'));
+    }
     return [
       '#type' => 'ai_prompt',
       '#title' => $this->t('After prompt'),
@@ -2475,6 +2478,9 @@ final class StudioForm extends FormBase {
    * Builds an optional managed prompt for video regeneration.
    */
   private function replacementPromptElement(object $turn): array {
+    if (!$this->promptResolver->promptTypeExists()) {
+      return $this->unavailablePromptElement($this->t('Replacement after prompt'));
+    }
     return [
       '#type' => 'ai_prompt',
       '#title' => $this->t('Replacement after prompt'),
@@ -2482,6 +2488,20 @@ final class StudioForm extends FormBase {
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#default_value' => '',
       '#required' => FALSE,
+    ];
+  }
+
+  /**
+   * Builds a safe placeholder when managed prompt configuration is missing.
+   */
+  private function unavailablePromptElement(string|\Stringable $title): array {
+    return [
+      '#type' => 'select',
+      '#title' => $title,
+      '#options' => [],
+      '#empty_option' => $this->t('- Prompt library unavailable -'),
+      '#disabled' => TRUE,
+      '#description' => $this->t('The reusable AI Image Studio prompt type is missing from active configuration. The start prompt can still be used.'),
     ];
   }
 

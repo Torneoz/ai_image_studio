@@ -80,17 +80,7 @@ final class CompactMediaForm {
           'prompt_start',
         ]),
       ],
-      'prompt' => [
-        '#type' => 'ai_prompt',
-        '#title' => t('After prompt'),
-        '#description' => t('Optionally append a reusable style or instruction prompt after the start prompt.'),
-        '#prompt_types' => [PromptResolver::PROMPT_TYPE],
-        '#required' => FALSE,
-        '#default_value' => $form_state->getValue([
-          'ai_image_studio_compact',
-          'prompt',
-        ]) ?: '',
-      ],
+      'prompt' => $this->promptElement($form_state),
       'model' => [
         '#type' => 'select',
         '#title' => t('Provider and model'),
@@ -267,6 +257,33 @@ final class CompactMediaForm {
     }
 
     return $element;
+  }
+
+  /**
+   * Builds the optional managed prompt without failing on missing config.
+   */
+  private function promptElement(FormStateInterface $form_state): array {
+    if (!$this->promptResolver->promptTypeExists()) {
+      return [
+        '#type' => 'select',
+        '#title' => t('After prompt'),
+        '#options' => [],
+        '#empty_option' => t('- Prompt library unavailable -'),
+        '#disabled' => TRUE,
+        '#description' => t('The reusable AI Image Studio prompt type is missing from active configuration. The start prompt can still be used.'),
+      ];
+    }
+    return [
+      '#type' => 'ai_prompt',
+      '#title' => t('After prompt'),
+      '#description' => t('Optionally append a reusable style or instruction prompt after the start prompt.'),
+      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
+      '#required' => FALSE,
+      '#default_value' => $form_state->getValue([
+        'ai_image_studio_compact',
+        'prompt',
+      ]) ?: '',
+    ];
   }
 
   /**

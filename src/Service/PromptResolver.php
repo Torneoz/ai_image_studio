@@ -37,6 +37,15 @@ final class PromptResolver {
   }
 
   /**
+   * Reports whether the Studio prompt type exists in active configuration.
+   */
+  public function promptTypeExists(): bool {
+    return !$this->configFactory
+      ->get('ai.ai_prompt_type.' . self::PROMPT_TYPE)
+      ->isNew();
+  }
+
+  /**
    * Combines editor-written instructions with an optional managed prompt.
    */
   public function compose(mixed $start, mixed $prompt_id): string {

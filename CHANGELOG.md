@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta8
 
+- Prevented missing managed prompt-type configuration from crashing Studio,
+  Media Library, and VBO forms, and added update hooks to restore it.
 - Added bundle-aware VBO result destinations so generated files can replace an
   image field or be published and attached to an image Media reference field.
 - Added video regeneration from each completed video’s original inputs, with

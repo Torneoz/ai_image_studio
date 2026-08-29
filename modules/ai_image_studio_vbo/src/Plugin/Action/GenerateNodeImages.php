@@ -97,13 +97,24 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $form['intro'] = [
       '#markup' => '<p>' . $this->t('One image request will be queued for each selected node. Drupal tokens such as [node:title] may be used in text fields.') . '</p>',
     ];
-    $form['prompt_id'] = [
-      '#type' => 'ai_prompt',
-      '#title' => $this->t('Prompt'),
-      '#prompt_types' => ['ai_image_studio_vbo'],
-      '#default_value' => $configuration['prompt_id'],
-      '#required' => TRUE,
-    ];
+    $prompt_type = $this->configFactory
+      ->get('ai.ai_prompt_type.ai_image_studio_vbo');
+    $form['prompt_id'] = $prompt_type->isNew()
+      ? [
+        '#type' => 'select',
+        '#title' => $this->t('Prompt'),
+        '#options' => [],
+        '#empty_option' => $this->t('- Prompt library unavailable -'),
+        '#disabled' => TRUE,
+        '#description' => $this->t('The AI Image Studio bulk prompt type is missing from active configuration.'),
+      ]
+      : [
+        '#type' => 'ai_prompt',
+        '#title' => $this->t('Prompt'),
+        '#prompt_types' => ['ai_image_studio_vbo'],
+        '#default_value' => $configuration['prompt_id'],
+        '#required' => TRUE,
+      ];
     $form['source_field'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Optional source image field'),
