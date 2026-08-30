@@ -159,7 +159,7 @@ final class BulkJobController extends ControllerBase {
         (string) $item->attempt_count,
         $cost,
         $result,
-        $regenerate,
+        ['data' => $regenerate],
         ['data' => ['#plain_text' => (string) ($item->error_message ?? '')]],
       ];
     }
