@@ -34,8 +34,3 @@ prompt_select:
   css:
     theme:
       css/prompt-select.css: {}
-  js:
-    js/prompt-select.js: {}
-  dependencies:
-    - core/drupal
-    - core/once
