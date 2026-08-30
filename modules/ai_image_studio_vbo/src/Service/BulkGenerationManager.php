@@ -105,6 +105,21 @@ final class BulkGenerationManager {
   }
 
   /**
+   * Loads all original items belonging to a bulk job.
+   *
+   * @return object[]
+   *   The job items in creation order.
+   */
+  public function itemsForJob(int $job_id): array {
+    return $this->database->select('ai_image_studio_vbo_item', 'i')
+      ->fields('i')
+      ->condition('job_id', $job_id)
+      ->orderBy('id')
+      ->execute()
+      ->fetchAll();
+  }
+
+  /**
    * Queues a fresh generation turn for a completed or failed item.
    */
   public function regenerateItem(int $job_id, int $item_id): void {
@@ -138,6 +153,84 @@ final class BulkGenerationManager {
       ->execute();
     $this->queueFactory->get('ai_image_studio_node_generation')
       ->createItem(['item_id' => $item_id]);
+  }
+
+  /**
+   * Requeues every original item in a job with replacement settings.
+   */
+  public function regenerateJob(int $job_id, array $configuration): int {
+    $job = $this->loadJob($job_id);
+    if ($job === NULL) {
+      throw new \InvalidArgumentException('The bulk job does not exist.');
+    }
+    $items = $this->itemsForJob($job_id);
+    foreach ($items as $item) {
+      if (in_array($item->status, ['queued', 'processing'], TRUE)) {
+        throw new \LogicException('The bulk job is already being processed.');
+      }
+    }
+    $stored_configuration = $configuration;
+    unset($stored_configuration['prompt_template']);
+    $now = $this->time->getRequestTime();
+
+    $transaction = $this->database->startTransaction();
+    try {
+      $this->database->update('ai_image_studio_vbo_job')
+        ->fields([
+          'uid' => (int) $configuration['initiating_uid'],
+          'prompt_template' => (string) $configuration['prompt_template'],
+          'configuration' => json_encode($stored_configuration, JSON_THROW_ON_ERROR),
+          'status' => 'active',
+          'changed' => $now,
+        ])
+        ->condition('id', $job_id)
+        ->execute();
+
+      $queued_item_ids = [];
+      foreach ($items as $item) {
+        $node = $this->entityTypeManager->getStorage('node')->load((int) $item->node_id);
+        if (!$node instanceof NodeInterface) {
+          continue;
+        }
+        if ($node->hasTranslation((string) $item->langcode)) {
+          $node = $node->getTranslation((string) $item->langcode);
+        }
+        $prompt = trim($this->token->replace(
+          (string) $configuration['prompt_template'],
+          ['node' => $node],
+          ['clear' => TRUE],
+        ));
+        if ($prompt === '') {
+          throw new \InvalidArgumentException('The resolved prompt is empty.');
+        }
+        $source = $this->sourceFile($node, (string) ($configuration['source_field'] ?? ''));
+        $this->database->update('ai_image_studio_vbo_item')
+          ->fields([
+            'revision_id' => $node->getRevisionId() ? (int) $node->getRevisionId() : NULL,
+            'label' => mb_substr((string) $node->label(), 0, 255),
+            'resolved_prompt' => $prompt,
+            'source_file_id' => $source?->id(),
+            'turn_id' => NULL,
+            'media_id' => NULL,
+            'status' => 'queued',
+            'attempt_count' => 0,
+            'error_message' => NULL,
+            'changed' => $now,
+          ])
+          ->condition('id', (int) $item->id)
+          ->execute();
+        $queued_item_ids[] = (int) $item->id;
+      }
+      foreach ($queued_item_ids as $item_id) {
+        $this->queueFactory->get('ai_image_studio_node_generation')
+          ->createItem(['item_id' => $item_id]);
+      }
+    }
+    catch (\Throwable $exception) {
+      $transaction->rollBack();
+      throw $exception;
+    }
+    return count($queued_item_ids);
   }
 
   /**

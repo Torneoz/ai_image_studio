@@ -172,6 +172,19 @@ final class BulkJobController extends ControllerBase {
       ),
     );
     $build = [
+      'actions' => [
+        '#type' => 'actions',
+        'regenerate_all' => [
+          '#type' => 'link',
+          '#title' => $this->t('Regenerate all with new settings'),
+          '#url' => Url::fromRoute('ai_image_studio_vbo.regenerate_job', [
+            'job_id' => $job_id,
+          ]),
+          '#attributes' => ['class' => ['button', 'button--primary']],
+          '#access' => $active === []
+          && $this->currentUser()->hasPermission('run ai image studio vbo generation'),
+        ],
+      ],
       'summary' => [
         '#theme' => 'item_list',
         '#items' => [
