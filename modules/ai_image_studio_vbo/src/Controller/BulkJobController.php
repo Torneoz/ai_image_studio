@@ -108,8 +108,12 @@ final class BulkJobController extends ControllerBase {
     if ($job === NULL) {
       throw new NotFoundHttpException();
     }
-    $items = $this->database->select('ai_image_studio_vbo_item', 'i')
-      ->fields('i')
+    $query = $this->database->select('ai_image_studio_vbo_item', 'i');
+    $query->leftJoin('ai_image_studio_turn', 't', 't.id = i.turn_id');
+    $query->fields('i');
+    $query->addField('t', 'estimated_cost');
+    $query->addField('t', 'cost_source');
+    $items = $query
       ->condition('job_id', $job_id)
       ->orderBy('id')
       ->execute()
@@ -135,12 +139,27 @@ final class BulkJobController extends ControllerBase {
           ]),
         );
       }
+      $cost = $this->formatCost($item->estimated_cost);
+      $regenerate = '';
+      if (!in_array($item->status, ['queued', 'processing'], TRUE)
+        && $this->currentUser()->hasPermission('run ai image studio vbo generation')) {
+        $regenerate = Link::fromTextAndUrl(
+          $this->t('Regenerate'),
+          Url::fromRoute('ai_image_studio_vbo.regenerate', [
+            'job_id' => $job_id,
+            'item_id' => $item->id,
+          ]),
+        )->toRenderable();
+        $regenerate['#attributes']['class'] = ['button', 'button--small'];
+      }
       $rows[] = [
         $node_link,
         $item->langcode,
         $item->status,
         (string) $item->attempt_count,
+        $cost,
         $result,
+        $regenerate,
         ['data' => ['#plain_text' => (string) ($item->error_message ?? '')]],
       ];
     }
@@ -170,7 +189,9 @@ final class BulkJobController extends ControllerBase {
           $this->t('Language'),
           $this->t('Status'),
           $this->t('Attempts'),
+          $this->t('Cost'),
           $this->t('Result'),
+          $this->t('Operations'),
           $this->t('Error'),
         ],
         '#rows' => $rows,
@@ -236,6 +257,18 @@ final class BulkJobController extends ControllerBase {
     $query->addExpression('COUNT(*)', 'item_count');
     $query->condition('job_id', $job_id)->groupBy('status');
     return $query->execute()->fetchAllKeyed();
+  }
+
+  /**
+   * Formats a provider-reported or estimated USD cost.
+   */
+  private function formatCost(mixed $value): string {
+    if ($value === NULL || $value === '') {
+      return '—';
+    }
+    $cost = (float) $value;
+    $precision = $cost !== 0.0 && abs($cost) < 0.01 ? 6 : 2;
+    return '$' . number_format($cost, $precision, '.', '');
   }
 
 }

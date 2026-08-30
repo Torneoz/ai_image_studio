@@ -93,6 +93,54 @@ final class BulkGenerationManager {
   }
 
   /**
+   * Loads one bulk job item.
+   */
+  public function loadItem(int $item_id): ?object {
+    $item = $this->database->select('ai_image_studio_vbo_item', 'i')
+      ->fields('i')
+      ->condition('id', $item_id)
+      ->execute()
+      ->fetchObject();
+    return $item === FALSE ? NULL : $item;
+  }
+
+  /**
+   * Queues a fresh generation turn for a completed or failed item.
+   */
+  public function regenerateItem(int $job_id, int $item_id): void {
+    $item = $this->loadItem($item_id);
+    if ($item === NULL || (int) $item->job_id !== $job_id) {
+      throw new \InvalidArgumentException('The bulk job item does not exist.');
+    }
+    if (in_array($item->status, ['queued', 'processing'], TRUE)) {
+      throw new \LogicException('The bulk job item is already being processed.');
+    }
+
+    $now = $this->time->getRequestTime();
+    $this->database->update('ai_image_studio_vbo_item')
+      ->fields([
+        'turn_id' => NULL,
+        'media_id' => NULL,
+        'status' => 'queued',
+        'attempt_count' => 0,
+        'error_message' => NULL,
+        'changed' => $now,
+      ])
+      ->condition('id', $item_id)
+      ->condition('job_id', $job_id)
+      ->execute();
+    $this->database->update('ai_image_studio_vbo_job')
+      ->fields([
+        'status' => 'active',
+        'changed' => $now,
+      ])
+      ->condition('id', $job_id)
+      ->execute();
+    $this->queueFactory->get('ai_image_studio_node_generation')
+      ->createItem(['item_id' => $item_id]);
+  }
+
+  /**
    * Returns the parent job ID for a queued item.
    */
   public function jobIdForItem(int $item_id): int {

@@ -15,3 +15,12 @@ ai_image_studio_vbo.job:
     _custom_access: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::access'
     job_id: '\d+'
 
+ai_image_studio_vbo.regenerate:
+  path: '/admin/content/ai-image-studio/bulk/{job_id}/item/{item_id}/regenerate'
+  defaults:
+    _form: '\Drupal\ai_image_studio_vbo\Form\RegenerateItemForm'
+    _title: 'Regenerate bulk image'
+  requirements:
+    _custom_access: '\Drupal\ai_image_studio_vbo\Form\RegenerateItemForm::access'
+    job_id: '\d+'
+    item_id: '\d+'
