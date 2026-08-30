@@ -6,5 +6,5 @@ core_version_requirement: ^10.3 || ^11
 dependencies:
   - ai_image_studio:ai_image_studio
   - drupal:node
+  - token:token
   - views_bulk_operations:views_bulk_operations
-

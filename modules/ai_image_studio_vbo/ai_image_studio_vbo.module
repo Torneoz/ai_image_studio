@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Form integrations for AI Image Studio bulk generation.
+ */
+
+declare(strict_types=1);
+
+use Drupal\ai\Entity\AiPromptInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function ai_image_studio_vbo_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form_object = $form_state->getFormObject();
+  if (!method_exists($form_object, 'getEntity')) {
+    return;
+  }
+
+  $prompt = $form_object->getEntity();
+  if (!$prompt instanceof AiPromptInterface
+    || $prompt->bundle() !== 'ai_image_studio_vbo'
+    || !isset($form['prompt'])) {
+    return;
+  }
+
+  $token_browser = [
+    '#theme' => 'token_tree_link',
+    '#token_types' => ['node'],
+    '#global_types' => FALSE,
+    '#click_insert' => TRUE,
+    '#show_nested' => TRUE,
+    '#recursion_limit' => 2,
+    '#text' => t('Browse node tokens'),
+  ];
+
+  // Keep the token browser beside the prompt editor regardless of how the AI
+  // module orders the remaining prompt metadata and action controls.
+  $prompt_position = array_search('prompt', array_keys($form), TRUE);
+  if ($prompt_position === FALSE) {
+    return;
+  }
+  $form = array_slice($form, 0, $prompt_position + 1, TRUE)
+    + ['ai_image_studio_vbo_token_browser' => $token_browser]
+    + array_slice($form, $prompt_position + 1, NULL, TRUE);
+}
