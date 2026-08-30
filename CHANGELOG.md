@@ -7,8 +7,9 @@ All notable changes to AI Image Studio are documented in this file.
 - Added a separate managed visual-style prompt library with photographic,
   illustrative, traditional-media, graphic, and 3D defaults across Studio and
   compact Media workflows.
-- Replaced the Style and After Prompt tables with compact selects that reveal
-  only the currently selected prompt text.
+- Replaced the Style and After Prompt selection tables with compact selects
+  that reveal only the selected prompt while retaining prompt-management
+  controls.
 - Prevented missing managed prompt-type configuration from crashing Studio,
   Media Library, and VBO forms, and added update hooks to restore it.
 - Made module install hooks explicitly create shipped prompt entities and Views

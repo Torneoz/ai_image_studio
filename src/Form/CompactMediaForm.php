@@ -274,15 +274,17 @@ final class CompactMediaForm {
         '#description' => t('The reusable AI Image Studio prompt type is missing from active configuration. The start prompt can still be used.'),
       ];
     }
-    return $this->promptSelectElement(
-      PromptResolver::PROMPT_TYPE,
-      t('After prompt'),
-      t('Optionally append reusable render-quality or finishing instructions.'),
-      $form_state->getValue([
+    return [
+      '#type' => 'ai_image_studio_prompt',
+      '#title' => t('After prompt'),
+      '#description' => t('Optionally append reusable render-quality or finishing instructions.'),
+      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
+      '#required' => FALSE,
+      '#default_value' => $form_state->getValue([
         'ai_image_studio_compact',
         'prompt',
       ]) ?: '',
-    );
+    ];
   }
 
   /**
@@ -298,49 +300,16 @@ final class CompactMediaForm {
         '#disabled' => TRUE,
       ];
     }
-    return $this->promptSelectElement(
-      PromptResolver::STYLE_PROMPT_TYPE,
-      t('Style'),
-      t('Optionally apply a reusable visual style.'),
-      $form_state->getValue([
+    return [
+      '#type' => 'ai_image_studio_prompt',
+      '#title' => t('Style'),
+      '#description' => t('Optionally apply a reusable visual style.'),
+      '#prompt_types' => [PromptResolver::STYLE_PROMPT_TYPE],
+      '#required' => FALSE,
+      '#default_value' => $form_state->getValue([
         'ai_image_studio_compact',
         'style_prompt',
       ]) ?: '',
-    );
-  }
-
-  /**
-   * Builds a label-only prompt select with a preview of the selected prompt.
-   */
-  private function promptSelectElement(
-    string $prompt_type,
-    string|\Stringable $title,
-    string|\Stringable $description,
-    mixed $default_value,
-  ): array {
-    $choices = $this->promptResolver->choices($prompt_type);
-    return [
-      '#type' => 'select',
-      '#title' => $title,
-      '#description' => $description,
-      '#options' => array_map(
-        static fn (array $choice): string => $choice['label'],
-        $choices,
-      ),
-      '#empty_option' => t('- None -'),
-      '#default_value' => $default_value,
-      '#required' => FALSE,
-      '#attributes' => [
-        'class' => ['ai-image-studio-prompt-select'],
-        'data-prompt-texts' => json_encode(array_map(
-          static fn (array $choice): string => $choice['prompt'],
-          $choices,
-        )),
-      ],
-      '#suffix' => '<div class="ai-image-studio-prompt-preview" aria-live="polite"></div>',
-      '#attached' => [
-        'library' => ['ai_image_studio/prompt_select'],
-      ],
     ];
   }
 
