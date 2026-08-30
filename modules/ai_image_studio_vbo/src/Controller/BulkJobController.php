@@ -9,9 +9,12 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\file\FileInterface;
+use Drupal\media\MediaInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -27,6 +30,7 @@ final class BulkJobController extends ControllerBase {
     private readonly Connection $database,
     private readonly BulkGenerationManager $bulkManager,
     private readonly DateFormatterInterface $dateFormatter,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -37,6 +41,7 @@ final class BulkJobController extends ControllerBase {
       $container->get('database'),
       $container->get('ai_image_studio_vbo.batch_manager'),
       $container->get('date.formatter'),
+      $container->get('entity_type.manager'),
     );
   }
 
@@ -118,6 +123,13 @@ final class BulkJobController extends ControllerBase {
       ->orderBy('id')
       ->execute()
       ->fetchAll();
+    $media_ids = array_values(array_filter(array_map(
+      static fn (object $item): int => (int) ($item->media_id ?? 0),
+      $items,
+    )));
+    $media_items = $media_ids === []
+      ? []
+      : $this->entityTypeManager->getStorage('media')->loadMultiple($media_ids);
     $rows = [];
     foreach ($items as $item) {
       $node_link = Link::fromTextAndUrl(
@@ -140,6 +152,9 @@ final class BulkJobController extends ControllerBase {
         );
       }
       $cost = $this->formatCost($item->estimated_cost);
+      $preview = isset($media_items[$item->media_id])
+        ? $this->mediaPreview($media_items[$item->media_id])
+        : [];
       $regenerate = '';
       if (!in_array($item->status, ['queued', 'processing'], TRUE)
         && $this->currentUser()->hasPermission('run ai image studio vbo generation')) {
@@ -158,6 +173,7 @@ final class BulkJobController extends ControllerBase {
         $item->status,
         (string) $item->attempt_count,
         $cost,
+        ['data' => $preview],
         $result,
         ['data' => $regenerate],
         ['data' => ['#plain_text' => (string) ($item->error_message ?? '')]],
@@ -203,6 +219,7 @@ final class BulkJobController extends ControllerBase {
           $this->t('Status'),
           $this->t('Attempts'),
           $this->t('Cost'),
+          $this->t('Image'),
           $this->t('Result'),
           $this->t('Operations'),
           $this->t('Error'),
@@ -282,6 +299,31 @@ final class BulkJobController extends ControllerBase {
     $cost = (float) $value;
     $precision = $cost !== 0.0 && abs($cost) < 0.01 ? 6 : 2;
     return '$' . number_format($cost, $precision, '.', '');
+  }
+
+  /**
+   * Builds a compact preview of the file published to an image Media item.
+   */
+  private function mediaPreview(MediaInterface $media): array {
+    $source_field = (string) ($media->getSource()->getConfiguration()['source_field'] ?? '');
+    if ($source_field === '' || !$media->hasField($source_field)) {
+      return [];
+    }
+    $source_item = $media->get($source_field)->first();
+    $file = $source_item?->entity;
+    if (!$file instanceof FileInterface) {
+      return [];
+    }
+    $source_value = $source_item->getValue();
+    return [
+      '#theme' => 'image',
+      '#uri' => $file->getFileUri(),
+      '#alt' => (string) ($source_value['alt'] ?? $media->label()),
+      '#width' => 160,
+      '#attributes' => [
+        'loading' => 'lazy',
+      ],
+    ];
   }
 
 }
