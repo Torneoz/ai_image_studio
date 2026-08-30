@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__minimalist
+label: Minimalist
+type: ai_image_studio_style
+prompt: >-
+  Use a minimalist visual style with restrained colour, generous negative
+  space, simple forms, precise alignment, and only essential visual elements.
+

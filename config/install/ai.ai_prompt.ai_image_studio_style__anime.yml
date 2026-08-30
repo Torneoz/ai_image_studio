@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__anime
+label: Anime
+type: ai_image_studio_style
+prompt: >-
+  Use an anime-inspired illustration style with clean expressive linework,
+  stylised forms, cel-like shading, deliberate colour design, and dynamic staging.
+

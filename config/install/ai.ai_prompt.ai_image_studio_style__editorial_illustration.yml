@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__editorial_illustration
+label: 'Editorial illustration'
+type: ai_image_studio_style
+prompt: >-
+  Use a contemporary editorial-illustration style with simplified shapes,
+  expressive visual metaphor, confident colour choices, and a clear focal idea.
+

@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__paper_collage
+label: 'Paper collage'
+type: ai_image_studio_style
+prompt: >-
+  Render as a handmade paper collage with layered cut-paper shapes, tactile
+  fibres, slightly irregular edges, simple shadows, and playful colour blocking.
+

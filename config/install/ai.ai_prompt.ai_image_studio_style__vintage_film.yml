@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__vintage_film
+label: 'Vintage film'
+type: ai_image_studio_style
+prompt: >-
+  Use a vintage analogue-film aesthetic with gentle grain, softened contrast,
+  subtle colour shifts, restrained highlights, and a nostalgic tonal character.
+

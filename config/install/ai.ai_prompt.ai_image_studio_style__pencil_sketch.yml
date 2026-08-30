@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__pencil_sketch
+label: 'Pencil sketch'
+type: ai_image_studio_style
+prompt: >-
+  Render as a graphite pencil sketch with expressive construction lines,
+  varied pressure, cross-hatched shadows, paper grain, and hand-drawn texture.
+

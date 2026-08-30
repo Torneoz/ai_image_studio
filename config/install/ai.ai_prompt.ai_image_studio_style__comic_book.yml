@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__comic_book
+label: 'Comic book'
+type: ai_image_studio_style
+prompt: >-
+  Render in a comic-book style with bold ink contours, dynamic framing,
+  graphic shadows, energetic poses, and controlled halftone texture.
+

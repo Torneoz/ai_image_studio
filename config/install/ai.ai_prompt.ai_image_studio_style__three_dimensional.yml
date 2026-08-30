@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__three_dimensional
+label: '3D render'
+type: ai_image_studio_style
+prompt: >-
+  Render as a polished three-dimensional scene with sculpted forms, physically
+  based materials, studio-quality lighting, and clearly defined spatial depth.
+

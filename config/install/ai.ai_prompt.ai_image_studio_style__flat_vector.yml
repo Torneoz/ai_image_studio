@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__flat_vector
+label: 'Flat vector'
+type: ai_image_studio_style
+prompt: >-
+  Use a flat vector-illustration style with crisp geometric shapes, clean
+  silhouettes, a limited colour palette, uniform fills, and minimal shading.
+

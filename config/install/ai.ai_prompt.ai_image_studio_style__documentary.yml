@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__documentary
+label: Documentary
+type: ai_image_studio_style
+prompt: >-
+  Use an observational documentary-photography style with candid framing,
+  available light, natural colour, authentic environments, and an unstaged mood.
+

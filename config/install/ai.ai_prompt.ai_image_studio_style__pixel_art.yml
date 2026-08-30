@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__pixel_art
+label: 'Pixel art'
+type: ai_image_studio_style
+prompt: >-
+  Render as deliberate pixel art with a restricted palette, crisp pixel
+  clusters, simplified forms, hard edges, and no anti-aliased or painterly detail.
+

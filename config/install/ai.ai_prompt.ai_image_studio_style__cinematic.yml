@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__cinematic
+label: Cinematic
+type: ai_image_studio_style
+prompt: >-
+  Use a cinematic visual style with dramatic composition, motivated lighting,
+  controlled colour grading, atmospheric depth, and a film-like sense of scale.
+

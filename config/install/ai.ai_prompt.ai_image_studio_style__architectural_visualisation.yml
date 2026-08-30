@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__architectural_visualisation
+label: 'Architectural visualisation'
+type: ai_image_studio_style
+prompt: >-
+  Use an architectural-visualisation style with accurate perspective, refined
+  material definition, controlled daylight, crisp structural detail, and a
+  strong sense of place and scale.
+

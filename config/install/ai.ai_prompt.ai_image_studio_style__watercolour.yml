@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__watercolour
+label: Watercolour
+type: ai_image_studio_style
+prompt: >-
+  Render as a watercolour painting with translucent washes, softly bleeding
+  edges, visible paper texture, layered pigments, and expressive brushwork.
+
