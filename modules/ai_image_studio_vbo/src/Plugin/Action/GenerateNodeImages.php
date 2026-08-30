@@ -13,6 +13,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -48,6 +49,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     private readonly ConfigFactoryInterface $configFactory,
     private readonly EntityFieldManagerInterface $entityFieldManager,
     private readonly EntityTypeBundleInfoInterface $bundleInfo,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -66,6 +68,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       $container->get('config.factory'),
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
+      $container->get('entity_type.manager'),
     );
   }
 
@@ -128,7 +131,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       $bundle_options[$bundle_id] = $bundle['label'];
     }
     asort($bundle_options);
-    $selected_bundle = (string) $configuration['destination_bundle'];
+    $selected_bundle = (string) ($configuration['destination_bundle'] ?: $this->selectedNodeBundle());
     $triggering_element = $form_state->getTriggeringElement();
     $triggering_parents = $triggering_element['#parents'] ?? [];
     if (end($triggering_parents) === 'destination_bundle') {
@@ -366,6 +369,27 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     }
     asort($options);
     return $options;
+  }
+
+  /**
+   * Infers a common node bundle from the current VBO selection.
+   */
+  private function selectedNodeBundle(): string {
+    $bundle = '';
+    foreach ($this->context['list'] ?? [] as $item) {
+      if (!is_array($item) || ($item[2] ?? '') !== 'node') {
+        return '';
+      }
+      $node = $this->entityTypeManager->getStorage('node')->load($item[0] ?? NULL);
+      if (!$node instanceof NodeInterface) {
+        continue;
+      }
+      if ($bundle !== '' && $bundle !== $node->bundle()) {
+        return '';
+      }
+      $bundle = $node->bundle();
+    }
+    return $bundle;
   }
 
   /**
