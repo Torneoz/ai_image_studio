@@ -1,0 +1,7 @@
+prompt_tokens:
+  js:
+    js/prompt-tokens.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - token/token

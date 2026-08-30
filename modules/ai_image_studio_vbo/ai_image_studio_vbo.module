@@ -35,6 +35,7 @@ function ai_image_studio_vbo_form_alter(array &$form, FormStateInterface $form_s
     '#recursion_limit' => 2,
     '#text' => t('Browse node tokens'),
   ];
+  $form['#attached']['library'][] = 'ai_image_studio_vbo/prompt_tokens';
 
   // Keep the token browser beside the prompt editor regardless of how the AI
   // module orders the remaining prompt metadata and action controls.
