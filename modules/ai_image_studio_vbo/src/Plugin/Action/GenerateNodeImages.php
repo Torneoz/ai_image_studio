@@ -6,6 +6,7 @@ namespace Drupal\ai_image_studio_vbo\Plugin\Action;
 
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio_vbo\Service\BulkGenerationManager;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -127,8 +128,22 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       $bundle_options[$bundle_id] = $bundle['label'];
     }
     asort($bundle_options);
-    $selected_bundle = (string) ($form_state->getValue('destination_bundle')
-      ?: $configuration['destination_bundle']);
+    $selected_bundle = (string) $configuration['destination_bundle'];
+    $triggering_element = $form_state->getTriggeringElement();
+    $triggering_parents = $triggering_element['#parents'] ?? [];
+    if (end($triggering_parents) === 'destination_bundle') {
+      // VBO embeds action configuration in a subform. Reading the triggering
+      // element directly works both there and when the plugin form is built
+      // on its own.
+      $selected_bundle = (string) ($triggering_element['#value'] ?? '');
+    }
+    elseif ($form_state->getValue('destination_bundle') !== NULL) {
+      $selected_bundle = (string) $form_state->getValue('destination_bundle');
+    }
+    $destination_options = $this->destinationFieldOptions($selected_bundle);
+    $selected_field = isset($destination_options[$configuration['destination_field']])
+      ? $configuration['destination_field']
+      : '';
     $form['destination'] = [
       '#type' => 'details',
       '#title' => $this->t('Result destination'),
@@ -150,11 +165,11 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $form['destination']['destination_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Destination field'),
-      '#options' => $this->destinationFieldOptions($selected_bundle),
+      '#options' => $destination_options,
       '#empty_option' => $selected_bundle === ''
         ? $this->t('- Select a content type first -')
         : $this->t('- Select a destination field -'),
-      '#default_value' => $configuration['destination_field'],
+      '#default_value' => $selected_field,
       '#required' => $selected_bundle !== '',
       '#description' => $this->t('Image fields receive the generated file. Media reference fields receive a newly published image Media item. Existing field values are replaced.'),
     ];
@@ -309,7 +324,16 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
   /**
    * Rebuilds the destination controls after selecting a content type.
    */
-  public static function updateDestinationFields(array &$form): array {
+  public static function updateDestinationFields(array &$form, FormStateInterface $form_state): array {
+    $triggering_element = $form_state->getTriggeringElement();
+    $array_parents = $triggering_element['#array_parents'] ?? [];
+    array_pop($array_parents);
+    $destination = NestedArray::getValue($form, $array_parents, $exists);
+    if ($exists && is_array($destination)) {
+      return $destination;
+    }
+
+    // Retain support for contexts that build the plugin form at the root.
     return $form['destination'];
   }
 

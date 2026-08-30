@@ -69,7 +69,19 @@ final class BulkJobController extends ControllerBase {
     }
     return [
       'description' => [
-        '#markup' => '<p>' . $this->t('Jobs are created by the “Generate images with AI Image Studio” Views Bulk Operations action. Active job pages advance the queue while they refresh; Drupal cron remains a fallback.') . '</p>',
+        'intro' => [
+          '#markup' => '<p>' . $this->t('Create a bulk image job from the <a href=":url">Image Studio Content</a> view using Views Bulk Operations (VBO).', [
+            ':url' => Url::fromRoute('view.image_studio_content.page_1')->toString(),
+          ]) . '</p>',
+        ],
+        'instructions' => [
+          '#theme' => 'item_list',
+          '#items' => [
+            $this->t('Select the content items you want to process, choose “Generate images with AI Image Studio” from the Action list, and apply it to the selection.'),
+            $this->t('Choose the content type and destination image or Media field in the action form. Generated Media is published and assigned to the selected Media field.'),
+            $this->t('Keep an active job page open to advance its queue while the page refreshes. Drupal cron remains a fallback.'),
+          ],
+        ],
       ],
       'table' => [
         '#type' => 'table',
