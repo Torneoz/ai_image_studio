@@ -1,0 +1,8 @@
+.ai-image-studio-prompt-preview {
+  margin-block-start: 0.5rem;
+  padding: 0.75rem;
+  border-inline-start: 0.25rem solid var(--color-gray-300, #b7b7b7);
+  background: var(--color-gray-050, #f5f5f5);
+  white-space: pre-wrap;
+}
+

@@ -19,6 +19,7 @@ services:
     class: Drupal\ai_image_studio\Service\PromptResolver
     arguments:
       - '@config.factory'
+      - '@entity_type.manager'
 
   logger.channel.ai_image_studio:
     parent: logger.channel_base

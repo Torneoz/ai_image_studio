@@ -762,17 +762,11 @@ final class StudioForm extends FormBase {
     if (!$this->promptResolver->promptTypeExists()) {
       return $this->unavailablePromptElement($this->t('After prompt'));
     }
-    return [
-      '#type' => 'ai_prompt',
-      '#title' => $this->t('After prompt'),
-      '#description' => $this->t('Optionally append reusable render-quality or finishing instructions.'),
-      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
-      '#default_value' => '',
-      // Validate this only for generation submissions. HTML's required
-      // attribute would otherwise block the per-version Media submit buttons
-      // before Drupal can apply their limited validation scope.
-      '#required' => FALSE,
-    ];
+    return $this->promptSelectElement(
+      PromptResolver::PROMPT_TYPE,
+      $this->t('After prompt'),
+      $this->t('Optionally append reusable render-quality or finishing instructions.'),
+    );
   }
 
   /**
@@ -783,13 +777,44 @@ final class StudioForm extends FormBase {
     if (!$this->promptResolver->promptTypeExists(PromptResolver::STYLE_PROMPT_TYPE)) {
       return $this->unavailablePromptElement($title);
     }
+    return $this->promptSelectElement(
+      PromptResolver::STYLE_PROMPT_TYPE,
+      $title,
+      $this->t('Optionally apply a reusable visual style.'),
+    );
+  }
+
+  /**
+   * Builds a label-only prompt select with a preview of the selected prompt.
+   */
+  private function promptSelectElement(
+    string $prompt_type,
+    string|\Stringable $title,
+    string|\Stringable $description,
+  ): array {
+    $choices = $this->promptResolver->choices($prompt_type);
     return [
-      '#type' => 'ai_prompt',
+      '#type' => 'select',
       '#title' => $title,
-      '#description' => $this->t('Optionally apply a reusable visual style.'),
-      '#prompt_types' => [PromptResolver::STYLE_PROMPT_TYPE],
+      '#description' => $description,
+      '#options' => array_map(
+        static fn (array $choice): string => $choice['label'],
+        $choices,
+      ),
+      '#empty_option' => $this->t('- None -'),
       '#default_value' => '',
       '#required' => FALSE,
+      '#attributes' => [
+        'class' => ['ai-image-studio-prompt-select'],
+        'data-prompt-texts' => json_encode(array_map(
+          static fn (array $choice): string => $choice['prompt'],
+          $choices,
+        )),
+      ],
+      '#suffix' => '<div class="ai-image-studio-prompt-preview" aria-live="polite"></div>',
+      '#attached' => [
+        'library' => ['ai_image_studio/prompt_select'],
+      ],
     ];
   }
 
@@ -2507,14 +2532,11 @@ final class StudioForm extends FormBase {
     if (!$this->promptResolver->promptTypeExists()) {
       return $this->unavailablePromptElement($this->t('Replacement after prompt'));
     }
-    return [
-      '#type' => 'ai_prompt',
-      '#title' => $this->t('Replacement after prompt'),
-      '#description' => $this->t('Optionally append a reusable prompt after the replacement start prompt.'),
-      '#prompt_types' => [PromptResolver::PROMPT_TYPE],
-      '#default_value' => '',
-      '#required' => FALSE,
-    ];
+    return $this->promptSelectElement(
+      PromptResolver::PROMPT_TYPE,
+      $this->t('Replacement after prompt'),
+      $this->t('Optionally append a reusable prompt after the replacement start prompt.'),
+    );
   }
 
   /**
