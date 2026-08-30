@@ -94,6 +94,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         ->get('ai_image_studio.settings')
         ->get('default_ai_badge_text') ?: 'AI Image'),
       'publish_media' => FALSE,
+      'attach_to_content' => FALSE,
       'media_name_template' => '[node:title] AI image',
       'alt_template' => 'AI-generated illustration for [node:title]',
     ] + parent::defaultConfiguration();
@@ -153,6 +154,9 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $selected_field = isset($destination_options[$configuration['destination_field']])
       ? $configuration['destination_field']
       : '';
+    $attach_to_content = array_key_exists('attach_to_content', $this->configuration)
+      ? (bool) $configuration['attach_to_content']
+      : $selected_field !== '';
     $form['text_model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-image model'),
@@ -265,12 +269,21 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         'visible' => [':input[name="publish_media"]' => ['checked' => TRUE]],
       ],
     ];
+    $form['publishing']['destination']['attach_to_content'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Save the published Media to content'),
+      '#default_value' => $attach_to_content,
+      '#description' => $this->t('Assign the new Media item to a field on each selected content item. Leave unchecked to publish Media without changing content.'),
+    ];
     $form['publishing']['destination']['destination_bundle'] = [
       '#type' => 'select',
       '#title' => $this->t('Content type'),
       '#options' => $bundle_options,
       '#empty_option' => $this->t('- Do not attach Media to content -'),
       '#default_value' => $selected_bundle,
+      '#states' => [
+        'visible' => [':input[name="attach_to_content"]' => ['checked' => TRUE]],
+      ],
       '#ajax' => [
         'callback' => [static::class, 'updateDestinationFields'],
         'wrapper' => 'ai-image-studio-vbo-destination',
@@ -285,6 +298,9 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         : $this->t('- Do not attach Media to content -'),
       '#default_value' => $selected_field,
       '#description' => $this->t('Optionally assign the published Media item to a compatible field. An existing field value will be replaced.'),
+      '#states' => [
+        'visible' => [':input[name="attach_to_content"]' => ['checked' => TRUE]],
+      ],
     ];
     $form['publishing']['media_name_template'] = [
       '#type' => 'textfield',
@@ -321,10 +337,14 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       && !$this->currentUser->hasPermission('publish ai image studio image')) {
       $form_state->setErrorByName('publish_media', $this->t('You do not have permission to publish generated images.'));
     }
-    $publish_media = (bool) $form_state->getValue('publish_media');
-    $bundle = $publish_media ? (string) $form_state->getValue('destination_bundle') : '';
-    $field = $publish_media ? (string) $form_state->getValue('destination_field') : '';
-    if ($field !== '' && !isset($this->destinationFieldOptions($bundle)[$field])) {
+    $attach_to_content = $form_state->getValue('publish_media')
+      && $form_state->getValue('attach_to_content');
+    $bundle = $attach_to_content ? (string) $form_state->getValue('destination_bundle') : '';
+    $field = $attach_to_content ? (string) $form_state->getValue('destination_field') : '';
+    if ($attach_to_content && ($bundle === '' || $field === '')) {
+      $form_state->setErrorByName('destination_field', $this->t('Select a content type and destination field, or disable saving Media to content.'));
+    }
+    elseif ($field !== '' && !isset($this->destinationFieldOptions($bundle)[$field])) {
       $form_state->setErrorByName('destination_field', $this->t('Select a compatible destination field from the chosen content type.'));
     }
     if ($bundle !== '' && $field !== '') {
@@ -351,7 +371,8 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $this->configuration['show_ai_badge'] = $this->generator->canRenderBadge(FALSE)
       && !empty($this->configuration['show_ai_badge']);
     $this->configuration['ai_badge_text'] = trim((string) $this->configuration['ai_badge_text']) ?: 'AI Image';
-    if (empty($this->configuration['publish_media'])) {
+    if (empty($this->configuration['publish_media'])
+      || empty($this->configuration['attach_to_content'])) {
       $this->configuration['destination_bundle'] = '';
       $this->configuration['destination_field'] = '';
     }
