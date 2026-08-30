@@ -87,6 +87,12 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       'resolution' => 'auto',
       'quality' => 'medium',
       'file_type' => 'png',
+      'show_ai_badge' => (bool) $this->configFactory
+        ->get('ai_image_studio.settings')
+        ->get('default_show_ai_badge'),
+      'ai_badge_text' => (string) ($this->configFactory
+        ->get('ai_image_studio.settings')
+        ->get('default_ai_badge_text') ?: 'AI Image'),
       'publish_media' => FALSE,
       'media_name_template' => '[node:title] AI image',
       'alt_template' => 'AI-generated illustration for [node:title]',
@@ -246,6 +252,27 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       // phpcs:enable DrupalPractice.General.OptionsT.TforValue
       '#default_value' => $configuration['file_type'],
     ];
+    $can_render_badge = $this->generator->canRenderBadge(FALSE);
+    $form['image_settings']['show_ai_badge'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Render an AI badge into saved Media files'),
+      '#default_value' => $can_render_badge && $configuration['show_ai_badge'],
+      '#disabled' => !$can_render_badge,
+      '#description' => $can_render_badge
+        ? $this->t('Creates a separate Media file with the badge permanently embedded. The original Studio result is preserved.')
+        : $this->t('Badge rendering is unavailable because PHP GD is not available to the web server.'),
+    ];
+    $form['image_settings']['ai_badge_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Badge text'),
+      '#default_value' => $configuration['ai_badge_text'],
+      '#maxlength' => 80,
+      '#states' => [
+        'visible' => [
+          ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     $form['publishing'] = [
       '#type' => 'details',
       '#title' => $this->t('Media publishing'),
@@ -318,6 +345,9 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $this->configuration['initiating_uid'] = (int) $this->currentUser->id();
     $this->configuration['prompt_template'] = trim((string) $prompt->get('prompt'));
     $this->configuration['source_field'] = trim((string) $this->configuration['source_field']);
+    $this->configuration['show_ai_badge'] = $this->generator->canRenderBadge(FALSE)
+      && !empty($this->configuration['show_ai_badge']);
+    $this->configuration['ai_badge_text'] = trim((string) $this->configuration['ai_badge_text']) ?: 'AI Image';
     if (empty($this->configuration['destination_bundle'])) {
       $this->configuration['destination_field'] = '';
     }

@@ -122,6 +122,8 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
             'resolution' => $configuration['resolution'] ?? 'auto',
             'quality' => $configuration['quality'] ?? 'medium',
             'file_type' => $configuration['file_type'] ?? 'png',
+            'show_ai_badge' => !empty($configuration['show_ai_badge']),
+            'ai_badge_text' => $configuration['ai_badge_text'] ?? 'AI Image',
             'variations' => 1,
           ],
         );
@@ -162,7 +164,12 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
           ['node' => $node],
           ['clear' => TRUE],
         ));
-        $media = $this->generator->publish($turn, $name ?: (string) $node->label(), $alt);
+        $media = $this->generator->publish(
+          $turn,
+          $name ?: (string) $node->label(),
+          $alt,
+          !empty($configuration['show_ai_badge']),
+        );
         $media_id = (int) $media->id();
         $status = 'published';
       }
