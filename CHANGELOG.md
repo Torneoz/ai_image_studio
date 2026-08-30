@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta8
 
+- Added a separate managed visual-style prompt library, including Vivid, Line
+  art, and Photorealistic defaults, across Studio and compact Media workflows.
 - Prevented missing managed prompt-type configuration from crashing Studio,
   Media Library, and VBO forms, and added update hooks to restore it.
 - Made module install hooks explicitly create shipped prompt entities and Views

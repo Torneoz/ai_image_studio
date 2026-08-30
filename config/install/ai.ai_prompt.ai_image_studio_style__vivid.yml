@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__vivid
+label: Vivid
+type: ai_image_studio_style
+prompt: >-
+  Use a vivid visual style with rich, saturated colours, strong contrast,
+  energetic lighting, and bold but coherent detail.
+

@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__photorealistic
+label: Photorealistic
+type: ai_image_studio_style
+prompt: >-
+  Render in a photorealistic style with natural materials, physically
+  plausible lighting, authentic textures, and realistic camera-like depth.
+

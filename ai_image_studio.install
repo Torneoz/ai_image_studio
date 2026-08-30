@@ -383,3 +383,12 @@ function ai_image_studio_update_10015(): void {
 function ai_image_studio_update_10016(): void {
   _ai_image_studio_install_views();
 }
+
+/**
+ * Adds the visual style prompt library and its default styles.
+ */
+function ai_image_studio_update_10017(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio');
+}

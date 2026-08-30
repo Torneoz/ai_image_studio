@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style
+label: 'AI Image Studio style'
+variables: {  }
+tokens: {  }
+

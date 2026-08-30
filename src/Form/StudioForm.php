@@ -321,6 +321,7 @@ final class StudioForm extends FormBase {
       $form['prompt_start'] = $this->promptStartElement(
         $this->t('Describe the image to create or how to transform the upload.'),
       );
+      $form['style_prompt'] = $this->stylePromptElement();
       $form['prompt'] = $this->promptElement();
       $form['generation_controls'] = $this->generationControls();
       $form['video_controls'] = $this->videoControls();
@@ -644,6 +645,7 @@ final class StudioForm extends FormBase {
           ? $this->t('Describe only the change you want to make to the selected image.')
           : $this->t('Describe the image to create.'),
       );
+      $form['refine']['style_prompt'] = $this->stylePromptElement();
       $form['refine']['prompt'] = $this->promptElement();
       $form['refine']['prompt_start']['#states'] = [
         'disabled' => [
@@ -655,6 +657,7 @@ final class StudioForm extends FormBase {
           ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
         ],
       ];
+      $form['refine']['style_prompt']['#states'] = $form['refine']['prompt']['#states'];
       $form['refine']['regenerate_with_new_settings'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Regenerate with new settings'),
@@ -762,12 +765,30 @@ final class StudioForm extends FormBase {
     return [
       '#type' => 'ai_prompt',
       '#title' => $this->t('After prompt'),
-      '#description' => $this->t('Optionally append a reusable style or instruction prompt after the start prompt.'),
+      '#description' => $this->t('Optionally append reusable render-quality or finishing instructions.'),
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#default_value' => '',
       // Validate this only for generation submissions. HTML's required
       // attribute would otherwise block the per-version Media submit buttons
       // before Drupal can apply their limited validation scope.
+      '#required' => FALSE,
+    ];
+  }
+
+  /**
+   * Creates the optional reusable visual style portion of a prompt.
+   */
+  private function stylePromptElement(string|\Stringable|null $title = NULL): array {
+    $title ??= $this->t('Style');
+    if (!$this->promptResolver->promptTypeExists(PromptResolver::STYLE_PROMPT_TYPE)) {
+      return $this->unavailablePromptElement($title);
+    }
+    return [
+      '#type' => 'ai_prompt',
+      '#title' => $title,
+      '#description' => $this->t('Optionally apply a reusable visual style.'),
+      '#prompt_types' => [PromptResolver::STYLE_PROMPT_TYPE],
+      '#default_value' => '',
       '#required' => FALSE,
     ];
   }
@@ -1042,12 +1063,13 @@ final class StudioForm extends FormBase {
       'prompt_start' => [
         '#type' => 'textarea',
         '#title' => $this->t('Replacement start prompt'),
-        '#description' => $this->t('Optional. Leave both replacement prompt fields empty to reuse the previous prompt: @prompt', [
+        '#description' => $this->t('Optional. Leave all replacement prompt fields empty to reuse the previous prompt: @prompt', [
           '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
         ]),
         '#maxlength' => $this->maximumPromptLength(),
         '#rows' => 5,
       ],
+      'style_prompt' => $this->stylePromptElement($this->t('Replacement style')),
       'prompt' => $this->replacementPromptElement($turn),
       'settings' => $video_controls,
       'actions' => [
@@ -1940,11 +1962,13 @@ final class StudioForm extends FormBase {
         );
       }
       $replacement_id = (string) ($values['prompt'] ?? '');
+      $replacement_style_id = (string) ($values['style_prompt'] ?? '');
       $replacement_start = trim((string) ($values['prompt_start'] ?? ''));
-      if ($replacement_id !== '' || $replacement_start !== '') {
+      if ($replacement_id !== '' || $replacement_style_id !== '' || $replacement_start !== '') {
         $replacement = $this->promptResolver->compose(
           $replacement_start,
           $replacement_id,
+          $replacement_style_id,
         );
         if ($replacement === '') {
           $form_state->setErrorByName(
@@ -2423,6 +2447,7 @@ final class StudioForm extends FormBase {
     $prompt = $this->promptResolver->compose(
       $values['prompt_start'] ?? '',
       $values['prompt'] ?? '',
+      $values['style_prompt'] ?? '',
     );
     if ($prompt === '') {
       $prompt = trim((string) $turn->get('prompt')->value);
@@ -2463,6 +2488,7 @@ final class StudioForm extends FormBase {
       return $this->promptResolver->compose(
         $form_state->getValue('prompt_start'),
         $form_state->getValue('prompt'),
+        $form_state->getValue('style_prompt'),
       );
     }
 

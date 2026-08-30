@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_style__line_art
+label: 'Line art'
+type: ai_image_studio_style
+prompt: >-
+  Render as clean line art with confident contours, controlled line weight,
+  clear negative space, and minimal tonal shading.
+

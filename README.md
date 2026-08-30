@@ -46,9 +46,14 @@ Drupal Media.
   dialogs, with or without the AI Media Image module.
 - Configurable generation defaults, limits, cost warnings, visibility controls,
   and per-operation model overrides.
-- Editor-written start prompts with optional reusable after-prompts managed
-  through Drupal AI Prompt Management in the full Studio, sequential
-  refinement, video regeneration, and compact Media forms.
+- Editor-written start prompts with separate reusable visual styles and
+  after-prompts managed through Drupal AI Prompt Management in the full
+  Studio, sequential refinement, video regeneration, and compact Media forms.
+
+External modules can add styles without an integration module by shipping an
+`ai.ai_prompt.*` configuration entity whose `type` is
+`ai_image_studio_style`. Use an enforced dependency on the module that owns the
+style so Drupal removes its configuration when that module is uninstalled.
 
 Image requests run synchronously. Video requests are queued by default. Studio
 starts one queued item after each web response and its five-second status

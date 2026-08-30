@@ -80,6 +80,7 @@ final class CompactMediaForm {
           'prompt_start',
         ]),
       ],
+      'style_prompt' => $this->stylePromptElement($form_state),
       'prompt' => $this->promptElement($form_state),
       'model' => [
         '#type' => 'select',
@@ -276,12 +277,38 @@ final class CompactMediaForm {
     return [
       '#type' => 'ai_prompt',
       '#title' => t('After prompt'),
-      '#description' => t('Optionally append a reusable style or instruction prompt after the start prompt.'),
+      '#description' => t('Optionally append reusable render-quality or finishing instructions.'),
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#required' => FALSE,
       '#default_value' => $form_state->getValue([
         'ai_image_studio_compact',
         'prompt',
+      ]) ?: '',
+    ];
+  }
+
+  /**
+   * Builds the optional managed visual style prompt.
+   */
+  private function stylePromptElement(FormStateInterface $form_state): array {
+    if (!$this->promptResolver->promptTypeExists(PromptResolver::STYLE_PROMPT_TYPE)) {
+      return [
+        '#type' => 'select',
+        '#title' => t('Style'),
+        '#options' => [],
+        '#empty_option' => t('- Style library unavailable -'),
+        '#disabled' => TRUE,
+      ];
+    }
+    return [
+      '#type' => 'ai_prompt',
+      '#title' => t('Style'),
+      '#description' => t('Optionally apply a reusable visual style.'),
+      '#prompt_types' => [PromptResolver::STYLE_PROMPT_TYPE],
+      '#required' => FALSE,
+      '#default_value' => $form_state->getValue([
+        'ai_image_studio_compact',
+        'style_prompt',
       ]) ?: '',
     ];
   }
@@ -294,12 +321,13 @@ final class CompactMediaForm {
     $prompt = $this->promptResolver->compose(
       $values['prompt_start'] ?? '',
       $values['prompt'] ?? '',
+      $values['style_prompt'] ?? '',
     );
     $model = (string) ($values['model'] ?? '');
     if ($prompt === '') {
       $form_state->setErrorByName(
         'ai_image_studio_compact][prompt_start',
-        t('Enter a start prompt or select an after prompt.'),
+        t('Enter a start prompt or select a style or after prompt.'),
       );
       return;
     }
