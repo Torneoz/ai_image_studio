@@ -12,6 +12,20 @@ ai_image_studio.new:
   parent: ai_image_studio.collection
   weight: -10
 
+ai_image_studio.view_sessions:
+  title: 'Views Image Studio Sessions'
+  description: 'Review and manage Image Studio sessions in Views.'
+  route_name: view.image_studio_sessions.page_1
+  parent: ai_image_studio.collection
+  weight: 2
+
+ai_image_studio.view_turns:
+  title: 'Views Image Studio Turns'
+  description: 'Review and manage Image Studio turns in Views.'
+  route_name: view.image_studio_turns.page_1
+  parent: ai_image_studio.collection
+  weight: 3
+
 ai_image_studio.workspace_settings:
   title: 'Settings'
   description: 'Configure image storage, limits, and Media publishing.'
