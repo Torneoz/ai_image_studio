@@ -30,7 +30,7 @@ final class BulkJobController extends ControllerBase {
     private readonly Connection $database,
     private readonly BulkGenerationManager $bulkManager,
     private readonly DateFormatterInterface $dateFormatter,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly EntityTypeManagerInterface $studioEntityTypeManager,
   ) {}
 
   /**
@@ -129,7 +129,7 @@ final class BulkJobController extends ControllerBase {
     )));
     $media_items = $media_ids === []
       ? []
-      : $this->entityTypeManager->getStorage('media')->loadMultiple($media_ids);
+      : $this->studioEntityTypeManager->getStorage('media')->loadMultiple($media_ids);
     $rows = [];
     foreach ($items as $item) {
       $node_link = Link::fromTextAndUrl(
