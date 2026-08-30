@@ -153,35 +153,6 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $selected_field = isset($destination_options[$configuration['destination_field']])
       ? $configuration['destination_field']
       : '';
-    $form['destination'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Result destination'),
-      '#open' => $selected_bundle !== '',
-      '#prefix' => '<div id="ai-image-studio-vbo-destination">',
-      '#suffix' => '</div>',
-    ];
-    $form['destination']['destination_bundle'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Content type'),
-      '#options' => $bundle_options,
-      '#empty_option' => $this->t('- Do not attach results to content -'),
-      '#default_value' => $selected_bundle,
-      '#ajax' => [
-        'callback' => [static::class, 'updateDestinationFields'],
-        'wrapper' => 'ai-image-studio-vbo-destination',
-      ],
-    ];
-    $form['destination']['destination_field'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Destination field'),
-      '#options' => $destination_options,
-      '#empty_option' => $selected_bundle === ''
-        ? $this->t('- Select a content type first -')
-        : $this->t('- Select a destination field -'),
-      '#default_value' => $selected_field,
-      '#required' => $selected_bundle !== '',
-      '#description' => $this->t('Image fields receive the generated file. Media reference fields receive a newly published image Media item. Existing field values are replaced.'),
-    ];
     $form['text_model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-image model'),
@@ -284,6 +255,37 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       '#default_value' => $configuration['publish_media'],
       '#access' => $this->currentUser->hasPermission('publish ai image studio image'),
     ];
+    $form['publishing']['destination'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Save to content'),
+      '#open' => $selected_bundle !== '',
+      '#prefix' => '<div id="ai-image-studio-vbo-destination">',
+      '#suffix' => '</div>',
+      '#states' => [
+        'visible' => [':input[name="publish_media"]' => ['checked' => TRUE]],
+      ],
+    ];
+    $form['publishing']['destination']['destination_bundle'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content type'),
+      '#options' => $bundle_options,
+      '#empty_option' => $this->t('- Do not attach Media to content -'),
+      '#default_value' => $selected_bundle,
+      '#ajax' => [
+        'callback' => [static::class, 'updateDestinationFields'],
+        'wrapper' => 'ai-image-studio-vbo-destination',
+      ],
+    ];
+    $form['publishing']['destination']['destination_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Destination field'),
+      '#options' => $destination_options,
+      '#empty_option' => $selected_bundle === ''
+        ? $this->t('- Select a content type first -')
+        : $this->t('- Do not attach Media to content -'),
+      '#default_value' => $selected_field,
+      '#description' => $this->t('Optionally assign the published Media item to a compatible field. An existing field value will be replaced.'),
+    ];
     $form['publishing']['media_name_template'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Media name template'),
@@ -319,9 +321,10 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       && !$this->currentUser->hasPermission('publish ai image studio image')) {
       $form_state->setErrorByName('publish_media', $this->t('You do not have permission to publish generated images.'));
     }
-    $bundle = (string) $form_state->getValue('destination_bundle');
-    $field = (string) $form_state->getValue('destination_field');
-    if ($bundle !== '' && !isset($this->destinationFieldOptions($bundle)[$field])) {
+    $publish_media = (bool) $form_state->getValue('publish_media');
+    $bundle = $publish_media ? (string) $form_state->getValue('destination_bundle') : '';
+    $field = $publish_media ? (string) $form_state->getValue('destination_field') : '';
+    if ($field !== '' && !isset($this->destinationFieldOptions($bundle)[$field])) {
       $form_state->setErrorByName('destination_field', $this->t('Select a compatible destination field from the chosen content type.'));
     }
     if ($bundle !== '' && $field !== '') {
@@ -348,7 +351,11 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $this->configuration['show_ai_badge'] = $this->generator->canRenderBadge(FALSE)
       && !empty($this->configuration['show_ai_badge']);
     $this->configuration['ai_badge_text'] = trim((string) $this->configuration['ai_badge_text']) ?: 'AI Image';
-    if (empty($this->configuration['destination_bundle'])) {
+    if (empty($this->configuration['publish_media'])) {
+      $this->configuration['destination_bundle'] = '';
+      $this->configuration['destination_field'] = '';
+    }
+    elseif (empty($this->configuration['destination_bundle'])) {
       $this->configuration['destination_field'] = '';
     }
     $this->configuration['variations'] = 1;
@@ -367,7 +374,7 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     }
 
     // Retain support for contexts that build the plugin form at the root.
-    return $form['destination'];
+    return $form['publishing']['destination'];
   }
 
   /**

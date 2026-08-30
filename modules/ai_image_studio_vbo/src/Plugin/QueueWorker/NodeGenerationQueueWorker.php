@@ -146,10 +146,7 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
       $status = 'completed';
       $destination_field = (string) ($configuration['destination_field'] ?? '');
       $destination_bundle = (string) ($configuration['destination_bundle'] ?? '');
-      $destination_is_media = $destination_field !== ''
-        && $node->hasField($destination_field)
-        && $node->get($destination_field)->getFieldDefinition()->getType() === 'entity_reference';
-      if (!empty($configuration['publish_media']) || $destination_is_media) {
+      if (!empty($configuration['publish_media'])) {
         $account = $this->entityTypeManager->getStorage('user')->load((int) $job->uid);
         if ($account === NULL || !$account->hasPermission('publish ai image studio image')) {
           throw new \RuntimeException('The initiating user may no longer publish generated images.');
