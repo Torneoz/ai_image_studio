@@ -49,6 +49,17 @@ ai_image_studio.download_all:
       ai_image_studio_session:
         type: entity:ai_image_studio_session
 
+ai_image_studio.join_videos:
+  path: '/admin/content/ai-image-studio/{ai_image_studio_session}/join-videos'
+  defaults:
+    _controller: '\Drupal\ai_image_studio\Controller\SessionDownloadController::joinVideos'
+  requirements:
+    _entity_access: 'ai_image_studio_session.view'
+  options:
+    parameters:
+      ai_image_studio_session:
+        type: entity:ai_image_studio_session
+
 ai_image_studio.settings:
   path: '/admin/config/ai/image-studio'
   defaults:

@@ -11,8 +11,11 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
 
 /**
  * Downloads all generated assets belonging to a Studio session.
@@ -95,6 +98,93 @@ final class SessionDownloadController extends ControllerBase {
     $download_name = $this->safeFilename((string) $ai_image_studio_session->label())
       . '-results.zip';
     $response = new BinaryFileResponse($temporary_path);
+    $response->setContentDisposition(
+      ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+      $download_name,
+    );
+    $response->deleteFileAfterSend(TRUE);
+    return $response;
+  }
+
+  /**
+   * Joins completed videos in turn order using FFmpeg stream copying.
+   */
+  public function joinVideos(
+    object $ai_image_studio_session,
+  ): BinaryFileResponse|RedirectResponse {
+    if ((new ExecutableFinder())->find('ffmpeg') === NULL) {
+      $this->messenger()->addError($this->t('Joining videos requires FFmpeg on the server.'));
+      return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
+    }
+
+    $turn_storage = $this->studioEntityTypeManager
+      ->getStorage('ai_image_studio_turn');
+    $turn_ids = $turn_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $ai_image_studio_session->id())
+      ->condition('status', 'completed')
+      ->condition('video.target_id', NULL, 'IS NOT NULL')
+      ->sort('created', 'ASC')
+      ->sort('id', 'ASC')
+      ->execute();
+    $source_paths = [];
+    foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
+      $file = $turn->get('video')->entity;
+      if (!$file instanceof FileInterface) {
+        continue;
+      }
+      $path = $this->fileSystem->realpath($file->getFileUri());
+      if ($path !== FALSE && is_file($path)) {
+        $source_paths[] = $path;
+      }
+    }
+    if (count($source_paths) < 2) {
+      $this->messenger()->addError($this->t('At least two completed videos are required to create a joined video.'));
+      return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
+    }
+
+    $temporary_directory = $this->fileSystem->getTempDirectory();
+    $manifest_path = tempnam($temporary_directory, 'ai-studio-videos-');
+    $output_path = tempnam($temporary_directory, 'ai-studio-joined-');
+    if ($manifest_path === FALSE || $output_path === FALSE) {
+      $this->messenger()->addError($this->t('Could not prepare temporary files for the joined video.'));
+      return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
+    }
+
+    try {
+      $manifest = implode("\n", array_map(
+        static fn (string $path): string => "file '"
+          . str_replace("'", "'\\''", $path) . "'",
+        $source_paths,
+      )) . "\n";
+      if (file_put_contents($manifest_path, $manifest) === FALSE) {
+        throw new \RuntimeException('Could not write the FFmpeg input list.');
+      }
+      $process = new Process([
+        'ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', $manifest_path,
+        '-c', 'copy', '-movflags', '+faststart', '-f', 'mp4', $output_path,
+      ]);
+      $process->setTimeout(600);
+      $process->run();
+      if (!$process->isSuccessful() || !is_file($output_path)
+        || filesize($output_path) === 0) {
+        throw new \RuntimeException(trim($process->getErrorOutput()));
+      }
+    }
+    catch (\Throwable $exception) {
+      @unlink($output_path);
+      $this->messenger()->addError($this->t('The videos could not be joined. This simple version requires compatible video formats. FFmpeg reported: @message', [
+        '@message' => mb_substr($exception->getMessage(), 0, 500),
+      ]));
+      return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
+    }
+    finally {
+      @unlink($manifest_path);
+    }
+
+    $download_name = $this->safeFilename((string) $ai_image_studio_session->label())
+      . '-joined.mp4';
+    $response = new BinaryFileResponse($output_path);
     $response->setContentDisposition(
       ResponseHeaderBag::DISPOSITION_ATTACHMENT,
       $download_name,

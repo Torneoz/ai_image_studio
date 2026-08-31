@@ -729,6 +729,23 @@ final class StudioForm extends FormBase {
         '#attributes' => ['class' => ['button']],
       ];
     }
+    $completed_videos = array_filter(
+      $completed_assets,
+      static fn (object $turn): bool => !$turn->get('video')->isEmpty(),
+    );
+    if (count($completed_videos) >= 2 && $this->generator->canExtractVideoFrame()) {
+      $form['session_actions']['join_videos'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Join all videos'),
+        '#url' => Url::fromRoute('ai_image_studio.join_videos', [
+          'ai_image_studio_session' => $session->id(),
+        ]),
+        '#attributes' => [
+          'class' => ['button'],
+          'title' => $this->t('Download all completed videos joined in oldest-first order.'),
+        ],
+      ];
+    }
     if ($session->access('delete')) {
       $form['session_actions']['delete'] = [
         '#type' => 'link',

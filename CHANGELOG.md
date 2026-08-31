@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta8
 
+- Added a proof-of-concept session action that joins compatible completed
+  videos in oldest-first order into a downloadable MP4 using FFmpeg.
 - Added video sequence chaining by extracting each completed video's last
   decodable frame and making it available as the next image-to-video source.
 - Authorized private last-frame previews through their owning Studio session.
