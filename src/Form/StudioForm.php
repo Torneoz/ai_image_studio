@@ -786,7 +786,7 @@ final class StudioForm extends FormBase {
           '#type' => 'actions',
           'join_videos' => [
             '#type' => 'submit',
-            '#value' => $this->t('Generate compiled video (@count clips)', [
+            '#value' => $this->t('Download Compiled Video (@count clips)', [
               '@count' => count($completed_videos),
             ]),
             '#studio_action' => 'join_videos',
