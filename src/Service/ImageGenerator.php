@@ -1291,6 +1291,10 @@ final class ImageGenerator {
         $directory,
         $this->safeSessionName($session),
       );
+      $this->fileSystem->prepareDirectory(
+        $destination_directory,
+        FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
+      );
       $destination = sprintf(
         '%s/turn-%d-last-frame.png',
         $destination_directory,
