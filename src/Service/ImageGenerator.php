@@ -166,6 +166,10 @@ final class ImageGenerator {
    *   Provider configuration for image dimensions and output options.
    * @param string $output_type
    *   Either image or video.
+   * @param object|null $replay_of
+   *   The original logical turn when this request is a replay.
+   * @param int|null $sequence
+   *   An explicit session-local logical request sequence.
    *
    * @return \Drupal\ai_image_studio\Entity\ImageStudioTurn
    *   The saved completed or failed turn.
@@ -178,7 +182,10 @@ final class ImageGenerator {
     ?FileInterface $source = NULL,
     array $generation_settings = [],
     string $output_type = 'image',
+    ?object $replay_of = NULL,
+    ?int $sequence = NULL,
   ): object {
+    $requested_generation_settings = $generation_settings;
     $source ??= $parent ? $this->turnSourceImage($parent) : NULL;
     $reference_ids = array_values(array_unique(array_filter(array_map(
       'intval',
@@ -222,11 +229,14 @@ final class ImageGenerator {
         $references,
       ),
       'request_group' => bin2hex(random_bytes(16)),
+      'sequence' => $sequence ?? $this->nextSequence((int) $session->id()),
+      'replay_of' => $replay_of?->id(),
       'prompt' => $prompt,
       'provider_id' => $provider_id,
       'model_id' => $model_id,
       'operation' => $operation,
       'generation_settings' => $generation_settings,
+      'requested_generation_settings' => $requested_generation_settings,
       'status' => 'pending',
     ]);
     $turn->save();
@@ -242,6 +252,26 @@ final class ImageGenerator {
     }
 
     return $this->processTurn($turn);
+  }
+
+  /**
+   * Returns the next logical request sequence for a session.
+   */
+  private function nextSequence(int $session_id): int {
+    $ids = $this->entityTypeManager->getStorage('ai_image_studio_turn')
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $session_id)
+      ->sort('sequence', 'DESC')
+      ->sort('id', 'DESC')
+      ->range(0, 1)
+      ->execute();
+    if ($ids === []) {
+      return 1;
+    }
+    $latest = $this->entityTypeManager->getStorage('ai_image_studio_turn')
+      ->load(reset($ids));
+    return max(1, (int) $latest?->get('sequence')->value + 1);
   }
 
   /**
@@ -731,11 +761,14 @@ final class ImageGenerator {
       'source_file_id',
       'source_file_ids',
       'request_group',
+      'sequence',
+      'replay_of',
       'prompt',
       'provider_id',
       'model_id',
       'operation',
       'generation_settings',
+      'requested_generation_settings',
       'attempt_count',
     ] as $field) {
       if (!$turn->get($field)->isEmpty()) {

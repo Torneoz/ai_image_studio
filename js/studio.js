@@ -58,17 +58,41 @@
               previewImage.alt = selectedImage.alt;
             }
 
-            const inherited = {
-              model: selectedCard.dataset.aiImageStudioModel,
-              aspect_ratio: selectedCard.dataset.aiImageStudioAspectRatio,
-              resolution: selectedCard.dataset.aiImageStudioResolution,
-              quality: selectedCard.dataset.aiImageStudioQuality,
-              variations: selectedCard.dataset.aiImageStudioVariations,
-              duration: selectedCard.dataset.aiImageStudioDuration,
-              transparent_background:
-                selectedCard.dataset.aiImageStudioTransparentBackground,
-              auto_levels: selectedCard.dataset.aiImageStudioAutoLevels,
-            };
+            const isVideoLastFrame =
+              selectedCard.dataset.aiImageStudioSourceKind === 'video-last-frame';
+            if (isVideoLastFrame) {
+              const videoOutput = studio.querySelector(
+                'input[name="output_type"][value="video"]',
+              );
+              if (videoOutput) {
+                videoOutput.checked = true;
+                videoOutput.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+
+            const inherited = isVideoLastFrame
+              ? {
+                video_model: selectedCard.dataset.aiImageStudioModel,
+                video_aspect_ratio:
+                  selectedCard.dataset.aiImageStudioAspectRatio,
+                video_resolution:
+                  selectedCard.dataset.aiImageStudioResolution,
+                duration: selectedCard.dataset.aiImageStudioDuration,
+                video_show_ai_badge:
+                  selectedCard.dataset.aiImageStudioShowAiBadge,
+                video_ai_badge_text:
+                  selectedCard.dataset.aiImageStudioAiBadgeText,
+              }
+              : {
+                model: selectedCard.dataset.aiImageStudioModel,
+                aspect_ratio: selectedCard.dataset.aiImageStudioAspectRatio,
+                resolution: selectedCard.dataset.aiImageStudioResolution,
+                quality: selectedCard.dataset.aiImageStudioQuality,
+                variations: selectedCard.dataset.aiImageStudioVariations,
+                transparent_background:
+                  selectedCard.dataset.aiImageStudioTransparentBackground,
+                auto_levels: selectedCard.dataset.aiImageStudioAutoLevels,
+              };
             Object.entries(inherited).forEach(([name, value]) => {
               if (value === undefined || value === '') {
                 return;
@@ -97,6 +121,28 @@
               }
             });
           });
+
+          const compileChoices = studio.querySelectorAll(
+            '[data-ai-image-studio-compile-choice]',
+          );
+          const compileSubmit = studio.querySelector(
+            '[data-ai-image-studio-compile-submit]',
+          );
+          if (compileChoices.length && compileSubmit) {
+            const updateCompileControl = () => {
+              const count = Array.from(compileChoices)
+                .filter((choice) => choice.checked).length;
+              compileSubmit.disabled = count < 2;
+              compileSubmit.value = Drupal.t(
+                'Generate compiled video (@count clips)',
+                { '@count': count },
+              );
+            };
+            compileChoices.forEach((choice) => {
+              choice.addEventListener('change', updateCompileControl);
+            });
+            updateCompileControl();
+          }
 
           if (history && orderControl) {
             const applyHistoryOrder = () => {

@@ -1,5 +1,11 @@
 # Changelog
 
+- Added immutable logical-turn snapshots with explicit session ordering,
+  requested and effective settings, and replay provenance.
+- Added ordered session re-rendering into a new session, including global
+  setting overrides, current-default model selection, variation-aware source
+  remapping, and resumable queued video replay.
+
 All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta9

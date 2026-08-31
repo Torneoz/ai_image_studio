@@ -408,3 +408,56 @@ function ai_image_studio_update_10018(): void {
     $definition,
   );
 }
+
+/**
+ * Adds immutable request snapshots, replay provenance, and replay state.
+ */
+function ai_image_studio_update_10019(): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $turn_fields = [
+    'sequence' => BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Session sequence'))
+      ->setSetting('unsigned', TRUE),
+    'replay_of' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Replay of'))
+      ->setSetting('target_type', 'ai_image_studio_turn'),
+    'requested_generation_settings' => BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Requested generation settings')),
+  ];
+  foreach ($turn_fields as $name => $definition) {
+    $manager->installFieldStorageDefinition($name, 'ai_image_studio_turn', 'ai_image_studio', $definition);
+  }
+  $session_fields = [
+    'replay_source_session_id' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Replay source session'))
+      ->setSetting('target_type', 'ai_image_studio_session'),
+    'replay_state' => BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Replay state')),
+  ];
+  foreach ($session_fields as $name => $definition) {
+    $manager->installFieldStorageDefinition($name, 'ai_image_studio_session', 'ai_image_studio', $definition);
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
+  $session_ids = \Drupal::entityQuery('ai_image_studio_session')->accessCheck(FALSE)->execute();
+  foreach ($session_ids as $session_id) {
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('session_id', $session_id)
+      ->sort('created', 'ASC')
+      ->sort('id', 'ASC')
+      ->execute();
+    $sequence = 0;
+    $groups = [];
+    foreach ($storage->loadMultiple($ids) as $turn) {
+      $group = (string) ($turn->get('request_group')->value ?: 'turn:' . $turn->id());
+      if (!isset($groups[$group])) {
+        $groups[$group] = ++$sequence;
+      }
+      $turn->set('sequence', $groups[$group]);
+      $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+      $turn->set('requested_generation_settings', $settings);
+      $turn->save();
+    }
+  }
+}

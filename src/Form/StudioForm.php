@@ -695,6 +695,31 @@ final class StudioForm extends FormBase {
       '#type' => 'container',
       '#attributes' => ['class' => ['ai-image-studio-actions']],
     ];
+    if ($session->access('update') && $turns !== []) {
+      $form['session_actions']['replay'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Re-render session'),
+        '#url' => Url::fromRoute('ai_image_studio.session_replay', [
+          'ai_image_studio_session' => $session->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+      ];
+    }
+    if (!$session->get('replay_state')->isEmpty()) {
+      $replay_state = (array) ($session->get('replay_state')->first()?->getValue() ?? []);
+      $replay_status = (string) ($replay_state['status'] ?? 'running');
+      $form['session_actions']['replay_status'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-image-studio-meta']],
+        'value' => [
+          '#plain_text' => $this->t('Re-render status: @status (@done of @total requests)', [
+            '@status' => $replay_status,
+            '@done' => (int) ($replay_state['cursor'] ?? 0),
+            '@total' => count((array) ($replay_state['plan'] ?? [])),
+          ]),
+        ],
+      ];
+    }
     $completed_assets = array_filter($turns, static function (object $turn): bool {
       return $turn->get('status')->value === 'completed'
         && (!$turn->get('image')->isEmpty() || !$turn->get('video')->isEmpty());
@@ -735,14 +760,17 @@ final class StudioForm extends FormBase {
     );
     if (count($completed_videos) >= 2 && $this->generator->canExtractVideoFrame()) {
       $form['session_actions']['join_videos'] = [
-        '#type' => 'link',
-        '#title' => $this->t('Join all videos'),
-        '#url' => Url::fromRoute('ai_image_studio.join_videos', [
-          'ai_image_studio_session' => $session->id(),
-        ]),
+        '#type' => 'submit',
+        '#value' => $this->t('Generate compiled video'),
+        '#studio_action' => 'join_videos',
+        '#limit_validation_errors' => [['compiled_video_turn_ids']],
         '#attributes' => [
           'class' => ['button'],
-          'title' => $this->t('Download all completed videos joined in oldest-first order.'),
+          'data-ai-image-studio-compile-submit' => '',
+          'data-compile-label' => $this->t('Generate compiled video (@count clips)', [
+            '@count' => count($completed_videos),
+          ]),
+          'title' => $this->t('Download the included videos joined in oldest-first order.'),
         ],
       ];
     }
@@ -1177,6 +1205,11 @@ final class StudioForm extends FormBase {
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
     $build['#attributes'] += [
       'data-ai-image-studio-model' => $this->turnModelOption($turn),
+      'data-ai-image-studio-source-kind' => !$turn->get('video')->isEmpty()
+        && $turn->hasField('last_frame')
+        && !$turn->get('last_frame')->isEmpty()
+          ? 'video-last-frame'
+          : 'image',
       'data-ai-image-studio-aspect-ratio' => (string) ($settings['aspect_ratio'] ?? ''),
       'data-ai-image-studio-resolution' => (string) ($settings['resolution'] ?? ''),
       'data-ai-image-studio-quality' => (string) ($settings['quality'] ?? ''),
@@ -1185,6 +1218,8 @@ final class StudioForm extends FormBase {
       'data-ai-image-studio-transparent-background' => !empty($settings['transparent_background']) ? '1' : '0',
       'data-ai-image-studio-file-type' => (string) ($settings['file_type'] ?? 'png'),
       'data-ai-image-studio-auto-levels' => !empty($settings['auto_levels']) ? '1' : '0',
+      'data-ai-image-studio-show-ai-badge' => !empty($settings['show_ai_badge']) ? '1' : '0',
+      'data-ai-image-studio-ai-badge-text' => (string) ($settings['ai_badge_text'] ?? ''),
     ];
     if ($settings) {
       $build['settings'] = [
@@ -1290,6 +1325,19 @@ final class StudioForm extends FormBase {
         }
       }
       if ($is_video) {
+        $build['compile_choice'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Include in compiled video'),
+          '#return_value' => (string) $turn->id(),
+          '#default_value' => (string) $turn->id(),
+          '#parents' => ['compiled_video_turn_ids', (string) $turn->id()],
+          '#attributes' => [
+            'data-ai-image-studio-compile-choice' => '',
+          ],
+          '#wrapper_attributes' => [
+            'class' => ['ai-image-studio-compile-choice'],
+          ],
+        ];
         $build['regenerate_video'] = [
           '#type' => 'link',
           '#title' => $this->t('Regenerate with new settings'),
@@ -2293,6 +2341,23 @@ final class StudioForm extends FormBase {
     }
     if (($trigger['#studio_action'] ?? '') === 'publish_all') {
       $this->publishAllTurns($form_state);
+      return;
+    }
+    if (($trigger['#studio_action'] ?? '') === 'join_videos') {
+      $turn_ids = array_values(array_filter(array_map(
+        'intval',
+        (array) $form_state->getValue('compiled_video_turn_ids'),
+      )));
+      if (count($turn_ids) < 2) {
+        $this->messenger()->addError($this->t('Include at least two videos to generate a compiled video.'));
+        $form_state->setRebuild();
+        return;
+      }
+      $form_state->setRedirect('ai_image_studio.join_videos', [
+        'ai_image_studio_session' => $form_state->get('session_id'),
+      ], [
+        'query' => ['turn_ids' => implode(',', $turn_ids)],
+      ]);
       return;
     }
     if (($trigger['#studio_action'] ?? '') === 'regenerate_video') {

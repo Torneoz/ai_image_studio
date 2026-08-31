@@ -12,6 +12,8 @@ Drupal Media.
 ## Features
 
 - Persistent image sessions with a chat-like prompt and version history.
+- Immutable logical-request history with explicit creation order, requested
+  and effective setting snapshots, and session re-rendering into a new session.
 - Text-to-image generation through compatible Drupal AI providers.
 - Sequential image refinement when the selected provider and model support
   image-to-image requests.
@@ -64,6 +66,10 @@ Image requests run synchronously. Video requests are queued by default. Studio
 starts one queued item after each web response and its five-second status
 refresh advances native provider polling. Drupal cron or another queue runner
 can process the same queue as a fallback, but is not required to start videos.
+Session re-renders use that same queue for asynchronous video turns and resume
+the ordered replay after each queued result completes. Refinement sources are
+remapped to the corresponding newly generated variation rather than reused
+from the original session.
 Administrators can restore synchronous video requests from the module settings
 for development or provider troubleshooting.
 

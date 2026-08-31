@@ -38,6 +38,18 @@ entity.ai_image_studio_session.delete_form:
       ai_image_studio_session:
         type: entity:ai_image_studio_session
 
+ai_image_studio.session_replay:
+  path: '/admin/content/ai-image-studio/{ai_image_studio_session}/re-render'
+  defaults:
+    _form: '\Drupal\ai_image_studio\Form\SessionReplayForm'
+    _title_callback: '\Drupal\ai_image_studio\Form\SessionReplayForm::title'
+  requirements:
+    _entity_access: 'ai_image_studio_session.update'
+  options:
+    parameters:
+      ai_image_studio_session:
+        type: entity:ai_image_studio_session
+
 ai_image_studio.download_all:
   path: '/admin/content/ai-image-studio/{ai_image_studio_session}/download-all'
   defaults:

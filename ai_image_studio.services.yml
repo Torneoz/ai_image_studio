@@ -20,6 +20,13 @@ services:
     arguments:
       - '@config.factory'
 
+  ai_image_studio.session_replay:
+    class: Drupal\ai_image_studio\Service\SessionReplayManager
+    arguments:
+      - '@entity_type.manager'
+      - '@ai_image_studio.generator'
+      - '@logger.channel.ai_image_studio'
+
   logger.channel.ai_image_studio:
     parent: logger.channel_base
     arguments: ['ai_image_studio']

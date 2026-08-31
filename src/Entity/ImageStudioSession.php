@@ -76,6 +76,13 @@ final class ImageStudioSession extends ContentEntityBase implements EntityOwnerI
       ])
       ->setDefaultValue('active');
 
+    $fields['replay_source_session_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Replay source session'))
+      ->setSetting('target_type', 'ai_image_studio_session');
+
+    $fields['replay_state'] = BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Replay state'));
+
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(new TranslatableMarkup('Created'));
 

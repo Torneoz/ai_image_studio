@@ -12,6 +12,7 @@ use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\ExecutableFinder;
@@ -111,6 +112,7 @@ final class SessionDownloadController extends ControllerBase {
    */
   public function joinVideos(
     object $ai_image_studio_session,
+    Request $request,
   ): BinaryFileResponse|RedirectResponse {
     if ((new ExecutableFinder())->find('ffmpeg') === NULL) {
       $this->messenger()->addError($this->t('Joining videos requires FFmpeg on the server.'));
@@ -127,6 +129,13 @@ final class SessionDownloadController extends ControllerBase {
       ->sort('created', 'ASC')
       ->sort('id', 'ASC')
       ->execute();
+    $requested_turn_ids = array_values(array_unique(array_filter(array_map(
+      'intval',
+      explode(',', (string) $request->query->get('turn_ids', '')),
+    ))));
+    if ($requested_turn_ids !== []) {
+      $turn_ids = array_intersect($turn_ids, $requested_turn_ids);
+    }
     $source_paths = [];
     foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
       $file = $turn->get('video')->entity;

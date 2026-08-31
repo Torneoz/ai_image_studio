@@ -62,6 +62,15 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setLabel(new TranslatableMarkup('Request group'))
       ->setSetting('max_length', 64);
 
+    $fields['sequence'] = BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Session sequence'))
+      ->setDescription(new TranslatableMarkup('Creation order of the logical request within its session.'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['replay_of'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Replay of'))
+      ->setSetting('target_type', 'ai_image_studio_turn');
+
     $fields['prompt'] = BaseFieldDefinition::create('string_long')
       ->setLabel(new TranslatableMarkup('Prompt'))
       ->setRequired(TRUE);
@@ -102,7 +111,10 @@ final class ImageStudioTurn extends ContentEntityBase {
       ]);
 
     $fields['generation_settings'] = BaseFieldDefinition::create('map')
-      ->setLabel(new TranslatableMarkup('Generation settings'));
+      ->setLabel(new TranslatableMarkup('Effective generation settings'));
+
+    $fields['requested_generation_settings'] = BaseFieldDefinition::create('map')
+      ->setLabel(new TranslatableMarkup('Requested generation settings'));
 
     $fields['duration_ms'] = BaseFieldDefinition::create('integer')
       ->setLabel(new TranslatableMarkup('Generation duration'))

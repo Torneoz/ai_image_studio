@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ai_image_studio\Plugin\QueueWorker;
 
 use Drupal\ai_image_studio\Service\ImageGenerator;
+use Drupal\ai_image_studio\Service\SessionReplayManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -35,6 +36,7 @@ final class GenerationQueueWorker extends QueueWorkerBase implements ContainerFa
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ImageGenerator $generator,
     private readonly ConfigFactoryInterface $configFactory,
+    private readonly SessionReplayManager $replayManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -55,6 +57,7 @@ final class GenerationQueueWorker extends QueueWorkerBase implements ContainerFa
       $container->get('entity_type.manager'),
       $container->get('ai_image_studio.generator'),
       $container->get('config.factory'),
+      $container->get('ai_image_studio.session_replay'),
     );
   }
 
@@ -76,11 +79,16 @@ final class GenerationQueueWorker extends QueueWorkerBase implements ContainerFa
       && !$turn->get('provider_request_id')->isEmpty()) {
       throw new DelayedRequeueException(5, 'The provider request is still processing.');
     }
+    if ($turn->get('status')->value === 'completed') {
+      $this->replayManager->turnFinished($turn);
+      return;
+    }
     if ($turn->get('status')->value !== 'failed') {
       return;
     }
     $provider_metadata = (array) ($turn->get('provider_metadata')->first()?->getValue() ?? []);
     if (($provider_metadata['provider_status'] ?? '') === 'failed') {
+      $this->replayManager->turnFinished($turn);
       return;
     }
 
@@ -92,6 +100,7 @@ final class GenerationQueueWorker extends QueueWorkerBase implements ContainerFa
       $turn->save();
       throw new RequeueException((string) $turn->get('error_message')->value);
     }
+    $this->replayManager->turnFinished($turn);
   }
 
 }
