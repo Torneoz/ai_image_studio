@@ -328,6 +328,7 @@ final class StudioForm extends FormBase {
       $form['actions'] = ['#type' => 'actions'];
       $form['actions']['generate'] = [
         '#type' => 'submit',
+        '#name' => 'generate',
         '#value' => $default_output_type === 'video'
           ? $this->t('Generate Video')
           : $this->t('Generate Image'),
@@ -674,6 +675,7 @@ final class StudioForm extends FormBase {
       $form['refine']['actions'] = ['#type' => 'actions'];
       $form['refine']['actions']['generate'] = [
         '#type' => 'submit',
+        '#name' => 'generate',
         '#value' => $default_output_type === 'video'
           ? $this->t('Generate Video')
           : $this->t('Generate Image'),

@@ -12,6 +12,8 @@ All notable changes to AI Image Studio are documented in this file.
   prompt-management and selected-prompt editing controls.
 - Normalized nested prompt-selector submissions so image and video generation
   consistently receive scalar managed-prompt IDs.
+- Kept the dynamically labelled generation button identifiable to Drupal Form
+  API, preventing video submissions from stopping silently before validation.
 - Prevented missing managed prompt-type configuration from crashing Studio,
   Media Library, and VBO forms, and added update hooks to restore it.
 - Made module install hooks explicitly create shipped prompt entities and Views

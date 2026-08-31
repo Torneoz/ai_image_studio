@@ -377,6 +377,21 @@
             return;
           }
 
+          // The visible Image/Video label changes with the selected output,
+          // while Drupal rebuilds the button with the configured default
+          // label. Identify this uniquely named button independently of its
+          // mutable value so Form API always runs its submit handler.
+          let triggeringName = studio.querySelector(
+            'input[name="_triggering_element_name"]',
+          );
+          if (!triggeringName) {
+            triggeringName = document.createElement('input');
+            triggeringName.type = 'hidden';
+            triggeringName.name = '_triggering_element_name';
+            studio.append(triggeringName);
+          }
+          triggeringName.value = submitter.name;
+
           const output = submitter.dataset.aiImageStudioOutputType
             || studio.querySelector(
               'input[name="output_type"]:checked',
