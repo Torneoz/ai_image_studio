@@ -2,7 +2,7 @@
 
 All notable changes to AI Image Studio are documented in this file.
 
-## 1.0.0-beta8
+## 1.0.0-beta9
 
 - Added a proof-of-concept session action that joins compatible completed
   videos in oldest-first order into a downloadable MP4 using FFmpeg.
@@ -25,6 +25,10 @@ All notable changes to AI Image Studio are documented in this file.
   when recipe installation cannot discover cross-provider configuration names.
 - Added bundle-aware VBO result destinations so generated files can replace an
   image field or be published and attached to an image Media reference field.
+- Added an Image Studio Content View for selecting nodes and starting bulk
+  image-generation jobs through Views Bulk Operations.
+- Added owner-aware bulk job listings and item-level progress, previews, costs,
+  errors, and regeneration controls.
 - Added video regeneration from each completed video’s original inputs, with
   updated video settings and an optional replacement prompt.
 - Added optional RGB auto levels for generated images in the full Studio and

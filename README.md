@@ -16,6 +16,8 @@ Drupal Media.
 - Sequential image refinement when the selected provider and model support
   image-to-image requests.
 - Text-to-video and image-to-video generation through compatible providers.
+- Video sequence chaining using the last decodable frame of a completed video,
+  plus an experimental FFmpeg action for joining compatible session videos.
 - Ordered Grok image editing with up to three uploaded, Media, or prior-session
   images and retained input provenance.
 - Grok reference-to-video with up to seven ordered images, `<IMAGE_N>` prompt
@@ -49,6 +51,9 @@ Drupal Media.
 - Editor-written start prompts with separate reusable visual styles and
   after-prompts managed through Drupal AI Prompt Management in the full
   Studio, sequential refinement, video regeneration, and compact Media forms.
+- Views integration for reporting on Studio sessions and individual turns.
+- Optional Views Bulk Operations integration for queued, token-aware image
+  generation across selected content items.
 
 External modules can add styles without an integration module by shipping an
 `ai.ai_prompt.*` configuration entity whose `type` is
@@ -64,6 +69,8 @@ for development or provider troubleshooting.
 
 Embedding badges in Media images requires PHP GD. Embedding badges in Media
 videos additionally requires the `ffmpeg` executable to be available to PHP.
+Extracting video chaining frames and joining session videos also requires
+FFmpeg to be available to PHP. Joined videos must be mutually compatible.
 Applying auto levels requires the PHP Imagick extension.
 
 ## Requirements
@@ -141,18 +148,30 @@ Image Studio** action to Views Bulk Operations node views. Install Views Bulk
 Operations, enable `ai_image_studio_vbo`, and add the action to a View's
 **Global: Views bulk operations** field.
 
+The submodule supplies an **Image Studio Content** View at
+`/admin/content/image-studio-content`. Editors can filter and select nodes,
+apply the generation action, then choose a managed prompt, provider models,
+optional source field, output settings, and publishing destination. The action
+queues one image request per selected node.
+
 Editors select or create reusable prompts through Drupal AI Prompt Management.
 Prompts can contain Drupal node tokens, and each job snapshots the selected
 prompt text before token replacement. Editors can optionally take an image from
-an image, file, or Media reference field and publish completed results to Media.
-The VBO request only snapshots and queues the selected nodes; Drupal cron
-performs the provider requests in the background. Job progress is available
-under **Content > Bulk image jobs**.
+an image, file, or Media reference field. Nodes without a usable source fall
+back to text-to-image. Completed results can remain in Studio, be published to
+Media, or be published and assigned to a compatible image or image-Media
+reference field. Assigning a result replaces the field's existing value.
+
+The VBO request only snapshots and queues the selected nodes. Drupal cron can
+process provider requests in the background; keeping an active job page open
+also advances the queue while it refreshes. **Content > Bulk image jobs** shows
+job and item status, attempts, costs, previews, results, errors, and controls
+for regenerating one item or an entire completed job with new settings.
 
 Install the optional dependency with Composer:
 
 ```shell
-composer require drupal/views_bulk_operations:^4.4
+composer require drupal/views_bulk_operations:^4.4 drupal/token
 ```
 
 ## Similar projects
