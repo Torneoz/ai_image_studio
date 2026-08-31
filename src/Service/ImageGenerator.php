@@ -135,6 +135,13 @@ final class ImageGenerator {
   }
 
   /**
+   * Reports whether completed videos can provide a chaining frame.
+   */
+  public function canExtractVideoFrame(): bool {
+    return (new ExecutableFinder())->find('ffmpeg') !== NULL;
+  }
+
+  /**
    * Reports whether generated images can be auto-levelled on this server.
    */
   public function canAutoLevels(): bool {
@@ -172,9 +179,7 @@ final class ImageGenerator {
     array $generation_settings = [],
     string $output_type = 'image',
   ): object {
-    $source ??= $parent && !$parent->get('image')->isEmpty()
-      ? $parent->get('image')->entity
-      : NULL;
+    $source ??= $parent ? $this->turnSourceImage($parent) : NULL;
     $reference_ids = array_values(array_unique(array_filter(array_map(
       'intval',
       (array) ($generation_settings['reference_file_ids'] ?? []),
@@ -399,6 +404,9 @@ final class ImageGenerator {
             $generation_settings,
           );
         $result_turn->set($output_type, ['target_id' => $file->id()]);
+        if ($output_type === 'video') {
+          $this->attachLastFrame($result_turn, $file, $session);
+        }
         $result_turn->set('duration_ms', $duration_ms);
         $result_turn->set('estimated_cost', $cost_per_output);
         $result_turn->set('token_usage', $index === 0 ? $token_usage : []);
@@ -619,6 +627,7 @@ final class ImageGenerator {
     );
     $cost = $this->findReportedCost($response);
     $turn->set('video', ['target_id' => $file->id()]);
+    $this->attachLastFrame($turn, $file, $session);
     $turn->set('duration_ms', (int) round((hrtime(TRUE) - $started_at) / 1_000_000));
     $turn->set('estimated_cost', $cost);
     $turn->set('cost_source', $cost === NULL ? 'unavailable' : 'reported');
@@ -1232,6 +1241,95 @@ final class ImageGenerator {
     $file->setPermanent();
     $file->save();
     return $file;
+  }
+
+  /**
+   * Extracts and attaches a video's last decodable frame without failing it.
+   */
+  private function attachLastFrame(
+    object $turn,
+    FileInterface $video,
+    object $session,
+  ): void {
+    if (!$this->canExtractVideoFrame()) {
+      return;
+    }
+    $source_path = $this->fileSystem->realpath($video->getFileUri());
+    $temporary_path = tempnam(
+      $this->fileSystem->getTempDirectory(),
+      'ai-image-last-frame-',
+    );
+    if ($source_path === FALSE || $temporary_path === FALSE) {
+      $this->logger->warning('Could not prepare video turn @turn for last-frame extraction.', [
+        '@turn' => $turn->id(),
+      ]);
+      return;
+    }
+    try {
+      $process = new Process([
+        'ffmpeg', '-y', '-sseof', '-0.1', '-i', $source_path,
+        '-frames:v', '1', '-c:v', 'png', '-f', 'image2', $temporary_path,
+      ]);
+      $process->setTimeout(60);
+      $process->run();
+      $binary = $process->isSuccessful()
+        ? file_get_contents($temporary_path)
+        : FALSE;
+      if ($binary === FALSE || $binary === '') {
+        $this->logger->warning('Could not extract a chaining frame from video turn @turn: @message', [
+          '@turn' => $turn->id(),
+          '@message' => trim($process->getErrorOutput()),
+        ]);
+        return;
+      }
+      $settings = $this->configFactory->get('ai_image_studio.settings');
+      $scheme = (string) ($settings->get('file_scheme') ?: 'private');
+      $directory = trim((string) ($settings->get('file_directory') ?: 'ai-image-studio'), '/');
+      $destination_directory = sprintf(
+        '%s://%s/%s',
+        $scheme,
+        $directory,
+        $this->safeSessionName($session),
+      );
+      $destination = sprintf(
+        '%s/turn-%d-last-frame.png',
+        $destination_directory,
+        $turn->id(),
+      );
+      $frame = $this->fileRepository->writeData(
+        $binary,
+        $destination,
+        FileExists::Replace,
+      );
+      $frame->setPermanent();
+      $frame->save();
+      $turn->set('last_frame', ['target_id' => $frame->id()]);
+    }
+    catch (\Throwable $exception) {
+      $this->logger->warning('Could not extract a chaining frame from video turn @turn: @message', [
+        '@turn' => $turn->id(),
+        '@message' => $exception->getMessage(),
+      ]);
+    }
+    finally {
+      @unlink($temporary_path);
+    }
+  }
+
+  /**
+   * Returns the image asset that can seed a child turn.
+   */
+  private function turnSourceImage(object $turn): ?FileInterface {
+    if (!$turn->get('image')->isEmpty()
+      && $turn->get('image')->entity instanceof FileInterface) {
+      return $turn->get('image')->entity;
+    }
+    if ($turn->hasField('last_frame')
+      && !$turn->get('last_frame')->isEmpty()
+      && $turn->get('last_frame')->entity instanceof FileInterface) {
+      return $turn->get('last_frame')->entity;
+    }
+    return NULL;
   }
 
   /**

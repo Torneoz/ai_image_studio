@@ -4,6 +4,8 @@ All notable changes to AI Image Studio are documented in this file.
 
 ## 1.0.0-beta8
 
+- Added video sequence chaining by extracting each completed video's last
+  decodable frame and making it available as the next image-to-video source.
 - Added a separate managed visual-style prompt library with photographic,
   illustrative, traditional-media, graphic, and 3D defaults across Studio and
   compact Media workflows.

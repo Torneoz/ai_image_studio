@@ -392,3 +392,19 @@ function ai_image_studio_update_10017(): void {
   $prompt_manager = \Drupal::service('ai.prompt_manager');
   $prompt_manager->upsertFromConfigInstall('ai_image_studio');
 }
+
+/**
+ * Adds extracted last-frame storage for video sequence chaining.
+ */
+function ai_image_studio_update_10018(): void {
+  $definition = BaseFieldDefinition::create('file')
+    ->setLabel(new TranslatableMarkup('Video last frame'))
+    ->setSetting('file_extensions', 'png')
+    ->setSetting('file_directory', 'ai-image-studio');
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'last_frame',
+    'ai_image_studio_turn',
+    'ai_image_studio',
+    $definition,
+  );
+}

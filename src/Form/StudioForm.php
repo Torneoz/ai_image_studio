@@ -1241,13 +1241,16 @@ final class StudioForm extends FormBase {
           ];
         }
       }
-      if (!$is_video) {
+      if (!$turn->get('image')->isEmpty()
+        || ($turn->hasField('last_frame') && !$turn->get('last_frame')->isEmpty())) {
         $build['source_choice'] = [
           '#type' => 'container',
           '#attributes' => ['class' => ['ai-image-studio-source-action']],
           'choice' => [
             '#type' => 'radio',
-            '#title' => $this->t('Use as refinement source'),
+            '#title' => $is_video
+              ? $this->t('Use last frame as source')
+              : $this->t('Use as refinement source'),
             '#return_value' => (string) $turn->id(),
             '#default_value' => (string) $selected_turn_id,
             '#parents' => ['source_turn_id'],
@@ -1260,8 +1263,16 @@ final class StudioForm extends FormBase {
             . $this->t('Selected source') . '</span>',
           ],
         ];
+        if ($is_video && $turn->get('last_frame')->entity instanceof FileInterface) {
+          $build['source_choice']['preview'] = [
+            '#theme' => 'image',
+            '#uri' => $turn->get('last_frame')->entity->getFileUri(),
+            '#alt' => $this->t('Last frame from generated video'),
+            '#attributes' => ['class' => ['ai-image-studio-last-frame']],
+          ];
+        }
       }
-      else {
+      if ($is_video) {
         $build['regenerate_video'] = [
           '#type' => 'link',
           '#title' => $this->t('Regenerate with new settings'),
@@ -2586,8 +2597,8 @@ final class StudioForm extends FormBase {
         (int) $session_id,
         (int) $form_state->getValue('source_turn_id'),
       );
-      if ($primary !== NULL && !$primary->get('image')->isEmpty()) {
-        $ids[] = (int) $primary->get('image')->target_id;
+      if ($primary !== NULL && $this->turnSourceFile($primary) !== NULL) {
+        $ids[] = (int) $this->turnSourceFile($primary)->id();
       }
       $selected_turn_ids = array_values(array_filter(array_map(
         'intval',
@@ -2604,8 +2615,8 @@ final class StudioForm extends FormBase {
       );
       foreach ($ordered_turn_ids as $turn_id) {
         $turn = $this->completedTurnFromSession((int) $session_id, (int) $turn_id);
-        if ($turn !== NULL && !$turn->get('image')->isEmpty()) {
-          $ids[] = (int) $turn->get('image')->target_id;
+        if ($turn !== NULL && $this->turnSourceFile($turn) !== NULL) {
+          $ids[] = (int) $this->turnSourceFile($turn)->id();
         }
       }
       $media_id = $this->mediaLibrarySelectionId($form_state->getValue('media'));
@@ -2787,11 +2798,14 @@ final class StudioForm extends FormBase {
    */
   private function latestCompletedTurn(int $session_id): ?object {
     $storage = $this->entityTypeManager->getStorage('ai_image_studio_turn');
-    $ids = $storage->getQuery()
+    $query = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('session_id', $session_id)
-      ->condition('status', 'completed')
+      ->condition('status', 'completed');
+    $query->condition($query->orConditionGroup()
       ->condition('image.target_id', NULL, 'IS NOT NULL')
+      ->condition('last_frame.target_id', NULL, 'IS NOT NULL'));
+    $ids = $query
       ->sort('created', 'DESC')
       ->sort('id', 'DESC')
       ->range(0, 1)
@@ -2816,10 +2830,26 @@ final class StudioForm extends FormBase {
     if ($turn === NULL
       || (int) $turn->get('session_id')->target_id !== $session_id
       || $turn->get('status')->value !== 'completed'
-      || $turn->get('image')->isEmpty()) {
+      || $this->turnSourceFile($turn) === NULL) {
       return NULL;
     }
     return $turn;
+  }
+
+  /**
+   * Returns an image or an extracted video frame usable as a source.
+   */
+  private function turnSourceFile(object $turn): ?FileInterface {
+    if (!$turn->get('image')->isEmpty()
+      && $turn->get('image')->entity instanceof FileInterface) {
+      return $turn->get('image')->entity;
+    }
+    if ($turn->hasField('last_frame')
+      && !$turn->get('last_frame')->isEmpty()
+      && $turn->get('last_frame')->entity instanceof FileInterface) {
+      return $turn->get('last_frame')->entity;
+    }
+    return NULL;
   }
 
   /**

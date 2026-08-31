@@ -76,6 +76,11 @@ final class ImageStudioTurn extends ContentEntityBase {
       ->setSetting('file_extensions', 'mp4')
       ->setSetting('file_directory', 'ai-image-studio');
 
+    $fields['last_frame'] = BaseFieldDefinition::create('file')
+      ->setLabel(new TranslatableMarkup('Video last frame'))
+      ->setSetting('file_extensions', 'png')
+      ->setSetting('file_directory', 'ai-image-studio');
+
     $fields['provider_id'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Provider'))
       ->setSetting('max_length', 128);
