@@ -1288,6 +1288,17 @@ final class StudioForm extends FormBase {
           ),
           '#attributes' => ['class' => ['button']],
         ];
+        if (!$turn->hasField('last_frame') || $turn->get('last_frame')->isEmpty()) {
+          $build['last_frame_unavailable'] = [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['ai-image-studio-meta']],
+            'value' => [
+              '#plain_text' => $this->generator->canExtractVideoFrame()
+                ? $this->t('A chaining frame could not be extracted from this video.')
+                : $this->t('Last-frame chaining requires FFmpeg on the server.'),
+            ],
+          ];
+        }
       }
       if ($published_media instanceof MediaInterface) {
         $build['published'] = $published_media
