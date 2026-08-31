@@ -123,7 +123,7 @@
           });
 
           const compileChoices = studio.querySelectorAll(
-            '[data-ai-image-studio-compile-choice]',
+            'input[type="checkbox"][name^="compiled_video[compiled_video_turn_ids]"]',
           );
           const compileSubmit = studio.querySelector(
             '[data-ai-image-studio-compile-submit]',

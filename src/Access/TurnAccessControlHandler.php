@@ -22,13 +22,18 @@ final class TurnAccessControlHandler extends EntityAccessControlHandler {
       return AccessResult::allowed()->cachePerPermissions();
     }
 
-    if ($operation !== 'view') {
-      return AccessResult::neutral()->cachePerPermissions();
-    }
-
     $session = $entity->get('session_id')->entity;
     if ($session === NULL) {
       return AccessResult::forbidden()->addCacheableDependency($entity);
+    }
+
+    if ($operation === 'delete') {
+      return $session->access('update', $account, TRUE)
+        ->addCacheableDependency($entity);
+    }
+
+    if ($operation !== 'view') {
+      return AccessResult::neutral()->cachePerPermissions();
     }
 
     return $session->access('view', $account, TRUE)

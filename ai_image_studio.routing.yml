@@ -38,6 +38,18 @@ entity.ai_image_studio_session.delete_form:
       ai_image_studio_session:
         type: entity:ai_image_studio_session
 
+entity.ai_image_studio_turn.delete_form:
+  path: '/admin/content/ai-image-studio/turn/{ai_image_studio_turn}/delete'
+  defaults:
+    _entity_form: 'ai_image_studio_turn.delete'
+    _title: 'Delete Studio turn'
+  requirements:
+    _entity_access: 'ai_image_studio_turn.delete'
+  options:
+    parameters:
+      ai_image_studio_turn:
+        type: entity:ai_image_studio_turn
+
 ai_image_studio.session_replay:
   path: '/admin/content/ai-image-studio/{ai_image_studio_session}/re-render'
   defaults:

@@ -759,18 +759,43 @@ final class StudioForm extends FormBase {
       static fn (object $turn): bool => !$turn->get('video')->isEmpty(),
     );
     if (count($completed_videos) >= 2 && $this->generator->canExtractVideoFrame()) {
-      $form['session_actions']['join_videos'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Generate compiled video'),
-        '#studio_action' => 'join_videos',
-        '#limit_validation_errors' => [['compiled_video_turn_ids']],
-        '#attributes' => [
-          'class' => ['button'],
-          'data-ai-image-studio-compile-submit' => '',
-          'data-compile-label' => $this->t('Generate compiled video (@count clips)', [
-            '@count' => count($completed_videos),
-          ]),
-          'title' => $this->t('Download the included videos joined in oldest-first order.'),
+      $compile_options = [];
+      foreach ($completed_videos as $video_turn) {
+        $compile_options[(int) $video_turn->id()] = $this->t('Version @number — @prompt', [
+          '@number' => $turn_numbers[(int) $video_turn->id()] ?? 1,
+          '@prompt' => $this->promptSummary((string) $video_turn->get('prompt')->value),
+        ]);
+      }
+      $form['compiled_video'] = [
+        '#type' => 'details',
+        '#tree' => TRUE,
+        '#weight' => -5,
+        '#title' => $this->t('Compiled video'),
+        '#open' => TRUE,
+        '#description' => $this->t('Uncheck a clip to leave it out of the compiled video. The original turn is not deleted.'),
+        'compiled_video_turn_ids' => [
+          '#type' => 'checkboxes',
+          '#title' => $this->t('Included clips'),
+          '#options' => $compile_options,
+          '#default_value' => array_keys($compile_options),
+          '#attributes' => [
+            'data-ai-image-studio-compile-choice' => '',
+          ],
+        ],
+        'actions' => [
+          '#type' => 'actions',
+          'join_videos' => [
+            '#type' => 'submit',
+            '#value' => $this->t('Generate compiled video (@count clips)', [
+              '@count' => count($completed_videos),
+            ]),
+            '#studio_action' => 'join_videos',
+            '#limit_validation_errors' => [['compiled_video', 'compiled_video_turn_ids']],
+            '#attributes' => [
+              'data-ai-image-studio-compile-submit' => '',
+              'title' => $this->t('Download the included videos joined in oldest-first order.'),
+            ],
+          ],
         ],
       ];
     }
@@ -1325,19 +1350,6 @@ final class StudioForm extends FormBase {
         }
       }
       if ($is_video) {
-        $build['compile_choice'] = [
-          '#type' => 'checkbox',
-          '#title' => $this->t('Include in compiled video'),
-          '#return_value' => (string) $turn->id(),
-          '#default_value' => (string) $turn->id(),
-          '#parents' => ['compiled_video_turn_ids', (string) $turn->id()],
-          '#attributes' => [
-            'data-ai-image-studio-compile-choice' => '',
-          ],
-          '#wrapper_attributes' => [
-            'class' => ['ai-image-studio-compile-choice'],
-          ],
-        ];
         $build['regenerate_video'] = [
           '#type' => 'link',
           '#title' => $this->t('Regenerate with new settings'),
@@ -1445,6 +1457,14 @@ final class StudioForm extends FormBase {
               '#attributes' => [
                 'class' => ['button'],
                 'download' => TRUE,
+              ],
+            ] : [],
+            'delete' => $turn->access('delete') ? [
+              '#type' => 'link',
+              '#title' => $this->t('Delete Turn'),
+              '#url' => $turn->toUrl('delete-form'),
+              '#attributes' => [
+                'class' => ['button', 'button--danger'],
               ],
             ] : [],
           ],
@@ -2346,7 +2366,10 @@ final class StudioForm extends FormBase {
     if (($trigger['#studio_action'] ?? '') === 'join_videos') {
       $turn_ids = array_values(array_filter(array_map(
         'intval',
-        (array) $form_state->getValue('compiled_video_turn_ids'),
+        (array) $form_state->getValue([
+          'compiled_video',
+          'compiled_video_turn_ids',
+        ]),
       )));
       if (count($turn_ids) < 2) {
         $this->messenger()->addError($this->t('Include at least two videos to generate a compiled video.'));

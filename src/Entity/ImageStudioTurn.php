@@ -24,6 +24,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   handlers: [
     'access' => TurnAccessControlHandler::class,
     'views_data' => ImageStudioTurnViewsData::class,
+    'form' => [
+      'delete' => 'Drupal\ai_image_studio\Form\TurnDeleteForm',
+    ],
   ],
   base_table: 'ai_image_studio_turn',
   entity_keys: [
@@ -31,6 +34,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
     'uuid' => 'uuid',
   ],
   admin_permission: 'administer ai image studio',
+  links: [
+    'delete-form' => '/admin/content/ai-image-studio/turn/{ai_image_studio_turn}/delete',
+  ],
 )]
 final class ImageStudioTurn extends ContentEntityBase {
 
