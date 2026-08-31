@@ -29,6 +29,9 @@ final class PromptResolver {
     mixed $prompt_id,
     string $prompt_type = self::PROMPT_TYPE,
   ): string {
+    if (is_array($prompt_id)) {
+      $prompt_id = $prompt_id['table'] ?? '';
+    }
     $prompt_id = trim((string) $prompt_id);
     if ($prompt_id === '') {
       return '';

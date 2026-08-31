@@ -122,4 +122,22 @@ final class PromptSelect extends AiPrompt {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function afterBuild(
+    array $element,
+    FormStateInterface $form_state,
+  ): array {
+    $element = parent::afterBuild($element, $form_state);
+    $value = $form_state->getValue($element['#parents']);
+    if (is_array($value)) {
+      $form_state->setValue(
+        $element['#parents'],
+        (string) ($value['table'] ?? ''),
+      );
+    }
+    return $element;
+  }
+
 }

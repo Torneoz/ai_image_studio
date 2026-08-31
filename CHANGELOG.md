@@ -10,6 +10,8 @@ All notable changes to AI Image Studio are documented in this file.
 - Replaced the Style and After Prompt selection tables with compact selects
   that load a styled selected-prompt preview over AJAX while retaining visible
   prompt-management and selected-prompt editing controls.
+- Normalized nested prompt-selector submissions so image and video generation
+  consistently receive scalar managed-prompt IDs.
 - Prevented missing managed prompt-type configuration from crashing Studio,
   Media Library, and VBO forms, and added update hooks to restore it.
 - Made module install hooks explicitly create shipped prompt entities and Views
