@@ -134,7 +134,7 @@
                 .filter((choice) => choice.checked).length;
               compileSubmit.disabled = count < 2;
               compileSubmit.value = Drupal.t(
-                'Download Compiled Video (@count clips)',
+                'Join Videos (@count selected)',
                 { '@count': count },
               );
             };

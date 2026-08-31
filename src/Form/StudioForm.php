@@ -786,14 +786,14 @@ final class StudioForm extends FormBase {
           '#type' => 'actions',
           'join_videos' => [
             '#type' => 'submit',
-            '#value' => $this->t('Download Compiled Video (@count clips)', [
+            '#value' => $this->t('Join Videos (@count selected)', [
               '@count' => count($completed_videos),
             ]),
             '#studio_action' => 'join_videos',
             '#limit_validation_errors' => [['compiled_video', 'compiled_video_turn_ids']],
             '#attributes' => [
               'data-ai-image-studio-compile-submit' => '',
-              'title' => $this->t('Download the included videos joined in oldest-first order.'),
+              'title' => $this->t('Join and download the selected videos in oldest-first order.'),
             ],
           ],
         ],
