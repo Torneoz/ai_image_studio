@@ -51,7 +51,7 @@
             }
 
             const selectedImage = selectedCard.querySelector(
-              '.ai-image-studio-turn__image',
+              '.ai-image-studio-turn__image, .ai-image-studio-last-frame',
             );
             if (previewImage && selectedImage) {
               previewImage.src = selectedImage.src;

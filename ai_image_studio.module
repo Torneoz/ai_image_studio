@@ -318,6 +318,7 @@ function ai_image_studio_file_download(string $uri): array|int|null {
     ->orConditionGroup()
     ->condition('image', $file->id())
     ->condition('video', $file->id())
+    ->condition('last_frame', $file->id())
     ->condition('source_file_ids', $file->id());
   $turn_ids = $turn_storage->getQuery()
     ->accessCheck(FALSE)
@@ -375,8 +376,16 @@ function ai_image_studio_entity_predelete(EntityInterface $entity): void {
     }
   }
 
-  if ($entity->getEntityTypeId() === 'ai_image_studio_turn'
-    && $entity->get('media_id')->isEmpty()) {
+  if ($entity->getEntityTypeId() === 'ai_image_studio_turn') {
+    if (!$entity->get('last_frame')->isEmpty()) {
+      $last_frame = $entity->get('last_frame')->entity;
+      if ($last_frame instanceof FileInterface) {
+        $last_frame->delete();
+      }
+    }
+    if (!$entity->get('media_id')->isEmpty()) {
+      return;
+    }
     foreach (['image', 'video'] as $field_name) {
       if (!$entity->get($field_name)->isEmpty()) {
         $file = $entity->get($field_name)->entity;

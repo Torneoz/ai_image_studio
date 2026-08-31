@@ -6,6 +6,7 @@ All notable changes to AI Image Studio are documented in this file.
 
 - Added video sequence chaining by extracting each completed video's last
   decodable frame and making it available as the next image-to-video source.
+- Authorized private last-frame previews through their owning Studio session.
 - Added a separate managed visual-style prompt library with photographic,
   illustrative, traditional-media, graphic, and 3D defaults across Studio and
   compact Media workflows.

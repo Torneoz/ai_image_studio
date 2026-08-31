@@ -437,7 +437,7 @@ final class StudioForm extends FormBase {
       if ($selected_source !== NULL) {
         $source_number = $turn_numbers[(int) $selected_source->id()] ?? 1;
         $source_prompt = (string) $selected_source->get('prompt')->value;
-        $source_file = $selected_source->get('image')->entity;
+        $source_file = $this->turnSourceFile($selected_source);
         $source_url = Url::fromRoute('<none>', [], [
           'fragment' => 'ai-image-studio-turn-' . $selected_source->id(),
         ]);
