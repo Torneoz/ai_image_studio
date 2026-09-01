@@ -377,14 +377,17 @@ function ai_image_studio_entity_predelete(EntityInterface $entity): void {
   }
 
   if ($entity->getEntityTypeId() === 'ai_image_studio_turn') {
+    // Published Media may use the extracted frame as its thumbnail and the
+    // generated asset as its source. Preserve both when removing only the
+    // Studio turn.
+    if (!$entity->get('media_id')->isEmpty()) {
+      return;
+    }
     if (!$entity->get('last_frame')->isEmpty()) {
       $last_frame = $entity->get('last_frame')->entity;
       if ($last_frame instanceof FileInterface) {
         $last_frame->delete();
       }
-    }
-    if (!$entity->get('media_id')->isEmpty()) {
-      return;
     }
     foreach (['image', 'video'] as $field_name) {
       if (!$entity->get($field_name)->isEmpty()) {

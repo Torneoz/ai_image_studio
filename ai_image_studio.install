@@ -461,3 +461,31 @@ function ai_image_studio_update_10019(): void {
     }
   }
 }
+
+/**
+ * Uses extracted video frames as thumbnails for published Media items.
+ */
+function ai_image_studio_update_10020(): void {
+  $turn_storage = \Drupal::entityTypeManager()
+    ->getStorage('ai_image_studio_turn');
+  $turn_ids = $turn_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('video.target_id', NULL, 'IS NOT NULL')
+    ->condition('last_frame.target_id', NULL, 'IS NOT NULL')
+    ->condition('media_id.target_id', NULL, 'IS NOT NULL')
+    ->execute();
+
+  foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
+    $media = $turn->get('media_id')->entity;
+    $frame = $turn->get('last_frame')->entity;
+    if (!$media instanceof \Drupal\media\MediaInterface
+      || !$frame instanceof \Drupal\file\FileInterface) {
+      continue;
+    }
+    $media->set('thumbnail', [
+      'target_id' => $frame->id(),
+      'alt' => $media->label(),
+    ]);
+    $media->save();
+  }
+}

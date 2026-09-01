@@ -840,6 +840,19 @@ final class ImageGenerator {
       'status' => 1,
     ]);
     $media->save();
+    if ($is_video
+      && $turn->hasField('last_frame')
+      && !$turn->get('last_frame')->isEmpty()
+      && $turn->get('last_frame')->entity instanceof FileInterface) {
+      // File-based video Media uses a generic file icon by default. Save the
+      // extracted frame after creation so Media's initial metadata refresh
+      // does not replace this explicit thumbnail.
+      $media->set('thumbnail', [
+        'target_id' => $turn->get('last_frame')->target_id,
+        'alt' => $name,
+      ]);
+      $media->save();
+    }
     $turn->set('media_id', ['target_id' => $media->id()]);
     $turn->save();
     return $media;
@@ -1463,9 +1476,12 @@ final class ImageGenerator {
     imagepng($badge, $badge_path, 6);
     try {
       $process = new Process([
-        'ffmpeg', '-y', '-i', $source_path, '-i', $badge_path,
-        '-filter_complex', 'overlay=W-w-24:H-h-24',
-        '-codec:a', 'copy', '-movflags', '+faststart',
+        'ffmpeg', '-y', '-i', $source_path, '-loop', '1', '-i', $badge_path,
+        '-filter_complex', '[0:v:0][1:v:0]overlay=W-w-24:H-h-24:format=auto[v]',
+        '-map', '[v]', '-map', '0:a?',
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '18',
+        '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
+        '-shortest', '-movflags', '+faststart',
         '-f', 'mp4', $output_path,
       ]);
       $process->setTimeout(300);

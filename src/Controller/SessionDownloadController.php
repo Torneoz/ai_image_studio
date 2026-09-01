@@ -108,7 +108,7 @@ final class SessionDownloadController extends ControllerBase {
   }
 
   /**
-   * Joins completed videos in turn order using FFmpeg stream copying.
+   * Joins completed videos in turn order with normalized timestamps.
    */
   public function joinVideos(
     object $ai_image_studio_session,
@@ -170,8 +170,13 @@ final class SessionDownloadController extends ControllerBase {
         throw new \RuntimeException('Could not write the FFmpeg input list.');
       }
       $process = new Process([
-        'ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', $manifest_path,
-        '-c', 'copy', '-movflags', '+faststart', '-f', 'mp4', $output_path,
+        'ffmpeg', '-y', '-fflags', '+genpts',
+        '-f', 'concat', '-safe', '0', '-i', $manifest_path,
+        '-map', '0:v:0', '-map', '0:a?',
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '20',
+        '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
+        '-avoid_negative_ts', 'make_zero', '-movflags', '+faststart',
+        '-f', 'mp4', $output_path,
       ]);
       $process->setTimeout(600);
       $process->run();
@@ -182,7 +187,7 @@ final class SessionDownloadController extends ControllerBase {
     }
     catch (\Throwable $exception) {
       @unlink($output_path);
-      $this->messenger()->addError($this->t('The videos could not be joined. This simple version requires compatible video formats. FFmpeg reported: @message', [
+      $this->messenger()->addError($this->t('The videos could not be joined. FFmpeg reported: @message', [
         '@message' => mb_substr($exception->getMessage(), 0, 500),
       ]));
       return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
