@@ -489,3 +489,24 @@ function ai_image_studio_update_10020(): void {
     $media->save();
   }
 }
+
+/**
+ * Normalizes installed Views configuration for supported core schemas.
+ */
+function ai_image_studio_update_10021(): void {
+  $config_factory = \Drupal::configFactory();
+  foreach (['image_studio_sessions', 'image_studio_turns'] as $view_id) {
+    $view = $config_factory->getEditable('views.view.' . $view_id);
+    if ($view->isNew()) {
+      continue;
+    }
+    $fields = (array) $view->get('display.default.display_options.fields');
+    foreach ($fields as $field_id => $field) {
+      if (isset($field['settings']['time_diff']['description'])) {
+        unset($field['settings']['time_diff']['description']);
+        $fields[$field_id] = $field;
+      }
+    }
+    $view->set('display.default.display_options.fields', $fields)->save(TRUE);
+  }
+}

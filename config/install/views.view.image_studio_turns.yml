@@ -152,7 +152,6 @@ display:
               past_format: '@interval ago'
               granularity: 2
               refresh: 60
-              description: ''
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -804,4 +803,3 @@ display:
         - 'languages:language_interface'
         - url.query_args
       tags: {  }
-

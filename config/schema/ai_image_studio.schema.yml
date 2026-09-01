@@ -122,3 +122,11 @@ ai_image_studio.settings:
     video_media_source_field:
       type: string
       label: 'Video Media source field'
+
+views.field.ai_image_studio_image_preview:
+  type: views.field.field
+  label: 'AI Image Studio image preview field'
+
+views.field.ai_image_studio_video_preview:
+  type: views.field.field
+  label: 'AI Image Studio video preview field'
