@@ -1,5 +1,6 @@
 # Changelog
 
+- Added content-aware bulk image prompts for team, city, and venue nodes.
 - Added immutable logical-turn snapshots with explicit session ordering,
   requested and effective settings, and replay provenance.
 - Added ordered session re-rendering into a new session, including global

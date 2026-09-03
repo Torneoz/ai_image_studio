@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
+id: ai_image_studio_vbo__venue
+label: 'Venue image'
+type: ai_image_studio_vbo
+prompt: >-
+  Create a polished editorial establishing image representing the venue
+  [node:title]. Focus on the venue's architecture, scale, entrances, spectator
+  areas, and event atmosphere from a clear exterior or wide interior viewpoint.
+  Keep structural details plausible without inventing signage, sponsors, or
+  distinctive features that are not known. Make the image suitable for a venue
+  profile or listing. Do not include text, captions, watermarks, or logos in the
+  image.

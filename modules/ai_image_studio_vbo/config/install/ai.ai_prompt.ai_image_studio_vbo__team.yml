@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
+id: ai_image_studio_vbo__team
+label: 'Team image'
+type: ai_image_studio_vbo
+prompt: >-
+  Create a polished editorial image representing the team [node:title]. Use a
+  dynamic, cohesive composition that conveys teamwork, energy, and competitive
+  identity without inventing specific players, uniforms, badges, sponsors, or
+  trophies. Make the image suitable for a team profile or listing. Do not
+  include text, captions, watermarks, or logos in the image.

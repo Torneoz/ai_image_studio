@@ -240,3 +240,12 @@ function ai_image_studio_vbo_update_10004(): void {
 function ai_image_studio_vbo_update_10005(): void {
   _ai_image_studio_vbo_install_views();
 }
+
+/**
+ * Adds content-aware bulk prompts for teams, cities, and venues.
+ */
+function ai_image_studio_vbo_update_10006(): void {
+  /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
+  $prompt_manager = \Drupal::service('ai.prompt_manager');
+  $prompt_manager->upsertFromConfigInstall('ai_image_studio_vbo');
+}

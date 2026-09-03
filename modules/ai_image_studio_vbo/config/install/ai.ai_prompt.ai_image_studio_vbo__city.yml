@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_image_studio_vbo
+id: ai_image_studio_vbo__city
+label: 'City image'
+type: ai_image_studio_vbo
+prompt: >-
+  Create a polished editorial cityscape representing [node:title]. Emphasise
+  the city's recognisable setting, architecture, landscape, climate, and sense
+  of place in a natural establishing view. Keep geographic and architectural
+  details plausible, and avoid inventing named landmarks. Make the image
+  suitable for a city profile or destination listing. Do not include text,
+  captions, watermarks, or logos in the image.
