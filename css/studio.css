@@ -418,15 +418,33 @@
   background: rgb(0 0 0 / 72%);
   border: 1px solid rgb(255 255 255 / 35%);
   border-radius: 999px;
-  bottom: .75rem;
   color: #fff;
   font-size: .75rem;
   font-weight: 700;
-  inset-inline-end: .75rem;
   line-height: 1;
   padding: .45rem .7rem;
   pointer-events: none;
   position: absolute;
+}
+
+.ai-image-studio-ai-badge--top-left {
+  inset-block-start: .75rem;
+  inset-inline-start: .75rem;
+}
+
+.ai-image-studio-ai-badge--top-right {
+  inset-block-start: .75rem;
+  inset-inline-end: .75rem;
+}
+
+.ai-image-studio-ai-badge--bottom-left {
+  inset-block-end: .75rem;
+  inset-inline-start: .75rem;
+}
+
+.ai-image-studio-ai-badge--bottom-right {
+  inset-block-end: .75rem;
+  inset-inline-end: .75rem;
 }
 
 .ai-image-studio-actions {

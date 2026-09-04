@@ -997,6 +997,29 @@ final class StudioForm extends FormBase {
           ],
         ],
       ],
+      'ai_badge_position' => [
+        '#type' => 'select',
+        '#title' => $this->t('Badge position'),
+        '#options' => $this->badgePositionOptions(),
+        '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
+        '#states' => [
+          'visible' => [
+            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+      'ai_badge_class' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Badge CSS class'),
+        '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
+        '#maxlength' => 255,
+        '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
+        '#states' => [
+          'visible' => [
+            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
     ];
   }
 
@@ -1075,7 +1098,75 @@ final class StudioForm extends FormBase {
           ],
         ],
       ],
+      'video_ai_badge_position' => [
+        '#type' => 'select',
+        '#title' => $this->t('Badge position'),
+        '#options' => $this->badgePositionOptions(),
+        '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
+        '#states' => [
+          'visible' => [
+            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+      'video_ai_badge_class' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Badge CSS class'),
+        '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
+        '#maxlength' => 255,
+        '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
+        '#states' => [
+          'visible' => [
+            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
     ];
+  }
+
+  /**
+   * Returns the supported badge positions.
+   */
+  private function badgePositionOptions(): array {
+    return [
+      'top-left' => $this->t('Top left'),
+      'top-right' => $this->t('Top right'),
+      'bottom-left' => $this->t('Bottom left'),
+      'bottom-right' => $this->t('Bottom right'),
+    ];
+  }
+
+  /**
+   * Normalizes a submitted or stored badge position.
+   */
+  private function badgePosition(mixed $position): string {
+    $position = (string) $position;
+    return array_key_exists($position, $this->badgePositionOptions())
+      ? $position
+      : 'bottom-right';
+  }
+
+  /**
+   * Normalizes a space-separated list of custom badge CSS classes.
+   */
+  private function badgeClassValue(mixed $value): string {
+    $classes = preg_split('/\s+/', trim((string) $value)) ?: [];
+    $classes = array_values(array_filter($classes, static fn (string $class): bool =>
+      (bool) preg_match('/^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/', $class)
+    ));
+    return implode(' ', array_slice(array_unique($classes), 0, 10));
+  }
+
+  /**
+   * Builds safe preview classes for a badge.
+   */
+  private function badgeClasses(array $settings): array {
+    $position = $this->badgePosition($settings['ai_badge_position'] ?? NULL);
+    $custom = $this->badgeClassValue($settings['ai_badge_class'] ?? '');
+    return array_merge(
+      ['ai-image-studio-ai-badge', 'ai-image-studio-ai-badge--' . $position],
+      $custom === '' ? [] : explode(' ', $custom),
+    );
   }
 
   /**
@@ -1105,6 +1196,9 @@ final class StudioForm extends FormBase {
         ],
       ],
     ];
+    foreach (['video_ai_badge_position', 'video_ai_badge_class'] as $key) {
+      $video_controls[$key]['#states'] = $video_controls['video_ai_badge_text']['#states'];
+    }
 
     return [
       '#type' => 'details',
@@ -1231,10 +1325,10 @@ final class StudioForm extends FormBase {
     $build['#attributes'] += [
       'data-ai-image-studio-model' => $this->turnModelOption($turn),
       'data-ai-image-studio-source-kind' => !$turn->get('video')->isEmpty()
-        && $turn->hasField('last_frame')
-        && !$turn->get('last_frame')->isEmpty()
-          ? 'video-last-frame'
-          : 'image',
+      && $turn->hasField('last_frame')
+      && !$turn->get('last_frame')->isEmpty()
+        ? 'video-last-frame'
+        : 'image',
       'data-ai-image-studio-aspect-ratio' => (string) ($settings['aspect_ratio'] ?? ''),
       'data-ai-image-studio-resolution' => (string) ($settings['resolution'] ?? ''),
       'data-ai-image-studio-quality' => (string) ($settings['quality'] ?? ''),
@@ -1245,6 +1339,8 @@ final class StudioForm extends FormBase {
       'data-ai-image-studio-auto-levels' => !empty($settings['auto_levels']) ? '1' : '0',
       'data-ai-image-studio-show-ai-badge' => !empty($settings['show_ai_badge']) ? '1' : '0',
       'data-ai-image-studio-ai-badge-text' => (string) ($settings['ai_badge_text'] ?? ''),
+      'data-ai-image-studio-ai-badge-position' => $this->badgePosition($settings['ai_badge_position'] ?? NULL),
+      'data-ai-image-studio-ai-badge-class' => (string) ($settings['ai_badge_class'] ?? ''),
     ];
     if ($settings) {
       $build['settings'] = [
@@ -1291,7 +1387,7 @@ final class StudioForm extends FormBase {
               '#type' => 'html_tag',
               '#tag' => 'span',
               '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Video'))),
-              '#attributes' => ['class' => ['ai-image-studio-ai-badge']],
+              '#attributes' => ['class' => $this->badgeClasses($settings)],
             ] : [],
           ];
         }
@@ -1313,7 +1409,7 @@ final class StudioForm extends FormBase {
               '#type' => 'html_tag',
               '#tag' => 'span',
               '#value' => Html::escape((string) ($settings['ai_badge_text'] ?? $this->t('AI Image'))),
-              '#attributes' => ['class' => ['ai-image-studio-ai-badge']],
+              '#attributes' => ['class' => $this->badgeClasses($settings)],
             ] : [],
           ];
         }
@@ -2487,6 +2583,12 @@ final class StudioForm extends FormBase {
         'ai_badge_text' => trim((string) $form_state->getValue(
           $output_type === 'video' ? 'video_ai_badge_text' : 'ai_badge_text',
         )) ?: ($output_type === 'video' ? 'AI Video' : 'AI Image'),
+        'ai_badge_position' => $this->badgePosition($form_state->getValue(
+          $output_type === 'video' ? 'video_ai_badge_position' : 'ai_badge_position',
+        )),
+        'ai_badge_class' => $this->badgeClassValue($form_state->getValue(
+          $output_type === 'video' ? 'video_ai_badge_class' : 'ai_badge_class',
+        )),
         'reference_file_ids' => array_map(
           static fn (FileInterface $file): int => (int) $file->id(),
           $reference_files,
@@ -2565,6 +2667,8 @@ final class StudioForm extends FormBase {
       'resolution' => $submitted_settings['video_resolution'] ?? $settings['resolution'] ?? '720p',
       'show_ai_badge' => !empty($submitted_settings['video_show_ai_badge']),
       'ai_badge_text' => trim((string) ($submitted_settings['video_ai_badge_text'] ?? '')) ?: 'AI Video',
+      'ai_badge_position' => $this->badgePosition($submitted_settings['video_ai_badge_position'] ?? NULL),
+      'ai_badge_class' => $this->badgeClassValue($submitted_settings['video_ai_badge_class'] ?? ''),
       'reference_file_ids' => array_map(
         static fn (FileInterface $file): int => (int) $file->id(),
         $sources,

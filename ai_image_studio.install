@@ -510,3 +510,17 @@ function ai_image_studio_update_10021(): void {
     $view->set('display.default.display_options.fields', $fields)->save(TRUE);
   }
 }
+
+/**
+ * Adds badge position and preview class defaults.
+ */
+function ai_image_studio_update_10022(): void {
+  $config = \Drupal::configFactory()->getEditable('ai_image_studio.settings');
+  if ($config->get('default_ai_badge_position') === NULL) {
+    $config->set('default_ai_badge_position', 'bottom-right');
+  }
+  if ($config->get('default_ai_badge_class') === NULL) {
+    $config->set('default_ai_badge_class', '');
+  }
+  $config->save(TRUE);
+}

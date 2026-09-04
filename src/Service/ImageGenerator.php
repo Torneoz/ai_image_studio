@@ -824,9 +824,10 @@ final class ImageGenerator {
       $badge_text = trim((string) ($generation_settings['ai_badge_text'] ?? (
         $is_video ? 'AI Video' : 'AI Image'
       )));
+      $badge_position = $this->badgePosition($generation_settings['ai_badge_position'] ?? NULL);
       $file = $is_video
-        ? $this->createBadgedVideo($file, $badge_text, (int) $turn->id())
-        : $this->createBadgedImage($file, $badge_text, (int) $turn->id());
+        ? $this->createBadgedVideo($file, $badge_text, $badge_position, (int) $turn->id())
+        : $this->createBadgedImage($file, $badge_text, $badge_position, (int) $turn->id());
     }
 
     $source_value = ['target_id' => $file->id()];
@@ -1400,6 +1401,7 @@ final class ImageGenerator {
   private function createBadgedImage(
     FileInterface $source,
     string $text,
+    string $position,
     int $turn_id,
   ): FileInterface {
     if (!function_exists('imagecreatefromstring')) {
@@ -1416,12 +1418,20 @@ final class ImageGenerator {
     }
     $badge = $this->createBadgeImage($text);
     $margin = max(12, (int) round(imagesx($image) * 0.015));
+    [$x, $y] = $this->badgeCoordinates(
+      imagesx($image),
+      imagesy($image),
+      imagesx($badge),
+      imagesy($badge),
+      $margin,
+      $position,
+    );
     imagealphablending($image, TRUE);
     imagecopy(
       $image,
       $badge,
-      max(0, imagesx($image) - imagesx($badge) - $margin),
-      max(0, imagesy($image) - imagesy($badge) - $margin),
+      $x,
+      $y,
       0,
       0,
       imagesx($badge),
@@ -1451,6 +1461,7 @@ final class ImageGenerator {
   private function createBadgedVideo(
     FileInterface $source,
     string $text,
+    string $position,
     int $turn_id,
   ): FileInterface {
     if (!function_exists('imagecreatetruecolor')) {
@@ -1474,10 +1485,16 @@ final class ImageGenerator {
     }
     $badge = $this->createBadgeImage($text);
     imagepng($badge, $badge_path, 6);
+    $overlay = match ($this->badgePosition($position)) {
+      'top-left' => '24:24',
+      'top-right' => 'W-w-24:24',
+      'bottom-left' => '24:H-h-24',
+      default => 'W-w-24:H-h-24',
+    };
     try {
       $process = new Process([
         'ffmpeg', '-y', '-i', $source_path, '-loop', '1', '-i', $badge_path,
-        '-filter_complex', '[0:v:0][1:v:0]overlay=W-w-24:H-h-24:format=auto[v]',
+        '-filter_complex', '[0:v:0][1:v:0]overlay=' . $overlay . ':format=auto[v]',
         '-map', '[v]', '-map', '0:a?',
         '-c:v', 'libx264', '-preset', 'medium', '-crf', '18',
         '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
@@ -1532,6 +1549,40 @@ final class ImageGenerator {
     imagefilledrectangle($badge, 0, 0, $width - 1, $height - 1, $background);
     imagestring($badge, $font, $padding_x, $padding_y, $text, $foreground);
     return $badge;
+  }
+
+  /**
+   * Normalizes a badge position, preserving the legacy bottom-right default.
+   */
+  private function badgePosition(mixed $position): string {
+    $position = (string) $position;
+    return in_array($position, [
+      'top-left',
+      'top-right',
+      'bottom-left',
+      'bottom-right',
+    ], TRUE) ? $position : 'bottom-right';
+  }
+
+  /**
+   * Calculates image overlay coordinates for a badge position.
+   */
+  private function badgeCoordinates(
+    int $image_width,
+    int $image_height,
+    int $badge_width,
+    int $badge_height,
+    int $margin,
+    string $position,
+  ): array {
+    $position = $this->badgePosition($position);
+    $x = str_ends_with($position, 'right')
+      ? $image_width - $badge_width - $margin
+      : $margin;
+    $y = str_starts_with($position, 'bottom')
+      ? $image_height - $badge_height - $margin
+      : $margin;
+    return [max(0, $x), max(0, $y)];
   }
 
   /**

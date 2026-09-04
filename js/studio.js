@@ -82,6 +82,10 @@
                   selectedCard.dataset.aiImageStudioShowAiBadge,
                 video_ai_badge_text:
                   selectedCard.dataset.aiImageStudioAiBadgeText,
+                video_ai_badge_position:
+                  selectedCard.dataset.aiImageStudioAiBadgePosition,
+                video_ai_badge_class:
+                  selectedCard.dataset.aiImageStudioAiBadgeClass,
               }
               : {
                 model: selectedCard.dataset.aiImageStudioModel,
@@ -92,6 +96,14 @@
                 transparent_background:
                   selectedCard.dataset.aiImageStudioTransparentBackground,
                 auto_levels: selectedCard.dataset.aiImageStudioAutoLevels,
+                show_ai_badge:
+                  selectedCard.dataset.aiImageStudioShowAiBadge,
+                ai_badge_text:
+                  selectedCard.dataset.aiImageStudioAiBadgeText,
+                ai_badge_position:
+                  selectedCard.dataset.aiImageStudioAiBadgePosition,
+                ai_badge_class:
+                  selectedCard.dataset.aiImageStudioAiBadgeClass,
               };
             Object.entries(inherited).forEach(([name, value]) => {
               if (value === undefined || value === '') {

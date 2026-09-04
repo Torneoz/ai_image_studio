@@ -124,6 +124,7 @@ final class NodeGenerationQueueWorker extends QueueWorkerBase implements Contain
             'file_type' => $configuration['file_type'] ?? 'png',
             'show_ai_badge' => !empty($configuration['show_ai_badge']),
             'ai_badge_text' => $configuration['ai_badge_text'] ?? 'AI Image',
+            'ai_badge_position' => $configuration['ai_badge_position'] ?? 'bottom-right',
             'variations' => 1,
           ],
         );

@@ -234,6 +234,34 @@ final class SettingsForm extends ConfigFormBase {
         ],
       ],
     ];
+    $form['generation']['default_ai_badge_position'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default badge position'),
+      '#options' => [
+        'top-left' => $this->t('Top left'),
+        'top-right' => $this->t('Top right'),
+        'bottom-left' => $this->t('Bottom left'),
+        'bottom-right' => $this->t('Bottom right'),
+      ],
+      '#default_value' => $config->get('default_ai_badge_position') ?: 'bottom-right',
+      '#states' => [
+        'visible' => [
+          ':input[name="default_show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['generation']['default_ai_badge_class'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Default badge CSS class'),
+      '#default_value' => $config->get('default_ai_badge_class') ?: '',
+      '#maxlength' => 255,
+      '#description' => $this->t('Optional space-separated CSS classes applied to badge previews.'),
+      '#states' => [
+        'visible' => [
+          ':input[name="default_show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     foreach ([
       'text_to_image' => $this->t('Default Text-to-Image model'),
       'image_to_image' => $this->t('Default Image-to-Image model'),
@@ -459,6 +487,10 @@ final class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $badge_position = $form_state->getValue('default_ai_badge_position');
+    if (!in_array($badge_position, ['top-left', 'top-right', 'bottom-left', 'bottom-right'], TRUE)) {
+      $badge_position = 'bottom-right';
+    }
     $this->config('ai_image_studio.settings')
       ->set('file_scheme', $form_state->getValue('file_scheme'))
       ->set('file_directory', trim((string) $form_state->getValue('file_directory'), '/'))
@@ -485,6 +517,8 @@ final class SettingsForm extends ConfigFormBase {
       ->set('default_show_ai_badge', (bool) $form_state->getValue('default_show_ai_badge'))
       ->set('default_ai_badge_text', trim((string) $form_state->getValue('default_ai_badge_text')) ?: 'AI Image')
       ->set('default_video_ai_badge_text', trim((string) $form_state->getValue('default_video_ai_badge_text')) ?: 'AI Video')
+      ->set('default_ai_badge_position', $badge_position)
+      ->set('default_ai_badge_class', trim((string) $form_state->getValue('default_ai_badge_class')))
       ->set('default_text_to_image_model', $form_state->getValue('default_text_to_image_model'))
       ->set('default_image_to_image_model', $form_state->getValue('default_image_to_image_model'))
       ->set('default_text_to_video_model', $form_state->getValue('default_text_to_video_model'))

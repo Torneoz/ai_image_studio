@@ -93,6 +93,9 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       'ai_badge_text' => (string) ($this->configFactory
         ->get('ai_image_studio.settings')
         ->get('default_ai_badge_text') ?: 'AI Image'),
+      'ai_badge_position' => (string) ($this->configFactory
+        ->get('ai_image_studio.settings')
+        ->get('default_ai_badge_position') ?: 'bottom-right'),
       'publish_media' => FALSE,
       'attach_to_content' => FALSE,
       'media_name_template' => '[node:title] AI image',
@@ -248,6 +251,22 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         ],
       ],
     ];
+    $form['image_settings']['ai_badge_position'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Badge position'),
+      '#options' => [
+        'top-left' => $this->t('Top left'),
+        'top-right' => $this->t('Top right'),
+        'bottom-left' => $this->t('Bottom left'),
+        'bottom-right' => $this->t('Bottom right'),
+      ],
+      '#default_value' => $configuration['ai_badge_position'],
+      '#states' => [
+        'visible' => [
+          ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     $form['publishing'] = [
       '#type' => 'details',
       '#title' => $this->t('Media publishing'),
@@ -371,6 +390,9 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
     $this->configuration['show_ai_badge'] = $this->generator->canRenderBadge(FALSE)
       && !empty($this->configuration['show_ai_badge']);
     $this->configuration['ai_badge_text'] = trim((string) $this->configuration['ai_badge_text']) ?: 'AI Image';
+    if (!in_array($this->configuration['ai_badge_position'], ['top-left', 'top-right', 'bottom-left', 'bottom-right'], TRUE)) {
+      $this->configuration['ai_badge_position'] = 'bottom-right';
+    }
     if (empty($this->configuration['publish_media'])
       || empty($this->configuration['attach_to_content'])) {
       $this->configuration['destination_bundle'] = '';
