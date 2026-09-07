@@ -1,0 +1,9 @@
+access ai storyboard:
+  title: 'Access AI Storyboard'
+  description: 'Create and work with owned storyboard projects.'
+
+administer ai storyboard:
+  title: 'Administer AI Storyboard'
+  description: 'Access and delete any storyboard project.'
+  restrict access: true
+

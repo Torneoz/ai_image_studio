@@ -1,0 +1,6 @@
+ai_storyboard.new:
+  route_name: ai_storyboard.new
+  title: 'Add storyboard'
+  appears_on:
+    - entity.ai_storyboard.collection
+

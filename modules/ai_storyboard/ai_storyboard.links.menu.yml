@@ -1,0 +1,6 @@
+ai_storyboard.collection:
+  title: 'AI Storyboards'
+  description: 'Create storyboards from scripts.'
+  route_name: entity.ai_storyboard.collection
+  parent: system.admin_content
+

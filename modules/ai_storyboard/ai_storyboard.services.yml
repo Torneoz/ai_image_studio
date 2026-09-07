@@ -1,0 +1,13 @@
+services:
+  logger.channel.ai_storyboard:
+    parent: logger.channel_base
+    arguments: ['ai_storyboard']
+
+  ai_storyboard.breakdown:
+    class: Drupal\ai_storyboard\Service\ScriptBreakdown
+    arguments: ['@ai.provider', '@logger.channel.ai_storyboard']
+
+  ai_storyboard.manager:
+    class: Drupal\ai_storyboard\Service\StoryboardManager
+    arguments: ['@entity_type.manager', '@ai_image_studio.generator', '@ai_image_studio.session_machine_name']
+

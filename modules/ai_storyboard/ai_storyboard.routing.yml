@@ -1,0 +1,68 @@
+entity.ai_storyboard.collection:
+  path: '/admin/content/ai-storyboard'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardController::collection'
+    _title: 'AI Storyboards'
+  requirements:
+    _permission: 'access ai storyboard'
+
+ai_storyboard.new:
+  path: '/admin/content/ai-storyboard/new'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\StoryboardForm'
+    _title: 'New storyboard'
+  requirements:
+    _permission: 'access ai storyboard'
+
+entity.ai_storyboard.canonical:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\StoryboardForm'
+    _title_callback: '\Drupal\ai_storyboard\Form\StoryboardForm::title'
+  requirements:
+    _entity_access: 'ai_storyboard.view'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
+entity.ai_storyboard.delete_form:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/delete'
+  defaults:
+    _entity_form: 'ai_storyboard.delete'
+    _title: 'Delete storyboard'
+  requirements:
+    _entity_access: 'ai_storyboard.delete'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
+entity.ai_storyboard_shot.edit_form:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/shot/{ai_storyboard_shot}'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\ShotForm'
+    _title_callback: '\Drupal\ai_storyboard\Form\ShotForm::title'
+  requirements:
+    _entity_access: 'ai_storyboard_shot.update'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+      ai_storyboard_shot:
+        type: entity:ai_storyboard_shot
+
+ai_storyboard.generate_shot:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/shot/{ai_storyboard_shot}/generate'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\GenerateShotForm'
+    _title: 'Generate storyboard frame'
+  requirements:
+    _entity_access: 'ai_storyboard_shot.update'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+      ai_storyboard_shot:
+        type: entity:ai_storyboard_shot
+

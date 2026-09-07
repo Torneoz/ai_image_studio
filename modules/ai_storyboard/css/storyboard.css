@@ -1,0 +1,56 @@
+.ai-storyboard-summary {
+  color: var(--color-text-neutral-medium, #55565b);
+  font-size: 1rem;
+}
+
+.ai-storyboard-shot {
+  display: grid;
+  grid-template-columns: minmax(260px, 42%) 1fr;
+  gap: 1.5rem;
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-gray-200, #d3d4d9);
+  border-radius: .5rem;
+  background: var(--color-white, #fff);
+}
+
+.ai-storyboard-shot__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .25rem;
+}
+
+.ai-storyboard-shot__placeholder {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  border: 1px dashed var(--color-gray-400, #919297);
+  border-radius: .25rem;
+  color: var(--color-text-neutral-medium, #55565b);
+  background: #f6f6f7;
+}
+
+.ai-storyboard-shot__body h3 {
+  margin-block-start: 0;
+}
+
+.ai-storyboard-shot__technical {
+  color: var(--color-text-neutral-medium, #55565b);
+}
+
+.ai-storyboard-shot__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.ai-storyboard-bible {
+  max-width: 75ch;
+  white-space: normal;
+}
+
+@media (max-width: 760px) {
+  .ai-storyboard-shot {
+    grid-template-columns: 1fr;
+  }
+}

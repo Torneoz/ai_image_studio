@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * @file
+ * Provides AI-assisted script breakdown and storyboarding.
+ */
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for ai_storyboard.
+ */
+function ai_storyboard_ai_storyboard_predelete(EntityInterface $entity): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('ai_storyboard_shot');
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('storyboard_id', $entity->id())
+    ->execute();
+  if ($ids) {
+    $storage->delete($storage->loadMultiple($ids));
+  }
+}

@@ -56,6 +56,8 @@ Drupal Media.
 - Views integration for reporting on Studio sessions and individual turns.
 - Optional Views Bulk Operations integration for queued, token-aware image
   generation across selected content items.
+- Optional AI Storyboard submodule for turning scripts into editable,
+  continuity-aware shot plans and versioned generated frames.
 
 External modules can add styles without an integration module by shipping an
 `ai.ai_prompt.*` configuration entity whose `type` is
@@ -179,6 +181,15 @@ Install the optional dependency with Composer:
 ```shell
 composer require drupal/views_bulk_operations:^4.4 drupal/token
 ```
+
+## AI Storyboard
+
+The optional `ai_storyboard` submodule uses a configured chat model to break a
+script into editable shots with action, dialogue, sound, timing, camera, lens,
+lighting, prompt, and continuity fields. Each frame is generated through AI
+Image Studio, preserving provider metadata, cost information, and the earlier
+turn when a shot is regenerated. See
+[`modules/ai_storyboard/README.md`](modules/ai_storyboard/README.md).
 
 ## Similar projects
 

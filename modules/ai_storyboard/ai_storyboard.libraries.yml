@@ -1,0 +1,5 @@
+workspace:
+  css:
+    theme:
+      css/storyboard.css: {}
+

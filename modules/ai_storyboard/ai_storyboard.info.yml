@@ -1,0 +1,11 @@
+name: 'AI Storyboard'
+type: module
+description: 'Turns scripts into editable, continuity-aware storyboards using Drupal AI and AI Image Studio.'
+package: 'AI'
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - ai:ai
+  - ai_image_studio:ai_image_studio
+  - drupal:file
+  - drupal:user
+
