@@ -534,15 +534,19 @@ function ai_image_studio_update_10023(array &$sandbox): void {
   $manager = \Drupal::entityDefinitionUpdateManager();
   $storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_session');
   if (empty($sandbox['initialized'])) {
-    $definition = BaseFieldDefinition::create('string')
-      ->setLabel(new TranslatableMarkup('Machine name'))
-      ->setSetting('max_length', 100);
-    $manager->installFieldStorageDefinition(
-      'machine_name',
-      'ai_image_studio_session',
-      'ai_image_studio',
-      $definition,
-    );
+    $installed_definitions = \Drupal::service('entity.last_installed_schema.repository')
+      ->getLastInstalledFieldStorageDefinitions('ai_image_studio_session');
+    if (!isset($installed_definitions['machine_name'])) {
+      $definition = BaseFieldDefinition::create('string')
+        ->setLabel(new TranslatableMarkup('Machine name'))
+        ->setSetting('max_length', 100);
+      $manager->installFieldStorageDefinition(
+        'machine_name',
+        'ai_image_studio_session',
+        'ai_image_studio',
+        $definition,
+      );
+    }
     $sandbox['initialized'] = TRUE;
     $sandbox['last_id'] = 0;
     $sandbox['processed'] = 0;
@@ -579,11 +583,10 @@ function ai_image_studio_update_10023(array &$sandbox): void {
     $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
     return;
   }
-  $required_definition = BaseFieldDefinition::create('string')
-    ->setLabel(new TranslatableMarkup('Machine name'))
-    ->setRequired(TRUE)
-    ->setSetting('max_length', 100)
-    ->addConstraint('UniqueField');
+  $definitions = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('ai_image_studio_session');
+  $required_definition = $definitions['machine_name'];
+  $required_definition->setRequired(TRUE);
   $manager->updateFieldStorageDefinition($required_definition);
   $sandbox['#finished'] = 1;
 }
