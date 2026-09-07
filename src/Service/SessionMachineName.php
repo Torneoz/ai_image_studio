@@ -25,7 +25,7 @@ final class SessionMachineName {
    */
   public function normalize(string $value): string {
     $value = strtolower($this->transliteration->transliterate(trim($value), 'en'));
-    $value = trim((string) preg_replace('/[^a-z0-9]+/', '-', $value), '-');
+    $value = trim((string) preg_replace('/[^a-z0-9]+/', '_', $value), '_');
     return mb_substr($value, 0, 100);
   }
 
@@ -35,13 +35,13 @@ final class SessionMachineName {
   public function generate(string $value, ?int $session_id = NULL): string {
     $base = $this->normalize($value);
     if ($base === '') {
-      $base = $session_id === NULL ? 'session' : 'session-' . $session_id;
+      $base = $session_id === NULL ? 'session' : 'session_' . $session_id;
     }
 
     $candidate = $base;
     $suffix = 2;
     while ($this->exists($candidate, $session_id)) {
-      $ending = '-' . $suffix++;
+      $ending = '_' . $suffix++;
       $candidate = mb_substr($base, 0, 100 - strlen($ending)) . $ending;
     }
     return $candidate;

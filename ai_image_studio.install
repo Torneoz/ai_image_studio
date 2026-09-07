@@ -567,10 +567,10 @@ function ai_image_studio_update_10023(array &$sandbox): void {
   foreach ($storage->loadMultiple($ids) as $session) {
     $machine_name = $machine_names->normalize((string) $session->label());
     if ($machine_name === '') {
-      $machine_name = 'session-' . $session->id();
+      $machine_name = 'session_' . $session->id();
     }
     elseif ($machine_names->exists($machine_name, (int) $session->id())) {
-      $suffix = '-' . $session->id();
+      $suffix = '_' . $session->id();
       $machine_name = mb_substr($machine_name, 0, 100 - strlen($suffix)) . $suffix;
     }
     $session->set('machine_name', $machine_name);
@@ -690,6 +690,47 @@ function ai_image_studio_update_10024(array &$sandbox): void {
     }
 
     $sandbox['last_id'] = (int) $turn->id();
+    $sandbox['processed']++;
+  }
+
+  if ($sandbox['processed'] < $sandbox['total']) {
+    $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
+    return;
+  }
+  $sandbox['#finished'] = 1;
+}
+
+/**
+ * Converts session machine names to Drupal's underscore convention.
+ */
+function ai_image_studio_update_10025(array &$sandbox): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_session');
+  if (empty($sandbox['initialized'])) {
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+    $sandbox['processed'] = 0;
+    $sandbox['total'] = (int) $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->count()
+      ->execute();
+  }
+
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('id', $sandbox['last_id'], '>')
+    ->sort('id', 'ASC')
+    ->range(0, 50)
+    ->execute();
+  /** @var \Drupal\ai_image_studio\Service\SessionMachineName $machine_names */
+  $machine_names = \Drupal::service('ai_image_studio.session_machine_name');
+  foreach ($storage->loadMultiple($ids) as $session) {
+    $current = (string) $session->get('machine_name')->value;
+    $session->set('machine_name', $machine_names->generate(
+      $current !== '' ? $current : (string) $session->label(),
+      (int) $session->id(),
+    ));
+    $session->save();
+    $sandbox['last_id'] = (int) $session->id();
     $sandbox['processed']++;
   }
 

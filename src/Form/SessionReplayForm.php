@@ -78,9 +78,6 @@ final class SessionReplayForm extends FormBase {
       '#machine_name' => [
         'source' => ['title'],
         'exists' => [$this, 'machineNameExists'],
-        'replace_pattern' => '[^a-z0-9-]+',
-        'replace' => '-',
-        'error' => $this->t('The machine name may only contain lowercase letters, numbers, and hyphens.'),
       ],
     ];
     $form['use_default_models'] = [
