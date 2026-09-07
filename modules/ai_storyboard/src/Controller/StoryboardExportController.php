@@ -26,7 +26,7 @@ final class StoryboardExportController extends ControllerBase {
    * Constructs the storyboard export controller.
    */
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly EntityTypeManagerInterface $storyboardEntityTypeManager,
     private readonly FileSystemInterface $fileSystem,
     private readonly TransliterationInterface $transliteration,
   ) {}
@@ -181,7 +181,7 @@ final class StoryboardExportController extends ControllerBase {
    * Loads generated frames in storyboard position order.
    */
   private function frames(object $storyboard): array {
-    $shot_storage = $this->entityTypeManager->getStorage('ai_storyboard_shot');
+    $shot_storage = $this->storyboardEntityTypeManager->getStorage('ai_storyboard_shot');
     $shot_ids = $shot_storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('storyboard_id', $storyboard->id())
