@@ -80,6 +80,13 @@ final class StoryboardForm extends FormBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $this->saveProject($form, $form_state);
+  }
+
+  /**
    * Saves without replacing existing shots. */
   public function saveProject(array &$form, FormStateInterface $form_state): void {
     $board = $this->loadOrCreate($form_state);
