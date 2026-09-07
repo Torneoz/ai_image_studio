@@ -33,7 +33,7 @@ final class ShotForm extends FormBase {
    *
    */
   public function title(object $ai_storyboard_shot): string {
-    return $this->t('Edit shot: @title', ['@title' => $ai_storyboard_shot->label()]);
+    return (string) $this->t('Edit shot: @title', ['@title' => $ai_storyboard_shot->label()]);
   }
 
   /**
