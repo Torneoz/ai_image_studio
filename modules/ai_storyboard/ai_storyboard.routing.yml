@@ -26,6 +26,28 @@ entity.ai_storyboard.canonical:
       ai_storyboard:
         type: entity:ai_storyboard
 
+ai_storyboard.download_images:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/export/images'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardExportController::downloadImages'
+  requirements:
+    _entity_access: 'ai_storyboard.view'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
+ai_storyboard.download_video:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/export/video'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardExportController::downloadVideo'
+  requirements:
+    _entity_access: 'ai_storyboard.view'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
 entity.ai_storyboard.delete_form:
   path: '/admin/content/ai-storyboard/{ai_storyboard}/delete'
   defaults:
@@ -65,4 +87,3 @@ ai_storyboard.generate_shot:
         type: entity:ai_storyboard
       ai_storyboard_shot:
         type: entity:ai_storyboard_shot
-

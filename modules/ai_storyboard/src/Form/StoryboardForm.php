@@ -73,6 +73,22 @@ final class StoryboardForm extends FormBase {
     $form['actions']['save'] = ['#type' => 'submit', '#value' => $ai_storyboard ? $this->t('Save project') : $this->t('Create and break down script'), '#button_type' => 'primary', '#submit' => ['::saveProject']];
     if ($ai_storyboard) {
       $form['actions']['breakdown'] = ['#type' => 'submit', '#value' => $this->t('Rebuild shots from script'), '#submit' => ['::rebuildShots']];
+      $form['actions']['download_images'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download images'),
+        '#url' => Url::fromRoute('ai_storyboard.download_images', [
+          'ai_storyboard' => $ai_storyboard->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+      ];
+      $form['actions']['download_video'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download MP4'),
+        '#url' => Url::fromRoute('ai_storyboard.download_video', [
+          'ai_storyboard' => $ai_storyboard->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+      ];
       $form['actions']['delete'] = Link::fromTextAndUrl($this->t('Delete'), $ai_storyboard->toUrl('delete-form'))->toRenderable();
       $this->buildWorkspace($form, $ai_storyboard);
     }
