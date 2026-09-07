@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Adds the reusable after-prompt field to existing storyboards.
+ */
+function ai_storyboard_update_10001(): string {
+  $definition = BaseFieldDefinition::create('string_long')
+    ->setLabel(new TranslatableMarkup('After prompt'))
+    ->setDescription(new TranslatableMarkup('Instructions appended to every generated shot prompt.'));
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'after_prompt',
+    'ai_storyboard',
+    'ai_storyboard',
+    $definition,
+  );
+  return 'Added the storyboard after-prompt field.';
+}

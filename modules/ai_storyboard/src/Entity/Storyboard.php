@@ -51,6 +51,9 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Owner'))->setSetting('target_type', 'user')->setDefaultValueCallback(static::class . '::getDefaultEntityOwner');
     $fields['script'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Script'))->setRequired(TRUE);
     $fields['creative_brief'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Creative brief'));
+    $fields['after_prompt'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(new TranslatableMarkup('After prompt'))
+      ->setDescription(new TranslatableMarkup('Instructions appended to every generated shot prompt.'));
     $fields['continuity_bible'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Continuity bible'));
     $fields['visual_style'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Visual style'))->setSetting('max_length', 255)->setDefaultValue('cinematic storyboard sketch');
     $fields['aspect_ratio'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Aspect ratio'))->setSettings(['allowed_values' => ['16:9' => '16:9 landscape', '9:16' => '9:16 portrait', '1:1' => '1:1 square', '4:3' => '4:3 classic', '2.39:1' => '2.39:1 anamorphic']])->setDefaultValue('16:9');

@@ -63,6 +63,13 @@ final class StoryboardForm extends FormBase {
     $form['project']['creative_brief'] = ['#type' => 'textarea', '#title' => $this->t('Creative brief'), '#rows' => 3, '#default_value' => $ai_storyboard?->get('creative_brief')->value, '#description' => $this->t('Audience, objective, tone, runtime, platform, and production constraints.')];
     $form['project']['script'] = ['#type' => 'textarea', '#title' => $this->t('Script'), '#required' => TRUE, '#rows' => 14, '#default_value' => $ai_storyboard?->get('script')->value];
     $form['project']['visual_style'] = ['#type' => 'textfield', '#title' => $this->t('Visual style'), '#default_value' => $ai_storyboard?->get('visual_style')->value ?? 'cinematic storyboard sketch', '#maxlength' => 255];
+    $form['project']['after_prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('After prompt'),
+      '#rows' => 3,
+      '#default_value' => $ai_storyboard?->get('after_prompt')->value,
+      '#description' => $this->t('Appended to every frame prompt. Use it for a consistent final instruction, such as “Turn robots into proper humanoid robots according to current market trends.”'),
+    ];
     $form['project']['aspect_ratio'] = ['#type' => 'select', '#title' => $this->t('Aspect ratio'), '#options' => ['16:9' => '16:9 landscape', '9:16' => '9:16 portrait', '1:1' => '1:1 square', '4:3' => '4:3 classic', '2.39:1' => '2.39:1 anamorphic'], '#default_value' => $ai_storyboard?->get('aspect_ratio')->value ?? '16:9'];
     $chat_options = $this->breakdown->getModelOptions();
     $image_options = $this->imageGenerator->getModelOptions('text_to_image');
@@ -126,7 +133,7 @@ final class StoryboardForm extends FormBase {
   private function loadOrCreate(FormStateInterface $form_state): object {
     $storage = $this->entityTypeManager->getStorage('ai_storyboard');
     $board = $form_state->get('storyboard_id') ? $storage->load($form_state->get('storyboard_id')) : $storage->create(['uid' => $this->currentUser()->id()]);
-    foreach (['title', 'creative_brief', 'script', 'visual_style', 'aspect_ratio', 'chat_model', 'image_model', 'status'] as $field) {
+    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status'] as $field) {
       $board->set($field, $form_state->getValue($field));
     }
     $board->save();

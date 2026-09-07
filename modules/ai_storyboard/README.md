@@ -44,6 +44,10 @@ Create a project, paste a script, select configured chat and image models, and
 run the breakdown. Review and edit each shot before generating frames because
 provider calls may incur charges.
 
+Use **After prompt** for a final instruction that must be appended to every
+frame prompt. This is useful for project-wide visual corrections or constraints
+that should also apply when individual shots are regenerated.
+
 Generated frames can be exported from the storyboard workspace as an ordered
 ZIP image collection with a JSON shot manifest, or as an MP4 animatic. The MP4
 uses each shot's configured duration and requires FFmpeg on the server.

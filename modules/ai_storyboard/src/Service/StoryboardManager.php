@@ -65,6 +65,7 @@ final class StoryboardManager {
       $session->save();
       $storyboard->set('studio_session_id', $session->id())->save();
     }
+    $after_prompt = trim((string) $storyboard->get('after_prompt')->value);
     $prompt = implode("\n\n", array_filter([
       'Create one production storyboard frame. No text, lettering, borders, split panels, or captions.',
       'VISUAL STYLE: ' . $storyboard->get('visual_style')->value,
@@ -73,6 +74,7 @@ final class StoryboardManager {
       'THIS SHOT: ' . $shot->get('image_prompt')->value,
       'COMPOSITION: ' . implode(', ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('lens')->value, $shot->get('lighting')->value])),
       'SHOT CONTINUITY: ' . $shot->get('continuity_notes')->value,
+      $after_prompt !== '' ? 'FINAL INSTRUCTION: ' . $after_prompt : '',
     ]));
     $turn = $this->imageGenerator->generate(
       $session,
