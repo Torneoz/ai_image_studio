@@ -10,6 +10,8 @@ declare(strict_types=1);
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Component\Serialization\Yaml;
+use Drupal\file\FileInterface;
+use Drupal\media\MediaInterface;
 
 /**
  * Implements hook_install().
@@ -478,8 +480,8 @@ function ai_image_studio_update_10020(): void {
   foreach ($turn_storage->loadMultiple($turn_ids) as $turn) {
     $media = $turn->get('media_id')->entity;
     $frame = $turn->get('last_frame')->entity;
-    if (!$media instanceof \Drupal\media\MediaInterface
-      || !$frame instanceof \Drupal\file\FileInterface) {
+    if (!$media instanceof MediaInterface
+      || !$frame instanceof FileInterface) {
       continue;
     }
     $media->set('thumbnail', [
@@ -523,4 +525,174 @@ function ai_image_studio_update_10022(): void {
     $config->set('default_ai_badge_class', '');
   }
   $config->save(TRUE);
+}
+
+/**
+ * Adds stable machine names to Studio sessions.
+ */
+function ai_image_studio_update_10023(array &$sandbox): void {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_session');
+  if (empty($sandbox['initialized'])) {
+    $definition = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Machine name'))
+      ->setSetting('max_length', 100);
+    $manager->installFieldStorageDefinition(
+      'machine_name',
+      'ai_image_studio_session',
+      'ai_image_studio',
+      $definition,
+    );
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+    $sandbox['processed'] = 0;
+    $sandbox['total'] = (int) $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->count()
+      ->execute();
+  }
+
+  /** @var \Drupal\ai_image_studio\Service\SessionMachineName $machine_names */
+  $machine_names = \Drupal::service('ai_image_studio.session_machine_name');
+  $ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('id', $sandbox['last_id'], '>')
+    ->sort('id', 'ASC')
+    ->range(0, 50)
+    ->execute();
+  foreach ($storage->loadMultiple($ids) as $session) {
+    $machine_name = $machine_names->normalize((string) $session->label());
+    if ($machine_name === '') {
+      $machine_name = 'session-' . $session->id();
+    }
+    elseif ($machine_names->exists($machine_name, (int) $session->id())) {
+      $suffix = '-' . $session->id();
+      $machine_name = mb_substr($machine_name, 0, 100 - strlen($suffix)) . $suffix;
+    }
+    $session->set('machine_name', $machine_name);
+    $session->save();
+    $sandbox['last_id'] = (int) $session->id();
+    $sandbox['processed']++;
+  }
+
+  if ($sandbox['processed'] < $sandbox['total']) {
+    $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
+    return;
+  }
+  $required_definition = BaseFieldDefinition::create('string')
+    ->setLabel(new TranslatableMarkup('Machine name'))
+    ->setRequired(TRUE)
+    ->setSetting('max_length', 100)
+    ->addConstraint('UniqueField');
+  $manager->updateFieldStorageDefinition($required_definition);
+  $sandbox['#finished'] = 1;
+}
+
+/**
+ * Copies private files attached to Studio Media into public storage.
+ */
+function ai_image_studio_update_10024(array &$sandbox): void {
+  $turn_storage = \Drupal::entityTypeManager()->getStorage('ai_image_studio_turn');
+  if (empty($sandbox['initialized'])) {
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+    $sandbox['processed'] = 0;
+    $sandbox['total'] = (int) $turn_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('media_id.target_id', NULL, 'IS NOT NULL')
+      ->count()
+      ->execute();
+  }
+
+  $ids = $turn_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('media_id.target_id', NULL, 'IS NOT NULL')
+    ->condition('id', $sandbox['last_id'], '>')
+    ->sort('id', 'ASC')
+    ->range(0, 25)
+    ->execute();
+  /** @var \Drupal\ai_image_studio\Service\MediaFilePublisher $publisher */
+  $publisher = \Drupal::service('ai_image_studio.media_file_publisher');
+  /** @var \Drupal\ai_image_studio\Service\SessionMachineName $machine_names */
+  $machine_names = \Drupal::service('ai_image_studio.session_machine_name');
+
+  foreach ($turn_storage->loadMultiple($ids) as $turn) {
+    $media = $turn->get('media_id')->entity;
+    $session = $turn->get('session_id')->entity;
+    if (!$media instanceof MediaInterface || $session === NULL) {
+      $sandbox['last_id'] = (int) $turn->id();
+      $sandbox['processed']++;
+      continue;
+    }
+    $machine_name = trim((string) $session->get('machine_name')->value);
+    if ($machine_name === '') {
+      $machine_name = $machine_names->generate((string) $session->label(), (int) $session->id());
+    }
+    $source_field = (string) ($media->getSource()->getConfiguration()['source_field'] ?? '');
+    $public_source = NULL;
+    $private_source_id = NULL;
+    if ($source_field !== '' && $media->hasField($source_field)) {
+      $source_item = $media->get($source_field)->first();
+      $source_file = $source_item?->entity;
+      if ($source_file instanceof FileInterface
+        && str_starts_with($source_file->getFileUri(), 'private://')) {
+        $private_source_id = (int) $source_file->id();
+        $is_video = !$turn->get('video')->isEmpty();
+        $master_id = (int) $turn->get($is_video ? 'video' : 'image')->target_id;
+        $badged = $master_id !== $private_source_id;
+        $extension = pathinfo($source_file->getFilename(), PATHINFO_EXTENSION);
+        $filename = sprintf(
+          '%s_turn_%d%s.%s',
+          $machine_name,
+          $turn->id(),
+          $badged ? '_badged' : '',
+          $extension,
+        );
+        $public_source = $publisher->copyToPublic(
+          $source_file,
+          $media->get($source_field),
+          ['media' => $media],
+          $filename,
+        );
+        $source_value = $source_item->getValue();
+        $source_value['target_id'] = $public_source->id();
+        $media->set($source_field, $source_value);
+        $media->save();
+      }
+    }
+
+    if ($media->hasField('thumbnail')) {
+      $thumbnail_item = $media->get('thumbnail')->first();
+      $thumbnail = $thumbnail_item?->entity;
+      if ($thumbnail instanceof FileInterface
+        && str_starts_with($thumbnail->getFileUri(), 'private://')) {
+        if ($public_source instanceof FileInterface
+          && (int) $thumbnail->id() === $private_source_id) {
+          $public_thumbnail = $public_source;
+        }
+        else {
+          $extension = pathinfo($thumbnail->getFilename(), PATHINFO_EXTENSION);
+          $public_thumbnail = $publisher->copyToPublic(
+            $thumbnail,
+            $media->get('thumbnail'),
+            ['media' => $media],
+            sprintf('%s_turn_%d_last_frame.%s', $machine_name, $turn->id(), $extension),
+          );
+        }
+        $thumbnail_value = $thumbnail_item->getValue();
+        $thumbnail_value['target_id'] = $public_thumbnail->id();
+        $media->set('thumbnail', $thumbnail_value);
+        $media->save();
+      }
+    }
+
+    $sandbox['last_id'] = (int) $turn->id();
+    $sandbox['processed']++;
+  }
+
+  if ($sandbox['processed'] < $sandbox['total']) {
+    $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
+    return;
+  }
+  $sandbox['#finished'] = 1;
 }

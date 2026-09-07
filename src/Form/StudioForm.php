@@ -6,6 +6,7 @@ namespace Drupal\ai_image_studio\Form;
 
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio\Service\PromptResolver;
+use Drupal\ai_image_studio\Service\SessionMachineName;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -31,6 +32,7 @@ final class StudioForm extends FormBase {
     protected ConfigFactoryInterface $studioConfigFactory,
     protected AccountProxyInterface $currentUserProxy,
     protected PromptResolver $promptResolver,
+    protected SessionMachineName $sessionMachineName,
   ) {}
 
   /**
@@ -43,6 +45,7 @@ final class StudioForm extends FormBase {
       $container->get('config.factory'),
       $container->get('current_user'),
       $container->get('ai_image_studio.prompt_resolver'),
+      $container->get('ai_image_studio.session_machine_name'),
     );
   }
 
@@ -141,6 +144,19 @@ final class StudioForm extends FormBase {
         '#title' => $this->t('Session title'),
         '#required' => TRUE,
         '#maxlength' => 255,
+      ];
+      $form['machine_name'] = [
+        '#type' => 'machine_name',
+        '#title' => $this->t('Machine name'),
+        '#maxlength' => 100,
+        '#description' => $this->t('Used for generated file and directory names. It cannot be changed after the session is created.'),
+        '#machine_name' => [
+          'source' => ['title'],
+          'exists' => [$this, 'machineNameExists'],
+          'replace_pattern' => '[^a-z0-9]+',
+          'replace' => '-',
+          'error' => $this->t('The machine name may only contain lowercase letters, numbers, and hyphens.'),
+        ],
       ];
       $form['start_mode'] = [
         '#type' => 'radios',
@@ -2489,6 +2505,7 @@ final class StudioForm extends FormBase {
     if ($session_id === NULL) {
       $session = $storage->create([
         'title' => trim((string) $form_state->getValue('title')),
+        'machine_name' => trim((string) $form_state->getValue('machine_name')),
         'uid' => $this->currentUserProxy->id(),
         'status' => 'active',
       ]);
@@ -2632,6 +2649,13 @@ final class StudioForm extends FormBase {
     ], $output_type === 'video'
       ? ['fragment' => 'ai-image-studio-turn-' . $turn->id()]
       : []);
+  }
+
+  /**
+   * Checks whether a proposed session machine name is already in use.
+   */
+  public function machineNameExists(string $value): bool {
+    return $this->sessionMachineName->exists($value);
   }
 
   /**

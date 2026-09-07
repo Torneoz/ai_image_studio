@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ai_image_studio\Form;
 
 use Drupal\ai_image_studio\Service\SessionReplayManager;
+use Drupal\ai_image_studio\Service\SessionMachineName;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -26,6 +27,7 @@ final class SessionReplayForm extends FormBase {
   public function __construct(
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly SessionReplayManager $replayManager,
+    private readonly SessionMachineName $sessionMachineName,
   ) {}
 
   /**
@@ -35,6 +37,7 @@ final class SessionReplayForm extends FormBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('ai_image_studio.session_replay'),
+      $container->get('ai_image_studio.session_machine_name'),
     );
   }
 
@@ -66,6 +69,19 @@ final class SessionReplayForm extends FormBase {
       '#default_value' => $this->t('@title — re-render', ['@title' => $ai_image_studio_session?->label()]),
       '#required' => TRUE,
       '#maxlength' => 255,
+    ];
+    $form['machine_name'] = [
+      '#type' => 'machine_name',
+      '#title' => $this->t('Machine name'),
+      '#maxlength' => 100,
+      '#description' => $this->t('Used for generated file and directory names.'),
+      '#machine_name' => [
+        'source' => ['title'],
+        'exists' => [$this, 'machineNameExists'],
+        'replace_pattern' => '[^a-z0-9]+',
+        'replace' => '-',
+        'error' => $this->t('The machine name may only contain lowercase letters, numbers, and hyphens.'),
+      ],
     ];
     $form['use_default_models'] = [
       '#type' => 'checkbox',
@@ -148,6 +164,7 @@ final class SessionReplayForm extends FormBase {
     }
     $target = $this->entityTypeManager->getStorage('ai_image_studio_session')->create([
       'title' => trim((string) $form_state->getValue('title')),
+      'machine_name' => trim((string) $form_state->getValue('machine_name')),
       'uid' => $this->currentUser()->id(),
       'status' => 'active',
     ]);
@@ -163,6 +180,13 @@ final class SessionReplayForm extends FormBase {
     $this->replayManager->start($source, $target, $overrides, (bool) $form_state->getValue('use_default_models'));
     $this->messenger()->addStatus($this->t('The re-render was started in a new session.'));
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', ['ai_image_studio_session' => $target->id()]);
+  }
+
+  /**
+   * Checks whether a proposed session machine name is already in use.
+   */
+  public function machineNameExists(string $value): bool {
+    return $this->sessionMachineName->exists($value);
   }
 
 }

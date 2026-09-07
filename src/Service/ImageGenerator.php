@@ -54,6 +54,7 @@ final class ImageGenerator {
     private readonly ClientInterface $httpClient,
     private readonly KeyRepositoryInterface $keyRepository,
     private readonly TransliterationInterface $transliteration,
+    private readonly MediaFilePublisher $mediaFilePublisher,
     private readonly ?object $pricingCatalog = NULL,
   ) {}
 
@@ -840,7 +841,18 @@ final class ImageGenerator {
       $field => $source_value,
       'status' => 1,
     ]);
+    $published_file = $this->mediaFilePublisher->copyToPublic(
+      $file,
+      $media->get($field),
+      ['media' => $media],
+      $this->publishedFilename($turn, $file, $render_badge),
+    );
+    $source_value['target_id'] = $published_file->id();
+    $media->set($field, $source_value);
     $media->save();
+    if ($render_badge && $file->id() !== $turn->get($is_video ? 'video' : 'image')->target_id) {
+      $file->delete();
+    }
     if ($is_video
       && $turn->hasField('last_frame')
       && !$turn->get('last_frame')->isEmpty()
@@ -848,8 +860,14 @@ final class ImageGenerator {
       // File-based video Media uses a generic file icon by default. Save the
       // extracted frame after creation so Media's initial metadata refresh
       // does not replace this explicit thumbnail.
+      $thumbnail = $this->mediaFilePublisher->copyToPublic(
+        $turn->get('last_frame')->entity,
+        $media->get('thumbnail'),
+        ['media' => $media],
+        $this->publishedFilename($turn, $turn->get('last_frame')->entity, FALSE, TRUE),
+      );
       $media->set('thumbnail', [
-        'target_id' => $turn->get('last_frame')->target_id,
+        'target_id' => $thumbnail->id(),
         'alt' => $name,
       ]);
       $media->save();
@@ -857,6 +875,27 @@ final class ImageGenerator {
     $turn->set('media_id', ['target_id' => $media->id()]);
     $turn->save();
     return $media;
+  }
+
+  /**
+   * Returns a descriptive filename for a published Studio asset.
+   */
+  private function publishedFilename(
+    object $turn,
+    FileInterface $file,
+    bool $badged = FALSE,
+    bool $last_frame = FALSE,
+  ): string {
+    $session = $turn->get('session_id')->entity;
+    $extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+    $suffix = $last_frame ? '_last_frame' : ($badged ? '_badged' : '');
+    return sprintf(
+      '%s_turn_%d%s.%s',
+      $this->safeSessionName($session),
+      $turn->id(),
+      $suffix,
+      $extension,
+    );
   }
 
   /**
@@ -1206,7 +1245,13 @@ final class ImageGenerator {
       'image/gif' => 'gif',
       default => 'png',
     };
-    $destination = sprintf('%s/turn-%d.%s', $destination_directory, $turn_id, $extension);
+    $destination = sprintf(
+      '%s/%s_turn_%d.%s',
+      $destination_directory,
+      $this->safeSessionName($session),
+      $turn_id,
+      $extension,
+    );
     $file = $this->fileRepository->writeData(
       $image->getBinary(),
       $destination,
@@ -1279,7 +1324,12 @@ final class ImageGenerator {
       $destination_directory,
       FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
     );
-    $destination = sprintf('%s/turn-%d.mp4', $destination_directory, $turn_id);
+    $destination = sprintf(
+      '%s/%s_turn_%d.mp4',
+      $destination_directory,
+      $this->safeSessionName($session),
+      $turn_id,
+    );
     $file = $this->fileRepository->writeData(
       $video->getBinary(),
       $destination,
@@ -1343,8 +1393,9 @@ final class ImageGenerator {
         FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS,
       );
       $destination = sprintf(
-        '%s/turn-%d-last-frame.png',
+        '%s/%s_turn_%d_last_frame.png',
         $destination_directory,
+        $this->safeSessionName($session),
         $turn->id(),
       );
       $frame = $this->fileRepository->writeData(
@@ -1387,6 +1438,12 @@ final class ImageGenerator {
    * Returns a filesystem-safe directory name derived from the session title.
    */
   private function safeSessionName(object $session): string {
+    if ($session->hasField('machine_name')) {
+      $machine_name = trim((string) $session->get('machine_name')->value);
+      if ($machine_name !== '') {
+        return $machine_name;
+      }
+    }
     $name = strtolower($this->transliteration->transliterate(
       trim((string) $session->label()),
       'en',

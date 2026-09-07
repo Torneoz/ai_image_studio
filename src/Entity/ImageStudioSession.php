@@ -60,6 +60,12 @@ final class ImageStudioSession extends ContentEntityBase implements EntityOwnerI
       ->setRequired(TRUE)
       ->setSetting('max_length', 255);
 
+    $fields['machine_name'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Machine name'))
+      ->setRequired(TRUE)
+      ->setSetting('max_length', 100)
+      ->addConstraint('UniqueField');
+
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(new TranslatableMarkup('Owner'))
       ->setSetting('target_type', 'user')

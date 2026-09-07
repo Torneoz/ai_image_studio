@@ -14,6 +14,24 @@ use Drupal\file\FileInterface;
 use Drupal\media\Entity\MediaType;
 
 /**
+ * Implements hook_entity_presave().
+ */
+function ai_image_studio_entity_presave(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'ai_image_studio_session'
+    || !$entity->hasField('machine_name')) {
+    return;
+  }
+  $machine_name = trim((string) $entity->get('machine_name')->value);
+  if ($machine_name === '') {
+    $machine_name = (string) $entity->label();
+  }
+  $entity->set('machine_name', \Drupal::service('ai_image_studio.session_machine_name')->generate(
+    $machine_name,
+    $entity->isNew() ? NULL : (int) $entity->id(),
+  ));
+}
+
+/**
  * Implements hook_query_ai_image_studio_session_access_alter().
  */
 function ai_image_studio_query_ai_image_studio_session_access_alter(AlterableInterface $query): void {

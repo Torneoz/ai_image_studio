@@ -13,12 +13,25 @@ services:
       - '@http_client'
       - '@key.repository'
       - '@transliteration'
+      - '@ai_image_studio.media_file_publisher'
       - '@?torneo_ai.pricing_catalog'
+
+  ai_image_studio.media_file_publisher:
+    class: Drupal\ai_image_studio\Service\MediaFilePublisher
+    arguments:
+      - '@file_system'
+      - '@file.repository'
 
   ai_image_studio.prompt_resolver:
     class: Drupal\ai_image_studio\Service\PromptResolver
     arguments:
       - '@config.factory'
+
+  ai_image_studio.session_machine_name:
+    class: Drupal\ai_image_studio\Service\SessionMachineName
+    arguments:
+      - '@transliteration'
+      - '@entity_type.manager'
 
   ai_image_studio.session_replay:
     class: Drupal\ai_image_studio\Service\SessionReplayManager
