@@ -40,11 +40,25 @@ final class StoryboardController extends ControllerBase {
     foreach ($boards as $board) {
       $shot_count = $this->entityTypeManager->getStorage('ai_storyboard_shot')->getQuery()->accessCheck(FALSE)->condition('storyboard_id', $board->id())->count()->execute();
       $rows[] = [
-        Link::fromTextAndUrl($board->label(), $board->toUrl())->toRenderable(),
+        ['data' => Link::fromTextAndUrl($board->label(), $board->toUrl())->toRenderable()],
         (string) $shot_count,
         ucfirst(str_replace('_', ' ', (string) $board->get('status')->value)),
         $this->dateFormatter->format((int) $board->getChangedTime(), 'short'),
-        Link::fromTextAndUrl($this->t('Edit'), $board->toUrl())->toRenderable(),
+        [
+          'data' => [
+            '#type' => 'operations',
+            '#links' => [
+              'edit' => [
+                'title' => $this->t('Edit'),
+                'url' => $board->toUrl(),
+              ],
+              'delete' => [
+                'title' => $this->t('Delete'),
+                'url' => $board->toUrl('delete-form'),
+              ],
+            ],
+          ],
+        ],
       ];
     }
     return [
