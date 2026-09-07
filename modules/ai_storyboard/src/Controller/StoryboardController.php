@@ -65,7 +65,13 @@ final class StoryboardController extends ControllerBase {
       'intro' => ['#markup' => '<p>' . $this->t('Turn a script into editable, production-aware shots, then generate continuity-guided frames through AI Image Studio.') . '</p>'],
       'table' => [
         '#type' => 'table',
-        '#header' => [$this->t('Storyboard'), $this->t('Shots'), $this->t('Status'), $this->t('Updated'), $this->t('Operations')],
+        '#header' => [
+          $this->t('Storyboard'),
+          $this->t('Shots'),
+          $this->t('Status'),
+          $this->t('Updated'),
+          $this->t('Operations'),
+        ],
         '#rows' => $rows,
         '#empty' => $this->t('No storyboards yet.'),
       ],
