@@ -126,3 +126,36 @@ function ai_storyboard_update_10004(): string {
   $schema->dropTable('ai_storyboard_bulk_job');
   return 'Migrated storyboard generation into the shared Bulk Jobs facility.';
 }
+
+/**
+ * Adds configurable video-sequence fields to storyboards and shots.
+ */
+function ai_storyboard_update_10005(): string {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $storyboard_type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard');
+  $storyboard_fields = Storyboard::baseFieldDefinitions($storyboard_type);
+  foreach ([
+    'video_model',
+    'video_sequence_mode',
+    'video_duration',
+    'video_resolution',
+    'video_prompt',
+  ] as $field_name) {
+    $update_manager->installFieldStorageDefinition(
+      $field_name,
+      'ai_storyboard',
+      'ai_storyboard',
+      $storyboard_fields[$field_name],
+    );
+  }
+
+  $shot_type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard_shot');
+  $shot_fields = \Drupal\ai_storyboard\Entity\StoryboardShot::baseFieldDefinitions($shot_type);
+  $update_manager->installFieldStorageDefinition(
+    'video_turn_id',
+    'ai_storyboard_shot',
+    'ai_storyboard',
+    $shot_fields['video_turn_id'],
+  );
+  return 'Added configurable storyboard video sequences.';
+}

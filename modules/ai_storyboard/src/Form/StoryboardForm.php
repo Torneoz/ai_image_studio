@@ -136,6 +136,16 @@ final class StoryboardForm extends FormBase {
         '#access' => $shot_count > 0
           && $this->currentUser()->hasPermission('run ai storyboard bulk generation'),
       ];
+      $form['storyboard_actions']['buttons']['generate_video_sequences'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Generate video sequences'),
+        '#url' => Url::fromRoute('ai_storyboard.generate_video_sequences', [
+          'ai_storyboard' => $ai_storyboard->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+        '#access' => $shot_count > 0
+          && $this->currentUser()->hasPermission('run ai storyboard bulk generation'),
+      ];
       $form['storyboard_actions']['buttons']['breakdown'] = [
         '#type' => 'submit',
         '#value' => $this->t('Rebuild shots from script'),
@@ -244,6 +254,7 @@ final class StoryboardForm extends FormBase {
       $total += (float) $shot->get('duration')->value;
       $turn = $shot->get('studio_turn_id')->entity;
       $image = $turn?->get('image')->entity;
+      $video = $shot->get('video_turn_id')->entity?->get('video')->entity;
       $frame = $image
         ? ['#theme' => 'image', '#uri' => $this->fileUrlGenerator->generateAbsoluteString($image->getFileUri()), '#alt' => $shot->label()]
         : ['#markup' => '<div class="ai-storyboard-shot__placeholder">' . $this->t('Frame not generated') . '</div>'];
@@ -268,6 +279,17 @@ final class StoryboardForm extends FormBase {
             'edit' => $edit_link,
             'generate' => $generate_link,
           ],
+          'video' => $video ? [
+            '#type' => 'html_tag',
+            '#tag' => 'video',
+            '#attributes' => [
+              'src' => $this->fileUrlGenerator->generateAbsoluteString($video->getFileUri()),
+              'controls' => 'controls',
+              'preload' => 'metadata',
+              'playsinline' => 'playsinline',
+              'class' => ['ai-storyboard-shot__video'],
+            ],
+          ] : [],
         ],
       ];
     }

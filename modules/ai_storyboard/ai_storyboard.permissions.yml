@@ -9,4 +9,4 @@ administer ai storyboard:
 
 run ai storyboard bulk generation:
   title: 'Run AI Storyboard bulk generation'
-  description: 'Queue every shot in a storyboard for image generation.'
+  description: 'Queue storyboard frame and video-sequence generation.'

@@ -10,6 +10,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -31,6 +32,7 @@ final class BulkJobController extends ControllerBase {
     private readonly BulkGenerationManager $bulkManager,
     private readonly DateFormatterInterface $dateFormatter,
     private readonly EntityTypeManagerInterface $studioEntityTypeManager,
+    private readonly FileUrlGeneratorInterface $fileUrlGenerator,
   ) {}
 
   /**
@@ -42,6 +44,7 @@ final class BulkJobController extends ControllerBase {
       $container->get('ai_image_studio_vbo.batch_manager'),
       $container->get('date.formatter'),
       $container->get('entity_type.manager'),
+      $container->get('file_url_generator'),
     );
   }
 
@@ -66,8 +69,10 @@ final class BulkJobController extends ControllerBase {
           $this->t('Job @id', ['@id' => $job->id]),
           Url::fromRoute('ai_image_studio_vbo.job', ['job_id' => $job->id]),
         ),
-        ($configuration['source_type'] ?? '') === 'storyboard'
-          ? $this->t('Storyboard')
+        str_starts_with((string) ($configuration['source_type'] ?? ''), 'storyboard')
+          ? (($configuration['source_type'] ?? '') === 'storyboard_video'
+            ? $this->t('Storyboard video')
+            : $this->t('Storyboard frames'))
           : $this->t('Content'),
         $job->status,
         (string) array_sum($counts),
@@ -118,7 +123,11 @@ final class BulkJobController extends ControllerBase {
     if ($job === NULL) {
       throw new NotFoundHttpException();
     }
-    $is_storyboard = ($job->configuration['source_type'] ?? '') === 'storyboard';
+    $is_storyboard = str_starts_with(
+      (string) ($job->configuration['source_type'] ?? ''),
+      'storyboard',
+    );
+    $is_video_job = ($job->configuration['source_type'] ?? '') === 'storyboard_video';
     $storyboard_id = (int) ($job->configuration['storyboard_id'] ?? 0);
     $query = $this->database->select('ai_image_studio_vbo_item', 'i');
     $query->leftJoin('ai_image_studio_turn', 't', 't.id = i.turn_id');
@@ -130,6 +139,9 @@ final class BulkJobController extends ControllerBase {
       ->orderBy('id')
       ->execute()
       ->fetchAll();
+    if ($is_video_job) {
+      $this->syncVideoJob($job, $items);
+    }
     $media_ids = array_values(array_filter(array_map(
       static fn (object $item): int => (int) ($item->media_id ?? 0),
       $items,
@@ -300,7 +312,10 @@ final class BulkJobController extends ControllerBase {
       $account->hasPermission('view any ai image studio vbo job')
       || ($account->hasPermission('view ai image studio vbo jobs')
         && (int) $job->uid === (int) $account->id())
-      || (($job->configuration['source_type'] ?? '') === 'storyboard'
+      || (str_starts_with(
+        (string) ($job->configuration['source_type'] ?? ''),
+        'storyboard',
+      )
         && $account->hasPermission('access ai storyboard')
         && (int) $job->uid === (int) $account->id()),
     )->addCacheContexts(['user.permissions', 'user']);
@@ -363,6 +378,19 @@ final class BulkJobController extends ControllerBase {
     }
     $turn = $this->studioEntityTypeManager
       ->getStorage('ai_image_studio_turn')->load($turn_id);
+    $video = $turn?->get('video')->entity;
+    if ($video instanceof FileInterface) {
+      return [
+        '#type' => 'html_tag',
+        '#tag' => 'video',
+        '#attributes' => [
+          'src' => $this->fileUrlGenerator->generateAbsoluteString($video->getFileUri()),
+          'controls' => 'controls',
+          'preload' => 'metadata',
+          'width' => 240,
+        ],
+      ];
+    }
     $file = $turn?->get('image')->entity;
     if (!$file instanceof FileInterface) {
       return [];
@@ -374,6 +402,49 @@ final class BulkJobController extends ControllerBase {
       '#width' => 160,
       '#attributes' => ['loading' => 'lazy'],
     ];
+  }
+
+  /**
+   * Synchronizes shared job items with asynchronous video turns.
+   */
+  private function syncVideoJob(object $job, array $items): void {
+    $active = FALSE;
+    $failed = FALSE;
+    foreach ($items as $item) {
+      $turn = $item->turn_id
+        ? $this->studioEntityTypeManager->getStorage('ai_image_studio_turn')->load((int) $item->turn_id)
+        : NULL;
+      if ($turn) {
+        $turn_status = (string) $turn->get('status')->value;
+        $status = match ($turn_status) {
+          'completed' => 'completed',
+          'failed', 'expired', 'cancelled' => 'failed',
+          'processing' => 'processing',
+          default => 'queued',
+        };
+        if ($status !== $item->status) {
+          $item->status = $status;
+          $item->error_message = $status === 'failed'
+            ? (string) $turn->get('error_message')->value
+            : NULL;
+          $this->database->update('ai_image_studio_vbo_item')->fields([
+            'status' => $status,
+            'error_message' => $item->error_message,
+            'changed' => time(),
+          ])->condition('id', (int) $item->id)->execute();
+        }
+      }
+      $active = $active || in_array($item->status, ['queued', 'processing'], TRUE);
+      $failed = $failed || $item->status === 'failed';
+    }
+    $status = $active ? 'active' : ($failed ? 'completed_with_errors' : 'completed');
+    if ($status !== $job->status) {
+      $job->status = $status;
+      $this->database->update('ai_image_studio_vbo_job')->fields([
+        'status' => $status,
+        'changed' => time(),
+      ])->condition('id', (int) $job->id)->execute();
+    }
   }
 
 }

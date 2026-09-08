@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Service;
 
+use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Uuid\Php as UuidGenerator;
 use Drupal\Core\Database\Connection;
@@ -19,6 +20,7 @@ final class StoryboardBulkManager {
     private readonly QueueFactory $queueFactory,
     private readonly TimeInterface $time,
     private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly ImageGenerator $imageGenerator,
   ) {}
 
   /**
@@ -67,6 +69,117 @@ final class StoryboardBulkManager {
     if ($ids === []) {
       $this->updateJobStatus($job_id);
     }
+    return $job_id;
+  }
+
+  /**
+   * Creates video turns from the generated storyboard keyframes.
+   */
+  public function enqueueVideoSequences(object $storyboard, int $uid, array $settings): int {
+    $session = $storyboard->get('studio_session_id')->entity;
+    if (!$session) {
+      throw new \LogicException('Generate storyboard frames before creating video sequences.');
+    }
+    $storage = $this->entityTypeManager->getStorage('ai_storyboard_shot');
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('storyboard_id', $storyboard->id())
+      ->sort('position')
+      ->execute();
+    $keyframes = [];
+    foreach ($storage->loadMultiple($ids) as $shot) {
+      $file = $shot->get('studio_turn_id')->entity?->get('image')->entity;
+      if ($file) {
+        $keyframes[] = ['shot' => $shot, 'file' => $file];
+      }
+    }
+    $mode = (string) ($settings['mode'] ?? 'animate');
+    if ($keyframes === [] || ($mode === 'bridge' && count($keyframes) < 2)) {
+      throw new \LogicException($mode === 'bridge'
+        ? 'Generate at least two storyboard frames before bridging keyframes.'
+        : 'Generate at least one storyboard frame before creating video sequences.');
+    }
+
+    $now = $this->time->getRequestTime();
+    $job_id = (int) $this->database->insert('ai_image_studio_vbo_job')
+      ->fields([
+        'uuid' => (new UuidGenerator())->generate(),
+        'uid' => $uid,
+        'session_id' => (int) $session->id(),
+        'prompt_template' => 'Storyboard video sequences: ' . $storyboard->label(),
+        'configuration' => json_encode([
+          'source_type' => 'storyboard_video',
+          'storyboard_id' => (int) $storyboard->id(),
+          'mode' => $mode,
+        ], JSON_THROW_ON_ERROR),
+        'status' => 'active',
+        'created' => $now,
+        'changed' => $now,
+      ])->execute();
+
+    $limit = $mode === 'bridge' ? count($keyframes) - 1 : count($keyframes);
+    for ($index = 0; $index < $limit; $index++) {
+      $shot = $keyframes[$index]['shot'];
+      $prompt = implode("\n\n", array_filter([
+        (string) ($settings['prompt'] ?? ''),
+        'SHOT ACTION: ' . $shot->get('action')->value,
+        'CAMERA MOVEMENT: ' . $shot->get('camera_move')->value,
+        $mode === 'bridge' ? 'Create a continuous transition from the first supplied keyframe to the second. Preserve character identity, wardrobe, environment, and screen direction.' : 'Animate this keyframe as a continuous cinematic shot. Preserve character identity, composition, wardrobe, and environment.',
+      ]));
+      $item_id = (int) $this->database->insert('ai_image_studio_vbo_item')
+        ->fields([
+          'job_id' => $job_id,
+          'node_id' => (int) $shot->id(),
+          'revision_id' => NULL,
+          'langcode' => 'und',
+          'label' => mb_substr((string) $shot->label(), 0, 255),
+          'resolved_prompt' => $prompt,
+          'source_file_id' => (int) $keyframes[$index]['file']->id(),
+          'status' => 'queued',
+          'created' => $now,
+          'changed' => $now,
+        ])->execute();
+      try {
+        $aspect_ratio = (string) $storyboard->get('aspect_ratio')->value;
+        $generation_settings = [
+          'duration' => (int) $settings['duration'],
+          'resolution' => (string) $settings['resolution'],
+          'aspect_ratio' => in_array($aspect_ratio, ['1:1', '16:9', '9:16', '4:3'], TRUE)
+            ? $aspect_ratio
+            : 'auto',
+        ];
+        if ($mode === 'bridge') {
+          $generation_settings['video_mode'] = 'reference';
+          $generation_settings['reference_file_ids'] = [
+            (int) $keyframes[$index]['file']->id(),
+            (int) $keyframes[$index + 1]['file']->id(),
+          ];
+        }
+        $turn = $this->imageGenerator->generate(
+          $session,
+          $prompt,
+          (string) $settings['model'],
+          NULL,
+          $keyframes[$index]['file'],
+          $generation_settings,
+          'video',
+        );
+        $shot->set('video_turn_id', $turn->id())->save();
+        $this->database->update('ai_image_studio_vbo_item')->fields([
+          'turn_id' => (int) $turn->id(),
+          'status' => (string) $turn->get('status')->value,
+          'changed' => $this->time->getRequestTime(),
+        ])->condition('id', $item_id)->execute();
+      }
+      catch (\Throwable $exception) {
+        $this->database->update('ai_image_studio_vbo_item')->fields([
+          'status' => 'failed',
+          'error_message' => $exception->getMessage(),
+          'changed' => $this->time->getRequestTime(),
+        ])->condition('id', $item_id)->execute();
+      }
+    }
+    $this->updateJobStatus($job_id);
     return $job_id;
   }
 

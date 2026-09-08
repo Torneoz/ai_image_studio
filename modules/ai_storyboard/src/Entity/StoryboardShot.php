@@ -47,6 +47,7 @@ final class StoryboardShot extends ContentEntityBase {
     $fields['image_prompt'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Image prompt'));
     $fields['continuity_notes'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Continuity notes'));
     $fields['studio_turn_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Generated frame'))->setSetting('target_type', 'ai_image_studio_turn');
+    $fields['video_turn_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Generated video sequence'))->setSetting('target_type', 'ai_image_studio_turn');
     $fields['status'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Status'))->setSettings(['allowed_values' => ['draft' => 'Draft', 'generated' => 'Generated', 'approved' => 'Approved']])->setDefaultValue('draft');
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(new TranslatableMarkup('Created'));
     $fields['changed'] = BaseFieldDefinition::create('changed')->setLabel(new TranslatableMarkup('Changed'));

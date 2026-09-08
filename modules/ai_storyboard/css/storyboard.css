@@ -77,6 +77,14 @@
   gap: 1rem;
 }
 
+.ai-storyboard-shot__video {
+  display: block;
+  width: min(100%, 640px);
+  margin-block-start: 1rem;
+  border-radius: .25rem;
+  background: #000;
+}
+
 .ai-storyboard-bible {
   max-width: 75ch;
   color: var(--gin-color-text, CanvasText);

@@ -62,6 +62,11 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['aspect_ratio'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Aspect ratio'))->setSettings(['allowed_values' => ['16:9' => '16:9 landscape', '9:16' => '9:16 portrait', '1:1' => '1:1 square', '4:3' => '4:3 classic', '2.39:1' => '2.39:1 anamorphic']])->setDefaultValue('16:9');
     $fields['chat_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Breakdown model'))->setSetting('max_length', 383);
     $fields['image_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Image model'))->setSetting('max_length', 383);
+    $fields['video_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Video model'))->setSetting('max_length', 383);
+    $fields['video_sequence_mode'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Video sequence mode'))->setSettings(['allowed_values' => ['animate' => 'Animate each keyframe', 'bridge' => 'Bridge consecutive keyframes']])->setDefaultValue('animate');
+    $fields['video_duration'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Video duration'))->setSetting('unsigned', TRUE)->setDefaultValue(5);
+    $fields['video_resolution'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Video resolution'))->setSettings(['allowed_values' => ['480p' => '480p', '720p' => '720p', '1080p' => '1080p']])->setDefaultValue('720p');
+    $fields['video_prompt'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Video sequence prompt'));
     $fields['studio_session_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Image Studio session'))->setSetting('target_type', 'ai_image_studio_session');
     $fields['status'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Status'))->setSettings(['allowed_values' => ['draft' => 'Draft', 'in_review' => 'In review', 'approved' => 'Approved']])->setDefaultValue('draft');
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(new TranslatableMarkup('Created'));
