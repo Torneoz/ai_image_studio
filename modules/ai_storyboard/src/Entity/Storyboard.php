@@ -9,6 +9,7 @@ use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
@@ -50,6 +51,10 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
     $fields = parent::baseFieldDefinitions($entity_type);
     $fields['title'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Title'))->setRequired(TRUE)->setSetting('max_length', 255);
+    $fields['machine_name'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Machine name'))
+      ->setSetting('max_length', 100)
+      ->addConstraint('UniqueField');
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Owner'))->setSetting('target_type', 'user')->setDefaultValueCallback(static::class . '::getDefaultEntityOwner');
     $fields['script'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Script'))->setRequired(TRUE);
     $fields['creative_brief'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Creative brief'));
@@ -75,6 +80,29 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(new TranslatableMarkup('Created'));
     $fields['changed'] = BaseFieldDefinition::create('changed')->setLabel(new TranslatableMarkup('Changed'));
     return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage): void {
+    parent::preSave($storage);
+    $value = (string) ($this->get('machine_name')->value ?: $this->label());
+    $base = \Drupal::service('ai_image_studio.session_machine_name')->normalize($value) ?: 'storyboard';
+    $candidate = $base;
+    $suffix = 2;
+    while (TRUE) {
+      $query = $storage->getQuery()->accessCheck(FALSE)->condition('machine_name', $candidate);
+      if (!$this->isNew()) {
+        $query->condition('id', $this->id(), '<>');
+      }
+      if (!$query->count()->execute()) {
+        break;
+      }
+      $ending = '_' . $suffix++;
+      $candidate = substr($base, 0, 100 - strlen($ending)) . $ending;
+    }
+    $this->set('machine_name', $candidate);
   }
 
 }

@@ -60,6 +60,18 @@ final class StoryboardForm extends FormBase {
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
     $form['project'] = ['#type' => 'details', '#title' => $this->t('Project and script'), '#open' => $ai_storyboard === NULL];
     $form['project']['title'] = ['#type' => 'textfield', '#title' => $this->t('Title'), '#required' => TRUE, '#maxlength' => 255, '#default_value' => $ai_storyboard?->label()];
+    $form['project']['machine_name'] = [
+      '#type' => 'machine_name',
+      '#title' => $this->t('Machine name'),
+      '#default_value' => $ai_storyboard?->get('machine_name')->value,
+      '#maxlength' => 100,
+      '#required' => TRUE,
+      '#machine_name' => [
+        'source' => ['project', 'title'],
+        'exists' => [$this, 'machineNameExists'],
+      ],
+      '#description' => $this->t('A unique project identifier using lowercase letters, numbers, and underscores.'),
+    ];
     $form['project']['creative_brief'] = ['#type' => 'textarea', '#title' => $this->t('Creative brief'), '#rows' => 3, '#default_value' => $ai_storyboard?->get('creative_brief')->value, '#description' => $this->t('Audience, objective, tone, runtime, platform, and production constraints.')];
     $form['project']['script'] = ['#type' => 'textarea', '#title' => $this->t('Script'), '#required' => TRUE, '#rows' => 14, '#default_value' => $ai_storyboard?->get('script')->value];
     $form['project']['visual_style'] = ['#type' => 'textfield', '#title' => $this->t('Visual style'), '#default_value' => $ai_storyboard?->get('visual_style')->value ?? 'cinematic storyboard sketch', '#maxlength' => 255];
@@ -220,8 +232,21 @@ final class StoryboardForm extends FormBase {
       $board->set($field, $form_state->getValue($field));
     }
     $board->set('audio_prompt', (string) $form_state->getValue('audio_prompt'));
+    $board->set('machine_name', (string) $form_state->getValue('machine_name'));
     $board->save();
     return $board;
+  }
+
+  /**
+   * Checks machine-name uniqueness, excluding the current storyboard.
+   */
+  public function machineNameExists(string $value, array $element, FormStateInterface $form_state): bool {
+    $query = $this->entityTypeManager->getStorage('ai_storyboard')->getQuery()
+      ->accessCheck(FALSE)->condition('machine_name', $value);
+    if ($form_state->get('storyboard_id')) {
+      $query->condition('id', $form_state->get('storyboard_id'), '<>');
+    }
+    return (bool) $query->count()->execute();
   }
 
   /**

@@ -186,3 +186,26 @@ function ai_storyboard_update_10007(): string {
   }
   return 'Installed missing Storyboard Views; existing Views were preserved.';
 }
+
+/**
+ * Adds machine names and backfills existing storyboard projects in batches.
+ */
+function ai_storyboard_update_10008(array &$sandbox): void {
+  if (empty($sandbox['initialized'])) {
+    $type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard');
+    $fields = Storyboard::baseFieldDefinitions($type);
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+      'machine_name', 'ai_storyboard', 'ai_storyboard', $fields['machine_name'],
+    );
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+  }
+  $storage = \Drupal::entityTypeManager()->getStorage('ai_storyboard');
+  $ids = $storage->getQuery()->accessCheck(FALSE)
+    ->condition('id', $sandbox['last_id'], '>')->sort('id')->range(0, 50)->execute();
+  foreach ($storage->loadMultiple($ids) as $board) {
+    $board->save();
+    $sandbox['last_id'] = (int) $board->id();
+  }
+  $sandbox['#finished'] = count($ids) < 50 ? 1 : 0.5;
+}
