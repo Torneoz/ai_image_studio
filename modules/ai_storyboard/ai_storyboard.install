@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Drupal\ai_storyboard\Entity\Storyboard;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
@@ -170,4 +171,18 @@ function ai_storyboard_update_10006(): string {
     'audio_prompt', 'ai_storyboard', 'ai_storyboard', $fields['audio_prompt'],
   );
   return 'Added the project audio prompt for video generation.';
+}
+
+/**
+ * Installs the bundled Storyboard Views when not already present.
+ */
+function ai_storyboard_update_10007(): string {
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  foreach (['ai_storyboards', 'ai_storyboard_shots'] as $id) {
+    if ($storage->load($id) === NULL) {
+      $data = Yaml::decode(file_get_contents(__DIR__ . '/config/install/views.view.' . $id . '.yml'));
+      $storage->create($data)->save();
+    }
+  }
+  return 'Installed missing Storyboard Views; existing Views were preserved.';
 }

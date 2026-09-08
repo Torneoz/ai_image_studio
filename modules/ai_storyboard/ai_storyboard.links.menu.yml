@@ -11,3 +11,17 @@ ai_storyboard.new:
   route_name: ai_storyboard.new
   parent: ai_image_studio.collection
   weight: -4
+
+ai_storyboard.view_storyboards:
+  title: 'AI Storyboards'
+  description: 'Browse the AI Storyboards View.'
+  route_name: view.ai_storyboards.page_1
+  parent: ai_image_studio.views
+  weight: 4
+
+ai_storyboard.view_shots:
+  title: 'AI Storyboard Shots'
+  description: 'Browse the AI Storyboard Shots View.'
+  route_name: view.ai_storyboard_shots.page_1
+  parent: ai_image_studio.views
+  weight: 5
