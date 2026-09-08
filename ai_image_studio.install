@@ -194,7 +194,7 @@ function ai_image_studio_update_10006(): void {
     ->getEditable('ai_image_studio.settings');
   $defaults = [
     'default_image_file_type' => 'png',
-    'default_show_ai_badge' => FALSE,
+    'default_show_ai_badge' => TRUE,
     'default_ai_badge_text' => 'AI Image',
   ];
   foreach ($defaults as $key => $value) {
