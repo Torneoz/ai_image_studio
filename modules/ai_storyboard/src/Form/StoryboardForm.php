@@ -105,7 +105,28 @@ final class StoryboardForm extends FormBase {
         ->condition('storyboard_id', $ai_storyboard->id())
         ->count()
         ->execute();
-      $form['actions']['generate_all'] = [
+      $form['storyboard_actions'] = [
+        '#type' => 'container',
+        '#weight' => 10,
+        '#attributes' => [
+          'class' => ['ai-storyboard-project-actions'],
+          'aria-labelledby' => 'ai-storyboard-project-actions-title',
+        ],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#value' => $this->t('Storyboard actions'),
+          '#attributes' => ['id' => 'ai-storyboard-project-actions-title'],
+        ],
+        'description' => [
+          '#markup' => '<p>' . $this->t('Generate frames, rebuild the shot plan, or export the current storyboard.') . '</p>',
+        ],
+        'buttons' => [
+          '#type' => 'actions',
+          '#attributes' => ['class' => ['ai-storyboard-project-actions__buttons']],
+        ],
+      ];
+      $form['storyboard_actions']['buttons']['generate_all'] = [
         '#type' => 'link',
         '#title' => $this->t('Generate all frames'),
         '#url' => Url::fromRoute('ai_storyboard.generate_all', [
@@ -115,8 +136,12 @@ final class StoryboardForm extends FormBase {
         '#access' => $shot_count > 0
           && $this->currentUser()->hasPermission('run ai storyboard bulk generation'),
       ];
-      $form['actions']['breakdown'] = ['#type' => 'submit', '#value' => $this->t('Rebuild shots from script'), '#submit' => ['::rebuildShots']];
-      $form['actions']['download_images'] = [
+      $form['storyboard_actions']['buttons']['breakdown'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Rebuild shots from script'),
+        '#submit' => ['::rebuildShots'],
+      ];
+      $form['storyboard_actions']['buttons']['download_images'] = [
         '#type' => 'link',
         '#title' => $this->t('Download images'),
         '#url' => Url::fromRoute('ai_storyboard.download_images', [
@@ -124,7 +149,7 @@ final class StoryboardForm extends FormBase {
         ]),
         '#attributes' => ['class' => ['button']],
       ];
-      $form['actions']['download_video'] = [
+      $form['storyboard_actions']['buttons']['download_video'] = [
         '#type' => 'link',
         '#title' => $this->t('Download MP4'),
         '#url' => Url::fromRoute('ai_storyboard.download_video', [
@@ -132,7 +157,12 @@ final class StoryboardForm extends FormBase {
         ]),
         '#attributes' => ['class' => ['button']],
       ];
-      $form['actions']['delete'] = Link::fromTextAndUrl($this->t('Delete'), $ai_storyboard->toUrl('delete-form'))->toRenderable();
+      $delete = Link::fromTextAndUrl(
+        $this->t('Delete'),
+        $ai_storyboard->toUrl('delete-form'),
+      )->toRenderable();
+      $delete['#attributes']['class'] = ['button', 'button--danger'];
+      $form['actions']['delete'] = $delete;
       $this->buildWorkspace($form, $ai_storyboard);
     }
     return $form;
