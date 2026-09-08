@@ -118,10 +118,12 @@ final class StoryboardBulkManager {
       ])->execute();
 
     $limit = $mode === 'bridge' ? count($keyframes) - 1 : count($keyframes);
+    $audio_prompt = trim((string) $storyboard->get('audio_prompt')->value);
     for ($index = 0; $index < $limit; $index++) {
       $shot = $keyframes[$index]['shot'];
       $prompt = implode("\n\n", array_filter([
         (string) ($settings['prompt'] ?? ''),
+        $audio_prompt !== '' ? 'AUDIO DIRECTION: ' . $audio_prompt : '',
         'SHOT ACTION: ' . $shot->get('action')->value,
         'CAMERA MOVEMENT: ' . $shot->get('camera_move')->value,
         $mode === 'bridge' ? 'Create a continuous transition from the first supplied keyframe to the second. Preserve character identity, wardrobe, environment, and screen direction.' : 'Animate this keyframe as a continuous cinematic shot. Preserve character identity, composition, wardrobe, and environment.',

@@ -97,6 +97,13 @@ final class StoryboardForm extends FormBase {
       '#description' => $this->t('One canonical visual description per character: appearance, age, wardrobe, distinguishing features, and relationships.'),
     ];
     $form['actions'] = ['#type' => 'actions'];
+    $form['prompt_bibles']['audio_prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Audio prompt'),
+      '#default_value' => $ai_storyboard?->get('audio_prompt')->value,
+      '#rows' => 4,
+      '#description' => $this->t('Music, ambience, sound effects, dialogue, and voice direction to include in every video generation prompt.'),
+    ];
     $form['actions']['save'] = ['#type' => 'submit', '#value' => $ai_storyboard ? $this->t('Save project') : $this->t('Create and break down script'), '#button_type' => 'primary', '#submit' => ['::saveProject']];
     if ($ai_storyboard) {
       $shot_count = $this->entityTypeManager->getStorage('ai_storyboard_shot')
@@ -212,6 +219,7 @@ final class StoryboardForm extends FormBase {
     foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status', 'continuity_bible', 'character_bible'] as $field) {
       $board->set($field, $form_state->getValue($field));
     }
+    $board->set('audio_prompt', (string) $form_state->getValue('audio_prompt'));
     $board->save();
     return $board;
   }

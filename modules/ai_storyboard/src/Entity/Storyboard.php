@@ -67,6 +67,9 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['video_duration'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Video duration'))->setSetting('unsigned', TRUE)->setDefaultValue(5);
     $fields['video_resolution'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Video resolution'))->setSettings(['allowed_values' => ['480p' => '480p', '720p' => '720p', '1080p' => '1080p']])->setDefaultValue('720p');
     $fields['video_prompt'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Video sequence prompt'));
+    $fields['audio_prompt'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(new TranslatableMarkup('Audio prompt'))
+      ->setDescription(new TranslatableMarkup('Project-wide audio instructions included in every video generation prompt.'));
     $fields['studio_session_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Image Studio session'))->setSetting('target_type', 'ai_image_studio_session');
     $fields['status'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Status'))->setSettings(['allowed_values' => ['draft' => 'Draft', 'in_review' => 'In review', 'approved' => 'Approved']])->setDefaultValue('draft');
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(new TranslatableMarkup('Created'));

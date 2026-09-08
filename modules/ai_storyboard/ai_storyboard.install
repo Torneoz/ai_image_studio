@@ -159,3 +159,15 @@ function ai_storyboard_update_10005(): string {
   );
   return 'Added configurable storyboard video sequences.';
 }
+
+/**
+ * Adds project audio direction for video generation.
+ */
+function ai_storyboard_update_10006(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard');
+  $fields = Storyboard::baseFieldDefinitions($type);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'audio_prompt', 'ai_storyboard', 'ai_storyboard', $fields['audio_prompt'],
+  );
+  return 'Added the project audio prompt for video generation.';
+}

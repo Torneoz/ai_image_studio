@@ -100,6 +100,13 @@ final class GenerateVideoSequencesForm extends FormBase {
       '#rows' => 5,
       '#description' => $this->t('Project-wide motion, pacing, performance, and transition direction. Each shot’s action and camera movement are appended automatically.'),
     ];
+    $form['audio_prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Audio prompt'),
+      '#default_value' => $ai_storyboard->get('audio_prompt')->value,
+      '#rows' => 4,
+      '#description' => $this->t('Saved for this project and included in every video generation prompt. Describe music, ambience, sound effects, dialogue, and voice direction. Audio output depends on the selected model.'),
+    ];
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['generate'] = [
       '#type' => 'submit',
@@ -142,6 +149,7 @@ final class GenerateVideoSequencesForm extends FormBase {
       ->set('video_duration', $settings['duration'])
       ->set('video_resolution', $settings['resolution'])
       ->set('video_prompt', $settings['prompt'])
+      ->set('audio_prompt', trim((string) $form_state->getValue('audio_prompt')))
       ->save();
     try {
       $job_id = $this->bulkManager->enqueueVideoSequences(
