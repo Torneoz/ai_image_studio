@@ -98,7 +98,7 @@ final class StoryboardExportController extends ControllerBase {
 
     return $this->downloadResponse(
       $temporary_path,
-      $this->safeFilename((string) $ai_storyboard->label()) . '-images.zip',
+      $this->projectFilename($ai_storyboard) . '-images.zip',
     );
   }
 
@@ -204,7 +204,7 @@ final class StoryboardExportController extends ControllerBase {
 
     return $this->downloadResponse(
       $output_path,
-      $this->safeFilename((string) $ai_storyboard->label()) . '-animatic.mp4',
+      $this->projectFilename($ai_storyboard) . '-animatic.mp4',
     );
   }
 
@@ -278,6 +278,16 @@ final class StoryboardExportController extends ControllerBase {
     $filename = strtolower($this->transliteration->transliterate($label));
     $filename = trim((string) preg_replace('/[^a-z0-9]+/', '-', $filename), '-');
     return $filename !== '' ? $filename : 'storyboard';
+  }
+
+  /**
+   * Uses the project identifier for downloads, preserving underscores.
+   */
+  private function projectFilename(object $storyboard): string {
+    $name = (string) $storyboard->get('machine_name')->value;
+    return preg_match('/^[a-z0-9_]+$/D', $name)
+      ? $name
+      : $this->safeFilename((string) $storyboard->label());
   }
 
 }

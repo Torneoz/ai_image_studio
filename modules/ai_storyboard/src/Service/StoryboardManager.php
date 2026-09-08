@@ -53,19 +53,35 @@ final class StoryboardManager {
   }
 
   /**
-   * Generates or regenerates one shot and returns the Image Studio turn. */
-  public function generateShot(object $storyboard, object $shot): object {
+   * Prepares a session using the project machine name for generated assets.
+   */
+  public function prepareSession(object $storyboard): object {
     $session = $storyboard->get('studio_session_id')->entity;
+    $name = (string) ($storyboard->get('machine_name')->value ?: $storyboard->label());
     if (!$session) {
       $session = $this->entityTypeManager->getStorage('ai_image_studio_session')->create([
         'title' => 'Storyboard: ' . $storyboard->label(),
-        'machine_name' => $this->machineName->generate('storyboard-' . $storyboard->id() . '-' . $storyboard->label()),
+        'machine_name' => $this->machineName->generate($name),
         'uid' => $storyboard->getOwnerId(),
         'status' => 'active',
       ]);
       $session->save();
       $storyboard->set('studio_session_id', $session->id())->save();
     }
+    else {
+      $name = $this->machineName->generate($name, (int) $session->id());
+      if ($session->get('machine_name')->value !== $name) {
+        $session->set('machine_name', $name)->save();
+      }
+    }
+    return $session;
+  }
+
+  /**
+   * Generates or regenerates one shot and returns the Image Studio turn.
+   */
+  public function generateShot(object $storyboard, object $shot): object {
+    $session = $this->prepareSession($storyboard);
     $after_prompt = trim((string) $storyboard->get('after_prompt')->value);
     $prompt = implode("\n\n", array_filter([
       'Create one production storyboard frame. No text, lettering, borders, split panels, or captions.',

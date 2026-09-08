@@ -21,6 +21,7 @@ final class StoryboardBulkManager {
     private readonly TimeInterface $time,
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ImageGenerator $imageGenerator,
+    private readonly StoryboardManager $storyboardManager,
   ) {}
 
   /**
@@ -80,6 +81,7 @@ final class StoryboardBulkManager {
     if (!$session) {
       throw new \LogicException('Generate storyboard frames before creating video sequences.');
     }
+    $session = $this->storyboardManager->prepareSession($storyboard);
     $storage = $this->entityTypeManager->getStorage('ai_storyboard_shot');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
