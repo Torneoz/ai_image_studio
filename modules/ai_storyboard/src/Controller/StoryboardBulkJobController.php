@@ -22,7 +22,7 @@ final class StoryboardBulkJobController extends ControllerBase {
 
   public function __construct(
     private readonly StoryboardBulkManager $bulkManager,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly EntityTypeManagerInterface $storyboardEntityTypeManager,
     private readonly DateFormatterInterface $dateFormatter,
     private readonly Connection $database,
   ) {}
@@ -48,7 +48,7 @@ final class StoryboardBulkJobController extends ControllerBase {
     }
     $rows = [];
     foreach ($query->execute()->fetchAll() as $job) {
-      $storyboard = $this->entityTypeManager->getStorage('ai_storyboard')->load((int) $job->storyboard_id);
+      $storyboard = $this->storyboardEntityTypeManager->getStorage('ai_storyboard')->load((int) $job->storyboard_id);
       $items = $this->bulkManager->itemsForJob((int) $job->id);
       $completed = count(array_filter($items, static fn (object $item): bool => $item->status === 'completed'));
       $job_link = Link::fromTextAndUrl(
@@ -89,15 +89,15 @@ final class StoryboardBulkJobController extends ControllerBase {
     if (!$job) {
       throw new NotFoundHttpException();
     }
-    $storyboard = $this->entityTypeManager->getStorage('ai_storyboard')->load((int) $job->storyboard_id);
+    $storyboard = $this->storyboardEntityTypeManager->getStorage('ai_storyboard')->load((int) $job->storyboard_id);
     $items = $this->bulkManager->itemsForJob($job_id);
     $active = FALSE;
     $rows = [];
     foreach ($items as $item) {
       $active = $active || in_array($item->status, ['queued', 'processing'], TRUE);
-      $shot = $this->entityTypeManager->getStorage('ai_storyboard_shot')->load((int) $item->shot_id);
+      $shot = $this->storyboardEntityTypeManager->getStorage('ai_storyboard_shot')->load((int) $item->shot_id);
       $turn = $item->turn_id
-        ? $this->entityTypeManager->getStorage('ai_image_studio_turn')->load((int) $item->turn_id)
+        ? $this->storyboardEntityTypeManager->getStorage('ai_image_studio_turn')->load((int) $item->turn_id)
         : NULL;
       $image = $turn?->get('image')->entity;
       $preview = $image ? [
