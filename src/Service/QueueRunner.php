@@ -31,6 +31,9 @@ final class QueueRunner {
    */
   public function runOne(string $queue_id): void {
     $queue = $this->queueFactory->get($queue_id);
+    // DatabaseQueue only claims items with a zero lease. Release expired
+    // delays here as web-driven processing can run without Drupal cron.
+    $queue->garbageCollection();
     $item = $queue->claimItem(900);
     if ($item === FALSE) {
       return;
