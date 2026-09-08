@@ -27,6 +27,7 @@ final class StoryboardManager {
       $storage->delete($storage->loadMultiple($ids));
     }
     $storyboard->set('continuity_bible', (string) ($breakdown['continuity_bible'] ?? ''));
+    $storyboard->set('character_bible', (string) ($breakdown['character_bible'] ?? ''));
     $storyboard->save();
     foreach (array_values($breakdown['shots']) as $index => $shot) {
       $storage->create([
@@ -71,6 +72,7 @@ final class StoryboardManager {
       'VISUAL STYLE: ' . $storyboard->get('visual_style')->value,
       'ASPECT RATIO: ' . $storyboard->get('aspect_ratio')->value,
       'CONTINUITY BIBLE: ' . $storyboard->get('continuity_bible')->value,
+      'CHARACTER BIBLE: ' . $storyboard->get('character_bible')->value,
       'THIS SHOT: ' . $shot->get('image_prompt')->value,
       'COMPOSITION: ' . implode(', ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('lens')->value, $shot->get('lighting')->value])),
       'SHOT CONTINUITY: ' . $shot->get('continuity_notes')->value,

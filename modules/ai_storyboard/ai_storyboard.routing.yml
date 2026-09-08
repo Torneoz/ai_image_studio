@@ -87,3 +87,32 @@ ai_storyboard.generate_shot:
         type: entity:ai_storyboard
       ai_storyboard_shot:
         type: entity:ai_storyboard_shot
+ai_storyboard.generate_all:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/generate-all'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\GenerateAllForm'
+    _title: 'Generate all storyboard frames'
+  requirements:
+    _entity_access: 'ai_storyboard.update'
+    _permission: 'run ai storyboard bulk generation'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
+ai_storyboard.bulk_jobs:
+  path: '/admin/content/ai-storyboard/bulk'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardBulkJobController::listing'
+    _title: 'Storyboard bulk jobs'
+  requirements:
+    _permission: 'access ai storyboard'
+
+ai_storyboard.bulk_job:
+  path: '/admin/content/ai-storyboard/bulk/{job_id}'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardBulkJobController::view'
+    _title_callback: '\Drupal\ai_storyboard\Controller\StoryboardBulkJobController::title'
+  requirements:
+    _custom_access: '\Drupal\ai_storyboard\Controller\StoryboardBulkJobController::access'
+    job_id: '\d+'

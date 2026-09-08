@@ -4,3 +4,8 @@ ai_storyboard.collection:
   route_name: entity.ai_storyboard.collection
   parent: system.admin_content
 
+ai_storyboard.bulk_jobs:
+  title: 'Storyboard bulk jobs'
+  description: 'Monitor queued storyboard frame generation.'
+  route_name: ai_storyboard.bulk_jobs
+  parent: system.admin_content

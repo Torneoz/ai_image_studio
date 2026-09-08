@@ -76,9 +76,45 @@ final class StoryboardForm extends FormBase {
     $form['project']['chat_model'] = ['#type' => 'select', '#title' => $this->t('Script breakdown model'), '#options' => $chat_options, '#required' => TRUE, '#default_value' => $ai_storyboard?->get('chat_model')->value ?: (string) array_key_first($chat_options)];
     $form['project']['image_model'] = ['#type' => 'select', '#title' => $this->t('Frame generation model'), '#options' => $image_options, '#required' => TRUE, '#default_value' => $ai_storyboard?->get('image_model')->value ?: (string) array_key_first($image_options)];
     $form['project']['status'] = ['#type' => 'select', '#title' => $this->t('Status'), '#options' => ['draft' => $this->t('Draft'), 'in_review' => $this->t('In review'), 'approved' => $this->t('Approved')], '#default_value' => $ai_storyboard?->get('status')->value ?? 'draft'];
+    $form['prompt_bibles'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Visual continuity prompts'),
+      '#open' => $ai_storyboard !== NULL,
+      '#description' => $this->t('These reusable directions are sent with every frame prompt. The script breakdown can expand them; edit and save them at any time.'),
+    ];
+    $form['prompt_bibles']['continuity_bible'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Continuity bible'),
+      '#default_value' => $ai_storyboard?->get('continuity_bible')->value,
+      '#rows' => 7,
+      '#description' => $this->t('Locations, props, screen direction, geography, palette, lighting, weather, and time-of-day rules.'),
+    ];
+    $form['prompt_bibles']['character_bible'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Character bible'),
+      '#default_value' => $ai_storyboard?->get('character_bible')->value,
+      '#rows' => 7,
+      '#description' => $this->t('One canonical visual description per character: appearance, age, wardrobe, distinguishing features, and relationships.'),
+    ];
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['save'] = ['#type' => 'submit', '#value' => $ai_storyboard ? $this->t('Save project') : $this->t('Create and break down script'), '#button_type' => 'primary', '#submit' => ['::saveProject']];
     if ($ai_storyboard) {
+      $shot_count = $this->entityTypeManager->getStorage('ai_storyboard_shot')
+        ->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('storyboard_id', $ai_storyboard->id())
+        ->count()
+        ->execute();
+      $form['actions']['generate_all'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Generate all frames'),
+        '#url' => Url::fromRoute('ai_storyboard.generate_all', [
+          'ai_storyboard' => $ai_storyboard->id(),
+        ]),
+        '#attributes' => ['class' => ['button', 'button--primary']],
+        '#access' => $shot_count > 0
+          && $this->currentUser()->hasPermission('run ai storyboard bulk generation'),
+      ];
       $form['actions']['breakdown'] = ['#type' => 'submit', '#value' => $this->t('Rebuild shots from script'), '#submit' => ['::rebuildShots']];
       $form['actions']['download_images'] = [
         '#type' => 'link',
@@ -133,7 +169,7 @@ final class StoryboardForm extends FormBase {
   private function loadOrCreate(FormStateInterface $form_state): object {
     $storage = $this->entityTypeManager->getStorage('ai_storyboard');
     $board = $form_state->get('storyboard_id') ? $storage->load($form_state->get('storyboard_id')) : $storage->create(['uid' => $this->currentUser()->id()]);
-    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status'] as $field) {
+    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status', 'continuity_bible', 'character_bible'] as $field) {
       $board->set($field, $form_state->getValue($field));
     }
     $board->save();
@@ -145,7 +181,13 @@ final class StoryboardForm extends FormBase {
    */
   private function runBreakdown(object $board, FormStateInterface $form_state): void {
     try {
-      $result = $this->breakdown->breakdown((string) $board->get('script')->value, (string) $board->get('chat_model')->value, (string) $board->get('creative_brief')->value);
+      $result = $this->breakdown->breakdown(
+        (string) $board->get('script')->value,
+        (string) $board->get('chat_model')->value,
+        (string) $board->get('creative_brief')->value,
+        (string) $board->get('continuity_bible')->value,
+        (string) $board->get('character_bible')->value,
+      );
       $count = $this->manager->replaceShots($board, $result);
       $this->messenger()->addStatus($this->formatPlural($count, 'Created 1 storyboard shot.', 'Created @count storyboard shots.'));
     }
@@ -175,6 +217,10 @@ final class StoryboardForm extends FormBase {
       $frame = $image
         ? ['#theme' => 'image', '#uri' => $this->fileUrlGenerator->generateAbsoluteString($image->getFileUri()), '#alt' => $shot->label()]
         : ['#markup' => '<div class="ai-storyboard-shot__placeholder">' . $this->t('Frame not generated') . '</div>'];
+      $edit_link = Link::fromTextAndUrl($this->t('Edit shot'), Url::fromRoute('entity.ai_storyboard_shot.edit_form', ['ai_storyboard' => $board->id(), 'ai_storyboard_shot' => $shot->id()]))->toRenderable();
+      $edit_link['#attributes']['class'] = ['button', 'button--small'];
+      $generate_link = Link::fromTextAndUrl($image ? $this->t('Regenerate frame') : $this->t('Generate frame'), Url::fromRoute('ai_storyboard.generate_shot', ['ai_storyboard' => $board->id(), 'ai_storyboard_shot' => $shot->id()]))->toRenderable();
+      $generate_link['#attributes']['class'] = ['button', 'button--primary', 'button--small'];
       $form['workspace']['shot_' . $shot->id()] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['ai-storyboard-shot']],
@@ -186,12 +232,16 @@ final class StoryboardForm extends FormBase {
           'technical' => ['#markup' => '<p class="ai-storyboard-shot__technical">' . implode(' · ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('camera_move')->value, $shot->get('lens')->value, $shot->get('duration')->value . 's'])) . '</p>'],
           'action' => ['#markup' => '<p><strong>' . $this->t('Action') . ':</strong> ' . nl2br(htmlspecialchars((string) $shot->get('action')->value)) . '</p>'],
           'dialogue' => ['#markup' => $shot->get('dialogue')->value ? '<p><strong>' . $this->t('Dialogue') . ':</strong> ' . nl2br(htmlspecialchars((string) $shot->get('dialogue')->value)) . '</p>' : ''],
-          'links' => ['#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__actions']], 'edit' => Link::fromTextAndUrl($this->t('Edit shot'), Url::fromRoute('entity.ai_storyboard_shot.edit_form', ['ai_storyboard' => $board->id(), 'ai_storyboard_shot' => $shot->id()]))->toRenderable(), 'generate' => Link::fromTextAndUrl($image ? $this->t('Regenerate frame') : $this->t('Generate frame'), Url::fromRoute('ai_storyboard.generate_shot', ['ai_storyboard' => $board->id(), 'ai_storyboard_shot' => $shot->id()]))->toRenderable()],
+          'links' => [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['ai-storyboard-shot__actions']],
+            'edit' => $edit_link,
+            'generate' => $generate_link,
+          ],
         ],
       ];
     }
     $form['workspace']['summary'] = ['#markup' => '<p class="ai-storyboard-summary">' . $this->formatPlural(count($shots), '1 shot', '@count shots') . ' · ' . $this->t('@seconds seconds estimated runtime', ['@seconds' => round($total, 1)]) . '</p>', '#weight' => -10];
-    $form['workspace']['bible'] = ['#type' => 'details', '#title' => $this->t('Continuity bible'), '#open' => FALSE, 'text' => ['#markup' => '<div class="ai-storyboard-bible">' . nl2br(htmlspecialchars((string) $board->get('continuity_bible')->value)) . '</div>'], '#weight' => -9];
   }
 
 }

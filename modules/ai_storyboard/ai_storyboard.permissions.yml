@@ -7,3 +7,6 @@ administer ai storyboard:
   description: 'Access and delete any storyboard project.'
   restrict access: true
 
+run ai storyboard bulk generation:
+  title: 'Run AI Storyboard bulk generation'
+  description: 'Queue every shot in a storyboard for image generation.'

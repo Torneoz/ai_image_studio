@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Drupal\ai_storyboard\Entity\Storyboard;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
@@ -19,4 +20,79 @@ function ai_storyboard_update_10001(): string {
     $definition,
   );
   return 'Added the storyboard after-prompt field.';
+}
+
+/**
+ * Implements hook_schema().
+ */
+function ai_storyboard_schema(): array {
+  $schema['ai_storyboard_bulk_job'] = [
+    'description' => 'Bulk frame-generation jobs for storyboard projects.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'uuid' => ['type' => 'varchar_ascii', 'length' => 64, 'not null' => TRUE],
+      'storyboard_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'status' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'active'],
+      'created' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'changed' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => ['uuid' => ['uuid']],
+    'indexes' => [
+      'storyboard_created' => ['storyboard_id', 'created'],
+      'owner_created' => ['uid', 'created'],
+    ],
+  ];
+  $schema['ai_storyboard_bulk_item'] = [
+    'description' => 'Shots processed by storyboard bulk jobs.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'job_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'shot_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'turn_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE],
+      'label' => ['type' => 'varchar', 'length' => 255, 'not null' => TRUE],
+      'status' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'queued'],
+      'attempt_count' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0],
+      'error_message' => ['type' => 'text', 'size' => 'big', 'not null' => FALSE],
+      'created' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'changed' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => ['job_shot' => ['job_id', 'shot_id']],
+    'indexes' => ['job_status' => ['job_id', 'status']],
+    'foreign keys' => [
+      'job' => [
+        'table' => 'ai_storyboard_bulk_job',
+        'columns' => ['job_id' => 'id'],
+      ],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Adds the dedicated character bible to existing storyboard projects.
+ */
+function ai_storyboard_update_10002(): void {
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard');
+  $field = Storyboard::baseFieldDefinitions($entity_type)['character_bible'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition(
+    'character_bible',
+    'ai_storyboard',
+    'ai_storyboard',
+    $field,
+  );
+}
+
+/**
+ * Adds durable storyboard bulk-generation job storage.
+ */
+function ai_storyboard_update_10003(): void {
+  $schema = \Drupal::database()->schema();
+  foreach (ai_storyboard_schema() as $table => $definition) {
+    if (!$schema->tableExists($table)) {
+      $schema->createTable($table, $definition);
+    }
+  }
 }

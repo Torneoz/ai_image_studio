@@ -61,6 +61,16 @@ final class StoryboardController extends ControllerBase {
         ],
       ];
     }
+    $add = Link::fromTextAndUrl(
+      $this->t('Add storyboard'),
+      Url::fromRoute('ai_storyboard.new'),
+    )->toRenderable();
+    $add['#attributes']['class'] = ['button', 'button--primary'];
+    $jobs = Link::fromTextAndUrl(
+      $this->t('Bulk jobs'),
+      Url::fromRoute('ai_storyboard.bulk_jobs'),
+    )->toRenderable();
+    $jobs['#attributes']['class'] = ['button'];
     return [
       'intro' => ['#markup' => '<p>' . $this->t('Turn a script into editable, production-aware shots, then generate continuity-guided frames through AI Image Studio.') . '</p>'],
       'table' => [
@@ -75,7 +85,11 @@ final class StoryboardController extends ControllerBase {
         '#rows' => $rows,
         '#empty' => $this->t('No storyboards yet.'),
       ],
-      'add' => Link::fromTextAndUrl($this->t('Add storyboard'), Url::fromRoute('ai_storyboard.new'))->toRenderable(),
+      'actions' => [
+        '#type' => 'actions',
+        'add' => $add,
+        'jobs' => $jobs,
+      ],
     ];
   }
 

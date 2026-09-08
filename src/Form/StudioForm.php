@@ -706,6 +706,7 @@ final class StudioForm extends FormBase {
 
     $form['session_actions'] = [
       '#type' => 'container',
+      '#weight' => 1000,
       '#attributes' => ['class' => ['ai-image-studio-actions']],
     ];
     if ($session->access('update') && $turns !== []) {
@@ -782,7 +783,7 @@ final class StudioForm extends FormBase {
       $form['compiled_video'] = [
         '#type' => 'details',
         '#tree' => TRUE,
-        '#weight' => -5,
+        '#weight' => 999,
         '#title' => $this->t('Compiled video'),
         '#open' => TRUE,
         '#description' => $this->t('Uncheck a clip to leave it out of the compiled video. The original turn is not deleted.'),

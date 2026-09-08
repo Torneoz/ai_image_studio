@@ -20,8 +20,9 @@ leading storyboard products:
    Storyboarder).
 
 The first release implements the foundation: structured AI breakdown,
-continuity memory, editable production fields, shot timing and status, and
-versioned frame generation backed by AI Image Studio. Animatics, PDF/CSV
+editable continuity and character prompt bibles, production fields, shot timing and status, and
+versioned frame generation backed by AI Image Studio. Generate All creates a
+durable bulk job with per-shot progress, results, and error reporting. Animatics, PDF/CSV
 exports, reference-asset libraries, annotations, and guest approval links are
 the next logical increments.
 

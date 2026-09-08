@@ -26,14 +26,25 @@ final class ScriptBreakdown {
 
   /**
    * Breaks a script into a continuity bible and ordered shots. */
-  public function breakdown(string $script, string $modelOption, string $brief = ''): array {
+  public function breakdown(
+    string $script,
+    string $modelOption,
+    string $brief = '',
+    string $continuityBible = '',
+    string $characterBible = '',
+  ): array {
     $provider = $this->providerManager->loadProviderFromSimpleOption($modelOption);
     $model = $this->providerManager->getModelNameFromSimpleOption($modelOption);
     if (!$provider || $model === '') {
       throw new \InvalidArgumentException('The selected chat provider/model is unavailable.');
     }
 
-    $input = new ChatInput([new ChatMessage('user', "CREATIVE BRIEF:\n{$brief}\n\nSCRIPT:\n{$script}")]);
+    $input = new ChatInput([new ChatMessage('user', implode("\n\n", [
+      "CREATIVE BRIEF:\n{$brief}",
+      "EXISTING CONTINUITY BIBLE — preserve and improve these directions:\n{$continuityBible}",
+      "EXISTING CHARACTER BIBLE — preserve these canonical identities:\n{$characterBible}",
+      "SCRIPT:\n{$script}",
+    ]))]);
     $input->setSystemPrompt('You are a meticulous film director and storyboard artist. Break the supplied script into visually distinct shots, preserving every story beat. Prefer purposeful coverage over arbitrary cuts. Return only the requested structured data. Image prompts must describe a single frozen frame and must not contain dialogue text, captions, or camera motion as visible action.');
     $input->setChatStructuredJsonSchema([
       'name' => 'storyboard_breakdown',
@@ -42,7 +53,8 @@ final class ScriptBreakdown {
         'type' => 'object',
         'additionalProperties' => FALSE,
         'properties' => [
-          'continuity_bible' => ['type' => 'string', 'description' => 'Canonical character, wardrobe, prop, environment, geography, palette, and time-of-day facts to preserve across shots.'],
+          'continuity_bible' => ['type' => 'string', 'description' => 'Canonical prop, environment, geography, palette, lighting, and time-of-day facts to preserve across shots.'],
+          'character_bible' => ['type' => 'string', 'description' => 'Canonical visual description of every character, including age, appearance, wardrobe, distinguishing features, and relationships.'],
           'shots' => [
             'type' => 'array',
             'items' => [
@@ -68,7 +80,7 @@ final class ScriptBreakdown {
             ],
           ],
         ],
-        'required' => ['continuity_bible', 'shots'],
+        'required' => ['continuity_bible', 'character_bible', 'shots'],
       ],
     ]);
 
