@@ -103,18 +103,43 @@ final class StoryboardExportController extends ControllerBase {
   }
 
   /**
-   * Downloads an MP4 animatic built from generated frames and shot durations.
+   * Downloads ordered video clips, falling back to timed keyframes.
    */
   public function downloadVideo(object $ai_storyboard): BinaryFileResponse|RedirectResponse {
-    if ((new ExecutableFinder())->find('ffmpeg') === NULL) {
-      $this->messenger()->addError($this->t('MP4 export requires FFmpeg on the server.'));
+    if ((new ExecutableFinder())->find('ffmpeg') === NULL
+      || (new ExecutableFinder())->find('ffprobe') === NULL) {
+      $this->messenger()->addError($this->t('MP4 export requires FFmpeg and FFprobe on the server.'));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
     }
-    $frames = $this->frames($ai_storyboard);
+    $frames = $this->frames($ai_storyboard, TRUE);
     if ($frames === []) {
-      $this->messenger()->addError($this->t('Generate at least one storyboard frame before exporting an MP4.'));
+      $this->messenger()->addError($this->t('Generate at least one storyboard frame or video before exporting an MP4.'));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
     }
+
+    foreach ($frames as &$frame) {
+      $frame['duration'] = max(0.1, (float) $frame['shot']->get('duration')->value);
+      $frame['audio'] = FALSE;
+      if ($frame['video']) {
+        $probe = new Process([
+          'ffprobe', '-v', 'error', '-show_entries',
+          'format=duration:stream=codec_type', '-of', 'json', $frame['path'],
+        ]);
+        $probe->setTimeout(30);
+        $probe->run();
+        $metadata = json_decode($probe->getOutput(), TRUE) ?: [];
+        $duration = (float) ($metadata['format']['duration'] ?? 0);
+        if (!$probe->isSuccessful() || $duration <= 0) {
+          $this->messenger()->addError($this->t('The video for “@shot” could not be read.', [
+            '@shot' => $frame['shot']->label(),
+          ]));
+          return new RedirectResponse($ai_storyboard->toUrl()->toString());
+        }
+        $frame['duration'] = $duration;
+        $frame['audio'] = in_array('audio', array_column($metadata['streams'] ?? [], 'codec_type'), TRUE);
+      }
+    }
+    unset($frame);
 
     [$width, $height] = $this->videoDimensions((string) $ai_storyboard->get('aspect_ratio')->value);
     $output_path = tempnam($this->fileSystem->getTempDirectory(), 'ai-storyboard-video-');
@@ -123,33 +148,39 @@ final class StoryboardExportController extends ControllerBase {
     }
     $command = ['ffmpeg', '-y'];
     foreach ($frames as $frame) {
-      $command = array_merge($command, [
-        '-loop', '1',
-        '-t', (string) max(0.1, (float) $frame['shot']->get('duration')->value),
-        '-i', $frame['path'],
-      ]);
+      if (!$frame['video']) {
+        $command = array_merge($command, ['-loop', '1', '-t', (string) $frame['duration']]);
+      }
+      $command = array_merge($command, ['-i', $frame['path']]);
     }
     $filters = [];
     $streams = '';
-    foreach (array_keys($frames) as $index) {
+    foreach ($frames as $index => $frame) {
       $filters[] = sprintf(
         '[%1$d:v]scale=%2$d:%3$d:force_original_aspect_ratio=decrease,'
         . 'pad=%2$d:%3$d:(ow-iw)/2:(oh-ih)/2:color=black,'
-        . 'setsar=1,fps=25,format=yuv420p[v%1$d]',
+        . 'setsar=1,fps=25,format=yuv420p,setpts=PTS-STARTPTS[v%1$d]',
         $index,
         $width,
         $height,
       );
-      $streams .= sprintf('[v%d]', $index);
+      $audio = $frame['audio']
+        ? sprintf('[%d:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,apad', $index)
+        : 'anullsrc=r=48000:cl=stereo';
+      $filters[] = sprintf('%s,atrim=duration=%s,asetpts=PTS-STARTPTS[a%d]', $audio, $frame['duration'], $index);
+      $streams .= sprintf('[v%d][a%d]', $index, $index);
     }
     $filters[] = sprintf(
-      '%sconcat=n=%d:v=1:a=0[outv]',
+      '%sconcat=n=%d:v=1:a=1[outv][outa]',
       $streams,
       count($frames),
     );
     $command = array_merge($command, [
       '-filter_complex', implode(';', $filters),
       '-map', '[outv]',
+      '-map', '[outa]',
+      '-c:a', 'aac',
+      '-b:a', '192k',
       '-c:v', 'libx264',
       '-preset', 'medium',
       '-crf', '20',
@@ -178,9 +209,9 @@ final class StoryboardExportController extends ControllerBase {
   }
 
   /**
-   * Loads generated frames in storyboard position order.
+   * Loads keyframes or preferred completed videos in storyboard order.
    */
-  private function frames(object $storyboard): array {
+  private function frames(object $storyboard, bool $prefer_video = FALSE): array {
     $shot_storage = $this->storyboardEntityTypeManager->getStorage('ai_storyboard_shot');
     $shot_ids = $shot_storage->getQuery()
       ->accessCheck(FALSE)
@@ -190,6 +221,17 @@ final class StoryboardExportController extends ControllerBase {
       ->execute();
     $frames = [];
     foreach ($shot_storage->loadMultiple($shot_ids) as $shot) {
+      if ($prefer_video) {
+        $video_turn = $shot->get('video_turn_id')->entity;
+        $video = $video_turn?->get('video')->entity;
+        if ($video instanceof FileInterface && $video_turn->get('status')->value === 'completed') {
+          $path = $this->fileSystem->realpath($video->getFileUri());
+          if ($path !== FALSE && is_file($path)) {
+            $frames[] = ['shot' => $shot, 'file' => $video, 'path' => $path, 'video' => TRUE];
+            continue;
+          }
+        }
+      }
       $turn = $shot->get('studio_turn_id')->entity;
       $file = $turn?->get('image')->entity;
       if (!$file instanceof FileInterface) {
@@ -197,7 +239,7 @@ final class StoryboardExportController extends ControllerBase {
       }
       $path = $this->fileSystem->realpath($file->getFileUri());
       if ($path !== FALSE && is_file($path)) {
-        $frames[] = ['shot' => $shot, 'file' => $file, 'path' => $path];
+        $frames[] = ['shot' => $shot, 'file' => $file, 'path' => $path, 'video' => FALSE];
       }
     }
     return $frames;
