@@ -11,10 +11,3 @@ ai_storyboard.new:
   route_name: ai_storyboard.new
   parent: ai_image_studio.collection
   weight: -4
-
-ai_storyboard.bulk_jobs:
-  title: 'Storyboard bulk jobs'
-  description: 'Monitor queued storyboard frame generation.'
-  route_name: ai_storyboard.bulk_jobs
-  parent: ai_image_studio.collection
-  weight: 5

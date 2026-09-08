@@ -21,8 +21,9 @@ leading storyboard products:
 
 The first release implements the foundation: structured AI breakdown,
 editable continuity and character prompt bibles, production fields, shot timing and status, and
-versioned frame generation backed by AI Image Studio. Generate All creates a
-durable bulk job with per-shot progress, results, and error reporting. Animatics, PDF/CSV
+versioned frame generation backed by AI Image Studio. Generate All uses the
+existing AI Image Studio Bulk Jobs facility for per-shot progress, results,
+and error reporting. Animatics, PDF/CSV
 exports, reference-asset libraries, annotations, and guest approval links are
 the next logical increments.
 

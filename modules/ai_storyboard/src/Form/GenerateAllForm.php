@@ -76,7 +76,7 @@ final class GenerateAllForm extends ConfirmFormBase {
       (int) $this->currentUser()->id(),
     );
     $this->messenger()->addStatus($this->t('All storyboard frames have been queued.'));
-    $form_state->setRedirect('ai_storyboard.bulk_job', ['job_id' => $job_id]);
+    $form_state->setRedirect('ai_image_studio_vbo.job', ['job_id' => $job_id]);
   }
 
 }

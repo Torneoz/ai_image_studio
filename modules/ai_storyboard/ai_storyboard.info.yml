@@ -6,6 +6,7 @@ core_version_requirement: ^10.3 || ^11
 dependencies:
   - ai:ai
   - ai_image_studio:ai_image_studio
+  - ai_image_studio:ai_image_studio_vbo
   - drupal:file
   - drupal:user
   - drupal:views

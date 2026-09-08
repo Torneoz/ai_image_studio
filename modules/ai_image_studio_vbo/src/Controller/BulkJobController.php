@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Displays VBO image generation jobs and their node items.
+ * Displays shared bulk image-generation jobs and their source items.
  */
 final class BulkJobController extends ControllerBase {
 
@@ -60,11 +60,15 @@ final class BulkJobController extends ControllerBase {
     $rows = [];
     foreach ($jobs as $job) {
       $counts = $this->itemCounts((int) $job->id);
+      $configuration = json_decode((string) $job->configuration, TRUE) ?: [];
       $rows[] = [
         Link::fromTextAndUrl(
           $this->t('Job @id', ['@id' => $job->id]),
           Url::fromRoute('ai_image_studio_vbo.job', ['job_id' => $job->id]),
         ),
+        ($configuration['source_type'] ?? '') === 'storyboard'
+          ? $this->t('Storyboard')
+          : $this->t('Content'),
         $job->status,
         (string) array_sum($counts),
         (string) (($counts['completed'] ?? 0) + ($counts['published'] ?? 0)),
@@ -75,7 +79,7 @@ final class BulkJobController extends ControllerBase {
     return [
       'description' => [
         'intro' => [
-          '#markup' => '<p>' . $this->t('Create a bulk image job from the <a href=":url">Image Studio Content</a> view using Views Bulk Operations (VBO).', [
+          '#markup' => '<p>' . $this->t('Create a bulk image job from an AI Storyboard, or from the <a href=":url">Image Studio Content</a> view using Views Bulk Operations (VBO).', [
             ':url' => Url::fromRoute('view.image_studio_content.page_1')->toString(),
           ]) . '</p>',
         ],
@@ -92,6 +96,7 @@ final class BulkJobController extends ControllerBase {
         '#type' => 'table',
         '#header' => [
           $this->t('Job'),
+          $this->t('Source'),
           $this->t('Status'),
           $this->t('Items'),
           $this->t('Succeeded'),
@@ -113,6 +118,8 @@ final class BulkJobController extends ControllerBase {
     if ($job === NULL) {
       throw new NotFoundHttpException();
     }
+    $is_storyboard = ($job->configuration['source_type'] ?? '') === 'storyboard';
+    $storyboard_id = (int) ($job->configuration['storyboard_id'] ?? 0);
     $query = $this->database->select('ai_image_studio_vbo_item', 'i');
     $query->leftJoin('ai_image_studio_turn', 't', 't.id = i.turn_id');
     $query->fields('i');
@@ -132,15 +139,31 @@ final class BulkJobController extends ControllerBase {
       : $this->studioEntityTypeManager->getStorage('media')->loadMultiple($media_ids);
     $rows = [];
     foreach ($items as $item) {
-      $node_link = Link::fromTextAndUrl(
-        $item->label,
-        Url::fromRoute('entity.node.canonical', ['node' => $item->node_id]),
-      );
+      $source_link = $is_storyboard
+        ? Link::fromTextAndUrl($item->label, Url::fromRoute(
+          'entity.ai_storyboard_shot.edit_form',
+          [
+            'ai_storyboard' => $storyboard_id,
+            'ai_storyboard_shot' => $item->node_id,
+          ],
+        ))
+        : Link::fromTextAndUrl(
+          $item->label,
+          Url::fromRoute('entity.node.canonical', ['node' => $item->node_id]),
+        );
       $result = '';
       if ($item->media_id) {
         $result = Link::fromTextAndUrl(
           $this->t('Media @id', ['@id' => $item->media_id]),
           Url::fromRoute('entity.media.canonical', ['media' => $item->media_id]),
+        );
+      }
+      elseif ($is_storyboard && $storyboard_id) {
+        $result = Link::fromTextAndUrl(
+          $this->t('View storyboard'),
+          Url::fromRoute('entity.ai_storyboard.canonical', [
+            'ai_storyboard' => $storyboard_id,
+          ]),
         );
       }
       elseif ($item->turn_id && $job->session_id) {
@@ -154,9 +177,10 @@ final class BulkJobController extends ControllerBase {
       $cost = $this->formatCost($item->estimated_cost);
       $preview = isset($media_items[$item->media_id])
         ? $this->mediaPreview($media_items[$item->media_id])
-        : [];
+        : $this->turnPreview((int) ($item->turn_id ?? 0), $item->label);
       $regenerate = '';
-      if (!in_array($item->status, ['queued', 'processing'], TRUE)
+      if (!$is_storyboard
+        && !in_array($item->status, ['queued', 'processing'], TRUE)
         && $this->currentUser()->hasPermission('run ai image studio vbo generation')) {
         $regenerate = Link::fromTextAndUrl(
           $this->t('Regenerate'),
@@ -168,8 +192,8 @@ final class BulkJobController extends ControllerBase {
         $regenerate['#attributes']['class'] = ['button', 'button--small'];
       }
       $rows[] = [
-        $node_link,
-        $item->langcode,
+        $source_link,
+        $is_storyboard ? '—' : $item->langcode,
         $item->status,
         (string) $item->attempt_count,
         $cost,
@@ -198,6 +222,7 @@ final class BulkJobController extends ControllerBase {
           ]),
           '#attributes' => ['class' => ['button', 'button--primary']],
           '#access' => $active === []
+          && !$is_storyboard
           && $this->currentUser()->hasPermission('run ai image studio vbo generation'),
         ],
       ],
@@ -214,7 +239,7 @@ final class BulkJobController extends ControllerBase {
       'table' => [
         '#type' => 'table',
         '#header' => [
-          $this->t('Node'),
+          $is_storyboard ? $this->t('Shot') : $this->t('Node'),
           $this->t('Language'),
           $this->t('Status'),
           $this->t('Attempts'),
@@ -225,7 +250,7 @@ final class BulkJobController extends ControllerBase {
           $this->t('Error'),
         ],
         '#rows' => $rows,
-        '#empty' => $this->t('No nodes have been queued for this job.'),
+        '#empty' => $this->t('No items have been queued for this job.'),
       ],
       '#cache' => ['max-age' => 0],
     ];
@@ -274,6 +299,9 @@ final class BulkJobController extends ControllerBase {
     return AccessResult::allowedIf(
       $account->hasPermission('view any ai image studio vbo job')
       || ($account->hasPermission('view ai image studio vbo jobs')
+        && (int) $job->uid === (int) $account->id())
+      || (($job->configuration['source_type'] ?? '') === 'storyboard'
+        && $account->hasPermission('access ai storyboard')
         && (int) $job->uid === (int) $account->id()),
     )->addCacheContexts(['user.permissions', 'user']);
   }
@@ -323,6 +351,28 @@ final class BulkJobController extends ControllerBase {
       '#attributes' => [
         'loading' => 'lazy',
       ],
+    ];
+  }
+
+  /**
+   * Builds a compact preview directly from an Image Studio turn.
+   */
+  private function turnPreview(int $turn_id, string $label): array {
+    if ($turn_id === 0) {
+      return [];
+    }
+    $turn = $this->studioEntityTypeManager
+      ->getStorage('ai_image_studio_turn')->load($turn_id);
+    $file = $turn?->get('image')->entity;
+    if (!$file instanceof FileInterface) {
+      return [];
+    }
+    return [
+      '#theme' => 'image',
+      '#uri' => $file->getFileUri(),
+      '#alt' => $label,
+      '#width' => 160,
+      '#attributes' => ['loading' => 'lazy'],
     ];
   }
 

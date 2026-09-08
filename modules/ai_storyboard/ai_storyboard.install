@@ -23,55 +23,6 @@ function ai_storyboard_update_10001(): string {
 }
 
 /**
- * Implements hook_schema().
- */
-function ai_storyboard_schema(): array {
-  $schema['ai_storyboard_bulk_job'] = [
-    'description' => 'Bulk frame-generation jobs for storyboard projects.',
-    'fields' => [
-      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
-      'uuid' => ['type' => 'varchar_ascii', 'length' => 64, 'not null' => TRUE],
-      'storyboard_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'status' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'active'],
-      'created' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'changed' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-    ],
-    'primary key' => ['id'],
-    'unique keys' => ['uuid' => ['uuid']],
-    'indexes' => [
-      'storyboard_created' => ['storyboard_id', 'created'],
-      'owner_created' => ['uid', 'created'],
-    ],
-  ];
-  $schema['ai_storyboard_bulk_item'] = [
-    'description' => 'Shots processed by storyboard bulk jobs.',
-    'fields' => [
-      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
-      'job_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'shot_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'turn_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE],
-      'label' => ['type' => 'varchar', 'length' => 255, 'not null' => TRUE],
-      'status' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'queued'],
-      'attempt_count' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0],
-      'error_message' => ['type' => 'text', 'size' => 'big', 'not null' => FALSE],
-      'created' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-      'changed' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
-    ],
-    'primary key' => ['id'],
-    'unique keys' => ['job_shot' => ['job_id', 'shot_id']],
-    'indexes' => ['job_status' => ['job_id', 'status']],
-    'foreign keys' => [
-      'job' => [
-        'table' => 'ai_storyboard_bulk_job',
-        'columns' => ['job_id' => 'id'],
-      ],
-    ],
-  ];
-  return $schema;
-}
-
-/**
  * Adds the dedicated character bible to existing storyboard projects.
  */
 function ai_storyboard_update_10002(): void {
@@ -86,13 +37,92 @@ function ai_storyboard_update_10002(): void {
 }
 
 /**
- * Adds durable storyboard bulk-generation job storage.
+ * Retained as a no-op for sites that have not yet run this update.
  */
 function ai_storyboard_update_10003(): void {
-  $schema = \Drupal::database()->schema();
-  foreach (ai_storyboard_schema() as $table => $definition) {
-    if (!$schema->tableExists($table)) {
-      $schema->createTable($table, $definition);
-    }
+}
+
+/**
+ * Moves storyboard jobs into the shared AI Image Studio Bulk Jobs tables.
+ */
+function ai_storyboard_update_10004(): string {
+  $database = \Drupal::database();
+  $schema = $database->schema();
+  if (!$schema->tableExists('ai_storyboard_bulk_job')) {
+    return 'Storyboard generation now uses the shared Bulk Jobs facility.';
   }
+
+  \Drupal::queue('ai_storyboard_frame_generation')->deleteQueue();
+  $job_map = [];
+  $jobs = $database->select('ai_storyboard_bulk_job', 'j')
+    ->fields('j')->execute()->fetchAll();
+  $storyboards = \Drupal::entityTypeManager()->getStorage('ai_storyboard');
+  $shots = \Drupal::entityTypeManager()->getStorage('ai_storyboard_shot');
+  foreach ($jobs as $job) {
+    $storyboard = $storyboards->load((int) $job->storyboard_id);
+    $configuration = json_encode([
+      'source_type' => 'storyboard',
+      'storyboard_id' => (int) $job->storyboard_id,
+    ], JSON_THROW_ON_ERROR);
+    $existing = $database->select('ai_image_studio_vbo_job', 'j')
+      ->fields('j', ['id'])->condition('uuid', $job->uuid)
+      ->execute()->fetchField();
+    $job_map[(int) $job->id] = $existing === FALSE
+      ? (int) $database->insert('ai_image_studio_vbo_job')
+        ->fields([
+          'uuid' => $job->uuid,
+          'uid' => (int) $job->uid,
+          'session_id' => $storyboard
+            ? ($storyboard->get('studio_session_id')->target_id ?: NULL)
+            : NULL,
+          'prompt_template' => 'Storyboard frames: ' . ($storyboard?->label() ?? $job->storyboard_id),
+          'configuration' => $configuration,
+          'status' => $job->status,
+          'created' => (int) $job->created,
+          'changed' => (int) $job->changed,
+        ])->execute()
+      : (int) $existing;
+  }
+
+  if ($schema->tableExists('ai_storyboard_bulk_item')) {
+    $items = $database->select('ai_storyboard_bulk_item', 'i')
+      ->fields('i')->orderBy('id')->execute()->fetchAll();
+    foreach ($items as $item) {
+      $shot = $shots->load((int) $item->shot_id);
+      $status = $item->status === 'processing' ? 'queued' : $item->status;
+      $shared_job_id = $job_map[(int) $item->job_id];
+      $existing = $database->select('ai_image_studio_vbo_item', 'i')
+        ->fields('i', ['id'])
+        ->condition('job_id', $shared_job_id)
+        ->condition('node_id', (int) $item->shot_id)
+        ->condition('langcode', 'und')
+        ->execute()->fetchField();
+      $item_id = $existing === FALSE
+        ? (int) $database->insert('ai_image_studio_vbo_item')
+          ->fields([
+            'job_id' => $shared_job_id,
+            'node_id' => (int) $item->shot_id,
+            'revision_id' => NULL,
+            'langcode' => 'und',
+            'label' => $item->label,
+            'resolved_prompt' => (string) ($shot?->get('image_prompt')->value ?? ''),
+            'source_file_id' => NULL,
+            'turn_id' => $item->turn_id ? (int) $item->turn_id : NULL,
+            'media_id' => NULL,
+            'status' => $status,
+            'attempt_count' => (int) $item->attempt_count,
+            'error_message' => $item->error_message,
+            'created' => (int) $item->created,
+            'changed' => (int) $item->changed,
+          ])->execute()
+        : (int) $existing;
+      if ($status === 'queued') {
+        \Drupal::queue('ai_storyboard_frame_generation')
+          ->createItem(['item_id' => $item_id]);
+      }
+    }
+    $schema->dropTable('ai_storyboard_bulk_item');
+  }
+  $schema->dropTable('ai_storyboard_bulk_job');
+  return 'Migrated storyboard generation into the shared Bulk Jobs facility.';
 }

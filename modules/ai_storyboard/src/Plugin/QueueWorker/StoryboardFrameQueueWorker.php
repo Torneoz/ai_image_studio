@@ -56,20 +56,20 @@ final class StoryboardFrameQueueWorker extends QueueWorkerBase implements Contai
    * {@inheritdoc} */
   public function processItem($data): void {
     $item_id = (int) ($data['item_id'] ?? 0);
-    $item = $this->database->select('ai_storyboard_bulk_item', 'i')
+    $item = $this->database->select('ai_image_studio_vbo_item', 'i')
       ->fields('i')->condition('id', $item_id)->execute()->fetchObject();
     if ($item === FALSE || in_array($item->status, ['completed', 'failed'], TRUE)) {
       return;
     }
     $now = $this->time->getRequestTime();
-    $this->database->update('ai_storyboard_bulk_item')->fields([
+    $this->database->update('ai_image_studio_vbo_item')->fields([
       'status' => 'processing',
       'attempt_count' => (int) $item->attempt_count + 1,
       'error_message' => NULL,
       'changed' => $now,
     ])->condition('id', $item_id)->execute();
     try {
-      $shot = $this->entityTypeManager->getStorage('ai_storyboard_shot')->load((int) $item->shot_id);
+      $shot = $this->entityTypeManager->getStorage('ai_storyboard_shot')->load((int) $item->node_id);
       $storyboard = $shot?->get('storyboard_id')->entity;
       if (!$shot || !$storyboard) {
         throw new \RuntimeException('The storyboard shot is no longer available.');
@@ -78,14 +78,18 @@ final class StoryboardFrameQueueWorker extends QueueWorkerBase implements Contai
       if ($turn->get('status')->value !== 'completed') {
         throw new \RuntimeException((string) ($turn->get('error_message')->value ?: 'Frame generation did not complete.'));
       }
-      $this->database->update('ai_storyboard_bulk_item')->fields([
+      $this->database->update('ai_image_studio_vbo_item')->fields([
         'turn_id' => (int) $turn->id(),
         'status' => 'completed',
         'changed' => $this->time->getRequestTime(),
       ])->condition('id', $item_id)->execute();
+      $this->database->update('ai_image_studio_vbo_job')->fields([
+        'session_id' => (int) $storyboard->get('studio_session_id')->target_id,
+        'changed' => $this->time->getRequestTime(),
+      ])->condition('id', (int) $item->job_id)->execute();
     }
     catch (\Throwable $exception) {
-      $this->database->update('ai_storyboard_bulk_item')->fields([
+      $this->database->update('ai_image_studio_vbo_item')->fields([
         'status' => 'failed',
         'error_message' => $exception->getMessage(),
         'changed' => $this->time->getRequestTime(),

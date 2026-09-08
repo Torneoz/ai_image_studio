@@ -68,7 +68,7 @@ final class StoryboardController extends ControllerBase {
     $add['#attributes']['class'] = ['button', 'button--primary'];
     $jobs = Link::fromTextAndUrl(
       $this->t('Bulk jobs'),
-      Url::fromRoute('ai_storyboard.bulk_jobs'),
+      Url::fromRoute('ai_image_studio_vbo.jobs'),
     )->toRenderable();
     $jobs['#attributes']['class'] = ['button'];
     return [

@@ -4,7 +4,7 @@ ai_image_studio_vbo.jobs:
     _controller: '\Drupal\ai_image_studio_vbo\Controller\BulkJobController::listing'
     _title: 'AI Image Studio bulk jobs'
   requirements:
-    _permission: 'view ai image studio vbo jobs+view any ai image studio vbo job'
+    _permission: 'view ai image studio vbo jobs+view any ai image studio vbo job+access ai storyboard'
 
 ai_image_studio_vbo.job:
   path: '/admin/content/ai-image-studio/bulk/{job_id}'
