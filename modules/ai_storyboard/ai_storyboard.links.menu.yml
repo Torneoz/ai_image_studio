@@ -2,10 +2,19 @@ ai_storyboard.collection:
   title: 'AI Storyboards'
   description: 'Create storyboards from scripts.'
   route_name: entity.ai_storyboard.collection
-  parent: system.admin_content
+  parent: ai_image_studio.collection
+  weight: 4
+
+ai_storyboard.new:
+  title: 'New storyboard'
+  description: 'Create a storyboard project from a script.'
+  route_name: ai_storyboard.new
+  parent: ai_image_studio.collection
+  weight: -4
 
 ai_storyboard.bulk_jobs:
   title: 'Storyboard bulk jobs'
   description: 'Monitor queued storyboard frame generation.'
   route_name: ai_storyboard.bulk_jobs
-  parent: system.admin_content
+  parent: ai_image_studio.collection
+  weight: 5
