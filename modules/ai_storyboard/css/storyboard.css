@@ -1,24 +1,27 @@
 .ai-storyboard-summary {
-  color: var(--color-text-neutral-medium, #55565b);
+  color: var(--gin-color-text-light, var(--color-text-neutral-medium, #55565b));
   font-size: 1rem;
 }
 
 .ai-storyboard-project-actions {
   margin-block: 1.5rem;
   padding: 1.25rem 1.5rem;
-  border: 1px solid var(--color-gray-200, #d3d4d9);
+  color: var(--gin-color-text, CanvasText);
+  border: 1px solid var(--gin-border-color-layer2, var(--color-gray-200, #d3d4d9));
   border-radius: .5rem;
-  background: var(--color-gray-050, #f7f7f8);
+  background: var(--gin-bg-layer, Canvas);
+  box-shadow: 0 1px 2px var(--gin-border-color-layer, rgba(0, 0, 0, .08));
 }
 
 .ai-storyboard-project-actions h2 {
   margin-block: 0 .25rem;
+  color: var(--gin-color-text, CanvasText);
   font-size: 1.25rem;
 }
 
 .ai-storyboard-project-actions > p {
   margin-block: 0 1rem;
-  color: var(--color-text-neutral-medium, #55565b);
+  color: var(--gin-color-text-light, var(--color-text-neutral-medium, #55565b));
 }
 
 .ai-storyboard-project-actions__buttons {
@@ -31,9 +34,11 @@
   gap: 1.5rem;
   margin-block: 1.5rem;
   padding: 1rem;
-  border: 1px solid var(--color-gray-200, #d3d4d9);
+  color: var(--gin-color-text, CanvasText);
+  border: 1px solid var(--gin-border-color-layer2, var(--color-gray-200, #d3d4d9));
   border-radius: .5rem;
-  background: var(--color-white, #fff);
+  background: var(--gin-bg-layer, Canvas);
+  box-shadow: 0 1px 2px var(--gin-border-color-layer, rgba(0, 0, 0, .08));
 }
 
 .ai-storyboard-shot__frame img {
@@ -47,18 +52,24 @@
   display: grid;
   min-height: 220px;
   place-items: center;
-  border: 1px dashed var(--color-gray-400, #919297);
+  border: 1px dashed var(--gin-border-color-form-element, var(--color-gray-400, #919297));
   border-radius: .25rem;
-  color: var(--color-text-neutral-medium, #55565b);
-  background: #f6f6f7;
+  color: var(--gin-color-text-light, var(--color-text-neutral-medium, #55565b));
+  background: var(--gin-bg-layer2, #f6f6f7);
 }
 
 .ai-storyboard-shot__body h3 {
   margin-block-start: 0;
+  color: var(--gin-color-text, CanvasText);
 }
 
-.ai-storyboard-shot__technical {
-  color: var(--color-text-neutral-medium, #55565b);
+.ai-storyboard-shot__body p,
+.ai-storyboard-shot__body strong {
+  color: var(--gin-color-text, CanvasText);
+}
+
+.ai-storyboard-shot__body .ai-storyboard-shot__technical {
+  color: var(--gin-color-text-light, var(--color-text-neutral-medium, #55565b));
 }
 
 .ai-storyboard-shot__actions {
@@ -68,6 +79,7 @@
 
 .ai-storyboard-bible {
   max-width: 75ch;
+  color: var(--gin-color-text, CanvasText);
   white-space: normal;
 }
 
