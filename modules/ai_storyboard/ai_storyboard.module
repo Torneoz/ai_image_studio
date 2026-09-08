@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
 
 /**
  * @file
@@ -21,4 +22,64 @@ function ai_storyboard_ai_storyboard_predelete(EntityInterface $entity): void {
   if ($ids) {
     $storage->delete($storage->loadMultiple($ids));
   }
+}
+
+/**
+ * Implements hook_query_ai_storyboard_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai storyboard')) {
+    return;
+  }
+  if (!$account->hasPermission('access ai storyboard')) {
+    $query->where('1 = 0');
+    return;
+  }
+  foreach (_ai_storyboard_query_table_aliases($query, 'ai_storyboard') as $alias) {
+    $query->condition($alias . '.uid', $account->id());
+  }
+}
+
+/**
+ * Implements hook_query_ai_storyboard_shot_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_shot_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai storyboard')) {
+    return;
+  }
+  if (!$account->hasPermission('access ai storyboard')) {
+    $query->where('1 = 0');
+    return;
+  }
+  $connection = \Drupal::database();
+  foreach (_ai_storyboard_query_table_aliases($query, 'ai_storyboard_shot') as $alias) {
+    $owner_query = $connection->select('ai_storyboard', 'as_access');
+    $owner_query->addExpression('1');
+    $owner_query->where(
+      'as_access.id = ' . $connection->escapeTable($alias) . '.storyboard_id',
+    );
+    $owner_query->condition('as_access.uid', $account->id());
+    $query->exists($owner_query);
+  }
+}
+
+/**
+ * Finds aliases for an access-tagged Views table.
+ *
+ * @return string[]
+ *   Matching SQL table aliases.
+ */
+function _ai_storyboard_query_table_aliases(
+  AlterableInterface $query,
+  string $table_name,
+): array {
+  $aliases = [];
+  foreach ($query->getTables() as $alias => $table) {
+    if (($table['table'] ?? NULL) === $table_name) {
+      $aliases[] = $alias;
+    }
+  }
+  return $aliases;
 }

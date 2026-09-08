@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Entity;
 
+use Drupal\ai_storyboard\Entity\Views\StoryboardViewsData;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -22,6 +23,7 @@ use Drupal\user\EntityOwnerTrait;
   label_collection: new TranslatableMarkup('AI storyboards'),
   handlers: [
     'access' => 'Drupal\ai_storyboard\Access\StoryboardAccessControlHandler',
+    'views_data' => StoryboardViewsData::class,
     'form' => ['delete' => 'Drupal\ai_storyboard\Form\StoryboardDeleteForm'],
   ],
   base_table: 'ai_storyboard',

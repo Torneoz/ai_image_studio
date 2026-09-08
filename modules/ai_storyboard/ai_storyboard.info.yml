@@ -8,4 +8,4 @@ dependencies:
   - ai_image_studio:ai_image_studio
   - drupal:file
   - drupal:user
-
+  - drupal:views

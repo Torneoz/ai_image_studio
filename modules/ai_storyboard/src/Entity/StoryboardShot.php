@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Entity;
 
+use Drupal\ai_storyboard\Entity\Views\StoryboardShotViewsData;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -15,7 +16,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 #[ContentEntityType(
   id: 'ai_storyboard_shot',
   label: new TranslatableMarkup('Storyboard shot'),
-  handlers: ['access' => 'Drupal\ai_storyboard\Access\StoryboardShotAccessControlHandler'],
+  handlers: [
+    'access' => 'Drupal\ai_storyboard\Access\StoryboardShotAccessControlHandler',
+    'views_data' => StoryboardShotViewsData::class,
+  ],
   base_table: 'ai_storyboard_shot',
   entity_keys: ['id' => 'id', 'uuid' => 'uuid', 'label' => 'title'],
   admin_permission: 'administer ai storyboard',

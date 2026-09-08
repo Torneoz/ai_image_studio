@@ -45,6 +45,14 @@ Create a project, paste a script, select configured chat and image models, and
 run the breakdown. Review and edit each shot before generating frames because
 provider calls may incur charges.
 
+## Views integration
+
+Views can use **AI Storyboards** or **AI Storyboard shots** as base data
+sources. Project views can relate to their shots, owners, and linked Image
+Studio sessions. Shot views expose all production fields and can relate to
+their project and generated Image Studio turn. Views queries enforce the same
+owner-based access rules as the storyboard workspace.
+
 Use **After prompt** for a final instruction that must be appended to every
 frame prompt. This is useful for project-wide visual corrections or constraints
 that should also apply when individual shots are regenerated.
