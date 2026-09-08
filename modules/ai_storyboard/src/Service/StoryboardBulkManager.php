@@ -75,7 +75,7 @@ final class StoryboardBulkManager {
   /**
    * Creates video turns from the generated storyboard keyframes.
    */
-  public function enqueueVideoSequences(object $storyboard, int $uid, array $settings): int {
+  public function enqueueVideoSequences(object $storyboard, int $uid, array $settings, ?int $shot_id = NULL): int {
     $session = $storyboard->get('studio_session_id')->entity;
     if (!$session) {
       throw new \LogicException('Generate storyboard frames before creating video sequences.');
@@ -98,6 +98,20 @@ final class StoryboardBulkManager {
       throw new \LogicException($mode === 'bridge'
         ? 'Generate at least two storyboard frames before bridging keyframes.'
         : 'Generate at least one storyboard frame before creating video sequences.');
+    }
+
+    if ($shot_id !== NULL) {
+      $selected = NULL;
+      foreach ($keyframes as $index => $keyframe) {
+        if ((int) $keyframe['shot']->id() === $shot_id) {
+          $selected = $index;
+          break;
+        }
+      }
+      if ($selected === NULL || ($mode === 'bridge' && !isset($keyframes[$selected + 1]))) {
+        throw new \LogicException('This shot requires a generated keyframe, and bridge mode also requires a following generated keyframe.');
+      }
+      $keyframes = array_slice($keyframes, $selected, $mode === 'bridge' ? 2 : 1);
     }
 
     $now = $this->time->getRequestTime();

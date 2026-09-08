@@ -78,8 +78,8 @@ final class StoryboardForm extends FormBase {
     $form['project']['status'] = ['#type' => 'select', '#title' => $this->t('Status'), '#options' => ['draft' => $this->t('Draft'), 'in_review' => $this->t('In review'), 'approved' => $this->t('Approved')], '#default_value' => $ai_storyboard?->get('status')->value ?? 'draft'];
     $form['prompt_bibles'] = [
       '#type' => 'details',
-      '#title' => $this->t('Visual continuity prompts'),
-      '#open' => $ai_storyboard !== NULL,
+      '#title' => $this->t('Continuity Prompts'),
+      '#open' => FALSE,
       '#description' => $this->t('These reusable directions are sent with every frame prompt. The script breakdown can expand them; edit and save them at any time.'),
     ];
     $form['prompt_bibles']['continuity_bible'] = [
@@ -286,6 +286,16 @@ final class StoryboardForm extends FormBase {
             '#attributes' => ['class' => ['ai-storyboard-shot__actions']],
             'edit' => $edit_link,
             'generate' => $generate_link,
+            'sequence' => [
+              '#type' => 'link',
+              '#title' => $this->t('Generate Keyframe Sequences'),
+              '#url' => Url::fromRoute('ai_storyboard.generate_shot_sequence', [
+                'ai_storyboard' => $board->id(),
+                'ai_storyboard_shot' => $shot->id(),
+              ]),
+              '#attributes' => ['class' => ['button', 'button--small']],
+              '#access' => (bool) $image && $this->currentUser()->hasPermission('run ai storyboard bulk generation'),
+            ],
           ],
           'video' => $video ? [
             '#type' => 'html_tag',

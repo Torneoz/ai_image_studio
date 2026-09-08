@@ -9,6 +9,7 @@ use Drupal\ai_storyboard\Service\StoryboardBulkManager;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Configures and queues video sequences from storyboard keyframes.
@@ -19,6 +20,11 @@ final class GenerateVideoSequencesForm extends FormBase {
    * The storyboard being processed.
    */
   private object $storyboard;
+
+  /**
+   * Optional starting shot for a single sequence.
+   */
+  private ?int $shotId = NULL;
 
   public function __construct(
     private readonly StoryboardBulkManager $bulkManager,
@@ -45,8 +51,12 @@ final class GenerateVideoSequencesForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?object $ai_storyboard = NULL): array {
+  public function buildForm(array $form, FormStateInterface $form_state, ?object $ai_storyboard = NULL, ?object $ai_storyboard_shot = NULL): array {
     $this->storyboard = $ai_storyboard;
+    if ($ai_storyboard_shot && (int) $ai_storyboard_shot->get('storyboard_id')->target_id !== (int) $ai_storyboard->id()) {
+      throw new NotFoundHttpException();
+    }
+    $this->shotId = $ai_storyboard_shot ? (int) $ai_storyboard_shot->id() : NULL;
     $mode = (string) ($ai_storyboard->get('video_sequence_mode')->value ?: 'animate');
     $image_models = $this->imageGenerator->getModelOptions('image_to_video');
     $reference_models = $this->imageGenerator->getModelOptions('reference_to_video');
@@ -55,6 +65,11 @@ final class GenerateVideoSequencesForm extends FormBase {
     $form['intro'] = [
       '#markup' => '<p>' . $this->t('Create one video clip from each generated keyframe, or bridge each pair of consecutive keyframes. Requests run through the shared Bulk Jobs facility and may incur provider charges.') . '</p>',
     ];
+    if ($ai_storyboard_shot) {
+      $form['intro'] = [
+        '#markup' => '<p>' . $this->t('Generate a sequence for “@shot”. Animate this keyframe or bridge it to the next generated keyframe. Provider charges may apply.', ['@shot' => $ai_storyboard_shot->label()]) . '</p>',
+      ];
+    }
     $form['mode'] = [
       '#type' => 'radios',
       '#title' => $this->t('Sequence mode'),
@@ -156,6 +171,7 @@ final class GenerateVideoSequencesForm extends FormBase {
         $this->storyboard,
         (int) $this->currentUser()->id(),
         $settings,
+        $this->shotId,
       );
       $this->messenger()->addStatus($this->t('Storyboard video sequences have been queued.'));
       $form_state->setRedirect('ai_image_studio_vbo.job', ['job_id' => $job_id]);

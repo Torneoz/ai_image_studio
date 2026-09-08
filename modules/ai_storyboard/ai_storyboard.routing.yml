@@ -100,6 +100,21 @@ ai_storyboard.generate_all:
       ai_storyboard:
         type: entity:ai_storyboard
 
+ai_storyboard.generate_shot_sequence:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/shot/{ai_storyboard_shot}/sequence'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\GenerateVideoSequencesForm'
+    _title: 'Generate Keyframe Sequences'
+  requirements:
+    _entity_access: 'ai_storyboard.update'
+    _permission: 'run ai storyboard bulk generation'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+      ai_storyboard_shot:
+        type: entity:ai_storyboard_shot
+
 ai_storyboard.generate_video_sequences:
   path: '/admin/content/ai-storyboard/{ai_storyboard}/generate-video-sequences'
   defaults:
