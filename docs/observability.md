@@ -26,6 +26,15 @@ file IDs, never media binaries. Credentials, inline media and URLs are redacted;
 arbitrary request settings, headers and provider responses are not logged.
 Text is capped at 4,000 characters. Logging failures do not fail generation.
 
+Grok video submissions are limited to 4,096 characters. AIIS keeps the saved
+prompt intact and budgets descriptive storyboard continuity at submission time,
+including retries. Action, dialogue, audio, camera, voices and explicit overrides
+are retained verbatim; complete descriptive sentences share the remaining space.
+If those essentials cannot fit, generation fails locally without an API call.
+The effective settings report `original_prompt_characters`,
+`effective_prompt_characters` and `prompt_context_compacted`. Existing asynchronous
+jobs are polled without rebuilding their submitted prompt.
+
 These are **application lifecycle logs**, not synthetic provider response events.
 Native provider events and their OpenTelemetry integration remain unchanged;
 AIIS does not duplicate token metrics or pretend failed/pending requests produced

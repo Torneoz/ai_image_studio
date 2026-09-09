@@ -27,7 +27,10 @@ final class GenerationObservability {
     if ($turn->getEntityTypeId() !== 'ai_image_studio_turn') {
       return;
     }
-    $fields = ['status', 'attempt_count', 'provider_request_id', 'error_message', 'provider_metadata'];
+    $fields = [
+      'status', 'attempt_count', 'provider_request_id', 'error_message',
+      'provider_metadata', 'generation_settings',
+    ];
     $original = method_exists($turn, 'getOriginal') ? $turn->getOriginal() : ($turn->original ?? NULL);
     if ($original) {
       $changed = FALSE;
@@ -52,6 +55,8 @@ final class GenerationObservability {
     $settings = $turn->get('generation_settings')->first()?->getValue() ?? [];
     $metadata['configuration'] = array_intersect_key($settings, array_flip([
       'duration', 'resolution', 'aspect_ratio', 'variations', 'quality',
+      'original_prompt_characters', 'effective_prompt_characters',
+      'prompt_context_compacted',
     ]));
     $provider = $turn->get('provider_metadata')->first()?->getValue() ?? [];
     $metadata['provider_metadata'] = array_intersect_key($provider, array_flip([

@@ -309,6 +309,16 @@ final class ImageGenerator {
     $started_at = hrtime(TRUE);
 
     try {
+      if ($output_type === 'video' && $this->isXaiProvider($provider_id)
+        && $turn->get('provider_request_id')->isEmpty()) {
+        $original_length = mb_strlen($prompt);
+        $prompt = VideoPromptBudget::fit($prompt);
+        $generation_settings['original_prompt_characters'] = $original_length;
+        $generation_settings['effective_prompt_characters'] = mb_strlen($prompt);
+        $generation_settings['prompt_context_compacted'] = $original_length !== mb_strlen($prompt);
+        $turn->set('generation_settings', $generation_settings);
+        $turn->save();
+      }
       if ($operation === 'reference_to_video' && $this->isXaiProvider($provider_id)) {
         return $this->processXaiReferenceVideo(
           $turn,

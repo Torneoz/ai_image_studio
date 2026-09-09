@@ -1,5 +1,10 @@
 # Changelog
 
+- Budget Grok video prompts to 4,096 characters before submission, including
+  retries. Preserve essential direction and saved prompts; fit complete
+  descriptive continuity sentences into the remaining space. Report original
+  and effective lengths to Observability; reject oversized essentials locally.
+
 - Added optional AI Observability lifecycle logging for all media generation
   paths and storyboard breakdowns, with correlation, privacy filters and bounded
   nested HTTP provider diagnostics. See `docs/observability.md`.
