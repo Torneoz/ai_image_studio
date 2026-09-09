@@ -41,3 +41,20 @@ foreach (['text_to_image', 'image_to_image'] as $operation) {
 $prompt = 'PROJECT CONTINUITY: ' . str_repeat('Stone walls. ', 500) . "\n\nSHOT ACTION: Walk.\n\nSPOKEN DIALOGUE / VOICE-OVER: Hello.";
 $result = PromptLimit::prepare($prompt, 1000, 'image_to_video');
 $check(mb_strlen($result) <= 1000 && str_contains($result, 'VOICE-OVER: Hello.'), 'Video budgeting uses the configured ceiling and preserves dialogue');
+$unicode = "PROJECT CONTINUITY: " . str_repeat('Stone walls — weathered. ', 200) . "\n\nSHOT ACTION: Walk.\n\nSPOKEN DIALOGUE / VOICE-OVER: Hello, 世界 😀.";
+foreach (['text_to_video', 'image_to_video', 'reference_to_video'] as $operation) {
+  $bytes = PromptLimit::byteLimit(TRUE, 'grok-imagine-video', $operation);
+  $result = PromptLimit::prepare($unicode, 4096, $operation, $bytes);
+  $check(strlen($result) <= 4096 && mb_check_encoding($result, 'UTF-8') && str_contains($result, 'Hello, 世界 😀.'), "$operation fits UTF-8 bytes without altering dialogue");
+}
+$check(PromptLimit::byteLimit(TRUE, 'grok-imagine-video-1.5', 'image_to_video') === NULL, 'Other models do not inherit a byte cap');
+$check(PromptLimit::byteLimit(FALSE, 'grok-imagine-video', 'image_to_video') === NULL, 'Other providers do not inherit a byte cap');
+$boundary = str_repeat('😀', 1024);
+$check(PromptLimit::prepare($boundary, 4096, 'image_to_video', 4096) === $boundary, 'Exactly 4096 UTF-8 bytes remain unchanged');
+try {
+  PromptLimit::prepare($boundary . 'x', 4096, 'image_to_video', 4096);
+  $check(FALSE, 'Byte-only overflow must not pass the character check');
+}
+catch (LengthException $exception) {
+  $check(str_contains($exception->getMessage(), 'UTF-8 bytes'), 'Byte-only overflow fails locally with explicit units');
+}

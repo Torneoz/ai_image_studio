@@ -319,9 +319,14 @@ final class ImageGenerator {
           $operation,
         );
         $original_length = mb_strlen($prompt);
+        $original_bytes = strlen($prompt);
+        $byte_limit = PromptLimit::byteLimit($this->isXaiProvider($provider_id), $model_id, $operation);
         $generation_settings['effective_prompt_limit'] = $prompt_limit;
+        $generation_settings['effective_prompt_byte_limit'] = $byte_limit;
         $turn->set('generation_settings', $generation_settings);
-        $prompt = PromptLimit::prepare($prompt, $prompt_limit, $operation);
+        $prompt = PromptLimit::prepare($prompt, $prompt_limit, $operation, $byte_limit);
+        $generation_settings['original_prompt_bytes'] = $original_bytes;
+        $generation_settings['effective_prompt_bytes'] = strlen($prompt);
         $generation_settings['original_prompt_characters'] = $original_length;
         $generation_settings['effective_prompt_characters'] = mb_strlen($prompt);
         $generation_settings['prompt_context_compacted'] = $original_length !== mb_strlen($prompt);

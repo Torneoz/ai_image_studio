@@ -40,7 +40,14 @@ are retained verbatim; complete descriptive sentences share the remaining space.
 If those essentials cannot fit, generation fails locally without an API call.
 The effective settings report `original_prompt_characters`,
 `effective_prompt_characters`, `effective_prompt_limit` and
-`prompt_context_compacted`. Oversized image prompts fail locally without silent
+`prompt_context_compacted`. The exact `grok-imagine-video` model also enforces
+a conservative 4,096 UTF-8 byte ceiling: a real request with 4,089 characters
+but 4,101 bytes was rejected by that endpoint. The site setting remains measured
+in characters. Both ceilings are applied while selecting complete continuity
+sentences, without changing dialogue or splitting Unicode characters. Settings
+also report `effective_prompt_byte_limit`, `original_prompt_bytes` and
+`effective_prompt_bytes`; other models do not inherit this byte ceiling.
+Oversized image prompts fail locally without silent
 truncation. Existing asynchronous
 jobs are polled without rebuilding their submitted prompt.
 

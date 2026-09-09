@@ -25,14 +25,21 @@ final class PromptLimit {
   /**
    * Applies the effective ceiling immediately before a provider submission.
    */
-  public static function prepare(string $prompt, int $limit, string $operation): string {
+  public static function prepare(string $prompt, int $limit, string $operation, ?int $byte_limit = NULL): string {
     if (self::isVideo($operation)) {
-      return VideoPromptBudget::fit($prompt, $limit);
+      return VideoPromptBudget::fit($prompt, $limit, $byte_limit);
     }
     if (mb_strlen($prompt) > $limit) {
       throw new \LengthException(sprintf('The assembled prompt exceeds the configured maximum of %d characters. Shorten the prompt or increase Maximum prompt length in Image Studio settings. No API request was sent; the original prompt is preserved.', $limit));
     }
     return $prompt;
+  }
+
+  /**
+   * Safely handles observed Unicode rejection at this model's API boundary.
+   */
+  public static function byteLimit(bool $xai, string $model, string $operation): ?int {
+    return $xai && $model === 'grok-imagine-video' && self::isVideo($operation) ? 4096 : NULL;
   }
 
   /**

@@ -1,5 +1,9 @@
 # Changelog
 
+- Fixed Unicode video prompts passing the character budget but exceeding the
+  observed Grok video byte ceiling. Budget both units and report UTF-8 byte
+  counts to Observability; retain original prompts and essential instructions.
+
 - Added script downloads as versioned JSON, Fountain, Final Draft FDX, Open
   Screenplay Format, RTF and original text, available before media generation.
   See `docs/script-export.md` for interchange coverage and limitations.
