@@ -46,6 +46,7 @@ final class ScriptBreakdown {
       "SCRIPT:\n{$script}",
     ]))]);
     $input->setSystemPrompt('You are a meticulous film director and storyboard artist. Break the supplied script into visually distinct shots, preserving every story beat. Prefer purposeful coverage over arbitrary cuts. Return only the requested structured data. Image prompts must describe a single frozen frame and must not contain dialogue text, captions, or camera motion as visible action.');
+    $input->setSystemPrompt($input->getSystemPrompt() . ' Always create substantive continuity_bible and character_bible strings, even when the supplied bibles are empty. Define consistent environments, props, lighting and visual character identities from the script. If no characters exist, explicitly state that and describe any recurring subjects. Never return empty bible fields.');
     $input->setChatStructuredJsonSchema([
       'name' => 'storyboard_breakdown',
       'strict' => TRUE,
@@ -94,6 +95,11 @@ final class ScriptBreakdown {
     }
     if (!is_array($data) || !is_array($data['shots'] ?? NULL) || $data['shots'] === []) {
       throw new \UnexpectedValueException('The AI provider returned no usable shots.');
+    }
+    foreach (['continuity_bible', 'character_bible'] as $field) {
+      if (!is_string($data[$field] ?? NULL) || trim($data[$field]) === '') {
+        throw new \UnexpectedValueException('The AI provider returned an empty ' . $field . '. Existing shots and bibles have been preserved. Retry the breakdown.');
+      }
     }
     return $data;
   }

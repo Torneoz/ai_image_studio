@@ -27,6 +27,7 @@ final class StoryboardBulkQueueSubscriber implements EventSubscriberInterface {
    * Processes one queued frame after the response is sent. */
   public function onTerminate(TerminateEvent $event): void {
     if ($event->isMainRequest()) {
+      $this->queueRunner->runOne('ai_storyboard_breakdown');
       $this->queueRunner->runOne(self::QUEUE_ID);
     }
   }

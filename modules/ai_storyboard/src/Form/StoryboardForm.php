@@ -57,6 +57,18 @@ final class StoryboardForm extends FormBase {
    * {@inheritdoc} */
   public function buildForm(array $form, FormStateInterface $form_state, ?object $ai_storyboard = NULL): array {
     $form_state->set('storyboard_id', $ai_storyboard?->id());
+    $breakdown_status = $ai_storyboard
+      ? \Drupal::keyValue('ai_storyboard.breakdown')->get($ai_storyboard->id(), [])
+      : [];
+    $pending = in_array($breakdown_status['status'] ?? '', ['queued', 'processing'], TRUE);
+    if ($breakdown_status) {
+      $form['breakdown_progress'] = [
+        '#weight' => -100,
+        '#type' => 'item',
+        '#title' => $this->t('Script breakdown'),
+        '#plain_text' => $breakdown_status['message'] ?? $breakdown_status['status'],
+      ];
+    }
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
     $form['project'] = ['#type' => 'details', '#title' => $this->t('Project and script'), '#open' => $ai_storyboard === NULL];
     $form['project']['title'] = ['#type' => 'textfield', '#title' => $this->t('Title'), '#required' => TRUE, '#maxlength' => 255, '#default_value' => $ai_storyboard?->label()];
@@ -194,6 +206,18 @@ final class StoryboardForm extends FormBase {
       $form['actions']['delete'] = $delete;
       $this->buildWorkspace($form, $ai_storyboard);
     }
+    if ($pending) {
+      foreach (['project', 'prompt_bibles', 'actions', 'storyboard_actions'] as $section) {
+        if (isset($form[$section])) {
+          $form[$section]['#disabled'] = TRUE;
+        }
+      }
+      $form['#attached']['html_head'][] = [
+        ['#tag' => 'meta', '#attributes' => ['http-equiv' => 'refresh', 'content' => '10']],
+        'ai_storyboard_breakdown_refresh',
+      ];
+    }
+    $form['#cache']['max-age'] = 0;
     return $form;
   }
 
@@ -202,6 +226,17 @@ final class StoryboardForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->saveProject($form, $form_state);
+  }
+
+  /**
+   * Prevents stale forms from overwriting an active breakdown.
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $id = $form_state->get('storyboard_id');
+    $status = $id ? \Drupal::keyValue('ai_storyboard.breakdown')->get($id, []) : [];
+    if (in_array($status['status'] ?? '', ['queued', 'processing'], TRUE)) {
+      $form_state->setErrorByName('script', $this->t('Wait for the active script breakdown to finish before saving changes.'));
+    }
   }
 
   /**
@@ -253,20 +288,16 @@ final class StoryboardForm extends FormBase {
    *
    */
   private function runBreakdown(object $board, FormStateInterface $form_state): void {
-    try {
-      $result = $this->breakdown->breakdown(
-        (string) $board->get('script')->value,
-        (string) $board->get('chat_model')->value,
-        (string) $board->get('creative_brief')->value,
-        (string) $board->get('continuity_bible')->value,
-        (string) $board->get('character_bible')->value,
-      );
-      $count = $this->manager->replaceShots($board, $result);
-      $this->messenger()->addStatus($this->formatPlural($count, 'Created 1 storyboard shot.', 'Created @count storyboard shots.'));
+    $state = \Drupal::keyValue('ai_storyboard.breakdown');
+    $status = $state->get($board->id(), []);
+    if (!in_array($status['status'] ?? '', ['queued', 'processing'], TRUE)) {
+      $state->set($board->id(), [
+        'status' => 'queued',
+        'message' => (string) $this->t('Queued: generating shots and continuity bibles. This page refreshes automatically.'),
+      ]);
+      \Drupal::queue('ai_storyboard_breakdown')->createItem(['storyboard_id' => (int) $board->id()]);
     }
-    catch (\Throwable $e) {
-      $this->messenger()->addError($e->getMessage());
-    }
+    $this->messenger()->addStatus($this->t('Script breakdown queued. Your project has been saved.'));
     $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
   }
 
