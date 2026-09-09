@@ -150,23 +150,9 @@ final class StoryboardBulkManager {
         'changed' => $now,
       ])->execute();
 
-    $audio_prompt = trim((string) $storyboard->get('audio_prompt')->value);
     foreach ($eligible as $index) {
       $shot = $keyframes[$index]['shot'];
-      $dialogue = trim((string) $shot->get('dialogue')->value);
-      $sound = trim((string) $shot->get('audio')->value);
-      $prompt = implode("\n\n", array_filter([
-        (string) ($settings['prompt'] ?? ''),
-        'PROJECT CONTINUITY: ' . $storyboard->get('continuity_bible')->value,
-        'PROJECT CHARACTERS: ' . $storyboard->get('character_bible')->value,
-        $this->narrative->prompt($shot, TRUE),
-        $audio_prompt !== '' ? 'AUDIO DIRECTION: ' . $audio_prompt : '',
-        'SHOT ACTION: ' . $shot->get('action')->value,
-        $dialogue !== '' ? 'SPOKEN DIALOGUE / VOICE-OVER: ' . $dialogue . "\nSpeak the supplied lines in the specified voices and language. Match visible speakers with natural lip synchronization where applicable. Do not render dialogue as text or subtitles. Fit the delivery within the clip duration." : '',
-        $sound !== '' ? 'SHOT SOUND / MUSIC: ' . $sound : '',
-        'CAMERA MOVEMENT: ' . $shot->get('camera_move')->value,
-        $mode === 'bridge' ? 'Create a continuous transition from the first supplied keyframe to the second. Preserve character identity, wardrobe, environment, and screen direction.' : 'Animate this keyframe as a continuous cinematic shot. Preserve character identity, composition, wardrobe, and environment.',
-      ]));
+      $prompt = $this->videoPrompt($storyboard, $shot, $settings);
       $item_id = (int) $this->database->insert('ai_image_studio_vbo_item')
         ->fields([
           'job_id' => $job_id,
@@ -222,6 +208,27 @@ final class StoryboardBulkManager {
     }
     $this->updateJobStatus($job_id);
     return $job_id;
+  }
+
+  /**
+   * Builds a dedicated sequence prompt without repeating full visual bibles.
+   */
+  public function videoPrompt(object $storyboard, object $shot, array $settings): string {
+    $dialogue = trim((string) $shot->get('dialogue')->value);
+    $audio = trim((string) $storyboard->get('audio_prompt')->value);
+    $sound = trim((string) $shot->get('audio')->value);
+    return implode("\n\n", array_filter([
+      trim((string) ($settings['prompt'] ?? '')),
+      ($settings['mode'] ?? 'animate') === 'bridge'
+        ? 'Transition continuously between the supplied keyframes. Preserve identity, wardrobe, environment and screen direction.'
+        : 'Animate the supplied keyframe as one continuous shot. Preserve identity, wardrobe, composition and environment.',
+      $this->narrative->videoDirection($shot),
+      'SHOT ACTION: ' . $shot->get('action')->value,
+      'CAMERA: ' . implode(' · ', array_filter(array_map(static fn (string $field): string => (string) $shot->get($field)->value, ['shot_size', 'camera_angle', 'camera_move', 'lens']))),
+      $dialogue !== '' ? 'SPOKEN DIALOGUE / VOICE-OVER: ' . $dialogue . "\nSpeak exactly as supplied, in the specified voice/language, within the clip duration. Lip-sync visible speakers; no subtitles." : '',
+      $audio !== '' ? 'AUDIO DIRECTION: ' . $audio : '',
+      $sound !== '' ? 'SHOT SOUND / MUSIC: ' . $sound : '',
+    ]));
   }
 
   /**

@@ -110,10 +110,10 @@ final class GenerateVideoSequencesForm extends FormBase {
     ];
     $form['prompt'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Sequence direction'),
+      '#title' => $this->t('Concise video direction'),
       '#default_value' => $ai_storyboard->get('video_prompt')->value,
       '#rows' => 5,
-      '#description' => $this->t('Project-wide motion, pacing, performance, and transition direction. Each shot’s action and camera movement are appended automatically.'),
+      '#description' => $this->t('Keep this brief: motion, pacing, performance and transitions only. Each shot adds action, camera, dialogue/audio, scene overrides and its selected speaker’s voice. The keyframe supplies visual continuity; full project and library bibles are not repeated. Your project prompt limit still applies. To use this new composition for a failed clip, generate a new sequence rather than retrying its old saved prompt.'),
     ];
     $form['audio_prompt'] = [
       '#type' => 'textarea',

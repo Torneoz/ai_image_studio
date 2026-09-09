@@ -137,6 +137,30 @@ final class NarrativeContext {
   }
 
   /**
+   * Supplies video-only direction; the keyframe already carries visual bibles.
+   */
+  public function videoDirection(object $shot): string {
+    $parts = [];
+    if ($scene = $this->scene($shot)) {
+      $parts[] = 'SCENE: ' . $scene->label();
+      foreach (['conditions' => 'SCENE CONDITIONS', 'overrides' => 'SCENE OVERRIDES', 'character_states' => 'CHARACTER STATES'] as $field => $label) {
+        if ($value = trim((string) $scene->get($field)->value)) {
+          $parts[] = $label . ': ' . $value;
+        }
+      }
+    }
+    foreach ($this->cast($shot) as $member) {
+      if ($member->id() == $shot->get('speaker_id')->target_id) {
+        $parts[] = 'DIALOGUE SPEAKER: ' . $member->label();
+        if ($voice = trim((string) $member->get('voice_snapshot')->value)) {
+          $parts[] = 'VOICE: ' . $voice;
+        }
+      }
+    }
+    return implode("\n\n", $parts);
+  }
+
+  /**
    * Prevents a continuous video bridge across a scene cut.
    */
   public function sameScene(object $first, object $second): bool {

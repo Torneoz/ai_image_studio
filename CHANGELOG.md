@@ -1,5 +1,10 @@
 # Changelog
 
+- Compose concise storyboard video prompts from shot motion/camera, dialogue,
+  audio and scene direction. Keep full visual bibles in the project/keyframe
+  workflow instead of repeating them in every video request. Existing turn
+  snapshots remain unchanged; generate a new sequence to adopt the new prompt.
+
 - Added a saved maximum media prompt length per storyboard project, initialized
   from Studio settings. Removed all automatic Grok model/byte ceilings; project
   values govern submissions and retries, with provider errors reported normally.
