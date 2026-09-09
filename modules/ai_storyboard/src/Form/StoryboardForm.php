@@ -97,6 +97,12 @@ final class StoryboardForm extends FormBase {
     $form['project']['aspect_ratio'] = ['#type' => 'select', '#title' => $this->t('Aspect ratio'), '#options' => ['16:9' => '16:9 landscape', '9:16' => '9:16 portrait', '1:1' => '1:1 square', '4:3' => '4:3 classic', '2.39:1' => '2.39:1 anamorphic'], '#default_value' => $ai_storyboard?->get('aspect_ratio')->value ?? '16:9'];
     $chat_options = $this->breakdown->getModelOptions();
     $image_options = $this->imageGenerator->getModelOptions('text_to_image');
+    $form['project']['max_prompt_length'] = [
+      '#type' => 'number', '#title' => $this->t('Maximum media prompt length'),
+      '#min' => 100, '#required' => TRUE,
+      '#default_value' => $ai_storyboard?->get('max_prompt_length')->value ?: (int) (\Drupal::config('ai_image_studio.settings')->get('max_prompt_length') ?: 4000),
+      '#description' => $this->t('Maximum characters for this project’s assembled image and video prompts, including retries. No automatic provider or 4K override is applied. Providers can still reject prompts beyond their own limits. Save changes before generating.'),
+    ];
     $form['project']['chat_model'] = ['#type' => 'select', '#title' => $this->t('Script breakdown model'), '#options' => $chat_options, '#required' => TRUE, '#default_value' => $ai_storyboard?->get('chat_model')->value ?: (string) array_key_first($chat_options)];
     $form['project']['image_model'] = ['#type' => 'select', '#title' => $this->t('Frame generation model'), '#options' => $image_options, '#required' => TRUE, '#default_value' => $ai_storyboard?->get('image_model')->value ?: (string) array_key_first($image_options)];
     $form['project']['status'] = ['#type' => 'select', '#title' => $this->t('Status'), '#options' => ['draft' => $this->t('Draft'), 'in_review' => $this->t('In review'), 'approved' => $this->t('Approved')], '#default_value' => $ai_storyboard?->get('status')->value ?? 'draft'];
@@ -295,6 +301,7 @@ final class StoryboardForm extends FormBase {
       $board->set($field, $form_state->getValue($field));
     }
     $board->set('audio_prompt', (string) $form_state->getValue('audio_prompt'));
+    $board->set('max_prompt_length', (int) $form_state->getValue('max_prompt_length'));
     $board->set('machine_name', (string) $form_state->getValue('machine_name'));
     $board->save();
     return $board;

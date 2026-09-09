@@ -5,21 +5,15 @@ declare(strict_types=1);
 namespace Drupal\ai_image_studio\Service;
 
 /**
- * Resolves character limits by site policy, provider, model and operation.
+ * Applies project/Studio policy without automatic provider ceilings.
  */
 final class PromptLimit {
 
   /**
-   * Returns the configured ceiling, reduced only by a known endpoint limit.
+   * Returns the configured ceiling without reducing it for a provider/model.
    */
   public static function resolve(int $configured, bool $xai, string $model, string $operation): int {
-    $limit = $configured > 0 ? $configured : 4000;
-    // Confirmed by this model's video API validation response. Do not infer
-    // limits for other models from chat context windows or model-name prefixes.
-    if ($xai && $model === 'grok-imagine-video' && self::isVideo($operation)) {
-      $limit = min($limit, 4096);
-    }
-    return $limit;
+    return $configured > 0 ? $configured : 4000;
   }
 
   /**
@@ -36,10 +30,10 @@ final class PromptLimit {
   }
 
   /**
-   * Safely handles observed Unicode rejection at this model's API boundary.
+   * Provider byte ceilings are deliberately disabled; APIs validate themselves.
    */
   public static function byteLimit(bool $xai, string $model, string $operation): ?int {
-    return $xai && $model === 'grok-imagine-video' && self::isVideo($operation) ? 4096 : NULL;
+    return NULL;
   }
 
   /**

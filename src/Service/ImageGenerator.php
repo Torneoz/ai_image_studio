@@ -312,8 +312,19 @@ final class ImageGenerator {
       // All entry points (forms, bulk, storyboard, replay and retry) converge
       // here. Pending remote jobs only poll; their input is already submitted.
       if ($turn->get('provider_request_id')->isEmpty()) {
+        $configured_limit = (int) $this->configFactory->get('ai_image_studio.settings')->get('max_prompt_length');
+        // Resolve the current project value on every attempt, including retries
+        // of existing turns. Non-storyboard sessions use the Studio setting.
+        if ($this->entityTypeManager->hasDefinition('ai_storyboard')) {
+          $storage = $this->entityTypeManager->getStorage('ai_storyboard');
+          $ids = $storage->getQuery()->accessCheck(FALSE)->condition('studio_session_id', $session->id())->sort('id')->range(0, 1)->execute();
+          if ($ids) {
+            $project = $storage->load(reset($ids));
+            $configured_limit = (int) $project->get('max_prompt_length')->value ?: $configured_limit;
+          }
+        }
         $prompt_limit = PromptLimit::resolve(
-          (int) $this->configFactory->get('ai_image_studio.settings')->get('max_prompt_length'),
+          $configured_limit,
           $this->isXaiProvider($provider_id),
           $model_id,
           $operation,

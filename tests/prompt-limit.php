@@ -17,7 +17,7 @@ $check = static function (bool $pass, string $message): void {
   print "PASS: $message\n";
 };
 foreach (['text_to_video', 'image_to_video', 'reference_to_video'] as $operation) {
-  $check(PromptLimit::resolve(10000, TRUE, 'grok-imagine-video', $operation) === 4096, "$operation uses the confirmed model cap");
+  $check(PromptLimit::resolve(10000, TRUE, 'grok-imagine-video', $operation) === 10000, "$operation honors the configured value without a Grok cap");
   $check(PromptLimit::resolve(2000, TRUE, 'grok-imagine-video', $operation) === 2000, "$operation honors a lower configured ceiling");
 }
 foreach (['grok-imagine-video-1.5', 'grok-imagine-video-future', 'another-model'] as $model) {
@@ -44,8 +44,8 @@ $check(mb_strlen($result) <= 1000 && str_contains($result, 'VOICE-OVER: Hello.')
 $unicode = "PROJECT CONTINUITY: " . str_repeat('Stone walls — weathered. ', 200) . "\n\nSHOT ACTION: Walk.\n\nSPOKEN DIALOGUE / VOICE-OVER: Hello, 世界 😀.";
 foreach (['text_to_video', 'image_to_video', 'reference_to_video'] as $operation) {
   $bytes = PromptLimit::byteLimit(TRUE, 'grok-imagine-video', $operation);
-  $result = PromptLimit::prepare($unicode, 4096, $operation, $bytes);
-  $check(strlen($result) <= 4096 && mb_check_encoding($result, 'UTF-8') && str_contains($result, 'Hello, 世界 😀.'), "$operation fits UTF-8 bytes without altering dialogue");
+  $result = PromptLimit::prepare($unicode, 10000, $operation, $bytes);
+  $check($bytes === NULL && $result === $unicode && strlen($result) > 4096, "$operation preserves prompts over 4K without an automatic byte cap");
 }
 $check(PromptLimit::byteLimit(TRUE, 'grok-imagine-video-1.5', 'image_to_video') === NULL, 'Other models do not inherit a byte cap');
 $check(PromptLimit::byteLimit(FALSE, 'grok-imagine-video', 'image_to_video') === NULL, 'Other providers do not inherit a byte cap');

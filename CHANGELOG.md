@@ -1,5 +1,9 @@
 # Changelog
 
+- Added a saved maximum media prompt length per storyboard project, initialized
+  from Studio settings. Removed all automatic Grok model/byte ceilings; project
+  values govern submissions and retries, with provider errors reported normally.
+
 - Fixed Unicode video prompts passing the character budget but exceeding the
   observed Grok video byte ceiling. Budget both units and report UTF-8 byte
   counts to Observability; retain original prompts and essential instructions.

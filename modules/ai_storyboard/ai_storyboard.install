@@ -227,6 +227,21 @@ function ai_storyboard_update_10010(): void {
 }
 
 /**
+ * Adds a project-owned media prompt limit, initialized from Studio settings.
+ */
+function ai_storyboard_update_10011(): void {
+  $manager = \Drupal::entityTypeManager();
+  $updates = \Drupal::entityDefinitionUpdateManager();
+  if (!$updates->getFieldStorageDefinition('max_prompt_length', 'ai_storyboard')) {
+    $fields = \Drupal\ai_storyboard\Entity\Storyboard::baseFieldDefinitions($manager->getDefinition('ai_storyboard'));
+    $updates->installFieldStorageDefinition('max_prompt_length', 'ai_storyboard', 'ai_storyboard', $fields['max_prompt_length']);
+  }
+  \Drupal::database()->update('ai_storyboard')
+    ->fields(['max_prompt_length' => (int) (\Drupal::config('ai_image_studio.settings')->get('max_prompt_length') ?: 4000)])
+    ->isNull('max_prompt_length')->execute();
+}
+
+/**
  * Adds shared narrative libraries, project scenes/cast and shot references.
  */
 function ai_storyboard_update_10009(array &$sandbox): void {

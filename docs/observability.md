@@ -26,13 +26,13 @@ file IDs, never media binaries. Credentials, inline media and URLs are redacted;
 arbitrary request settings, headers and provider responses are not logged.
 Text is capped at 4,000 characters. Logging failures do not fail generation.
 
-All AIIS image/video submissions honor `max_prompt_length` centrally, including
-bulk jobs, storyboard media, replay and retries. For xAI's exact
-`grok-imagine-video` model, the three video generation operations use the smaller
-of that setting and the API-confirmed 4,096-character cap. Other models (including
-1.5), image operations and providers do not inherit that cap: unknown provider
-limits remain subject to API validation. Chat/script breakdown is a separate
-operation, not limited by this image/video character setting.
+All AIIS image/video submissions honor the configured character limit centrally.
+Storyboard projects have a saved `max_prompt_length`, initialized from Studio
+settings. Current project values govern existing session submissions and retries;
+ordinary sessions use Studio settings. There are no automatic model-specific
+character or byte ceilings. Providers may still reject oversized input; AIIS
+reports those errors rather than imposing its own provider cap. Chat/script
+breakdown is separate from this media prompt setting.
 
 AIIS keeps the saved prompt intact and budgets descriptive storyboard video
 continuity at submission time. Action, dialogue, audio, camera, voices and overrides
@@ -40,13 +40,8 @@ are retained verbatim; complete descriptive sentences share the remaining space.
 If those essentials cannot fit, generation fails locally without an API call.
 The effective settings report `original_prompt_characters`,
 `effective_prompt_characters`, `effective_prompt_limit` and
-`prompt_context_compacted`. The exact `grok-imagine-video` model also enforces
-a conservative 4,096 UTF-8 byte ceiling: a real request with 4,089 characters
-but 4,101 bytes was rejected by that endpoint. The site setting remains measured
-in characters. Both ceilings are applied while selecting complete continuity
-sentences, without changing dialogue or splitting Unicode characters. Settings
-also report `effective_prompt_byte_limit`, `original_prompt_bytes` and
-`effective_prompt_bytes`; other models do not inherit this byte ceiling.
+`prompt_context_compacted`. Settings also report `original_prompt_bytes` and
+`effective_prompt_bytes` for diagnosis; `effective_prompt_byte_limit` is null.
 Oversized image prompts fail locally without silent
 truncation. Existing asynchronous
 jobs are polled without rebuilding their submitted prompt.

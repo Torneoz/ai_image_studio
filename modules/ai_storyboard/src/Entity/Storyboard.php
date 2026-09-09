@@ -65,6 +65,11 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['character_bible'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Character bible'));
     $fields['visual_style'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Visual style'))->setSetting('max_length', 255)->setDefaultValue('cinematic storyboard sketch');
     $fields['aspect_ratio'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Aspect ratio'))->setSettings(['allowed_values' => ['16:9' => '16:9 landscape', '9:16' => '9:16 portrait', '1:1' => '1:1 square', '4:3' => '4:3 classic', '2.39:1' => '2.39:1 anamorphic']])->setDefaultValue('16:9');
+    $fields['max_prompt_length'] = BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Maximum media prompt length'))
+      ->setDescription(new TranslatableMarkup('Project character limit for assembled image and video prompts.'))
+      ->setSetting('unsigned', TRUE)
+      ->addPropertyConstraints('value', ['Range' => ['min' => 100]]);
     $fields['chat_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Breakdown model'))->setSetting('max_length', 383);
     $fields['image_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Image model'))->setSetting('max_length', 383);
     $fields['video_model'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Video model'))->setSetting('max_length', 383);
