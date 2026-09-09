@@ -380,11 +380,15 @@ final class BulkJobController extends ControllerBase {
       ->getStorage('ai_image_studio_turn')->load($turn_id);
     $video = $turn?->get('video')->entity;
     if ($video instanceof FileInterface) {
+      $poster = $turn->get('source_file_id')->entity;
       return [
         '#type' => 'html_tag',
         '#tag' => 'video',
         '#attributes' => [
           'src' => $this->fileUrlGenerator->generateAbsoluteString($video->getFileUri()),
+          'poster' => $poster instanceof FileInterface
+            ? $this->fileUrlGenerator->generateAbsoluteString($poster->getFileUri())
+            : NULL,
           'controls' => 'controls',
           'preload' => 'metadata',
           'width' => 240,

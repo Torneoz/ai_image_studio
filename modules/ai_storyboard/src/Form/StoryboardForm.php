@@ -318,7 +318,9 @@ final class StoryboardForm extends FormBase {
       $total += (float) $shot->get('duration')->value;
       $turn = $shot->get('studio_turn_id')->entity;
       $image = $turn?->get('image')->entity;
-      $video = $shot->get('video_turn_id')->entity?->get('video')->entity;
+      $video_turn = $shot->get('video_turn_id')->entity;
+      $video = $video_turn?->get('video')->entity;
+      $poster = $video_turn?->get('source_file_id')->entity ?? $image;
       $frame = $image
         ? ['#theme' => 'image', '#uri' => $this->fileUrlGenerator->generateAbsoluteString($image->getFileUri()), '#alt' => $shot->label()]
         : ['#markup' => '<div class="ai-storyboard-shot__placeholder">' . $this->t('Frame not generated') . '</div>'];
@@ -358,6 +360,7 @@ final class StoryboardForm extends FormBase {
             '#tag' => 'video',
             '#attributes' => [
               'src' => $this->fileUrlGenerator->generateAbsoluteString($video->getFileUri()),
+              'poster' => $poster ? $this->fileUrlGenerator->generateAbsoluteString($poster->getFileUri()) : NULL,
               'controls' => 'controls',
               'preload' => 'metadata',
               'playsinline' => 'playsinline',

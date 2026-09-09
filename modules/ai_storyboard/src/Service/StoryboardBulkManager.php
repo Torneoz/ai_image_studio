@@ -137,10 +137,14 @@ final class StoryboardBulkManager {
     $audio_prompt = trim((string) $storyboard->get('audio_prompt')->value);
     for ($index = 0; $index < $limit; $index++) {
       $shot = $keyframes[$index]['shot'];
+      $dialogue = trim((string) $shot->get('dialogue')->value);
+      $sound = trim((string) $shot->get('audio')->value);
       $prompt = implode("\n\n", array_filter([
         (string) ($settings['prompt'] ?? ''),
         $audio_prompt !== '' ? 'AUDIO DIRECTION: ' . $audio_prompt : '',
         'SHOT ACTION: ' . $shot->get('action')->value,
+        $dialogue !== '' ? 'SPOKEN DIALOGUE / VOICE-OVER: ' . $dialogue . "\nSpeak the supplied lines in the specified voices and language. Match visible speakers with natural lip synchronization where applicable. Do not render dialogue as text or subtitles. Fit the delivery within the clip duration." : '',
+        $sound !== '' ? 'SHOT SOUND / MUSIC: ' . $sound : '',
         'CAMERA MOVEMENT: ' . $shot->get('camera_move')->value,
         $mode === 'bridge' ? 'Create a continuous transition from the first supplied keyframe to the second. Preserve character identity, wardrobe, environment, and screen direction.' : 'Animate this keyframe as a continuous cinematic shot. Preserve character identity, composition, wardrobe, and environment.',
       ]));

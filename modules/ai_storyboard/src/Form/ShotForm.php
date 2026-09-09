@@ -71,6 +71,8 @@ final class ShotForm extends FormBase {
         $form[$name]['#rows'] = 3;
       }
     }
+    $form['dialogue']['#description'] = $this->t('Spoken lines for video generation. Include speaker names, language, and delivery, e.g. Lina (quietly): "Where am I?" Keep lines short enough for the clip duration. Spoken audio depends on model support.');
+    $form['audio']['#description'] = $this->t('Shot-specific sound effects, ambience, and music, included alongside the project audio prompt.');
     $form['status'] = ['#type' => 'select', '#title' => $this->t('Status'), '#options' => ['draft' => $this->t('Draft'), 'generated' => $this->t('Generated'), 'approved' => $this->t('Approved')], '#default_value' => $ai_storyboard_shot->get('status')->value];
     $form['actions'] = ['#type' => 'actions', 'submit' => ['#type' => 'submit', '#value' => $this->t('Save shot'), '#button_type' => 'primary']];
     return $form;
