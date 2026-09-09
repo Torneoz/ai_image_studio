@@ -29,9 +29,7 @@
 }
 
 .ai-storyboard-shot {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: block;
   margin-block: 1.5rem;
   padding: 0;
   overflow: hidden;
@@ -40,6 +38,34 @@
   border-radius: 1rem;
   background: var(--gin-bg-layer, Canvas);
   box-shadow: 0 1px 2px var(--gin-border-color-layer, rgba(0, 0, 0, .08));
+}
+
+/* Native details keeps summary toggles keyboard-accessible without JavaScript.
+ * Do not override closed-details display: the browser hides its contents. */
+.ai-storyboard-shot > summary,
+.ai-storyboard-workspace > summary {
+  cursor: pointer;
+  color: var(--gin-color-text, CanvasText);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ai-storyboard-shot > summary {
+  padding: 1.25rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ai-storyboard-shot > .details-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.ai-storyboard-shot > summary:focus-visible,
+.ai-storyboard-workspace > summary:focus-visible {
+  outline: 2px solid var(--gin-color-primary, Highlight);
+  outline-offset: -3px;
 }
 
 .ai-storyboard-shot__header {

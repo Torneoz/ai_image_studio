@@ -342,7 +342,7 @@ final class StoryboardForm extends FormBase {
     $ids = $shot_storage->getQuery()->accessCheck(FALSE)->condition('storyboard_id', $board->id())->sort('position')->execute();
     $shots = $shot_storage->loadMultiple($ids);
     $total = 0.0;
-    $form['workspace'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-workspace']], '#weight' => 20];
+    $form['workspace'] = ['#type' => 'details', '#title' => $this->t('Results'), '#open' => TRUE, '#attributes' => ['class' => ['ai-storyboard-workspace']], '#weight' => 20];
     if (!$shots) {
       $form['workspace']['empty'] = ['#markup' => '<p>' . $this->t('No shots yet. Save the script, then rebuild its shot breakdown.') . '</p>'];
       return;
@@ -411,13 +411,13 @@ final class StoryboardForm extends FormBase {
       $card = &$form['workspace']['shot_' . $shot->id()];
       $body = $card['body'];
       $card = [
-        '#type' => 'container',
+        '#type' => 'details',
+        '#title' => $this->t('Scene @scene · Shot @shot — @title', ['@scene' => $shot->get('scene_number')->value, '@shot' => $shot->get('shot_number')->value, '@title' => $shot->label()]),
+        '#open' => TRUE,
         '#attributes' => ['class' => ['ai-storyboard-shot']],
         'header' => [
           '#type' => 'container',
           '#attributes' => ['class' => ['ai-storyboard-shot__header']],
-          'eyebrow' => ['#markup' => '<div class="ai-storyboard-shot__eyebrow">' . $this->t('Scene @scene · Shot @shot', ['@scene' => $shot->get('scene_number')->value, '@shot' => $shot->get('shot_number')->value]) . '</div>'],
-          'title' => ['#type' => 'html_tag', '#tag' => 'h3', '#value' => htmlspecialchars((string) $shot->label())],
           'specs' => ['#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__specs']]],
         ],
         'media' => [
@@ -454,7 +454,7 @@ final class StoryboardForm extends FormBase {
       }
       unset($card);
     }
-    $form['workspace']['summary'] = ['#markup' => '<p class="ai-storyboard-summary">' . $this->formatPlural(count($shots), '1 shot', '@count shots') . ' · ' . $this->t('@seconds seconds estimated runtime', ['@seconds' => round($total, 1)]) . '</p>', '#weight' => -10];
+    $form['workspace']['#title'] = $this->t('Results — @shots · @seconds seconds estimated runtime', ['@shots' => $this->formatPlural(count($shots), '1 shot', '@count shots'), '@seconds' => round($total, 1)]);
   }
 
 }
