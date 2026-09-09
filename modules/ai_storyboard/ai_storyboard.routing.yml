@@ -1,3 +1,11 @@
+ai_storyboard.settings:
+  path: '/admin/config/ai/storyboard'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\StoryboardSettingsForm'
+    _title: 'AI Storyboard settings'
+  requirements:
+    _permission: 'administer ai storyboard'
+
 entity.ai_storyboard.collection:
   path: '/admin/content/ai-storyboard'
   defaults:

@@ -217,6 +217,16 @@ function ai_storyboard_update_10008(array &$sandbox): void {
 }
 
 /**
+ * Adds a Storyboard-only timeout without changing the global AI timeout.
+ */
+function ai_storyboard_update_10010(): void {
+  $config = \Drupal::configFactory()->getEditable('ai_storyboard.settings');
+  if ($config->get('breakdown_timeout') === NULL) {
+    $config->set('breakdown_timeout', 300)->save();
+  }
+}
+
+/**
  * Adds shared narrative libraries, project scenes/cast and shot references.
  */
 function ai_storyboard_update_10009(array &$sandbox): void {

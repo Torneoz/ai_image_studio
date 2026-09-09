@@ -14,7 +14,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 #[QueueWorker(
   id: 'ai_storyboard_breakdown',
   title: new TranslatableMarkup('AI Storyboard script breakdown'),
-  cron: ['time' => 300],
+  cron: ['time' => 600],
 )]
 final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
 

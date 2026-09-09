@@ -1,0 +1,7 @@
+ai_storyboard.settings:
+  type: config_object
+  label: 'AI Storyboard settings'
+  mapping:
+    breakdown_timeout:
+      type: integer
+      label: 'Script breakdown HTTP timeout in seconds'

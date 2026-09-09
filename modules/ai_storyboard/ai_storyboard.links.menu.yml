@@ -1,3 +1,9 @@
+ai_storyboard.settings:
+  title: 'Storyboard settings'
+  route_name: ai_storyboard.settings
+  parent: ai_storyboard.collection
+  weight: 10
+
 ai_storyboard.collection:
   title: 'AI Storyboards'
   description: 'Create storyboards from scripts.'

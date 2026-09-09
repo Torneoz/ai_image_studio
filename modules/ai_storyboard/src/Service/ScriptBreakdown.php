@@ -7,6 +7,7 @@ namespace Drupal\ai_storyboard\Service;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -16,7 +17,15 @@ final class ScriptBreakdown {
   public function __construct(
     private readonly AiProviderPluginManager $providerManager,
     private readonly LoggerInterface $logger,
+    private readonly ConfigFactoryInterface $configFactory,
   ) {}
+
+  /**
+   * Leaves headroom within the worker's execution limit and queue lease.
+   */
+  public function getRequestTimeout(): int {
+    return max(30, min(480, (int) ($this->configFactory->get('ai_storyboard.settings')->get('breakdown_timeout') ?? 300)));
+  }
 
   /**
    * Returns configured chat provider/model options. */
@@ -33,9 +42,20 @@ final class ScriptBreakdown {
     string $continuityBible = '',
     string $characterBible = '',
   ): array {
-    $provider = $this->providerManager->loadProviderFromSimpleOption($modelOption);
+    $parts = explode('__', $modelOption);
+    if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+      throw new \InvalidArgumentException('The selected chat provider/model is unavailable.');
+    }
+    // Supply transport options at construction, not as model parameters.
+    // Keep the AI provider proxy so normal provider events still run.
+    $provider = $this->providerManager->createInstance($parts[0], [
+      'http_client_options' => [
+        'timeout' => $this->getRequestTimeout(),
+        'connect_timeout' => 30,
+      ],
+    ]);
     $model = $this->providerManager->getModelNameFromSimpleOption($modelOption);
-    if (!$provider || $model === '') {
+    if (!$provider->isUsable() || $model === '') {
       throw new \InvalidArgumentException('The selected chat provider/model is unavailable.');
     }
 

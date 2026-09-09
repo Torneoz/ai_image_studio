@@ -9,7 +9,7 @@ services:
 
   ai_storyboard.breakdown:
     class: Drupal\ai_storyboard\Service\ScriptBreakdown
-    arguments: ['@ai.provider', '@logger.channel.ai_storyboard']
+    arguments: ['@ai.provider', '@logger.channel.ai_storyboard', '@config.factory']
 
   ai_storyboard.manager:
     class: Drupal\ai_storyboard\Service\StoryboardManager

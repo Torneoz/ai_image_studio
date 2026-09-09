@@ -48,6 +48,13 @@ Create a project, paste a script, select configured chat and image models, and
 run the breakdown. Review and edit each shot before generating frames because
 provider calls may incur charges.
 
+Under **AI Storyboards → Storyboard settings**, the **Script breakdown timeout**
+defaults to 300 seconds (configurable from 30 to 480). This overrides the standard
+Drupal AI HTTP client timeout only for script breakdowns; global AI settings are
+unchanged. Provider-specific transports and hosting limits may impose separate
+limits. Failed requests preserve existing shots and bibles and are not retried
+automatically. Use **Rebuild shots from script** to retry after changing settings.
+
 ## Views integration
 
 The module also supplies editable demo Views for **Locations**, **Characters**,
