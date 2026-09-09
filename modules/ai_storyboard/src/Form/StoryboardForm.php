@@ -408,6 +408,51 @@ final class StoryboardForm extends FormBase {
           ] : [],
         ],
       ];
+      $card = &$form['workspace']['shot_' . $shot->id()];
+      $body = $card['body'];
+      $card = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-storyboard-shot']],
+        'header' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['ai-storyboard-shot__header']],
+          'eyebrow' => ['#markup' => '<div class="ai-storyboard-shot__eyebrow">' . $this->t('Scene @scene · Shot @shot', ['@scene' => $shot->get('scene_number')->value, '@shot' => $shot->get('shot_number')->value]) . '</div>'],
+          'title' => ['#type' => 'html_tag', '#tag' => 'h3', '#value' => htmlspecialchars((string) $shot->label())],
+          'specs' => ['#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__specs']]],
+        ],
+        'media' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['ai-storyboard-shot__media']],
+          'frame' => [
+            '#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__asset']],
+            'label' => ['#markup' => '<div class="ai-storyboard-shot__media-label">' . $this->t('Keyframe') . '</div>'],
+            'image' => $frame,
+          ],
+        ],
+        'body' => [
+          '#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__body']],
+          'review_media' => $body['review_media'],
+          'action' => $body['action'], 'dialogue' => $body['dialogue'],
+        ],
+        'actions' => $body['links'],
+      ];
+      foreach (['shot_size', 'camera_angle', 'camera_move', 'lens', 'duration'] as $field) {
+        $value = (string) $shot->get($field)->value;
+        if ($value !== '') {
+          $card['header']['specs'][$field] = [
+            '#type' => 'html_tag', '#tag' => 'span',
+            '#value' => htmlspecialchars($value . ($field === 'duration' ? 's' : '')),
+          ];
+        }
+      }
+      if ($video) {
+        $card['media']['video'] = [
+          '#type' => 'container', '#attributes' => ['class' => ['ai-storyboard-shot__asset']],
+          'label' => ['#markup' => '<div class="ai-storyboard-shot__media-label">' . $this->t('Video sequence') . '</div>'],
+          'player' => $body['video'],
+        ];
+      }
+      unset($card);
     }
     $form['workspace']['summary'] = ['#markup' => '<p class="ai-storyboard-summary">' . $this->formatPlural(count($shots), '1 shot', '@count shots') . ' · ' . $this->t('@seconds seconds estimated runtime', ['@seconds' => round($total, 1)]) . '</p>', '#weight' => -10];
   }
