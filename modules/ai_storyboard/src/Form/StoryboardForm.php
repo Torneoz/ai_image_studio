@@ -216,7 +216,7 @@ final class StoryboardForm extends FormBase {
           '#attributes' => ['class' => ['button']],
         ];
       }
-      $form['narrative'] = ['#type' => 'details', '#title' => $this->t('Scenes and characters'), '#open' => TRUE, '#weight' => 9];
+      $form['narrative'] = ['#type' => 'details', '#title' => $this->t('Scenes and characters'), '#open' => FALSE, '#weight' => 9];
       $form['narrative']['description'] = ['#markup' => '<p>' . $this->t('Reuse shared Locations and Characters by pinning a library version. Scene conditions and project character overrides apply only to this production. Library changes are adopted explicitly, not automatically.') . '</p>'];
       foreach (['ai_storyboard_scene' => 'Scenes', 'ai_storyboard_cast' => 'Project characters'] as $type => $label) {
         $storage = $this->entityTypeManager->getStorage($type);
