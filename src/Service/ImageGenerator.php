@@ -455,7 +455,10 @@ final class ImageGenerator {
       $session->save();
     }
     catch (\Throwable $exception) {
-      $message = mb_substr($exception->getMessage(), 0, 4000);
+      $diagnostic = GenerationDiagnostics::fromException($exception);
+      $message = $diagnostic['message'];
+      unset($diagnostic['message']);
+      $turn->set('provider_metadata', $diagnostic + (array) ($turn->get('provider_metadata')->first()?->getValue() ?? []));
       if (!$turn->get('provider_request_id')->isEmpty()) {
         $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
       }

@@ -1,5 +1,9 @@
 # Changelog
 
+- Added optional AI Observability lifecycle logging for all media generation
+  paths and storyboard breakdowns, with correlation, privacy filters and bounded
+  nested HTTP provider diagnostics. See `docs/observability.md`.
+
 - Added content-aware bulk image prompts for team, city, and venue nodes.
 - Added immutable logical-turn snapshots with explicit session ordering,
   requested and effective settings, and replay provenance.

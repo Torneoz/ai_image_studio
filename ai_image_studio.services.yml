@@ -1,4 +1,8 @@
 services:
+  ai_image_studio.observability:
+    class: Drupal\ai_image_studio\Service\GenerationObservability
+    arguments: ['@config.factory', '@module_handler', '@logger.factory']
+
   ai_image_studio.generator:
     class: Drupal\ai_image_studio\Service\ImageGenerator
     arguments:

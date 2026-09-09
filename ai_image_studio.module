@@ -14,6 +14,27 @@ use Drupal\file\FileInterface;
 use Drupal\media\Entity\MediaType;
 
 /**
+ * Implements hook_entity_insert().
+ */
+function ai_image_studio_entity_insert(EntityInterface $entity): void {
+  ai_image_studio_entity_update($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function ai_image_studio_entity_update(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() === 'ai_image_studio_turn') {
+    try {
+      \Drupal::service('ai_image_studio.observability')->turnSaved($entity);
+    }
+    catch (\Throwable) {
+      // Logging must not interrupt generation or entity persistence.
+    }
+  }
+}
+
+/**
  * Implements hook_entity_presave().
  */
 function ai_image_studio_entity_presave(EntityInterface $entity): void {

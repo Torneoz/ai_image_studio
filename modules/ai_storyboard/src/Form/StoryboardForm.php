@@ -312,6 +312,11 @@ final class StoryboardForm extends FormBase {
         'message' => (string) $this->t('Queued: generating shots and continuity bibles. This page refreshes automatically.'),
       ]);
       \Drupal::queue('ai_storyboard_breakdown')->createItem(['storyboard_id' => (int) $board->id()]);
+      \Drupal::service('ai_image_studio.observability')->record('breakdown.queued', [
+        'storyboard_id' => (int) $board->id(),
+        'status' => 'queued',
+        'model' => (string) $board->get('chat_model')->value,
+      ], ['ai_image_studio', 'ai_storyboard']);
     }
     $this->messenger()->addStatus($this->t('Script breakdown queued. Your project has been saved.'));
     $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);

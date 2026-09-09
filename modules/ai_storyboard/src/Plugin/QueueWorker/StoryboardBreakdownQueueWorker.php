@@ -38,6 +38,10 @@ final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
       'message' => 'Generating shots and continuity bibles. This page refreshes automatically.',
     ]);
     $snapshot = $board->toArray();
+    $observability = \Drupal::service('ai_image_studio.observability');
+    $started = hrtime(TRUE);
+    $context = ['storyboard_id' => $id, 'model' => (string) $board->get('chat_model')->value];
+    $observability->record('breakdown.processing', $context + ['status' => 'processing'], ['ai_image_studio', 'ai_storyboard']);
     try {
       $merger = \Drupal::service('ai_storyboard.breakdown_merger');
       $existing = $merger->context($id);
@@ -64,19 +68,27 @@ final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
         throw $exception;
       }
       unset($transaction);
+      $observability->record('breakdown.completed', $context + ['status' => 'completed', 'duration_ms' => (int) ((hrtime(TRUE) - $started) / 1_000_000), 'changes' => $stats], ['ai_image_studio', 'ai_storyboard']);
       $state->set($id, [
         'status' => 'completed',
         'message' => sprintf('Created %d shots; updated %d; unchanged %d; retained %d omitted shots. Existing media and nonblank content were preserved. Changed shots are marked draft for review.', $stats['created'], $stats['updated'], $stats['unchanged'], $stats['retained']),
       ]);
     }
     catch (\Throwable $exception) {
+      $diagnostic = \Drupal\ai_image_studio\Service\GenerationDiagnostics::fromException($exception);
+      $message = $diagnostic['message'];
+      unset($diagnostic['message']);
+      if (\Drupal::config('ai_observability.settings')->get('log_input')) {
+        $diagnostic['error_message'] = $message;
+      }
+      $observability->record('breakdown.failed', $context + ['status' => 'failed', 'duration_ms' => (int) ((hrtime(TRUE) - $started) / 1_000_000)] + $diagnostic, ['ai_image_studio', 'ai_storyboard']);
       $state->set($id, [
         'status' => 'failed',
-        'message' => 'Breakdown failed: ' . $exception->getMessage() . ' Use Rebuild shots from script to retry.',
+        'message' => 'Breakdown failed: ' . $message . ' Use Rebuild shots from script to retry.',
       ]);
       \Drupal::logger('ai_storyboard')->error('Breakdown for storyboard @id failed: @message', [
         '@id' => $id,
-        '@message' => $exception->getMessage(),
+        '@message' => $message,
       ]);
     }
   }
