@@ -205,7 +205,7 @@ final class StoryboardForm extends FormBase {
       $delete['#attributes']['class'] = ['button', 'button--danger'];
       $form['actions']['delete'] = $delete;
       $form['script_exports'] = [
-        '#type' => 'details', '#title' => $this->t('Export script'),
+        '#type' => 'details', '#title' => $this->t('Export'),
         '#open' => FALSE, '#weight' => 90,
       ];
       $form['script_exports']['description'] = ['#markup' => '<p>' . $this->t('Exports the saved script. Save edits first. JSON also includes project, scene, shot and pinned character data (file references only). Other formats recognize basic screenplay structure; unstructured prose remains action text. Revisions, pagination and advanced Fountain markup are not converted.') . '</p>'];
