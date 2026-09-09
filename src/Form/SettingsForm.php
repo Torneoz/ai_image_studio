@@ -305,7 +305,7 @@ final class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Maximum prompt length'),
       '#default_value' => $config->get('max_prompt_length'),
       '#min' => 100,
-      '#max' => 20000,
+      '#description' => $this->t('Maximum characters in an assembled image or video prompt, including bulk jobs, storyboards and retries. Known stricter provider/model limits take precedence. Video continuity context may be shortened to fit; essential instructions are never truncated. This is not a chat-model token limit.'),
       '#required' => TRUE,
     ];
     $form['limits']['max_turns'] = [

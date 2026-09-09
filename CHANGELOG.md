@@ -1,5 +1,10 @@
 # Changelog
 
+- Honor Maximum prompt length centrally for all media submission paths; scope
+  the confirmed 4,096-character cap to xAI's exact grok-imagine-video model.
+  Other models retain the configured ceiling. Remove the settings UI's arbitrary
+  20,000-character upper bound; expose the effective limit in Observability.
+
 - Budget Grok video prompts to 4,096 characters before submission, including
   retries. Preserve essential direction and saved prompts; fit complete
   descriptive continuity sentences into the remaining space. Report original

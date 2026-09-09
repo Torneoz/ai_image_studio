@@ -26,13 +26,22 @@ file IDs, never media binaries. Credentials, inline media and URLs are redacted;
 arbitrary request settings, headers and provider responses are not logged.
 Text is capped at 4,000 characters. Logging failures do not fail generation.
 
-Grok video submissions are limited to 4,096 characters. AIIS keeps the saved
-prompt intact and budgets descriptive storyboard continuity at submission time,
-including retries. Action, dialogue, audio, camera, voices and explicit overrides
+All AIIS image/video submissions honor `max_prompt_length` centrally, including
+bulk jobs, storyboard media, replay and retries. For xAI's exact
+`grok-imagine-video` model, the three video generation operations use the smaller
+of that setting and the API-confirmed 4,096-character cap. Other models (including
+1.5), image operations and providers do not inherit that cap: unknown provider
+limits remain subject to API validation. Chat/script breakdown is a separate
+operation, not limited by this image/video character setting.
+
+AIIS keeps the saved prompt intact and budgets descriptive storyboard video
+continuity at submission time. Action, dialogue, audio, camera, voices and overrides
 are retained verbatim; complete descriptive sentences share the remaining space.
 If those essentials cannot fit, generation fails locally without an API call.
 The effective settings report `original_prompt_characters`,
-`effective_prompt_characters` and `prompt_context_compacted`. Existing asynchronous
+`effective_prompt_characters`, `effective_prompt_limit` and
+`prompt_context_compacted`. Oversized image prompts fail locally without silent
+truncation. Existing asynchronous
 jobs are polled without rebuilding their submitted prompt.
 
 These are **application lifecycle logs**, not synthetic provider response events.

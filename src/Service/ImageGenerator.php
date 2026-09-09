@@ -309,10 +309,19 @@ final class ImageGenerator {
     $started_at = hrtime(TRUE);
 
     try {
-      if ($output_type === 'video' && $this->isXaiProvider($provider_id)
-        && $turn->get('provider_request_id')->isEmpty()) {
+      // All entry points (forms, bulk, storyboard, replay and retry) converge
+      // here. Pending remote jobs only poll; their input is already submitted.
+      if ($turn->get('provider_request_id')->isEmpty()) {
+        $prompt_limit = PromptLimit::resolve(
+          (int) $this->configFactory->get('ai_image_studio.settings')->get('max_prompt_length'),
+          $this->isXaiProvider($provider_id),
+          $model_id,
+          $operation,
+        );
         $original_length = mb_strlen($prompt);
-        $prompt = VideoPromptBudget::fit($prompt);
+        $generation_settings['effective_prompt_limit'] = $prompt_limit;
+        $turn->set('generation_settings', $generation_settings);
+        $prompt = PromptLimit::prepare($prompt, $prompt_limit, $operation);
         $generation_settings['original_prompt_characters'] = $original_length;
         $generation_settings['effective_prompt_characters'] = mb_strlen($prompt);
         $generation_settings['prompt_context_compacted'] = $original_length !== mb_strlen($prompt);

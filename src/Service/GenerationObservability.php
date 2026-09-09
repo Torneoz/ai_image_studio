@@ -57,6 +57,7 @@ final class GenerationObservability {
       'duration', 'resolution', 'aspect_ratio', 'variations', 'quality',
       'original_prompt_characters', 'effective_prompt_characters',
       'prompt_context_compacted',
+      'effective_prompt_limit',
     ]));
     $provider = $turn->get('provider_metadata')->first()?->getValue() ?? [];
     $metadata['provider_metadata'] = array_intersect_key($provider, array_flip([
