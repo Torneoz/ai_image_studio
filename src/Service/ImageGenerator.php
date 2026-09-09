@@ -336,6 +336,9 @@ final class ImageGenerator {
         );
       }
       $provider = $this->providerManager->createInstance($provider_id);
+      // Image-to-video providers receive their prompt through configuration.
+      // Always use the turn's assembled prompt, overriding saved defaults.
+      $generation_settings['prompt'] = $prompt;
       $provider->setConfiguration($this->normalizeGenerationSettings(
         $provider_id,
         $operation,
