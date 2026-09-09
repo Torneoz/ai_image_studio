@@ -39,22 +39,25 @@ final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
     ]);
     $snapshot = $board->toArray();
     try {
+      $merger = \Drupal::service('ai_storyboard.breakdown_merger');
+      $existing = $merger->context($id);
       $result = \Drupal::service('ai_storyboard.breakdown')->breakdown(
         (string) $board->get('script')->value,
         (string) $board->get('chat_model')->value,
         (string) $board->get('creative_brief')->value,
         (string) $board->get('continuity_bible')->value,
         (string) $board->get('character_bible')->value,
+        $existing,
       );
       $storage = \Drupal::entityTypeManager()->getStorage('ai_storyboard');
       $storage->resetCache([$id]);
       $board = $storage->load($id);
-      if (!$board || $board->toArray() !== $snapshot) {
+      if (!$board || $board->toArray() !== $snapshot || $merger->context($id) !== $existing) {
         throw new \RuntimeException('The project changed during generation. Retry using the latest project settings.');
       }
       $transaction = \Drupal::database()->startTransaction();
       try {
-        $count = \Drupal::service('ai_storyboard.manager')->replaceShots($board, $result);
+        $stats = \Drupal::service('ai_storyboard.manager')->mergeBreakdown($board, $result);
       }
       catch (\Throwable $exception) {
         $transaction->rollBack();
@@ -63,7 +66,7 @@ final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
       unset($transaction);
       $state->set($id, [
         'status' => 'completed',
-        'message' => sprintf('Created %d shots and saved both continuity bibles.', $count),
+        'message' => sprintf('Created %d shots; updated %d; unchanged %d; retained %d omitted shots. Existing media and nonblank content were preserved. Changed shots are marked draft for review.', $stats['created'], $stats['updated'], $stats['unchanged'], $stats['retained']),
       ]);
     }
     catch (\Throwable $exception) {

@@ -22,6 +22,7 @@ $original_factory = $container->get('http_client_factory');
 $global_timeout = \Drupal::config('ai.settings')->get('request_timeout');
 $factory = new class extends ClientFactory {
   public array $requests = [];
+  public bool $emptyResult = FALSE;
 
   public function __construct() {}
 
@@ -43,10 +44,10 @@ $factory = new class extends ClientFactory {
           'message' => [
             'role' => 'assistant',
             'content' => json_encode([
-              'continuity_bible' => 'Stone hall.',
-              'character_bible' => 'Mira wears blue.',
+              'continuity_bible' => $this->emptyResult ? '' : 'Stone hall.',
+              'character_bible' => $this->emptyResult ? '' : 'Mira wears blue.',
               'scenes' => [],
-              'shots' => [['title' => 'Test shot']],
+              'shots' => $this->emptyResult ? [] : [['title' => 'Test shot']],
             ]),
           ],
         ]],
@@ -107,6 +108,18 @@ try {
   $request = end($factory->requests);
   $check($request['timeout'] === (int) ($global_timeout ?: 60), 'Ordinary AI calls keep their global timeout');
   $check(\Drupal::config('ai.settings')->get('request_timeout') === $global_timeout, 'Global AI configuration is unchanged');
+  $factory->emptyResult = TRUE;
+  $result = $service->breakdown('Unchanged script', 'grok__grok-4.6', '', 'Keep this location bible.', 'Keep this character bible.', ['shots' => [['id' => 42, 'title' => 'Existing shot']]]);
+  $check($result['shots'] === [] && $result['continuity_bible'] === 'Keep this location bible.' && $result['character_bible'] === 'Keep this character bible.', 'No-change responses preserve nonblank existing bibles');
+  $request = end($factory->requests);
+  $check(str_contains(json_encode($request['payload']), 'EXISTING PRODUCTION RECORDS') && str_contains(json_encode($request['payload']), 'Existing shot'), 'Provider receives current record identities and content');
+  try {
+    $service->breakdown('Brand new script', 'grok__grok-4.6');
+    $check(FALSE, 'Empty first breakdown must fail');
+  }
+  catch (\UnexpectedValueException $exception) {
+    $check(TRUE, 'Empty initial breakdown still fails safely');
+  }
 }
 finally {
   $container->set('http_client_factory', $original_factory);

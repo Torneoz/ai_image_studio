@@ -1,4 +1,8 @@
 services:
+  ai_storyboard.breakdown_merger:
+    class: Drupal\ai_storyboard\Service\BreakdownMerger
+    arguments: ['@entity_type.manager', '@database']
+
   ai_storyboard.narrative:
     class: Drupal\ai_storyboard\Service\NarrativeContext
     arguments: ['@entity_type.manager']
@@ -13,7 +17,7 @@ services:
 
   ai_storyboard.manager:
     class: Drupal\ai_storyboard\Service\StoryboardManager
-    arguments: ['@entity_type.manager', '@ai_image_studio.generator', '@ai_image_studio.session_machine_name', '@ai_storyboard.narrative']
+    arguments: ['@entity_type.manager', '@ai_image_studio.generator', '@ai_image_studio.session_machine_name', '@ai_storyboard.narrative', '@ai_storyboard.breakdown_merger']
 
   ai_storyboard.bulk_manager:
     class: Drupal\ai_storyboard\Service\StoryboardBulkManager

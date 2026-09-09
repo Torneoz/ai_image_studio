@@ -48,6 +48,17 @@ Create a project, paste a script, select configured chat and image models, and
 run the breakdown. Review and edit each shot before generating frames because
 provider calls may incur charges.
 
+Rebuilds request only new or materially changed Scenes/Shots using existing
+record IDs. Blank or omitted fields preserve stored content. Unchanged records
+are not saved again, and omitted records are retained rather than deleted.
+Changed shots keep their generated media but return to Draft for review;
+unchanged shots retain approvals. Library and speaker links are preserved.
+Scene numbers remain stable; shot positions control ordering. Legacy responses
+without IDs can match a unique title; ambiguous suggestions create new records
+instead of overwriting one. The AI still reads the complete script: this is
+incremental application, not yet scene-by-scene AI processing. Concurrent edits
+to project, Scene or Shot content cause the result to be rejected.
+
 Under **AI Storyboards → Storyboard settings**, the **Script breakdown timeout**
 defaults to 300 seconds (configurable from 30 to 480). This overrides the standard
 Drupal AI HTTP client timeout only for script breakdowns; global AI settings are
@@ -110,8 +121,8 @@ library**, then manage Scenes and cast from the project's **Scenes and
 characters** section. New script breakdowns draft Scenes and scene-local
 Location Bibles. AI does not create or modify shared library entries: review
 the draft and add reusable facts to the library yourself. Rebuilding shots
-preserves existing Scenes (matched by scene number), including their library
-choices and authored direction, while filling empty draft fields. It never
+matches existing Scenes by stable ID and applies nonblank changes while
+preserving their library selections and cast. It never
 adds an inferred location override to a Scene with a chosen library Location.
 Review those Scenes when the script changes.
 Existing shots migrate into Scenes by project and scene number; existing

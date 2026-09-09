@@ -17,48 +17,22 @@ final class StoryboardManager {
     private readonly ImageGenerator $imageGenerator,
     private readonly SessionMachineName $machineName,
     private readonly NarrativeContext $narrative,
+    private readonly BreakdownMerger $merger,
   ) {}
 
   /**
-   * Replaces a board's shots with an AI breakdown. */
+   * Merges without deleting shots; retained for callers of the original API.
+   */
   public function replaceShots(object $storyboard, array $breakdown): int {
-    $storage = $this->entityTypeManager->getStorage('ai_storyboard_shot');
-    $ids = $storage->getQuery()->accessCheck(FALSE)->condition('storyboard_id', $storyboard->id())->execute();
-    if ($ids) {
-      $storage->delete($storage->loadMultiple($ids));
-    }
-    $storyboard->set('continuity_bible', (string) ($breakdown['continuity_bible'] ?? ''));
-    $storyboard->set('character_bible', (string) ($breakdown['character_bible'] ?? ''));
-    $storyboard->save();
-    $scenes = [];
-    foreach ($breakdown['scenes'] ?? [] as $draft) {
-      $number = max(1, (int) ($draft['scene_number'] ?? 1));
-      $scenes[$number] = $this->narrative->ensureScene((int) $storyboard->id(), $number, $draft);
-    }
-    foreach (array_values($breakdown['shots']) as $index => $shot) {
-      $number = max(1, (int) ($shot['scene_number'] ?? 1));
-      $scene = $scenes[$number] ??= $this->narrative->ensureScene((int) $storyboard->id(), $number);
-      $storage->create([
-        'storyboard_id' => $storyboard->id(),
-        'scene_id' => $scene->id(),
-        'position' => $index + 1,
-        'scene_number' => max(1, (int) ($shot['scene_number'] ?? 1)),
-        'shot_number' => max(1, (int) ($shot['shot_number'] ?? ($index + 1))),
-        'title' => (string) ($shot['title'] ?? 'Untitled shot'),
-        'action' => (string) ($shot['action'] ?? ''),
-        'dialogue' => (string) ($shot['dialogue'] ?? ''),
-        'audio' => (string) ($shot['audio'] ?? ''),
-        'shot_size' => (string) ($shot['shot_size'] ?? ''),
-        'camera_angle' => (string) ($shot['camera_angle'] ?? ''),
-        'camera_move' => (string) ($shot['camera_move'] ?? ''),
-        'lens' => (string) ($shot['lens'] ?? ''),
-        'lighting' => (string) ($shot['lighting'] ?? ''),
-        'duration' => max(0.1, (float) ($shot['duration'] ?? 3)),
-        'image_prompt' => (string) ($shot['image_prompt'] ?? ''),
-        'continuity_notes' => (string) ($shot['continuity_notes'] ?? ''),
-      ])->save();
-    }
-    return count($breakdown['shots']);
+    $stats = $this->mergeBreakdown($storyboard, $breakdown);
+    return $stats['created'] + $stats['updated'];
+  }
+
+  /**
+   * Applies incremental suggestions and reports affected shots.
+   */
+  public function mergeBreakdown(object $storyboard, array $breakdown): array {
+    return $this->merger->merge($storyboard, $breakdown);
   }
 
   /**

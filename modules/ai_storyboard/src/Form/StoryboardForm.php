@@ -353,6 +353,12 @@ final class StoryboardForm extends FormBase {
           '#attributes' => ['class' => ['ai-storyboard-shot__body']],
           'heading' => ['#markup' => '<h3>' . $this->t('Scene @scene · Shot @shot — @title', ['@scene' => $shot->get('scene_number')->value, '@shot' => $shot->get('shot_number')->value, '@title' => $shot->label()]) . '</h3>'],
           'technical' => ['#markup' => '<p class="ai-storyboard-shot__technical">' . implode(' · ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('camera_move')->value, $shot->get('lens')->value, $shot->get('duration')->value . 's'])) . '</p>'],
+          'review_media' => [
+            '#type' => 'html_tag',
+            '#tag' => 'p',
+            '#value' => $this->t('Draft — existing media has been retained. Review or regenerate it before exporting.'),
+            '#access' => ($image || $video) && $shot->get('status')->value === 'draft',
+          ],
           'action' => ['#markup' => '<p><strong>' . $this->t('Action') . ':</strong> ' . nl2br(htmlspecialchars((string) $shot->get('action')->value)) . '</p>'],
           'dialogue' => ['#markup' => $shot->get('dialogue')->value ? '<p><strong>' . $this->t('Dialogue') . ':</strong> ' . nl2br(htmlspecialchars((string) $shot->get('dialogue')->value)) . '</p>' : ''],
           'links' => [

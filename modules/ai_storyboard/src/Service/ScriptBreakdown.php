@@ -41,6 +41,7 @@ final class ScriptBreakdown {
     string $brief = '',
     string $continuityBible = '',
     string $characterBible = '',
+    array $existing = [],
   ): array {
     $parts = explode('__', $modelOption);
     if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
@@ -64,9 +65,11 @@ final class ScriptBreakdown {
       "EXISTING CONTINUITY BIBLE — preserve and improve these directions:\n{$continuityBible}",
       "EXISTING CHARACTER BIBLE — preserve these canonical identities:\n{$characterBible}",
       "SCRIPT:\n{$script}",
+      'EXISTING PRODUCTION RECORDS (IDs are authoritative): ' . json_encode($existing, JSON_THROW_ON_ERROR),
     ]))]);
     $input->setSystemPrompt('You are a meticulous film director and storyboard artist. Break the supplied script into visually distinct shots, preserving every story beat. Prefer purposeful coverage over arbitrary cuts. Return only the requested structured data. Image prompts must describe a single frozen frame and must not contain dialogue text, captions, or camera motion as visible action.');
     $input->setSystemPrompt($input->getSystemPrompt() . ' Always create substantive continuity_bible and character_bible strings, even when the supplied bibles are empty. Define consistent environments, props, lighting and visual character identities from the script. If no characters exist, explicitly state that and describe any recurring subjects. Never return empty bible fields.');
+    $input->setSystemPrompt($input->getSystemPrompt() . ' When existing production records are supplied, return only new or materially changed scenes and shots. Preserve authored wording and production choices unless the updated script requires a change; do not paraphrase unchanged records. Use existing_scene_id and existing_shot_id from those records; use 0 only for genuinely new records. Never identify an existing record by its position alone. Keep existing scene numbers stable and allocate new scene numbers after the highest existing number. Position is the shot order in the complete updated storyboard, not the response array index; include existing shots whose positions must change. Empty arrays mean no changes. Return existing bibles verbatim unless changes are needed. Blank values mean preserve existing content, never deletion. Omitted existing shots and scenes will be retained, not deleted.');
     $input->setChatStructuredJsonSchema([
       'name' => 'storyboard_breakdown',
       'strict' => TRUE,
@@ -83,6 +86,7 @@ final class ScriptBreakdown {
               'type' => 'object',
               'additionalProperties' => FALSE,
               'properties' => [
+                'existing_scene_id' => ['type' => 'integer'],
                 'scene_number' => ['type' => 'integer'],
                 'title' => ['type' => 'string'],
                 'script_excerpt' => ['type' => 'string'],
@@ -90,7 +94,7 @@ final class ScriptBreakdown {
                 'conditions' => ['type' => 'string'],
                 'action' => ['type' => 'string'],
               ],
-              'required' => ['scene_number', 'title', 'script_excerpt', 'location_bible', 'conditions', 'action'],
+              'required' => ['existing_scene_id', 'scene_number', 'title', 'script_excerpt', 'location_bible', 'conditions', 'action'],
             ],
           ],
           'shots' => [
@@ -99,6 +103,9 @@ final class ScriptBreakdown {
               'type' => 'object',
               'additionalProperties' => FALSE,
               'properties' => [
+                'existing_shot_id' => ['type' => 'integer'],
+                'existing_scene_id' => ['type' => 'integer'],
+                'position' => ['type' => 'integer'],
                 'scene_number' => ['type' => 'integer'],
                 'shot_number' => ['type' => 'integer'],
                 'title' => ['type' => 'string'],
@@ -114,7 +121,7 @@ final class ScriptBreakdown {
                 'image_prompt' => ['type' => 'string'],
                 'continuity_notes' => ['type' => 'string'],
               ],
-              'required' => ['scene_number', 'shot_number', 'title', 'action', 'dialogue', 'audio', 'shot_size', 'camera_angle', 'camera_move', 'lens', 'lighting', 'duration', 'image_prompt', 'continuity_notes'],
+              'required' => ['existing_shot_id', 'existing_scene_id', 'position', 'scene_number', 'shot_number', 'title', 'action', 'dialogue', 'audio', 'shot_size', 'camera_angle', 'camera_move', 'lens', 'lighting', 'duration', 'image_prompt', 'continuity_notes'],
             ],
           ],
         ],
@@ -130,11 +137,16 @@ final class ScriptBreakdown {
       $this->logger->error('Storyboard breakdown failed: @message', ['@message' => $e->getMessage()]);
       throw new \RuntimeException('The AI provider could not break down this script. ' . $e->getMessage(), 0, $e);
     }
-    if (!is_array($data) || !is_array($data['shots'] ?? NULL) || $data['shots'] === []) {
+    if (!is_array($data) || !is_array($data['shots'] ?? NULL) || ($data['shots'] === [] && empty($existing['shots']))) {
       throw new \UnexpectedValueException('The AI provider returned no usable shots.');
     }
     foreach (['continuity_bible', 'character_bible'] as $field) {
       if (!is_string($data[$field] ?? NULL) || trim($data[$field]) === '') {
+        $previous = $field === 'continuity_bible' ? $continuityBible : $characterBible;
+        if (trim($previous) !== '') {
+          $data[$field] = $previous;
+          continue;
+        }
         throw new \UnexpectedValueException('The AI provider returned an empty ' . $field . '. Existing shots and bibles have been preserved. Retry the breakdown.');
       }
     }
