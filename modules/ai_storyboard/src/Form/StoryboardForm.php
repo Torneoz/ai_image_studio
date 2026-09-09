@@ -204,6 +204,22 @@ final class StoryboardForm extends FormBase {
       )->toRenderable();
       $delete['#attributes']['class'] = ['button', 'button--danger'];
       $form['actions']['delete'] = $delete;
+      $form['narrative'] = ['#type' => 'details', '#title' => $this->t('Scenes and characters'), '#open' => TRUE, '#weight' => 9];
+      $form['narrative']['description'] = ['#markup' => '<p>' . $this->t('Reuse shared Locations and Characters by pinning a library version. Scene conditions and project character overrides apply only to this production. Library changes are adopted explicitly, not automatically.') . '</p>'];
+      foreach (['ai_storyboard_scene' => 'Scenes', 'ai_storyboard_cast' => 'Project characters'] as $type => $label) {
+        $storage = $this->entityTypeManager->getStorage($type);
+        $ids = $storage->getQuery()->accessCheck(TRUE)->condition('storyboard_id', $ai_storyboard->id())->sort($type === 'ai_storyboard_scene' ? 'scene_number' : 'title')->execute();
+        $items = [];
+        foreach ($storage->loadMultiple($ids) as $record) {
+          $items[] = $record->toLink()->toRenderable();
+        }
+        $form['narrative'][$type] = ['#type' => 'container'];
+        $form['narrative'][$type]['list'] = ['#theme' => 'item_list', '#title' => $this->t($label), '#items' => $items, '#empty' => $this->t('None yet.')];
+        $form['narrative'][$type]['add'] = ['#type' => 'link', '#title' => $type === 'ai_storyboard_scene' ? $this->t('Add scene') : $this->t('Add project character'), '#url' => Url::fromRoute('entity.' . $type . '.add_form', [], ['query' => ['project' => $ai_storyboard->id()]]), '#attributes' => ['class' => ['button']]];
+      }
+      foreach (['ai_storyboard_location' => 'Location library', 'ai_storyboard_character' => 'Character library'] as $type => $label) {
+        $form['narrative'][$type] = ['#type' => 'link', '#title' => $this->t($label), '#url' => Url::fromRoute('entity.' . $type . '.collection'), '#attributes' => ['class' => ['button']]];
+      }
       $this->buildWorkspace($form, $ai_storyboard);
     }
     if ($pending) {

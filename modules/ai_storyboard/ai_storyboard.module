@@ -1,26 +1,81 @@
 <?php
 
+/**
+ * @file
+ * Provides AI-assisted script breakdown and storyboarding.
+ */
+
 declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 
 /**
- * @file
- * Provides AI-assisted script breakdown and storyboarding.
- */
-
-/**
  * Implements hook_ENTITY_TYPE_predelete() for ai_storyboard.
  */
 function ai_storyboard_ai_storyboard_predelete(EntityInterface $entity): void {
-  $storage = \Drupal::entityTypeManager()->getStorage('ai_storyboard_shot');
-  $ids = $storage->getQuery()
-    ->accessCheck(FALSE)
-    ->condition('storyboard_id', $entity->id())
-    ->execute();
-  if ($ids) {
-    $storage->delete($storage->loadMultiple($ids));
+  foreach (['ai_storyboard_shot', 'ai_storyboard_scene', 'ai_storyboard_cast'] as $type) {
+    $storage = \Drupal::entityTypeManager()->getStorage($type);
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('storyboard_id', $entity->id())
+      ->execute();
+    if ($ids) {
+      $storage->delete($storage->loadMultiple($ids));
+    }
+  }
+}
+
+/**
+ * Implements hook_query_ai_storyboard_scene_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_scene_access_alter(AlterableInterface $query): void {
+  _ai_storyboard_project_child_access($query, 'ai_storyboard_scene');
+}
+
+/**
+ * Implements hook_query_ai_storyboard_cast_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_cast_access_alter(AlterableInterface $query): void {
+  _ai_storyboard_project_child_access($query, 'ai_storyboard_cast');
+}
+
+/**
+ * Implements hook_query_ai_storyboard_location_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_location_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if (!$account->hasPermission('access ai storyboard') && !$account->hasPermission('administer ai storyboard') && !$account->hasPermission('manage ai storyboard library')) {
+    $query->where('1 = 0');
+  }
+}
+
+/**
+ * Implements hook_query_ai_storyboard_character_access_alter().
+ */
+function ai_storyboard_query_ai_storyboard_character_access_alter(AlterableInterface $query): void {
+  ai_storyboard_query_ai_storyboard_location_access_alter($query);
+}
+
+/**
+ * Restricts project child queries and Views to the owning user's projects.
+ */
+function _ai_storyboard_project_child_access(AlterableInterface $query, string $table): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai storyboard')) {
+    return;
+  }
+  if (!$account->hasPermission('access ai storyboard')) {
+    $query->where('1 = 0');
+    return;
+  }
+  $connection = \Drupal::database();
+  foreach (_ai_storyboard_query_table_aliases($query, $table) as $alias) {
+    $owner_query = $connection->select('ai_storyboard', 'narrative_access');
+    $owner_query->addExpression('1');
+    $owner_query->where('narrative_access.id = ' . $connection->escapeTable($alias) . '.storyboard_id');
+    $owner_query->condition('narrative_access.uid', $account->id());
+    $query->exists($owner_query);
   }
 }
 

@@ -2,6 +2,10 @@ access ai storyboard:
   title: 'Access AI Storyboard'
   description: 'Create and work with owned storyboard projects.'
 
+manage ai storyboard library:
+  title: 'Manage shared Storyboard Characters and Locations'
+  description: 'Create and edit versioned definitions shared across productions.'
+
 administer ai storyboard:
   title: 'Administer AI Storyboard'
   description: 'Access and delete any storyboard project.'

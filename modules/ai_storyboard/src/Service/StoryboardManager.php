@@ -16,6 +16,7 @@ final class StoryboardManager {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ImageGenerator $imageGenerator,
     private readonly SessionMachineName $machineName,
+    private readonly NarrativeContext $narrative,
   ) {}
 
   /**
@@ -29,9 +30,17 @@ final class StoryboardManager {
     $storyboard->set('continuity_bible', (string) ($breakdown['continuity_bible'] ?? ''));
     $storyboard->set('character_bible', (string) ($breakdown['character_bible'] ?? ''));
     $storyboard->save();
+    $scenes = [];
+    foreach ($breakdown['scenes'] ?? [] as $draft) {
+      $number = max(1, (int) ($draft['scene_number'] ?? 1));
+      $scenes[$number] = $this->narrative->ensureScene((int) $storyboard->id(), $number, $draft);
+    }
     foreach (array_values($breakdown['shots']) as $index => $shot) {
+      $number = max(1, (int) ($shot['scene_number'] ?? 1));
+      $scene = $scenes[$number] ??= $this->narrative->ensureScene((int) $storyboard->id(), $number);
       $storage->create([
         'storyboard_id' => $storyboard->id(),
+        'scene_id' => $scene->id(),
         'position' => $index + 1,
         'scene_number' => max(1, (int) ($shot['scene_number'] ?? 1)),
         'shot_number' => max(1, (int) ($shot['shot_number'] ?? ($index + 1))),
@@ -89,18 +98,25 @@ final class StoryboardManager {
       'ASPECT RATIO: ' . $storyboard->get('aspect_ratio')->value,
       'CONTINUITY BIBLE: ' . $storyboard->get('continuity_bible')->value,
       'CHARACTER BIBLE: ' . $storyboard->get('character_bible')->value,
+      $this->narrative->prompt($shot),
       'THIS SHOT: ' . $shot->get('image_prompt')->value,
       'COMPOSITION: ' . implode(', ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('lens')->value, $shot->get('lighting')->value])),
       'SHOT CONTINUITY: ' . $shot->get('continuity_notes')->value,
       $after_prompt !== '' ? 'FINAL INSTRUCTION: ' . $after_prompt : '',
     ]));
+    $references = $this->narrative->references($shot);
+    $settings = ['aspect_ratio' => (string) $storyboard->get('aspect_ratio')->value, 'variations' => 1];
+    $supports_references = $this->imageGenerator->supportsMultipleImages((string) $storyboard->get('image_model')->value);
+    if ($references && $supports_references) {
+      $settings['reference_file_ids'] = array_map(static fn(object $file): int => (int) $file->id(), $references);
+    }
     $turn = $this->imageGenerator->generate(
       $session,
       $prompt,
       (string) $storyboard->get('image_model')->value,
       NULL,
-      NULL,
-      ['aspect_ratio' => (string) $storyboard->get('aspect_ratio')->value, 'variations' => 1],
+      $supports_references ? ($references[0] ?? NULL) : NULL,
+      $settings,
     );
     $shot->set('studio_turn_id', $turn->id());
     $shot->set('status', $turn->get('status')->value === 'completed' ? 'generated' : 'draft');

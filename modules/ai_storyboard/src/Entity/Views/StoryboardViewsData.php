@@ -40,6 +40,18 @@ final class StoryboardViewsData extends EntityViewsData {
       ],
     ];
 
+    foreach (['scene' => $this->t('Scenes'), 'cast' => $this->t('Project characters')] as $suffix => $label) {
+      $data[$table][$suffix] = [
+        'title' => $label,
+        'relationship' => [
+          'id' => 'standard',
+          'base' => 'ai_storyboard_' . $suffix,
+          'base field' => 'storyboard_id',
+          'relationship field' => 'id',
+          'label' => $label,
+        ],
+      ];
+    }
     return $data;
   }
 

@@ -1,4 +1,8 @@
 services:
+  ai_storyboard.narrative:
+    class: Drupal\ai_storyboard\Service\NarrativeContext
+    arguments: ['@entity_type.manager']
+
   logger.channel.ai_storyboard:
     parent: logger.channel_base
     arguments: ['ai_storyboard']
@@ -9,11 +13,11 @@ services:
 
   ai_storyboard.manager:
     class: Drupal\ai_storyboard\Service\StoryboardManager
-    arguments: ['@entity_type.manager', '@ai_image_studio.generator', '@ai_image_studio.session_machine_name']
+    arguments: ['@entity_type.manager', '@ai_image_studio.generator', '@ai_image_studio.session_machine_name', '@ai_storyboard.narrative']
 
   ai_storyboard.bulk_manager:
     class: Drupal\ai_storyboard\Service\StoryboardBulkManager
-    arguments: ['@database', '@queue', '@datetime.time', '@entity_type.manager', '@ai_image_studio.generator', '@ai_storyboard.manager']
+    arguments: ['@database', '@queue', '@datetime.time', '@entity_type.manager', '@ai_image_studio.generator', '@ai_storyboard.manager', '@ai_storyboard.narrative']
 
   ai_storyboard.bulk_queue_subscriber:
     class: Drupal\ai_storyboard\EventSubscriber\StoryboardBulkQueueSubscriber

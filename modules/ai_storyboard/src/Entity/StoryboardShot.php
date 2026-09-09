@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\ai_storyboard\Entity\Views\StoryboardShotViewsData;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -27,12 +28,32 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 final class StoryboardShot extends ContentEntityBase {
 
   /**
+   * Keeps shot relationships within its project and synchronizes scene number.
+   */
+  public function preSave(EntityStorageInterface $storage): void {
+    parent::preSave($storage);
+    foreach (['scene_id', 'speaker_id'] as $field) {
+      $related = $this->get($field)->entity;
+      if ($this->get($field)->target_id && (!$related || $related->get('storyboard_id')->target_id != $this->get('storyboard_id')->target_id)) {
+        throw new \InvalidArgumentException('Shot scenes and speakers must belong to the same project.');
+      }
+    }
+    if ($scene = $this->get('scene_id')->entity) {
+      $this->set('scene_number', $scene->get('scene_number')->value);
+    }
+  }
+
+  /**
    * {@inheritdoc} */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
     $fields = parent::baseFieldDefinitions($entity_type);
     $fields['storyboard_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Storyboard'))->setRequired(TRUE)->setSetting('target_type', 'ai_storyboard');
     $fields['position'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Position'))->setRequired(TRUE)->setSetting('unsigned', TRUE);
     $fields['scene_number'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Scene'))->setSetting('unsigned', TRUE);
+    $fields['scene_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Scene entity'))->setSetting('target_type', 'ai_storyboard_scene');
+    $fields['speaker_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Dialogue speaker'))->setSetting('target_type', 'ai_storyboard_cast');
     $fields['shot_number'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Shot'))->setSetting('unsigned', TRUE);
     $fields['title'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Title'))->setRequired(TRUE)->setSetting('max_length', 255);
     $fields['action'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Action'));

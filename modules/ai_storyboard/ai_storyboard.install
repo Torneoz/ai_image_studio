@@ -1,7 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Installs and updates Storyboard schemas and bundled Views.
+ */
+
 declare(strict_types=1);
 
+use Drupal\ai_storyboard\Entity\StoryboardShot;
 use Drupal\ai_storyboard\Entity\Storyboard;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -151,7 +157,7 @@ function ai_storyboard_update_10005(): string {
   }
 
   $shot_type = \Drupal::entityTypeManager()->getDefinition('ai_storyboard_shot');
-  $shot_fields = \Drupal\ai_storyboard\Entity\StoryboardShot::baseFieldDefinitions($shot_type);
+  $shot_fields = StoryboardShot::baseFieldDefinitions($shot_type);
   $update_manager->installFieldStorageDefinition(
     'video_turn_id',
     'ai_storyboard_shot',
@@ -206,6 +212,49 @@ function ai_storyboard_update_10008(array &$sandbox): void {
   foreach ($storage->loadMultiple($ids) as $board) {
     $board->save();
     $sandbox['last_id'] = (int) $board->id();
+  }
+  $sandbox['#finished'] = count($ids) < 50 ? 1 : 0.5;
+}
+
+/**
+ * Adds shared narrative libraries, project scenes/cast and shot references.
+ */
+function ai_storyboard_update_10009(array &$sandbox): void {
+  $manager = \Drupal::entityTypeManager();
+  if (empty($sandbox['initialized'])) {
+    $manager->clearCachedDefinitions();
+    $updates = \Drupal::entityDefinitionUpdateManager();
+    foreach (['location', 'character', 'scene', 'cast'] as $suffix) {
+      $type = 'ai_storyboard_' . $suffix;
+      if (!$updates->getEntityType($type)) {
+        $updates->installEntityType($manager->getDefinition($type));
+      }
+    }
+    $type = $manager->getDefinition('ai_storyboard_shot');
+    $fields = StoryboardShot::baseFieldDefinitions($type);
+    foreach (['scene_id', 'speaker_id'] as $name) {
+      if (!$updates->getFieldStorageDefinition($name, 'ai_storyboard_shot')) {
+        $updates->installFieldStorageDefinition($name, 'ai_storyboard_shot', 'ai_storyboard', $fields[$name]);
+      }
+    }
+    $views = $manager->getStorage('view');
+    foreach (['locations', 'characters', 'scenes', 'cast'] as $suffix) {
+      $id = 'ai_storyboard_' . $suffix;
+      if (!$views->load($id)) {
+        $views->create(Yaml::decode(file_get_contents(__DIR__ . '/config/install/views.view.' . $id . '.yml')))->save();
+      }
+    }
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+  }
+  $storage = $manager->getStorage('ai_storyboard_shot');
+  $ids = $storage->getQuery()->accessCheck(FALSE)->condition('id', $sandbox['last_id'], '>')->sort('id')->range(0, 50)->execute();
+  foreach ($storage->loadMultiple($ids) as $shot) {
+    if (!$shot->get('scene_id')->target_id && $shot->get('storyboard_id')->entity) {
+      $scene = \Drupal::service('ai_storyboard.narrative')->ensureScene((int) $shot->get('storyboard_id')->target_id, max(1, (int) $shot->get('scene_number')->value));
+      $shot->set('scene_id', $scene->id())->save();
+    }
+    $sandbox['last_id'] = (int) $shot->id();
   }
   $sandbox['#finished'] = count($ids) < 50 ? 1 : 0.5;
 }

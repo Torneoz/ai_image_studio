@@ -44,6 +44,15 @@ final class ShotForm extends FormBase {
     }
     $form_state->set('shot_id', $ai_storyboard_shot->id());
     $form_state->set('storyboard_id', $ai_storyboard->id());
+    foreach (['scene_id' => ['ai_storyboard_scene', 'Scene'], 'speaker_id' => ['ai_storyboard_cast', 'Dialogue speaker']] as $field => [$type, $label]) {
+      $storage = $this->entityTypeManager->getStorage($type);
+      $ids = $storage->getQuery()->accessCheck(TRUE)->condition('storyboard_id', $ai_storyboard->id())->sort('title')->execute();
+      $options = [];
+      foreach ($storage->loadMultiple($ids) as $entity) {
+        $options[$entity->id()] = $entity->label();
+      }
+      $form[$field] = ['#type' => 'select', '#title' => $this->t($label), '#options' => $options, '#empty_option' => $this->t('- None -'), '#default_value' => $ai_storyboard_shot->get($field)->target_id];
+    }
     $fields = [
       'title' => ['textfield', $this->t('Title'), TRUE],
       'position' => ['number', $this->t('Position'), TRUE],
@@ -72,6 +81,7 @@ final class ShotForm extends FormBase {
       }
     }
     $form['dialogue']['#description'] = $this->t('Spoken lines for video generation. Include speaker names, language, and delivery, e.g. Lina (quietly): "Where am I?" Keep lines short enough for the clip duration. Spoken audio depends on model support.');
+    $form['scene_number']['#description'] = $this->t('When a Scene is selected, its scene number is used automatically.');
     $form['audio']['#description'] = $this->t('Shot-specific sound effects, ambience, and music, included alongside the project audio prompt.');
     $form['status'] = ['#type' => 'select', '#title' => $this->t('Status'), '#options' => ['draft' => $this->t('Draft'), 'generated' => $this->t('Generated'), 'approved' => $this->t('Approved')], '#default_value' => $ai_storyboard_shot->get('status')->value];
     $form['actions'] = ['#type' => 'actions', 'submit' => ['#type' => 'submit', '#value' => $this->t('Save shot'), '#button_type' => 'primary']];
@@ -82,7 +92,7 @@ final class ShotForm extends FormBase {
    * {@inheritdoc} */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $shot = $this->entityTypeManager->getStorage('ai_storyboard_shot')->load($form_state->get('shot_id'));
-    foreach (['title', 'position', 'scene_number', 'shot_number', 'duration', 'shot_size', 'camera_angle', 'camera_move', 'lens', 'lighting', 'action', 'dialogue', 'audio', 'image_prompt', 'continuity_notes', 'status'] as $field) {
+    foreach (['title', 'position', 'scene_number', 'shot_number', 'duration', 'shot_size', 'camera_angle', 'camera_move', 'lens', 'lighting', 'action', 'dialogue', 'audio', 'image_prompt', 'continuity_notes', 'status', 'scene_id', 'speaker_id'] as $field) {
       $shot->set($field, $form_state->getValue($field));
     }
     $shot->save();

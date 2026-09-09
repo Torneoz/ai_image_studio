@@ -56,6 +56,23 @@ final class ScriptBreakdown {
         'properties' => [
           'continuity_bible' => ['type' => 'string', 'description' => 'Canonical prop, environment, geography, palette, lighting, and time-of-day facts to preserve across shots.'],
           'character_bible' => ['type' => 'string', 'description' => 'Canonical visual description of every character, including age, appearance, wardrobe, distinguishing features, and relationships.'],
+          'scenes' => [
+            'type' => 'array',
+            'description' => 'One entry per scene. A change of location or dramatic time starts a new scene. Location bibles describe stable geography, architecture, materials and landmarks; conditions hold temporary time, weather and lighting. Do not invent shared library identifiers.',
+            'items' => [
+              'type' => 'object',
+              'additionalProperties' => FALSE,
+              'properties' => [
+                'scene_number' => ['type' => 'integer'],
+                'title' => ['type' => 'string'],
+                'script_excerpt' => ['type' => 'string'],
+                'location_bible' => ['type' => 'string'],
+                'conditions' => ['type' => 'string'],
+                'action' => ['type' => 'string'],
+              ],
+              'required' => ['scene_number', 'title', 'script_excerpt', 'location_bible', 'conditions', 'action'],
+            ],
+          ],
           'shots' => [
             'type' => 'array',
             'items' => [
@@ -81,7 +98,7 @@ final class ScriptBreakdown {
             ],
           ],
         ],
-        'required' => ['continuity_bible', 'character_bible', 'shots'],
+        'required' => ['continuity_bible', 'character_bible', 'scenes', 'shots'],
       ],
     ]);
 

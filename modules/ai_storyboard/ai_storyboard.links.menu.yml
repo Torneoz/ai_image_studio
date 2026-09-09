@@ -25,3 +25,51 @@ ai_storyboard.view_shots:
   route_name: view.ai_storyboard_shots.page_1
   parent: ai_image_studio.views
   weight: 5
+
+ai_storyboard.locations:
+  title: 'Location library'
+  route_name: entity.ai_storyboard_location.collection
+  parent: ai_storyboard.collection
+  weight: 1
+
+ai_storyboard.characters:
+  title: 'Character library'
+  route_name: entity.ai_storyboard_character.collection
+  parent: ai_storyboard.collection
+  weight: 2
+
+ai_storyboard.scenes:
+  title: 'Scenes'
+  route_name: entity.ai_storyboard_scene.collection
+  parent: ai_storyboard.collection
+  weight: 3
+
+ai_storyboard.cast:
+  title: 'Project characters'
+  route_name: entity.ai_storyboard_cast.collection
+  parent: ai_storyboard.collection
+  weight: 4
+
+ai_storyboard.view_locations:
+  title: 'AI Storyboard Locations'
+  route_name: view.ai_storyboard_locations.page_1
+  parent: ai_image_studio.views
+  weight: 6
+
+ai_storyboard.view_characters:
+  title: 'AI Storyboard Characters'
+  route_name: view.ai_storyboard_characters.page_1
+  parent: ai_image_studio.views
+  weight: 7
+
+ai_storyboard.view_scenes:
+  title: 'AI Storyboard Scenes'
+  route_name: view.ai_storyboard_scenes.page_1
+  parent: ai_image_studio.views
+  weight: 8
+
+ai_storyboard.view_cast:
+  title: 'AI Storyboard Project Characters'
+  route_name: view.ai_storyboard_cast.page_1
+  parent: ai_image_studio.views
+  weight: 9

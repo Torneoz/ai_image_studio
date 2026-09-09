@@ -22,6 +22,7 @@ final class StoryboardBulkManager {
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ImageGenerator $imageGenerator,
     private readonly StoryboardManager $storyboardManager,
+    private readonly NarrativeContext $narrative,
   ) {}
 
   /**
@@ -89,10 +90,16 @@ final class StoryboardBulkManager {
       ->sort('position')
       ->execute();
     $keyframes = [];
+    $previous = NULL;
+    $segment = 0;
     foreach ($storage->loadMultiple($ids) as $shot) {
+      if ($previous && !$this->narrative->sameScene($previous, $shot)) {
+        $segment++;
+      }
+      $previous = $shot;
       $file = $shot->get('studio_turn_id')->entity?->get('image')->entity;
       if ($file) {
-        $keyframes[] = ['shot' => $shot, 'file' => $file];
+        $keyframes[] = ['shot' => $shot, 'file' => $file, 'segment' => $segment];
       }
     }
     $mode = (string) ($settings['mode'] ?? 'animate');
@@ -116,6 +123,16 @@ final class StoryboardBulkManager {
       $keyframes = array_slice($keyframes, $selected, $mode === 'bridge' ? 2 : 1);
     }
 
+    $limit = $mode === 'bridge' ? count($keyframes) - 1 : count($keyframes);
+    $eligible = [];
+    for ($index = 0; $index < $limit; $index++) {
+      if ($mode !== 'bridge' || $keyframes[$index]['segment'] === $keyframes[$index + 1]['segment']) {
+        $eligible[] = $index;
+      }
+    }
+    if (!$eligible) {
+      throw new \LogicException('No eligible keyframe pairs within the same scene. Generate another frame in this scene, or use animate mode.');
+    }
     $now = $this->time->getRequestTime();
     $job_id = (int) $this->database->insert('ai_image_studio_vbo_job')
       ->fields([
@@ -133,14 +150,16 @@ final class StoryboardBulkManager {
         'changed' => $now,
       ])->execute();
 
-    $limit = $mode === 'bridge' ? count($keyframes) - 1 : count($keyframes);
     $audio_prompt = trim((string) $storyboard->get('audio_prompt')->value);
-    for ($index = 0; $index < $limit; $index++) {
+    foreach ($eligible as $index) {
       $shot = $keyframes[$index]['shot'];
       $dialogue = trim((string) $shot->get('dialogue')->value);
       $sound = trim((string) $shot->get('audio')->value);
       $prompt = implode("\n\n", array_filter([
         (string) ($settings['prompt'] ?? ''),
+        'PROJECT CONTINUITY: ' . $storyboard->get('continuity_bible')->value,
+        'PROJECT CHARACTERS: ' . $storyboard->get('character_bible')->value,
+        $this->narrative->prompt($shot, TRUE),
         $audio_prompt !== '' ? 'AUDIO DIRECTION: ' . $audio_prompt : '',
         'SHOT ACTION: ' . $shot->get('action')->value,
         $dialogue !== '' ? 'SPOKEN DIALOGUE / VOICE-OVER: ' . $dialogue . "\nSpeak the supplied lines in the specified voices and language. Match visible speakers with natural lip synchronization where applicable. Do not render dialogue as text or subtitles. Fit the delivery within the clip duration." : '',

@@ -1,0 +1,115 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - ai_storyboard
+id: ai_storyboard_locations
+label: 'AI Storyboard Locations'
+module: views
+description: 'Example View for locations; customize as needed.'
+tag: 'AI Storyboard'
+base_table: ai_storyboard_location
+base_field: id
+display:
+  default:
+    id: default
+    display_title: Default
+    display_plugin: default
+    position: 0
+    display_options:
+      title: 'AI Storyboard Locations'
+      access:
+        type: perm
+        options:
+          perm: 'access ai storyboard'
+      cache:
+        type: none
+      query:
+        type: views_query
+        options:
+          disable_sql_rewrite: false
+      pager:
+        type: mini
+        options:
+          items_per_page: 25
+      style:
+        type: table
+      row:
+        type: fields
+      fields:
+        title:
+          id: title
+          table: ai_storyboard_location
+          field: title
+          entity_type: ai_storyboard_location
+          entity_field: title
+          plugin_id: field
+          label: 'Name'
+          type: string
+          settings:
+            link_to_entity: true
+          alter:
+            max_length: 180
+            trim: true
+            word_boundary: true
+            ellipsis: true
+        revision_id:
+          id: revision_id
+          table: ai_storyboard_location
+          field: revision_id
+          entity_type: ai_storyboard_location
+          entity_field: revision_id
+          plugin_id: field
+          label: 'Version'
+          type: number_integer
+          settings: { }
+          alter:
+            max_length: 180
+            trim: true
+            word_boundary: true
+            ellipsis: true
+        bible:
+          id: bible
+          table: ai_storyboard_location
+          field: bible
+          entity_type: ai_storyboard_location
+          entity_field: bible
+          plugin_id: field
+          label: 'Bible'
+          type: basic_string
+          settings: { }
+          alter:
+            max_length: 180
+            trim: true
+            word_boundary: true
+            ellipsis: true
+      filters:
+        title:
+          id: title
+          table: ai_storyboard_location
+          field: title
+          entity_type: ai_storyboard_location
+          entity_field: title
+          plugin_id: string
+          operator: contains
+          exposed: true
+          expose:
+            operator_id: title_op
+            label: Name
+            identifier: title
+      sorts:
+        title:
+          id: title
+          table: ai_storyboard_location
+          field: title
+          entity_type: ai_storyboard_location
+          entity_field: title
+          plugin_id: standard
+          order: ASC
+  page_1:
+    id: page_1
+    display_title: Page
+    display_plugin: page
+    position: 1
+    display_options:
+      path: admin/content/ai-storyboard-views/locations
