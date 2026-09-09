@@ -45,6 +45,18 @@ ai_storyboard.download_images:
       ai_storyboard:
         type: entity:ai_storyboard
 
+ai_storyboard.download_script:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/export/script/{format}'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardExportController::downloadScript'
+  requirements:
+    _entity_access: 'ai_storyboard.view'
+    format: 'json|fountain|fdx|osf|rtf|txt'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
 ai_storyboard.download_video:
   path: '/admin/content/ai-storyboard/{ai_storyboard}/export/video'
   defaults:

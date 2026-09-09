@@ -9,6 +9,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\FileInterface;
+use Drupal\ai_storyboard\Service\ScriptExporter;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,6 +23,48 @@ use Symfony\Component\Process\Process;
  * Exports generated storyboard frames as image collections and animatics.
  */
 final class StoryboardExportController extends ControllerBase {
+
+  /**
+   * Downloads a saved script independently of generated media.
+   */
+  public function downloadScript(object $ai_storyboard, string $format): Response {
+    if (!isset(ScriptExporter::FORMATS[$format])) {
+      throw new NotFoundHttpException('Unknown script export format.');
+    }
+    $snapshot = [];
+    if ($format === 'json') {
+      $values = static function (object $entity): array {
+        $result = [];
+        foreach ($entity->getFields() as $name => $field) {
+          if (!$field->getFieldDefinition()->isComputed() && $field->access('view')) {
+            $result[$name] = $field->getValue();
+          }
+        }
+        return $result;
+      };
+      $snapshot['project'] = $values($ai_storyboard);
+      foreach (['ai_storyboard_scene' => 'scene_number', 'ai_storyboard_shot' => 'position', 'ai_storyboard_cast' => 'id'] as $type => $sort) {
+        $storage = $this->storyboardEntityTypeManager->getStorage($type);
+        $ids = $storage->getQuery()->accessCheck(FALSE)->condition('storyboard_id', $ai_storyboard->id())->sort($sort)->sort('id')->execute();
+        $snapshot[$type] = [];
+        foreach ($storage->loadMultiple($ids) as $entity) {
+          if ($entity->access('view')) {
+            $snapshot[$type][] = $values($entity);
+          }
+        }
+      }
+    }
+    $body = ScriptExporter::render($format, (string) $ai_storyboard->label(), (string) $ai_storyboard->get('script')->value, $snapshot);
+    $mime = match ($format) {
+      'json' => 'application/json', 'fdx', 'osf' => 'application/xml',
+      'rtf' => 'application/rtf', default => 'text/plain',
+    };
+    $response = new Response($body, 200, ['Content-Type' => $mime . '; charset=UTF-8']);
+    $response->headers->set('Content-Disposition', $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $this->projectFilename($ai_storyboard) . '-script.' . $format));
+    $response->headers->set('Cache-Control', 'private, no-store');
+    $response->headers->set('X-Content-Type-Options', 'nosniff');
+    return $response;
+  }
 
   /**
    * Constructs the storyboard export controller.

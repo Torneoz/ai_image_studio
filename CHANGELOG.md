@@ -1,5 +1,9 @@
 # Changelog
 
+- Added script downloads as versioned JSON, Fountain, Final Draft FDX, Open
+  Screenplay Format, RTF and original text, available before media generation.
+  See `docs/script-export.md` for interchange coverage and limitations.
+
 - Honor Maximum prompt length centrally for all media submission paths; scope
   the confirmed 4,096-character cap to xAI's exact grok-imagine-video model.
   Other models retain the configured ceiling. Remove the settings UI's arbitrary

@@ -204,6 +204,18 @@ final class StoryboardForm extends FormBase {
       )->toRenderable();
       $delete['#attributes']['class'] = ['button', 'button--danger'];
       $form['actions']['delete'] = $delete;
+      $form['script_exports'] = [
+        '#type' => 'details', '#title' => $this->t('Export script'),
+        '#open' => FALSE, '#weight' => 90,
+      ];
+      $form['script_exports']['description'] = ['#markup' => '<p>' . $this->t('Exports the saved script. Save edits first. JSON also includes project, scene, shot and pinned character data (file references only). Other formats recognize basic screenplay structure; unstructured prose remains action text. Revisions, pagination and advanced Fountain markup are not converted.') . '</p>'];
+      foreach (\Drupal\ai_storyboard\Service\ScriptExporter::FORMATS as $format => $label) {
+        $form['script_exports'][$format] = [
+          '#type' => 'link', '#title' => $label,
+          '#url' => Url::fromRoute('ai_storyboard.download_script', ['ai_storyboard' => $ai_storyboard->id(), 'format' => $format]),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
       $form['narrative'] = ['#type' => 'details', '#title' => $this->t('Scenes and characters'), '#open' => TRUE, '#weight' => 9];
       $form['narrative']['description'] = ['#markup' => '<p>' . $this->t('Reuse shared Locations and Characters by pinning a library version. Scene conditions and project character overrides apply only to this production. Library changes are adopted explicitly, not automatically.') . '</p>'];
       foreach (['ai_storyboard_scene' => 'Scenes', 'ai_storyboard_cast' => 'Project characters'] as $type => $label) {
