@@ -71,7 +71,7 @@ final class StoryboardForm extends FormBase {
     }
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
     $form['project'] = ['#type' => 'details', '#title' => $this->t('Project and script'), '#open' => $ai_storyboard === NULL];
-    $form['project']['title'] = ['#type' => 'textfield', '#title' => $this->t('Title'), '#required' => TRUE, '#maxlength' => 255, '#default_value' => $ai_storyboard?->label()];
+    $form['project']['title'] = ['#type' => 'textfield', '#title' => $this->t('Title'), '#required' => TRUE, '#maxlength' => 255, '#default_value' => $ai_storyboard?->label(), '#description' => $this->t('The machine name is used to generate directories and filenames.')];
     $form['project']['machine_name'] = [
       '#type' => 'machine_name',
       '#title' => $this->t('Machine name'),
@@ -82,7 +82,7 @@ final class StoryboardForm extends FormBase {
         'source' => ['project', 'title'],
         'exists' => [$this, 'machineNameExists'],
       ],
-      '#description' => $this->t('A unique project identifier using lowercase letters, numbers, and underscores.'),
+      '#description' => $this->t('A unique project identifier using lowercase letters, numbers, and underscores. Used to generate directories and filenames.'),
     ];
     $form['project']['creative_brief'] = ['#type' => 'textarea', '#title' => $this->t('Creative brief'), '#rows' => 3, '#default_value' => $ai_storyboard?->get('creative_brief')->value, '#description' => $this->t('Audience, objective, tone, runtime, platform, and production constraints.')];
     $form['project']['script'] = ['#type' => 'textarea', '#title' => $this->t('Script'), '#required' => TRUE, '#rows' => 14, '#default_value' => $ai_storyboard?->get('script')->value];

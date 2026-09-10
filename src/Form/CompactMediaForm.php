@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_image_studio\Form;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio\Service\PromptResolver;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -131,6 +132,7 @@ final class CompactMediaForm {
             : t('Requires the PHP Imagick extension.'),
         ],
       ],
+      'badges' => BadgePolicy::requestControls($settings->getRawData()),
       'actions' => [
         // Do not use an actions element here. Drupal's dialog integration
         // extracts submit buttons from .form-actions and hides the originals.
@@ -149,6 +151,7 @@ final class CompactMediaForm {
             ['ai_image_studio_compact', 'prompt'],
             ['ai_image_studio_compact', 'model'],
             ['ai_image_studio_compact', 'settings'],
+            ['ai_image_studio_compact', 'badges'],
           ],
           '#ajax' => [
             'callback' => 'ai_image_studio_compact_generate_ajax',
@@ -356,6 +359,7 @@ final class CompactMediaForm {
       ]);
     $session->save();
     $generation = (array) ($values['settings'] ?? []);
+    $generation['show_ai_badge'] = (bool) ($values['badges']['show_ai_badge'] ?? TRUE);
     $generation['prompt'] = $prompt;
     $turn = $this->generator->generate(
       $session,
@@ -414,6 +418,7 @@ final class CompactMediaForm {
       $turn,
       trim((string) ($values['name'] ?? 'Generated image')),
       trim((string) ($values['alt'] ?? '')),
+      !empty($turn->get('generation_settings')->first()?->getValue()['show_ai_badge']),
     );
     $form_state->set('media', [$media]);
     if (!$form_state->get('media_library_state')) {

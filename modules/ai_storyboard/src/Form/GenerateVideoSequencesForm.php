@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Form;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_storyboard\Service\StoryboardBulkManager;
 use Drupal\Core\Form\FormBase;
@@ -122,6 +123,7 @@ final class GenerateVideoSequencesForm extends FormBase {
       '#rows' => 4,
       '#description' => $this->t('Saved for this project and included in every video generation prompt. Describe music, ambience, sound effects, dialogue, and voice direction. Audio output depends on the selected model.'),
     ];
+    $form['badges'] = BadgePolicy::requestControls($this->config('ai_image_studio.settings')->getRawData());
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['generate'] = [
       '#type' => 'submit',
@@ -152,6 +154,7 @@ final class GenerateVideoSequencesForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $settings = [
+      'show_ai_badge' => (bool) $form_state->getValue(['badges', 'show_ai_badge']),
       'mode' => (string) $form_state->getValue('mode'),
       'model' => (string) $form_state->getValue('model'),
       'duration' => (int) $form_state->getValue('duration'),

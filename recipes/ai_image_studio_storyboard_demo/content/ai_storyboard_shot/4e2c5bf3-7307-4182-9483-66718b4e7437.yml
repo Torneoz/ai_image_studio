@@ -1,0 +1,53 @@
+_meta:
+  version: '1.0'
+  entity_type: ai_storyboard_shot
+  uuid: 4e2c5bf3-7307-4182-9483-66718b4e7437
+  depends:
+    e738e437-b902-4700-87e4-7939de19ec03: ai_storyboard
+    53f56dda-c79d-41a9-b3ad-3e136cb9206e: ai_storyboard_scene
+default:
+  storyboard_id:
+    -
+      entity: e738e437-b902-4700-87e4-7939de19ec03
+  scene_id:
+    -
+      entity: 53f56dda-c79d-41a9-b3ad-3e136cb9206e
+  position:
+    -
+      value: 3
+  scene_number:
+    -
+      value: 1
+  shot_number:
+    -
+      value: 3
+  title:
+    -
+      value: 'Reveal the horizon'
+  action:
+    -
+      value: 'The dragons climb toward the sun and the distant escarpment.'
+  shot_size:
+    -
+      value: 'Extreme wide'
+  camera_move:
+    -
+      value: 'Slow upward tilt'
+  lighting:
+    -
+      value: 'Warm sunrise from the right'
+  duration:
+    -
+      value: '5.00'
+  image_prompt:
+    -
+      value: 'Three dragons climb toward a warm sunrise above the distant Kakadu escarpment. Keep their rust-red, ochre and deep-teal colours and show the expansive landscape below.'
+  audio:
+    -
+      value: 'Soft wind and distant birds.'
+  continuity_notes:
+    -
+      value: 'Exactly three dragons with consistent colours. Maintain the direction of flight.'
+  status:
+    -
+      value: draft

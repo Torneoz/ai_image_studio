@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Component\Serialization\Yaml;
@@ -739,4 +740,27 @@ function ai_image_studio_update_10025(array &$sandbox): void {
     return;
   }
   $sandbox['#finished'] = 1;
+}
+
+/**
+ * Installs the reusable start prompt type without modifying existing prompts.
+ */
+function ai_image_studio_update_10026(): void {
+  $name = 'ai.ai_prompt_type.ai_image_studio_start';
+  $config = \Drupal::configFactory()->getEditable($name);
+  if ($config->isNew()) {
+    $path = \Drupal::service('extension.list.module')->getPath('ai_image_studio');
+    $storage = new FileStorage($path . '/config/install');
+    $config->setData($storage->read($name))->save(TRUE);
+  }
+}
+
+/**
+ * Adds the corporate badge requirement without changing existing policy.
+ */
+function ai_image_studio_update_10027(): void {
+  $config = \Drupal::configFactory()->getEditable('ai_image_studio.settings');
+  if ($config->get('require_ai_badges') === NULL) {
+    $config->set('require_ai_badges', FALSE)->save(TRUE);
+  }
 }

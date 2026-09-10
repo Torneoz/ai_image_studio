@@ -21,3 +21,8 @@ publish ai image studio video:
 administer ai image studio:
   title: 'Administer AI Image Studio'
   restrict access: true
+
+edit image studio corporate:
+  title: 'Edit Image Studio corporate settings'
+  description: 'Control mandatory AI badges across the Image Studio suite.'
+  restrict access: true

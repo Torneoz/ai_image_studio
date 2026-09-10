@@ -66,6 +66,7 @@ final class SessionReplayForm extends FormBase {
     $form['title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('New session title'),
+      '#description' => $this->t('The machine name is used to generate directories and filenames.'),
       '#default_value' => $this->t('@title — re-render', ['@title' => $ai_image_studio_session?->label()]),
       '#required' => TRUE,
       '#maxlength' => 255,

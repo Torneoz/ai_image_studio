@@ -110,7 +110,7 @@
                 return;
               }
               const control = studio.querySelector(`[name="${name}"]`);
-              if (!control) {
+              if (!control || control.disabled) {
                 return;
               }
               if (control.type === 'checkbox') {

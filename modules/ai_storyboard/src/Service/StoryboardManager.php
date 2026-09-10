@@ -63,7 +63,7 @@ final class StoryboardManager {
   /**
    * Generates or regenerates one shot and returns the Image Studio turn.
    */
-  public function generateShot(object $storyboard, object $shot): object {
+  public function generateShot(object $storyboard, object $shot, array $badge_settings = []): object {
     $session = $this->prepareSession($storyboard);
     $after_prompt = trim((string) $storyboard->get('after_prompt')->value);
     $prompt = implode("\n\n", array_filter([
@@ -81,6 +81,7 @@ final class StoryboardManager {
     $references = $this->narrative->references($shot);
     $settings = ['aspect_ratio' => (string) $storyboard->get('aspect_ratio')->value, 'variations' => 1];
     $supports_references = $this->imageGenerator->supportsMultipleImages((string) $storyboard->get('image_model')->value);
+    $settings += array_intersect_key($badge_settings, ['show_ai_badge' => TRUE]);
     if ($references && $supports_references) {
       $settings['reference_file_ids'] = array_map(static fn(object $file): int => (int) $file->id(), $references);
     }

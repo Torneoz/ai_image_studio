@@ -1,0 +1,10 @@
+name: 'AI Image Studio demo'
+description: 'Adds reusable example Start prompts and an empty demo session, ready for an editor to generate images or videos.'
+type: 'Demo content'
+install:
+  - ai_image_studio
+config:
+  strict: false
+  import:
+    ai_image_studio:
+      - ai.ai_prompt_type.ai_image_studio_start

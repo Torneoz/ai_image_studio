@@ -68,6 +68,9 @@ ai_image_studio.settings:
     default_auto_levels:
       type: boolean
       label: 'Apply auto levels by default'
+    require_ai_badges:
+      type: boolean
+      label: 'Require AI badges'
     default_show_ai_badge:
       type: boolean
       label: 'Show an AI badge by default'

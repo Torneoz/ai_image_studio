@@ -68,6 +68,19 @@ final class SettingsForm extends ConfigFormBase {
       $bundles[$id] = $definition['label'];
     }
 
+    $form['corporate'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Corporate'),
+      '#open' => TRUE,
+      '#access' => $this->currentUser()->hasPermission('edit image studio corporate'),
+      'require_ai_badges' => [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Require AI badges'),
+        '#default_value' => (bool) $config->get('require_ai_badges'),
+        '#description' => $this->t('When enabled, badges are required across the suite and editors cannot change badge controls. When disabled, badges remain enabled by default, but editors may turn them off.'),
+      ],
+    ];
+
     $form['interface'] = [
       '#type' => 'details',
       '#title' => $this->t('Studio interface'),
@@ -487,6 +500,13 @@ final class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    // Check permission at submission as well as hiding the fieldset.
+    if ($this->currentUser()->hasPermission('edit image studio corporate')
+      && $form_state->hasValue('require_ai_badges')) {
+      $this->config('ai_image_studio.settings')
+        ->set('require_ai_badges', (bool) $form_state->getValue('require_ai_badges'))
+        ->save();
+    }
     $badge_position = $form_state->getValue('default_ai_badge_position');
     if (!in_array($badge_position, ['top-left', 'top-right', 'bottom-left', 'bottom-right'], TRUE)) {
       $badge_position = 'bottom-right';

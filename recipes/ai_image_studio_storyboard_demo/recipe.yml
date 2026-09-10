@@ -1,0 +1,7 @@
+name: 'AI Image Studio storyboard demo'
+description: 'Includes the Studio demo and adds a three-shot storyboard with a script and continuity instructions. No AI requests are made during installation.'
+type: 'Demo content'
+recipes:
+  - ai_image_studio_demo
+install:
+  - ai_storyboard

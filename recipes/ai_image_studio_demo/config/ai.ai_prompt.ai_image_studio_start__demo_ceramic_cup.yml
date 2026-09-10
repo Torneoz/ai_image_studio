@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - ai.ai_prompt_type.ai_image_studio_start
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_start__demo_ceramic_cup
+label: 'Demo: Ceramic cup'
+type: ai_image_studio_start
+prompt: 'A handmade teal ceramic cup sits on a pale timber table beside a folded linen cloth and a small eucalyptus branch. Keep the cup as the main subject.'

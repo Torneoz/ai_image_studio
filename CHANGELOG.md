@@ -1,5 +1,30 @@
 # Changelog
 
+- Add optional demo recipes with reusable Start prompts, an empty Studio
+  session and a draft three-shot storyboard. Applying the recipes does not
+  call AI providers or overwrite existing demo content and prompt edits.
+
+- Disable After prompts for video tasks and exclude them from new video and
+  regeneration requests, preserving subject instructions and visual style.
+
+- Explain beneath session, re-render and storyboard titles that machine names
+  are used to generate directories and filenames. Document the proposed
+  optional AI Metering integration and its event/accounting gaps.
+
+- Restore remembered prompt selections through Drupal’s full Form API
+  processing, including nested video regeneration and AJAX clearing.
+
+- Remember source image, creation mode and reusable prompt selections per user
+  and session after refinement or image-to-video generation and regeneration.
+
+- Add permission-controlled Corporate settings with Require AI badges, locked
+  badge controls across suite request forms, and server-side enforcement for
+  generation, queues and Media publishing.
+
+- Group session badge controls into collapsed sections, add reusable Start
+  prompts, and apply selected styles when regenerating with new settings.
+  Preserve video instructions when only its style changes.
+
 - Compose concise storyboard video prompts from shot motion/camera, dialogue,
   audio and scene direction. Keep full visual bibles in the project/keyframe
   workflow instead of repeating them in every video request. Existing turn

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_image_studio\Form;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio\Service\PromptResolver;
 use Drupal\ai_image_studio\Service\SessionMachineName;
@@ -13,6 +14,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\TempStore\PrivateTempStore;
 use Drupal\Core\Url;
 use Drupal\file\FileInterface;
 use Drupal\media\MediaInterface;
@@ -33,6 +35,7 @@ final class StudioForm extends FormBase {
     protected AccountProxyInterface $currentUserProxy,
     protected PromptResolver $promptResolver,
     protected SessionMachineName $sessionMachineName,
+    protected PrivateTempStore $requestSelections,
   ) {}
 
   /**
@@ -46,6 +49,7 @@ final class StudioForm extends FormBase {
       $container->get('current_user'),
       $container->get('ai_image_studio.prompt_resolver'),
       $container->get('ai_image_studio.session_machine_name'),
+      $container->get('tempstore.private')->get('ai_image_studio.request_selections'),
     );
   }
 
@@ -142,6 +146,7 @@ final class StudioForm extends FormBase {
       $form['title'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Session title'),
+        '#description' => $this->t('The machine name is used to generate directories and filenames.'),
         '#required' => TRUE,
         '#maxlength' => 255,
       ];
@@ -331,11 +336,15 @@ final class StudioForm extends FormBase {
           'data-ai-image-studio-output-type' => 'video',
         ],
       ];
+      $form['start_prompt'] = $this->reusableStartPromptElement();
       $form['prompt_start'] = $this->promptStartElement(
         $this->t('Describe the image to create or how to transform the upload.'),
       );
       $form['style_prompt'] = $this->stylePromptElement();
       $form['prompt'] = $this->promptElement();
+      $form['prompt']['#states']['disabled'] = [
+        ':input[name="output_type"]' => ['value' => 'video'],
+      ];
       $form['generation_controls'] = $this->generationControls();
       $form['video_controls'] = $this->videoControls();
       $form['actions'] = ['#type' => 'actions'];
@@ -358,6 +367,8 @@ final class StudioForm extends FormBase {
       return $form;
     }
 
+    $this->restoreRequestSelections($form_state, (int) $session->id());
+    $default_output_type = (string) ($form_state->getValue('output_type') ?: $default_output_type);
     $turns = $this->loadTurns((int) $session->id());
     $latest = $this->latestCompletedTurn((int) $session->id());
     $turn_numbers = [];
@@ -415,9 +426,11 @@ final class StudioForm extends FormBase {
       $version_number++;
     }
     if ($regenerate_video !== NULL && $session->access('update')) {
+      $this->restoreRequestSelections($form_state, (int) $session->id(), (int) $regenerate_video->id());
       $form['video_regeneration'] = $this->buildVideoRegenerationForm(
         $regenerate_video,
         $turn_numbers[(int) $regenerate_video->id()] ?? 1,
+        (array) $form_state->getValue('video_regeneration'),
       );
     }
     if ($settings->get('show_session_report') !== FALSE
@@ -654,6 +667,7 @@ final class StudioForm extends FormBase {
           ],
         ],
       ];
+      $form['refine']['start_prompt'] = $this->reusableStartPromptElement();
       $form['refine']['prompt_start'] = $this->promptStartElement(
         $selected_source
           ? $this->t('Describe only the change you want to make to the selected image.')
@@ -661,21 +675,24 @@ final class StudioForm extends FormBase {
       );
       $form['refine']['style_prompt'] = $this->stylePromptElement();
       $form['refine']['prompt'] = $this->promptElement();
+      foreach (['start_prompt', 'style_prompt', 'prompt'] as $name) {
+        $form['refine'][$name]['#default_value'] = $form_state->getValue($name) ?? '';
+      }
       $form['refine']['prompt_start']['#states'] = [
         'disabled' => [
           ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
         ],
       ];
-      $form['refine']['prompt']['#states'] = [
-        'disabled' => [
-          ':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE],
-        ],
+      $form['refine']['start_prompt']['#states'] = $form['refine']['prompt_start']['#states'];
+      $form['refine']['prompt']['#states']['disabled'] = [
+        [':input[name="regenerate_with_new_settings"]' => ['checked' => TRUE]],
+        'or',
+        [':input[name="output_type"]' => ['value' => 'video']],
       ];
-      $form['refine']['style_prompt']['#states'] = $form['refine']['prompt']['#states'];
       $form['refine']['regenerate_with_new_settings'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Regenerate with new settings'),
-        '#description' => $this->t('Reuse the selected version’s prompt and apply the settings below.'),
+        '#description' => $this->t('Reuse the selected version’s prompt and apply the selected style and settings below. Leave Style empty to keep the previous style.'),
         '#default_value' => FALSE,
         '#states' => [
           'visible' => [
@@ -833,11 +850,28 @@ final class StudioForm extends FormBase {
   private function promptStartElement(string|\Stringable $description): array {
     return [
       '#type' => 'textarea',
-      '#title' => $this->t('Start prompt'),
+      '#title' => $this->t('Additional instructions'),
       '#description' => $description,
       '#required' => FALSE,
       '#maxlength' => $this->maximumPromptLength(),
       '#rows' => 5,
+    ];
+  }
+
+  /**
+   * Creates the reusable subject or task portion of a prompt.
+   */
+  private function reusableStartPromptElement(): array {
+    if (!$this->promptResolver->promptTypeExists(PromptResolver::START_PROMPT_TYPE)) {
+      return $this->unavailablePromptElement($this->t('Start prompt'));
+    }
+    return [
+      '#type' => 'ai_image_studio_prompt',
+      '#title' => $this->t('Start prompt'),
+      '#description' => $this->t('Select or create reusable instructions. Add any one-off details below.'),
+      '#prompt_types' => [PromptResolver::START_PROMPT_TYPE],
+      '#default_value' => '',
+      '#required' => FALSE,
     ];
   }
 
@@ -851,7 +885,7 @@ final class StudioForm extends FormBase {
     return [
       '#type' => 'ai_image_studio_prompt',
       '#title' => $this->t('After prompt'),
-      '#description' => $this->t('Optionally append reusable render-quality or finishing instructions.'),
+      '#description' => $this->t('Optionally append reusable render-quality or finishing instructions for images. After prompts are not used for video generation.'),
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#default_value' => '',
       '#required' => FALSE,
@@ -893,8 +927,9 @@ final class StudioForm extends FormBase {
    * Builds common image output controls.
    */
   private function generationControls(array $defaults = []): array {
+    $defaults = $this->generator->badgeSettings($defaults, FALSE);
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
-    return [
+    $controls = [
       '#type' => 'details',
       '#title' => $this->t('Image settings'),
       '#open' => $settings->get('image_settings_open') !== FALSE,
@@ -993,57 +1028,65 @@ final class StudioForm extends FormBase {
           ? $this->t('Automatically expands the RGB tonal range after generation. Transparency is preserved.')
           : $this->t('Auto levels is unavailable because the PHP Imagick extension is not installed.'),
       ],
-      'show_ai_badge' => [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Show an AI image badge'),
-        '#default_value' => array_key_exists('show_ai_badge', $defaults)
-          ? (bool) $defaults['show_ai_badge']
-          : (bool) $settings->get('default_show_ai_badge'),
-      ],
-      'ai_badge_text' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Badge text'),
-        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_ai_badge_text') ?: 'AI Image'),
-        '#maxlength' => 80,
-        '#states' => [
-          'visible' => [
-            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+      'badges' => [
+        '#type' => 'details',
+        '#title' => $this->t('Badges'),
+        '#open' => FALSE,
+        'show_ai_badge' => [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Show an AI image badge'),
+          '#default_value' => array_key_exists('show_ai_badge', $defaults)
+            ? (bool) $defaults['show_ai_badge']
+            : (bool) $settings->get('default_show_ai_badge'),
+        ],
+        'ai_badge_text' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Badge text'),
+          '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_ai_badge_text') ?: 'AI Image'),
+          '#maxlength' => 80,
+          '#states' => [
+            'visible' => [
+              ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
-      ],
-      'ai_badge_position' => [
-        '#type' => 'select',
-        '#title' => $this->t('Badge position'),
-        '#options' => $this->badgePositionOptions(),
-        '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
-        '#states' => [
-          'visible' => [
-            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+        'ai_badge_position' => [
+          '#type' => 'select',
+          '#title' => $this->t('Badge position'),
+          '#options' => $this->badgePositionOptions(),
+          '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
+          '#states' => [
+            'visible' => [
+              ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
-      ],
-      'ai_badge_class' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Badge CSS class'),
-        '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
-        '#maxlength' => 255,
-        '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
-        '#states' => [
-          'visible' => [
-            ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+        'ai_badge_class' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Badge CSS class'),
+          '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
+          '#maxlength' => 255,
+          '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
+          '#states' => [
+            'visible' => [
+              ':input[name="show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
       ],
     ];
+    $controls['badges'] = BadgePolicy::lockControls($controls['badges'], $this->generator->badgesRequired());
+    return $controls;
   }
 
   /**
    * Builds video output controls.
    */
   private function videoControls(array $defaults = []): array {
+    $defaults = $this->generator->badgeSettings($defaults, TRUE);
     $settings = $this->studioConfigFactory->get('ai_image_studio.settings');
     $max_duration = (int) ($settings->get('max_video_duration') ?: 15);
-    return [
+    $controls = [
       '#type' => 'details',
       '#title' => $this->t('Video settings'),
       '#open' => $settings->get('video_settings_open') !== FALSE,
@@ -1094,48 +1137,55 @@ final class StudioForm extends FormBase {
           'data-ai-image-studio-video-resolution' => '',
         ],
       ],
-      'video_show_ai_badge' => [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Show an AI video badge'),
-        '#default_value' => array_key_exists('show_ai_badge', $defaults)
-          ? (bool) $defaults['show_ai_badge']
-          : (bool) $settings->get('default_show_ai_badge'),
-      ],
-      'video_ai_badge_text' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Badge text'),
-        '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_video_ai_badge_text') ?: 'AI Video'),
-        '#maxlength' => 80,
-        '#states' => [
-          'visible' => [
-            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+      'badges' => [
+        '#type' => 'details',
+        '#title' => $this->t('Badges'),
+        '#open' => FALSE,
+        'video_show_ai_badge' => [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Show an AI video badge'),
+          '#default_value' => array_key_exists('show_ai_badge', $defaults)
+            ? (bool) $defaults['show_ai_badge']
+            : (bool) $settings->get('default_show_ai_badge'),
+        ],
+        'video_ai_badge_text' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Badge text'),
+          '#default_value' => $defaults['ai_badge_text'] ?? ($settings->get('default_video_ai_badge_text') ?: 'AI Video'),
+          '#maxlength' => 80,
+          '#states' => [
+            'visible' => [
+              ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
-      ],
-      'video_ai_badge_position' => [
-        '#type' => 'select',
-        '#title' => $this->t('Badge position'),
-        '#options' => $this->badgePositionOptions(),
-        '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
-        '#states' => [
-          'visible' => [
-            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+        'video_ai_badge_position' => [
+          '#type' => 'select',
+          '#title' => $this->t('Badge position'),
+          '#options' => $this->badgePositionOptions(),
+          '#default_value' => $this->badgePosition($defaults['ai_badge_position'] ?? $settings->get('default_ai_badge_position')),
+          '#states' => [
+            'visible' => [
+              ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
-      ],
-      'video_ai_badge_class' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Badge CSS class'),
-        '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
-        '#maxlength' => 255,
-        '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
-        '#states' => [
-          'visible' => [
-            ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+        'video_ai_badge_class' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Badge CSS class'),
+          '#default_value' => $defaults['ai_badge_class'] ?? ($settings->get('default_ai_badge_class') ?: ''),
+          '#maxlength' => 255,
+          '#description' => $this->t('Optional space-separated CSS classes for the Studio preview. CSS does not affect a badge rendered permanently into a media file.'),
+          '#states' => [
+            'visible' => [
+              ':input[name="video_show_ai_badge"]' => ['checked' => TRUE],
+            ],
           ],
         ],
       ],
     ];
+    $controls['badges'] = BadgePolicy::lockControls($controls['badges'], $this->generator->badgesRequired());
+    return $controls;
   }
 
   /**
@@ -1189,6 +1239,7 @@ final class StudioForm extends FormBase {
   private function buildVideoRegenerationForm(
     object $turn,
     int $number,
+    array $selections = [],
   ): array {
     $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
     $operation = (string) $turn->get('operation')->value === 'text_to_video'
@@ -1198,12 +1249,7 @@ final class StudioForm extends FormBase {
     $inherited_model = $this->turnModelOption($turn);
     $video_controls = $this->videoControls($settings);
     unset($video_controls['#states']);
-    $video_controls['video_show_ai_badge']['#parents'] = [
-      'video_regeneration',
-      'settings',
-      'video_show_ai_badge',
-    ];
-    $video_controls['video_ai_badge_text']['#states'] = [
+    $video_controls['badges']['video_ai_badge_text']['#states'] = [
       'visible' => [
         ':input[name="video_regeneration[settings][video_show_ai_badge]"]' => [
           'checked' => TRUE,
@@ -1211,10 +1257,16 @@ final class StudioForm extends FormBase {
       ],
     ];
     foreach (['video_ai_badge_position', 'video_ai_badge_class'] as $key) {
-      $video_controls[$key]['#states'] = $video_controls['video_ai_badge_text']['#states'];
+      $video_controls['badges'][$key]['#states'] = $video_controls['badges']['video_ai_badge_text']['#states'];
     }
 
-    return [
+    foreach (['video_show_ai_badge', 'video_ai_badge_text', 'video_ai_badge_position', 'video_ai_badge_class'] as $key) {
+      $video_controls['badges'][$key]['#parents'] = ['video_regeneration', 'settings', $key];
+    }
+
+    $video_controls['badges'] = BadgePolicy::lockControls($video_controls['badges'], $this->generator->badgesRequired());
+
+    $form = [
       '#type' => 'details',
       '#tree' => TRUE,
       '#weight' => -45,
@@ -1237,10 +1289,11 @@ final class StudioForm extends FormBase {
           : $this->configuredDefaultModel($operation),
         '#required' => TRUE,
       ],
+      'start_prompt' => $this->reusableStartPromptElement(),
       'prompt_start' => [
         '#type' => 'textarea',
-        '#title' => $this->t('Replacement start prompt'),
-        '#description' => $this->t('Optional. Leave all replacement prompt fields empty to reuse the previous prompt: @prompt', [
+        '#title' => $this->t('Replacement additional instructions'),
+        '#description' => $this->t('Optional. Leave the start prompt and additional instructions empty to reuse the previous prompt without its After prompt. Selecting only a style updates its style: @prompt', [
           '@prompt' => $this->promptSummary((string) $turn->get('prompt')->value),
         ]),
         '#maxlength' => $this->maximumPromptLength(),
@@ -1264,6 +1317,10 @@ final class StudioForm extends FormBase {
         ],
       ],
     ];
+    foreach (['start_prompt', 'style_prompt', 'prompt'] as $name) {
+      $form[$name]['#default_value'] = $selections[$name] ?? '';
+    }
+    return $form;
   }
 
   /**
@@ -1533,10 +1590,12 @@ final class StudioForm extends FormBase {
           'render_badge' => [
             '#type' => 'checkbox',
             '#title' => $this->t('Render the badge into the saved Media file'),
-            '#default_value' => $can_render_badge
-            && !empty($settings['show_ai_badge']),
-            '#disabled' => !$can_render_badge,
-            '#description' => $can_render_badge
+            '#default_value' => $this->generator->badgesRequired() || ($can_render_badge
+            && !empty($settings['show_ai_badge'])),
+            '#disabled' => !$can_render_badge || $this->generator->badgesRequired(),
+            '#description' => $this->generator->badgesRequired()
+              ? $this->t('Badge removal is not possible')
+              : ($can_render_badge
               ? $this->t('Creates a separate Media file with “@badge” permanently embedded. The original Studio result is preserved.', [
                 '@badge' => $settings['ai_badge_text'] ?? ($is_video
                   ? $this->t('AI Video')
@@ -1544,7 +1603,7 @@ final class StudioForm extends FormBase {
               ])
               : ($is_video
                 ? $this->t('Badge rendering is unavailable because PHP GD or FFmpeg is not available to the web server. The original video can still be published.')
-                : $this->t('Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published.')),
+                : $this->t('Badge rendering is unavailable because PHP GD is not available to the web server. The original image can still be published.'))),
           ],
           'actions' => [
             '#type' => 'actions',
@@ -2177,29 +2236,20 @@ final class StudioForm extends FormBase {
           $this->t('The selected model does not support reference-to-video.'),
         );
       }
-      $replacement_id = (string) ($values['prompt'] ?? '');
-      $replacement_style_id = (string) ($values['style_prompt'] ?? '');
-      $replacement_start = trim((string) ($values['prompt_start'] ?? ''));
-      if ($replacement_id !== '' || $replacement_style_id !== '' || $replacement_start !== '') {
-        $replacement = $this->promptResolver->compose(
-          $replacement_start,
-          $replacement_id,
-          $replacement_style_id,
+      $replacement = $this->promptResolver->join($this->videoPromptParts($turn, $values));
+      if ($replacement === '') {
+        $form_state->setErrorByName(
+          'video_regeneration][prompt_start',
+          $this->t('Enter a prompt to generate a result.'),
         );
-        if ($replacement === '') {
-          $form_state->setErrorByName(
-            'video_regeneration][prompt_start',
-            $this->t('Select a valid AI Image Studio prompt.'),
-          );
-        }
-        elseif (mb_strlen($replacement) > $this->maximumPromptLength()) {
-          $form_state->setErrorByName(
-            'video_regeneration][prompt_start',
-            $this->t('The selected prompt exceeds the maximum length of @count characters.', [
-              '@count' => $this->maximumPromptLength(),
-            ]),
-          );
-        }
+      }
+      elseif (mb_strlen($replacement) > $this->maximumPromptLength()) {
+        $form_state->setErrorByName(
+          'video_regeneration][prompt_start',
+          $this->t('The selected prompt exceeds the maximum length of @count characters.', [
+            '@count' => $this->maximumPromptLength(),
+          ]),
+        );
       }
       return;
     }
@@ -2589,6 +2639,7 @@ final class StudioForm extends FormBase {
           : 1,
         'duration' => $form_state->getValue('duration'),
         'prompt' => $prompt,
+        'prompt_parts' => $form_state->get('generation_prompt_parts'),
         'transparent_background' => $form_state->getValue('transparent_background'),
         'file_type' => $form_state->getValue('file_type') ?: 'png',
         'auto_levels' => (bool) $form_state->getValue('auto_levels'),
@@ -2642,11 +2693,63 @@ final class StudioForm extends FormBase {
         '@message' => $turn->get('error_message')->value,
       ]));
     }
+    $selections = $form_state->getValues();
+    $selections['source_turn_id'] = (int) ($form_state->getValue('source_turn_id') ?: ($output_type === 'image' ? $turn->id() : 0));
+    if ($form_state->getValue('regenerate_with_new_settings')) {
+      unset($selections['start_prompt'], $selections['prompt']);
+    }
+    if ($output_type === 'video') {
+      unset($selections['prompt']);
+    }
+    $this->rememberRequestSelections((int) $session->id(), $selections);
+
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session->id(),
     ], $output_type === 'video'
       ? ['fragment' => 'ai-image-studio-turn-' . $turn->id()]
       : []);
+  }
+
+  /**
+   * Remembers selectors independently for each user's session and video form.
+   */
+  private function rememberRequestSelections(int $session_id, array $values, int $video_id = 0): void {
+    $key = $session_id . ':' . $video_id;
+    $saved = (array) $this->requestSelections->get($key);
+    foreach (['start_prompt', 'style_prompt', 'prompt', 'source_turn_id', 'output_type'] as $name) {
+      if (array_key_exists($name, $values)) {
+        $value = $values[$name];
+        $saved[$name] = is_array($value) ? (string) ($value['table'] ?? '') : $value;
+      }
+    }
+    $this->requestSelections->set($key, $saved);
+  }
+
+  /**
+   * Restores selectors only on fresh requests, preserving submitted AJAX input.
+   */
+  private function restoreRequestSelections(FormStateInterface $form_state, int $session_id, int $video_id = 0): void {
+    if ($form_state->isProcessingInput() || $form_state->isRebuilding()) {
+      return;
+    }
+    $saved = (array) $this->requestSelections->get($session_id . ':' . $video_id);
+    foreach ($saved as $name => $value) {
+      $parents = $video_id ? ['video_regeneration', $name] : [$name];
+      if ($form_state->hasValue($parents)) {
+        continue;
+      }
+      $type = match ($name) {
+        'start_prompt' => PromptResolver::START_PROMPT_TYPE,
+        'style_prompt' => PromptResolver::STYLE_PROMPT_TYPE,
+        'prompt' => PromptResolver::PROMPT_TYPE,
+        default => NULL,
+      };
+      // Deleted or reclassified library entries must not break form validation.
+      if ($type !== NULL && $this->promptResolver->resolve($value, $type) === '') {
+        $value = '';
+      }
+      $form_state->setValue($parents, $value);
+    }
   }
 
   /**
@@ -2696,14 +2799,9 @@ final class StudioForm extends FormBase {
         $sources,
       ),
     ]);
-    $prompt = $this->promptResolver->compose(
-      $values['prompt_start'] ?? '',
-      $values['prompt'] ?? '',
-      $values['style_prompt'] ?? '',
-    );
-    if ($prompt === '') {
-      $prompt = trim((string) $turn->get('prompt')->value);
-    }
+    $settings['prompt_parts'] = $this->videoPromptParts($turn, $values);
+    $prompt = $this->promptResolver->join($settings['prompt_parts']);
+    $settings['prompt'] = $prompt;
     $parent = $turn->get('parent_id')->entity;
     $result = $this->generator->generate(
       $session,
@@ -2725,6 +2823,9 @@ final class StudioForm extends FormBase {
         '@message' => $result->get('error_message')->value,
       ]));
     }
+    $this->rememberRequestSelections($session_id, $values, (int) $turn->id());
+    $this->rememberRequestSelections($session_id, $values, (int) $result->id());
+
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session_id,
     ], [
@@ -2733,23 +2834,62 @@ final class StudioForm extends FormBase {
   }
 
   /**
+   * Resolves replacements while preserving instructions for style-only edits.
+   */
+  private function videoPromptParts(object $turn, array $values): array {
+    $parts = $this->promptResolver->parts(
+      $values['prompt_start'] ?? '',
+      '',
+      $values['style_prompt'] ?? '',
+      $values['start_prompt'] ?? '',
+    );
+    if ($parts['start'] !== '') {
+      return $parts;
+    }
+    $settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $previous = $this->promptResolver->regenerateParts(
+      (string) $turn->get('prompt')->value,
+      (array) ($settings['prompt_parts'] ?? []),
+      $values['style_prompt'] ?? '',
+    );
+    return $this->promptResolver->withoutAfterPrompt($previous, empty($settings['prompt_parts']));
+  }
+
+  /**
    * Resolves the prompt submitted for a generation request.
    */
   private function generationPrompt(FormStateInterface $form_state): string {
     if (!$form_state->getValue('regenerate_with_new_settings')) {
-      return $this->promptResolver->compose(
+      $parts = $this->promptResolver->parts(
         $form_state->getValue('prompt_start'),
         $form_state->getValue('prompt'),
         $form_state->getValue('style_prompt'),
+        $form_state->getValue('start_prompt'),
       );
     }
-
-    $session_id = (int) $form_state->get('session_id');
-    $source = $this->completedTurnFromSession(
-      $session_id,
-      (int) $form_state->getValue('source_turn_id'),
-    );
-    return trim((string) ($source?->get('prompt')->value ?? ''));
+    else {
+      $source = $this->completedTurnFromSession(
+        (int) $form_state->get('session_id'),
+        (int) $form_state->getValue('source_turn_id'),
+      );
+      if ($source === NULL) {
+        return '';
+      }
+      $settings = (array) ($source->get('generation_settings')->first()?->getValue() ?? []);
+      $parts = $this->promptResolver->regenerateParts(
+        (string) $source->get('prompt')->value,
+        (array) ($settings['prompt_parts'] ?? []),
+        $form_state->getValue('style_prompt'),
+      );
+    }
+    if ($form_state->getValue('output_type') === 'video') {
+      $parts = $this->promptResolver->withoutAfterPrompt(
+        $parts,
+        (bool) $form_state->getValue('regenerate_with_new_settings') && empty($settings['prompt_parts']),
+      );
+    }
+    $form_state->set('generation_prompt_parts', $parts);
+    return $this->promptResolver->join($parts);
   }
 
   /**
@@ -2762,7 +2902,8 @@ final class StudioForm extends FormBase {
     return [
       '#type' => 'ai_image_studio_prompt',
       '#title' => $this->t('Replacement after prompt'),
-      '#description' => $this->t('Optionally append a reusable prompt after the replacement start prompt.'),
+      '#description' => $this->t('After prompts are not used for video generation. Only the selected style is applied to the video instructions.'),
+      '#disabled' => TRUE,
       '#prompt_types' => [PromptResolver::PROMPT_TYPE],
       '#default_value' => '',
       '#required' => FALSE,
@@ -2779,7 +2920,7 @@ final class StudioForm extends FormBase {
       '#options' => [],
       '#empty_option' => $this->t('- Prompt library unavailable -'),
       '#disabled' => TRUE,
-      '#description' => $this->t('The reusable AI Image Studio prompt type is missing from active configuration. The start prompt can still be used.'),
+      '#description' => $this->t('The reusable AI Image Studio prompt type is missing from active configuration. Additional instructions can still be used.'),
     ];
   }
 

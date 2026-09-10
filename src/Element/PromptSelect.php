@@ -49,6 +49,15 @@ final class PromptSelect extends AiPrompt {
     }
     natcasesort($options);
 
+    // Drupal clears form values before processing elements. The AI widget may
+    // also encounter values from other prompt subforms; use this element's
+    // explicit default on the initial build, never in place of submitted input.
+    if (!$form_state->isProcessingInput() && !$form_state->isRebuilding()) {
+      $default = $element['#default_value'] ?? '';
+      $default = is_array($default) ? ($default['table'] ?? '') : $default;
+      $element['table']['#default_value'] = isset($options[$default]) ? $default : '';
+    }
+
     $element['table']['#type'] = 'select';
     $element['table']['#weight'] = -2;
     $element['table']['#options'] = $options;

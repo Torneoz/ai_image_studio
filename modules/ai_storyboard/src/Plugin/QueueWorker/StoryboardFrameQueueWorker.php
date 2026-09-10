@@ -74,7 +74,10 @@ final class StoryboardFrameQueueWorker extends QueueWorkerBase implements Contai
       if (!$shot || !$storyboard) {
         throw new \RuntimeException('The storyboard shot is no longer available.');
       }
-      $turn = $this->storyboardManager->generateShot($storyboard, $shot);
+      $configuration = $this->database->select('ai_image_studio_vbo_job', 'j')
+        ->fields('j', ['configuration'])->condition('id', $item->job_id)->execute()->fetchField();
+      $configuration = json_decode((string) $configuration, TRUE) ?: [];
+      $turn = $this->storyboardManager->generateShot($storyboard, $shot, (array) ($configuration['badge_settings'] ?? []));
       if ($turn->get('status')->value !== 'completed') {
         throw new \RuntimeException((string) ($turn->get('error_message')->value ?: 'Frame generation did not complete.'));
       }

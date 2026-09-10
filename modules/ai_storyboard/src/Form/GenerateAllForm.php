@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Form;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_storyboard\Service\StoryboardBulkManager;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -65,6 +66,7 @@ final class GenerateAllForm extends ConfirmFormBase {
    * {@inheritdoc} */
   public function buildForm(array $form, FormStateInterface $form_state, ?object $ai_storyboard = NULL): array {
     $this->storyboard = $ai_storyboard;
+    $form['badges'] = BadgePolicy::requestControls($this->config('ai_image_studio.settings')->getRawData());
     return parent::buildForm($form, $form_state);
   }
 
@@ -74,6 +76,7 @@ final class GenerateAllForm extends ConfirmFormBase {
     $job_id = $this->bulkManager->enqueueProject(
       $this->storyboard,
       (int) $this->currentUser()->id(),
+      (array) $form_state->getValue('badges'),
     );
     $this->messenger()->addStatus($this->t('All storyboard frames have been queued.'));
     $form_state->setRedirect('ai_image_studio_vbo.job', ['job_id' => $job_id]);

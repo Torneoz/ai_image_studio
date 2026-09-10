@@ -1,0 +1,14 @@
+_meta:
+  version: '1.0'
+  entity_type: ai_image_studio_session
+  uuid: daa13750-a4db-47d6-bdc1-23f61a645bc9
+default:
+  title:
+    -
+      value: 'Demo: Dragons over Kakadu'
+  machine_name:
+    -
+      value: aiis_demo_dragons_kakadu
+  status:
+    -
+      value: active

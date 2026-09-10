@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Form;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_storyboard\Service\StoryboardManager;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -69,6 +70,7 @@ final class GenerateShotForm extends ConfirmFormBase {
     }
     $this->storyboard = $ai_storyboard;
     $this->shot = $ai_storyboard_shot;
+    $form['badges'] = BadgePolicy::requestControls($this->config('ai_image_studio.settings')->getRawData());
     return parent::buildForm($form, $form_state);
   }
 
@@ -76,7 +78,7 @@ final class GenerateShotForm extends ConfirmFormBase {
    * {@inheritdoc} */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
-      $turn = $this->manager->generateShot($this->storyboard, $this->shot);
+      $turn = $this->manager->generateShot($this->storyboard, $this->shot, (array) $form_state->getValue('badges'));
       if ($turn->get('status')->value === 'completed') {
         $this->messenger()->addStatus($this->t('The storyboard frame has been generated.'));
       }

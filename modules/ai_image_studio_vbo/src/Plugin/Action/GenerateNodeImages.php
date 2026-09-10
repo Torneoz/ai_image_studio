@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_image_studio_vbo\Plugin\Action;
 
+use Drupal\ai_image_studio\Service\BadgePolicy;
 use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_image_studio_vbo\Service\BulkGenerationManager;
 use Drupal\Component\Utility\NestedArray;
@@ -230,11 +231,12 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
       // phpcs:enable DrupalPractice.General.OptionsT.TforValue
       '#default_value' => $configuration['file_type'],
     ];
+    $configuration = $this->generator->badgeSettings($configuration);
     $can_render_badge = $this->generator->canRenderBadge(FALSE);
     $form['image_settings']['show_ai_badge'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Render an AI badge into saved Media files'),
-      '#default_value' => $can_render_badge && $configuration['show_ai_badge'],
+      '#default_value' => $this->generator->badgesRequired() || ($can_render_badge && $configuration['show_ai_badge']),
       '#disabled' => !$can_render_badge,
       '#description' => $can_render_badge
         ? $this->t('Creates a separate Media file with the badge permanently embedded. The original Studio result is preserved.')
@@ -267,6 +269,19 @@ final class GenerateNodeImages extends ViewsBulkOperationsActionBase implements 
         ],
       ],
     ];
+    $form['image_settings']['badges'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Badges'),
+      '#open' => FALSE,
+    ];
+    foreach (['show_ai_badge', 'ai_badge_text', 'ai_badge_position'] as $key) {
+      $form['image_settings']['badges'][$key] = $form['image_settings'][$key];
+      unset($form['image_settings'][$key]);
+    }
+    $form['image_settings']['badges'] = BadgePolicy::lockControls(
+      $form['image_settings']['badges'],
+      $this->generator->badgesRequired(),
+    );
     $form['publishing'] = [
       '#type' => 'details',
       '#title' => $this->t('Media publishing'),

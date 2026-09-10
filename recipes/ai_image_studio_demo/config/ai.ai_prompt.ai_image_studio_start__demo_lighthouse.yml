@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - ai.ai_prompt_type.ai_image_studio_start
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_start__demo_lighthouse
+label: 'Demo: Lighthouse at dusk'
+type: ai_image_studio_start
+prompt: 'A small white lighthouse with a red roof stands on a rocky headland at dusk. Waves break below and a winding path leads toward the lighthouse.'

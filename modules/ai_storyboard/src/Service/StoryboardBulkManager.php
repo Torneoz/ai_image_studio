@@ -27,9 +27,10 @@ final class StoryboardBulkManager {
 
   /**
    * Queues all current shots in a storyboard and returns the new job ID. */
-  public function enqueueProject(object $storyboard, int $uid): int {
+  public function enqueueProject(object $storyboard, int $uid, array $badge_settings = []): int {
     $now = $this->time->getRequestTime();
     $configuration = json_encode([
+      'badge_settings' => $badge_settings,
       'source_type' => 'storyboard',
       'storyboard_id' => (int) $storyboard->id(),
     ], JSON_THROW_ON_ERROR);
@@ -169,6 +170,7 @@ final class StoryboardBulkManager {
       try {
         $aspect_ratio = (string) $storyboard->get('aspect_ratio')->value;
         $generation_settings = [
+          'show_ai_badge' => $settings['show_ai_badge'] ?? TRUE,
           'duration' => (int) $settings['duration'],
           'resolution' => (string) $settings['resolution'],
           'aspect_ratio' => in_array($aspect_ratio, ['1:1', '16:9', '9:16', '4:3'], TRUE)

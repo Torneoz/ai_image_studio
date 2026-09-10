@@ -1,0 +1,25 @@
+_meta:
+  version: '1.0'
+  entity_type: ai_storyboard_scene
+  uuid: 53f56dda-c79d-41a9-b3ad-3e136cb9206e
+  depends:
+    e738e437-b902-4700-87e4-7939de19ec03: ai_storyboard
+default:
+  title:
+    -
+      value: 'Demo: Sunrise over the escarpment'
+  storyboard_id:
+    -
+      entity: e738e437-b902-4700-87e4-7939de19ec03
+  scene_number:
+    -
+      value: 1
+  conditions:
+    -
+      value: 'Exterior, sunrise, clear sky'
+  bible_snapshot:
+    -
+      value: 'Sandstone escarpments, eucalyptus woodland and a winding river in Kakadu. Warm sunlight from the right of frame.'
+  action:
+    -
+      value: 'Three dragons emerge above the cliffs, follow the river and climb toward the horizon.'

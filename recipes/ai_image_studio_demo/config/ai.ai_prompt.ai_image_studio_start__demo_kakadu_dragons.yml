@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - ai.ai_prompt_type.ai_image_studio_start
+  enforced:
+    module:
+      - ai_image_studio
+id: ai_image_studio_start__demo_kakadu_dragons
+label: 'Demo: Dragons over Kakadu'
+type: ai_image_studio_start
+prompt: 'Three dragons glide above the sandstone escarpments and winding waterways of Kakadu at sunrise. Keep all three dragons clearly visible with distinct silhouettes.'

@@ -11,6 +11,10 @@ Drupal Media.
 
 ## Features
 
+For optional example Start prompts, a demo session and a three-shot storyboard,
+see [the demo recipes](recipes/README.md). Demo data is installed only when a
+recipe is explicitly applied.
+
 - Persistent image sessions with a chat-like prompt and version history.
 - Immutable logical-request history with explicit creation order, requested
   and effective setting snapshots, and session re-rendering into a new session.
@@ -59,10 +63,36 @@ Drupal Media.
 - Optional AI Storyboard submodule for turning scripts into editable,
   continuity-aware shot plans and versioned generated frames.
 
+The session form also supports reusable Start prompts (type
+`ai_image_studio_start`), followed by optional Additional instructions, Style,
+and After prompt. Badge controls are in collapsed Badges sections. Regenerate
+with new settings keeps the selected version’s instructions and applies the
+selected style; leaving Style empty keeps the previous style. New Studio turns
+store resolved prompt parts so changing style replaces the previous style.
+Older turns retain their combined prompt and append the selected style.
+After prompts are disabled for video requests and excluded from video generation
+and regeneration. Start instructions and Style still apply. Image requests retain
+their After prompt selection when switching output type.
+The selected source image, creation mode and reusable Start, Style and After
+prompts are remembered per user and session after generation. Video regeneration
+also retains its prompt selections. One-off additional instructions reset.
+After updating an existing installation, run `drush updb` and `drush cr` to
+install the Start prompt type and refresh the form.
+
+Corporate settings are visible only to accounts with both settings-page access
+and `edit image studio corporate`. **Require AI badges** prevents editors from
+changing badge controls in Studio, compact Media, bulk image and storyboard
+requests. Disabled controls remain under Badges with “Badge removal is not
+possible”. The requirement is enforced again during generation, queued
+processing and Media publishing. It defaults to off; badge defaults remain on.
+
 External modules can add styles without an integration module by shipping an
 `ai.ai_prompt.*` configuration entity whose `type` is
 `ai_image_studio_style`. Use an enforced dependency on the module that owns the
 style so Drupal removes its configuration when that module is uninstalled.
+
+For the proposed optional AI Metering integration, current event coverage and
+media-accounting gaps, see [the integration assessment](docs/ai-metering-integration.md).
 
 Image requests run synchronously. Video requests are queued by default. Studio
 starts one queued item after each web response and its five-second status

@@ -1,0 +1,29 @@
+_meta:
+  version: '1.0'
+  entity_type: ai_storyboard
+  uuid: e738e437-b902-4700-87e4-7939de19ec03
+default:
+  title:
+    -
+      value: 'Demo: Dragons over Kakadu'
+  machine_name:
+    -
+      value: aiis_demo_dragons_storyboard
+  script:
+    -
+      value: "EXT. KAKADU ESCARPMENT - SUNRISE\nThree dragons emerge above the sandstone cliffs.\nThey glide together over a winding river.\nThe dragons rise toward the sun and disappear over the distant escarpment."
+  creative_brief:
+    -
+      value: 'A peaceful fifteen-second fantasy sequence in three five-second shots. Establish the landscape, follow the flight, then reveal the horizon.'
+  continuity_bible:
+    -
+      value: 'Exactly three dragons: one rust-red leader, one ochre dragon and one deep-teal dragon. Keep their colours, relative sizes and direction of travel consistent. Sandstone cliffs, eucalyptus woodland and a winding river; sunrise throughout.'
+  visual_style:
+    -
+      value: 'Colour comic-book illustration with bold ink contours and graphic shadows'
+  aspect_ratio:
+    -
+      value: '16:9'
+  status:
+    -
+      value: draft

@@ -59,6 +59,24 @@ final class ImageGenerator {
   ) {}
 
   /**
+   * Reports whether corporate policy prevents badge removal.
+   */
+  public function badgesRequired(): bool {
+    return (bool) $this->configFactory->get('ai_image_studio.settings')->get('require_ai_badges');
+  }
+
+  /**
+   * Applies badge defaults and the corporate requirement across entry points.
+   */
+  public function badgeSettings(array $settings, bool $video = FALSE): array {
+    return BadgePolicy::apply(
+      $settings,
+      $this->configFactory->get('ai_image_studio.settings')->getRawData(),
+      $video,
+    );
+  }
+
+  /**
    * Returns configured provider/model options for an operation.
    */
   public function getModelOptions(string $operation): array {
@@ -186,6 +204,7 @@ final class ImageGenerator {
     ?object $replay_of = NULL,
     ?int $sequence = NULL,
   ): object {
+    $generation_settings = $this->badgeSettings($generation_settings, $output_type === 'video');
     $requested_generation_settings = $generation_settings;
     $source ??= $parent ? $this->turnSourceImage($parent) : NULL;
     $reference_ids = array_values(array_unique(array_filter(array_map(
@@ -300,6 +319,8 @@ final class ImageGenerator {
     $provider_id = (string) $turn->get('provider_id')->value;
     $model_id = (string) $turn->get('model_id')->value;
     $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+    $generation_settings = $this->badgeSettings($generation_settings, $output_type === 'video');
+    $turn->set('generation_settings', $generation_settings);
     if ($turn->get('provider_request_id')->isEmpty()) {
       $turn->set('attempt_count', (int) $turn->get('attempt_count')->value + 1);
     }
@@ -861,8 +882,10 @@ final class ImageGenerator {
         'The generated file is unavailable.',
       ));
     }
+    $render_badge = $render_badge || $this->badgesRequired();
     if ($render_badge) {
       $generation_settings = (array) ($turn->get('generation_settings')->first()?->getValue() ?? []);
+      $generation_settings = $this->badgeSettings($generation_settings, $is_video);
       $badge_text = trim((string) ($generation_settings['ai_badge_text'] ?? (
         $is_video ? 'AI Video' : 'AI Image'
       )));
