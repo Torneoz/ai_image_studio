@@ -31,7 +31,7 @@ $check(!isset($controls['show_ai_badge']['#disabled']), 'Unlocked request contro
 $config['require_ai_badges'] = TRUE;
 foreach ([FALSE, TRUE] as $video) {
   $result = BadgePolicy::apply(['show_ai_badge' => FALSE, 'ai_badge_text' => '', 'ai_badge_class' => 'hide', 'duration' => 8], $config, $video);
-  $check($result['show_ai_badge'] === TRUE && $result['ai_badge_text'] !== '' && $result['ai_badge_class'] === $config['default_ai_badge_class'] && $result['duration'] === 8, 'Locked requests reject badge removal and hidden/blank badge overrides, retaining other settings');
+  $check($result['show_ai_badge'] === TRUE && $result['ai_badge_text'] !== '' && $result['ai_badge_class'] === ($config['default_ai_badge_class'] ?? '') && $result['duration'] === 8, 'Locked requests reject badge removal and hidden/blank badge overrides, retaining other settings');
 }
 $controls = BadgePolicy::requestControls($config);
 $check($controls['#open'] === FALSE && $controls['show_ai_badge']['#disabled'] && $controls['show_ai_badge']['#default_value'], 'Locked fieldset remains collapsed with a checked disabled checkbox');
