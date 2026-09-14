@@ -6,19 +6,6 @@ of AI Image Studio.
 
 ## Product direction
 
-Research completed on 7 September 2026 found four recurring capabilities in
-leading storyboard products:
-
-1. Script-to-shot structure with editable action, dialogue, sound, and camera
-   fields (Boords and StoryboardHero).
-2. Persistent character, environment, prop, and brand references across shots
-   (LTX Studio and StoryboardHero).
-3. Selective shot regeneration and version retention instead of rebuilding a
-   whole board (Boords and LTX Studio).
-4. Timing, animatics, exports, comments, and approvals as the handoff layer
-   between creative development and production (Boords, KROCK.IO, and
-   Storyboarder).
-
 The first release implements the foundation: structured AI breakdown,
 editable continuity and character prompt bibles, production fields, shot timing and status, and
 versioned frame generation backed by AI Image Studio. Generate All uses the
@@ -28,15 +15,6 @@ used in consecutive pairs to create configurable in-fill video sequences through
 the same Bulk Jobs facility. Animatics, PDF/CSV
 exports, annotations, and guest approval links are
 the next logical increments.
-
-Primary product sources:
-
-- https://boords.com/ai-script-generator
-- https://assets.boords.com/docs/script-to-storyboard
-- https://ltx.io/blog/ltx-studio-tutorial
-- https://storyboardhero.ai/features
-- https://krock.io/features/
-- https://wonderunit.com/storyboarder/
 
 ## Usage
 

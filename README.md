@@ -21,6 +21,10 @@ recipe is explicitly applied.
 - Text-to-image generation through compatible Drupal AI providers.
 - Sequential image refinement when the selected provider and model support
   image-to-image requests.
+- Gemini image editing is supported when `gemini_provider` is enabled and a
+  Gemini image model is configured. The project-owned adapter sends the source
+  image and editing prompt together through Gemini's multimodal
+  `generateContent` API.
 - Text-to-video and image-to-video generation through compatible providers.
 - Video sequence chaining using the last decodable frame of a completed video,
   plus an experimental FFmpeg action for joining compatible session videos.
@@ -220,12 +224,6 @@ lighting, prompt, and continuity fields. Each frame is generated through AI
 Image Studio, preserving provider metadata, cost information, and the earlier
 turn when a shot is regenerated. See
 [`modules/ai_storyboard/README.md`](modules/ai_storyboard/README.md).
-
-## Similar projects
-
-AI Image Studio differs from one-shot image generators by preserving a
-session-based refinement history, request metadata, usage information, and
-cost feedback through the full editing workflow.
 
 ## Test harness
 

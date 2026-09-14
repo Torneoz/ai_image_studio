@@ -7,6 +7,22 @@
 
 declare(strict_types=1);
 
+/**
+ * Implements hook_ai_provider_info_alter().
+ *
+ * Keep Gemini support project-owned: the optional contrib provider remains
+ * untouched and can be updated independently.
+ */
+function ai_image_studio_ai_provider_info_alter(array &$info): void {
+  if (!isset($info['gemini']['class'])
+    || !class_exists(\Drupal\gemini_provider\Plugin\AiProvider\GeminiProvider::class)
+    || !class_exists(\Drupal\ai_image_studio\Plugin\AiProvider\GeminiImageProvider::class)) {
+    return;
+  }
+
+  $info['gemini']['class'] = \Drupal\ai_image_studio\Plugin\AiProvider\GeminiImageProvider::class;
+}
+
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;

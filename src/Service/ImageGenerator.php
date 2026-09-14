@@ -80,7 +80,18 @@ final class ImageGenerator {
    * Returns configured provider/model options for an operation.
    */
   public function getModelOptions(string $operation): array {
-    return $this->providerManager->getSimpleProviderModelOptions($operation, TRUE);
+    $options = $this->providerManager->getSimpleProviderModelOptions($operation, TRUE);
+    $seen_labels = [];
+    $deduplicated = [];
+    foreach ($options as $value => $label) {
+      $label_key = (string) $label;
+      if (isset($seen_labels[$label_key])) {
+        continue;
+      }
+      $seen_labels[$label_key] = TRUE;
+      $deduplicated[$value] = $label;
+    }
+    return $deduplicated;
   }
 
   /**
