@@ -4,6 +4,7 @@ description: 'Turns scripts into editable, continuity-aware storyboards using Dr
 package: 'AI'
 lifecycle: experimental
 core_version_requirement: ^10.3 || ^11
+configure: ai_storyboard.settings
 dependencies:
   - ai:ai
   - ai_image_studio:ai_image_studio
