@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 
 /**
  * Exports generated storyboard frames as image collections and animatics.
@@ -220,14 +221,17 @@ final class StoryboardExportController extends ControllerBase {
       count($frames),
     );
     $command = array_merge($command, [
+      '-filter_threads', '1',
+      '-filter_complex_threads', '1',
       '-filter_complex', implode(';', $filters),
       '-map', '[outv]',
       '-map', '[outa]',
       '-c:a', 'aac',
       '-b:a', '192k',
       '-c:v', 'libx264',
-      '-preset', 'medium',
+      '-preset', 'ultrafast',
       '-crf', '20',
+      '-threads', '1',
       '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart',
       '-f', 'mp4',
@@ -236,7 +240,14 @@ final class StoryboardExportController extends ControllerBase {
 
     $process = new Process($command);
     $process->setTimeout(900);
-    $process->run();
+    try {
+      $process->run();
+    }
+    catch (ProcessSignaledException $exception) {
+      @unlink($output_path);
+      $this->messenger()->addError($this->t('The MP4 export process was terminated by the server. Try exporting fewer or shorter clips at a time.'));
+      return new RedirectResponse($ai_storyboard->toUrl()->toString());
+    }
     if (!$process->isSuccessful() || !is_file($output_path)
       || filesize($output_path) === 0) {
       @unlink($output_path);
