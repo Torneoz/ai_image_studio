@@ -12,3 +12,4 @@ dependencies:
   - drupal:options
   - drupal:user
   - drupal:views
+  - views_bulk_operations:views_bulk_operations
