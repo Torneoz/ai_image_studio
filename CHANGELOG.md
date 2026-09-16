@@ -65,6 +65,17 @@
 
 All notable changes to AI Image Studio are documented in this file.
 
+## 1.0.0-beta10
+
+- Added the experimental AI Storyboard module with script breakdown, editable
+  continuity-aware projects, supplied Views, media generation, sequence
+  chaining, bulk generation, and script/MP4 exports.
+- Added provider-aware video prompt limits, UTF-8 byte budgeting for Grok,
+  optional AI Observability reporting, and lower-resource storyboard MP4
+  exports.
+- Declared Views Bulk Operations for the main module so supplied Views install
+  correctly on fresh sites.
+
 ## 1.0.0-beta9
 
 - Added a proof-of-concept session action that joins compatible completed

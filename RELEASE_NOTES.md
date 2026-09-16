@@ -1,4 +1,60 @@
-# AI Image Studio 1.0.0-beta9
+# AI Image Studio 1.0.0-beta10
+
+AI Image Studio 1.0.0-beta10 extends the beta9 release with the first
+integrated AI Storyboard workflow, richer exports, sequence generation, and
+additional installation and provider compatibility fixes.
+
+This remains a beta release. Test provider behaviour, private files, queue
+processing, FFmpeg and Imagick availability, and content-field destinations in
+a non-production environment before deployment.
+
+## Highlights
+
+### AI Storyboard
+
+- Added the experimental `ai_storyboard` module for turning scripts into
+  editable, continuity-aware storyboards.
+- Added storyboard projects, narratives, locations, characters, scenes, cast,
+  and shots with access-controlled Views integration.
+- Added queued script breakdown and incremental rebuilds that preserve existing
+  storyboard content.
+- Added storyboard image generation, video sequences, bulk generation, and
+  continuity-aware image-to-video chaining.
+- Added storyboard exports for JSON, Fountain, Final Draft FDX, Open
+  Screenplay Format, RTF, and original source text.
+- Added storyboard MP4 export with generated video and audio support.
+
+### Provider and workflow fixes
+
+- Added provider-aware video prompt budgeting, including UTF-8 byte limits for
+  Grok video prompts.
+- Added optional AI Observability lifecycle reporting for media generation and
+  storyboard breakdowns.
+- Improved prompt controls, badge policy, collapsed result sections, and
+  storyboard video prompt composition.
+- Reduced storyboard MP4 export resource usage.
+- Added the AI Storyboard Configure link and marked the module experimental.
+- Declared Views Bulk Operations as a dependency of the main module so fresh
+  installs can import the supplied session and turn Views correctly.
+
+## Upgrade notes
+
+1. Back up the site and deploy the new code.
+2. Run Drupal database updates and rebuild caches:
+
+   ```shell
+   drush updb
+   drush cr
+   ```
+
+3. If using AI Storyboard, enable `ai_storyboard` after reviewing its required
+   AI Image Studio and Views dependencies.
+4. Review the new Storyboard permissions and supplied Views before exposing
+   them to editors.
+5. Confirm FFmpeg is available before enabling storyboard video sequences or
+   MP4 exports.
+
+---
 
 AI Image Studio 1.0.0-beta9 expands the module from an individual generation
 workspace into a broader editorial asset-production system. This release adds
