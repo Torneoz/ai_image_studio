@@ -18,3 +18,19 @@ function ai_narration_update_10001(): string {
   }
   return 'Installed AI Narration project and chapter storage.';
 }
+
+function ai_narration_update_10002(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_project');
+  $field = \Drupal\ai_narration\Entity\NarrationProject::baseFieldDefinitions($type)['voice'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('voice', 'ai_narration_project', 'ai_narration_project', $field);
+  return 'Added the narration project default voice field.';
+}
+
+function ai_narration_update_10003(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_project');
+  $fields = \Drupal\ai_narration\Entity\NarrationProject::baseFieldDefinitions($type);
+  foreach (['format', 'speed', 'text_normalization'] as $name) {
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'ai_narration_project', 'ai_narration_project', $fields[$name]);
+  }
+  return 'Added narration project output defaults.';
+}

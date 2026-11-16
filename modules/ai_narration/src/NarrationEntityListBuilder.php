@@ -15,12 +15,26 @@ final class NarrationEntityListBuilder extends EntityListBuilder {
 
   /** {@inheritdoc} */
   public function buildHeader(): array {
-    return ['title' => $this->t('Title')] + parent::buildHeader();
+    $header = ['title' => $this->t('Title')];
+    if ($this->entityTypeId === 'ai_narration_project') {
+      $header += ['model' => $this->t('Model'), 'voice' => $this->t('Voice')];
+    }
+    if ($this->entityTypeId === 'ai_narration_chapter') {
+      $header += ['project' => $this->t('Project'), 'position' => $this->t('Position'), 'status' => $this->t('Status')];
+    }
+    return $header + parent::buildHeader();
   }
 
   /** {@inheritdoc} */
   public function buildRow(EntityInterface $entity): array {
-    return ['title' => $entity->toLink('edit-form')] + parent::buildRow($entity);
+    $row = ['title' => $entity->toLink(NULL, 'edit-form')];
+    if ($this->entityTypeId === 'ai_narration_project') {
+      $row += ['model' => $entity->get('model')->value ?: '—', 'voice' => $entity->get('voice')->value ?: $this->t('Provider default')];
+    }
+    if ($this->entityTypeId === 'ai_narration_chapter') {
+      $row += ['project' => $entity->get('project_id')->entity?->label() ?: '—', 'position' => $entity->get('position')->value, 'status' => $entity->get('status')->value];
+    }
+    return $row + parent::buildRow($entity);
   }
 
   /** {@inheritdoc} */

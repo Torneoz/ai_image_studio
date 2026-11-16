@@ -42,6 +42,18 @@ entity.ai_narration_project.edit_form:
       ai_narration_project:
         type: entity:ai_narration_project
 
+entity.ai_narration_project.canonical:
+  path: '/admin/content/ai-narration/projects/{ai_narration_project}'
+  defaults:
+    _entity_view: 'ai_narration_project.full'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _permission: 'administer ai narration'
+  options:
+    parameters:
+      ai_narration_project:
+        type: entity:ai_narration_project
+
 entity.ai_narration_chapter.collection:
   path: '/admin/content/ai-narration/chapters'
   defaults:
@@ -63,6 +75,18 @@ entity.ai_narration_chapter.edit_form:
   defaults:
     _entity_form: 'ai_narration_chapter.edit'
     _title: 'Edit narration chapter'
+  requirements:
+    _permission: 'administer ai narration'
+  options:
+    parameters:
+      ai_narration_chapter:
+        type: entity:ai_narration_chapter
+
+entity.ai_narration_chapter.canonical:
+  path: '/admin/content/ai-narration/chapters/{ai_narration_chapter}'
+  defaults:
+    _entity_view: 'ai_narration_chapter.full'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
   requirements:
     _permission: 'administer ai narration'
   options:

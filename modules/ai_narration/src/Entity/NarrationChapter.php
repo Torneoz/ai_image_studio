@@ -21,8 +21,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   handlers: [
     'list_builder' => 'Drupal\ai_narration\NarrationEntityListBuilder',
     'form' => [
-      'add' => 'Drupal\Core\Entity\ContentEntityForm',
-      'edit' => 'Drupal\Core\Entity\ContentEntityForm',
+      'add' => 'Drupal\ai_narration\Form\NarrationChapterForm',
+      'edit' => 'Drupal\ai_narration\Form\NarrationChapterForm',
       'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
     ],
     'route_provider' => ['html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider'],
