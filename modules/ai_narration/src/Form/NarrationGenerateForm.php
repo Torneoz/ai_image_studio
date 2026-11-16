@@ -111,22 +111,48 @@ final class NarrationGenerateForm extends FormBase {
         '#description' => $this->t('The selected provider determines the available formats.'),
       ];
     }
-    $form['actions']['submit'] = ['#type' => 'submit', '#value' => $this->t('Generate narration'), '#disabled' => $options === []];
-    if ($audioUrl = $form_state->get('audio_url')) {
-      $form['result'] = [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['ai-narration-result']],
-      ];
-      $form['result']['player'] = [
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Generate narration'),
+      '#disabled' => $options === [],
+      '#ajax' => [
+        'callback' => '::ajaxSubmit',
+        'wrapper' => 'ai-narration-feedback',
+        'progress' => [
+          'type' => 'throbber',
+          'message' => $this->t('Generating narration…'),
+        ],
+      ],
+    ];
+    $form['feedback'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'ai-narration-feedback', 'class' => ['ai-narration-result']],
+    ];
+    if ($result = $form_state->get('result')) {
+      $form['feedback']['message'] = ['#markup' => '<p><strong>' . $this->t('Narration generated.') . '</strong></p>'];
+      $form['feedback']['player'] = [
         '#type' => 'html_tag',
         '#tag' => 'audio',
-        '#attributes' => ['controls' => TRUE, 'src' => $audioUrl],
+        '#attributes' => ['controls' => TRUE, 'src' => $result['url']],
       ];
-      $form['result']['download'] = [
+      $form['feedback']['download'] = [
         '#type' => 'link',
         '#title' => $this->t('Download generated narration'),
-        '#url' => Url::fromUri($audioUrl),
+        '#url' => Url::fromUri($result['url']),
         '#attributes' => ['download' => TRUE],
+      ];
+      $form['feedback']['metadata'] = [
+        '#theme' => 'item_list',
+        '#title' => $this->t('Generation details'),
+        '#items' => [
+          $this->t('Model: @model', ['@model' => $result['model']]),
+          $result['voice'] === '' ? $this->t('Voice: provider default') : $this->t('Voice: @voice', ['@voice' => $result['voice']]),
+          $result['format'] === '' ? $this->t('Format: provider default') : $this->t('Format: @format', ['@format' => strtoupper($result['format'])]),
+          $this->t('Input: @characters characters', ['@characters' => $result['characters']]),
+          $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
+          $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
+          $this->t('Provider-reported price: unavailable'),
+        ],
       ];
     }
     return $form;
@@ -139,6 +165,13 @@ final class NarrationGenerateForm extends FormBase {
     return $form['voice_wrapper'];
   }
 
+  /**
+   * Returns completed generation feedback to the AJAX request.
+   */
+  public function ajaxSubmit(array &$form, FormStateInterface $form_state): array {
+    return $form['feedback'];
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
       $text = (string) $form_state->getValue('text');
@@ -149,9 +182,19 @@ final class NarrationGenerateForm extends FormBase {
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
+      $started = microtime(TRUE);
       $file = $this->generator->generate($text, $model, $voice, $format);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
-      $form_state->set('audio_url', $url);
+      $form_state->set('result', [
+        'url' => $url,
+        'model' => $model,
+        'voice' => $voice,
+        'format' => $format,
+        'characters' => mb_strlen($text),
+        'bytes' => $file->getSize(),
+        'mime' => $file->getMimeType(),
+        'seconds' => microtime(TRUE) - $started,
+      ]);
       $form_state->setRebuild();
       $this->messenger()->addStatus($this->t('Narration generated. Use the player below to preview or download it.'));
     }
