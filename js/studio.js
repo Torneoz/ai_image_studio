@@ -50,6 +50,17 @@
                 selectedCard.dataset.aiImageStudioSourceTitle || '';
             }
 
+            const regenerate = studio.querySelector(
+              'input[name="regenerate_with_new_settings"]',
+            );
+            const additionalInstructions = studio.querySelector(
+              '[name="prompt_start"]',
+            );
+            if (regenerate?.checked && additionalInstructions) {
+              additionalInstructions.value =
+                selectedCard.dataset.aiImageStudioSourcePrompt || '';
+            }
+
             const selectedImage = selectedCard.querySelector(
               '.ai-image-studio-turn__image, .ai-image-studio-last-frame',
             );
@@ -132,6 +143,21 @@
                 selectSource(choice);
               }
             });
+          });
+
+          const regenerate = studio.querySelector(
+            'input[name="regenerate_with_new_settings"]',
+          );
+          regenerate?.addEventListener('change', () => {
+            if (!regenerate.checked) {
+              return;
+            }
+            const selectedChoice = Array.from(choices).find(
+              (choice) => choice.checked,
+            );
+            if (selectedChoice) {
+              selectSource(selectedChoice);
+            }
           });
 
           const compileChoices = studio.querySelectorAll(

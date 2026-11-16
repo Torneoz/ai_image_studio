@@ -1365,6 +1365,7 @@ final class StudioForm extends FormBase {
         ]),
         'data-ai-image-studio-turn' => (string) $turn->id(),
         'data-ai-image-studio-source-title' => (string) $heading,
+        'data-ai-image-studio-source-prompt' => $prompt,
         'id' => 'ai-image-studio-turn-' . $turn->id(),
       ],
       'header' => [
