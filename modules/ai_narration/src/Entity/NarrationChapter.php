@@ -19,7 +19,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   label: new TranslatableMarkup('AI narration chapter'),
   label_collection: new TranslatableMarkup('AI narration chapters'),
   handlers: [
-    'list_builder' => 'Drupal\Core\Entity\EntityListBuilder',
+    'list_builder' => 'Drupal\ai_narration\NarrationEntityListBuilder',
     'form' => [
       'add' => 'Drupal\Core\Entity\ContentEntityForm',
       'edit' => 'Drupal\Core\Entity\ContentEntityForm',

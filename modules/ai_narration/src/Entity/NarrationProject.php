@@ -21,7 +21,7 @@ use Drupal\user\EntityOwnerTrait;
   label: new TranslatableMarkup('AI narration project'),
   label_collection: new TranslatableMarkup('AI narration projects'),
   handlers: [
-    'list_builder' => 'Drupal\Core\Entity\EntityListBuilder',
+    'list_builder' => 'Drupal\ai_narration\NarrationEntityListBuilder',
     'form' => [
       'add' => 'Drupal\Core\Entity\ContentEntityForm',
       'edit' => 'Drupal\Core\Entity\ContentEntityForm',
