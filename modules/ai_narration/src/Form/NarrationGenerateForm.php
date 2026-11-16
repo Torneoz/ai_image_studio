@@ -6,6 +6,8 @@ namespace Drupal\ai_narration\Form;
 
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -70,6 +72,7 @@ final class NarrationGenerateForm extends FormBase {
     $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
     $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
     $savedFormat = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_format') ?? '');
+    $textDefault = (string) ($form_state->getValue('text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
     $form['text'] = [
@@ -78,12 +81,17 @@ final class NarrationGenerateForm extends FormBase {
       '#description' => $this->t('Use only text you are authorized to turn into speech. Your selected provider applies its own length and content limits.'),
       '#required' => TRUE,
       '#rows' => 10,
-      '#default_value' => $form_state->getValue('text') ?? $savedText,
+      '#default_value' => $textDefault,
       '#attributes' => ['data-ai-narration-text' => TRUE],
     ];
+    $limit = $this->generator->getInputCharacterLimit($model);
+    $limitLabel = $limit === NULL
+      ? $this->t('No application limit is available for this provider.')
+      : $this->t('Limit: @limit characters', ['@limit' => number_format($limit)]);
     $form['text_count'] = [
       '#type' => 'item',
-      '#markup' => '<span data-ai-narration-character-count>0</span> ' . $this->t('characters'),
+      '#attributes' => ['id' => 'ai-narration-text-count'],
+      '#markup' => '<span data-ai-narration-character-count>' . mb_strlen($textDefault) . '</span> ' . $this->t('characters') . ' · ' . $limitLabel,
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
     $form['model'] = [
@@ -94,7 +102,7 @@ final class NarrationGenerateForm extends FormBase {
       '#required' => TRUE,
       '#empty_option' => $this->t('- Select a voice -'),
       '#description' => $options === [] ? $this->t('No usable text-to-speech provider is configured.') : $this->t('Voices are supplied by the enabled Drupal AI providers.'),
-      '#ajax' => ['callback' => '::refreshVoice', 'wrapper' => 'ai-narration-voice'],
+      '#ajax' => ['callback' => '::refreshModelOptions'],
     ];
     $voices = $this->generator->getVoiceOptions($model);
     $form['voice_wrapper'] = ['#type' => 'container', '#attributes' => ['id' => 'ai-narration-voice']];
@@ -167,8 +175,11 @@ final class NarrationGenerateForm extends FormBase {
   /**
    * Rebuilds request-level voices after a model changes.
    */
-  public function refreshVoice(array &$form, FormStateInterface $form_state): array {
-    return $form['voice_wrapper'];
+  public function refreshModelOptions(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#ai-narration-voice', $form['voice_wrapper']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-text-count', $form['text_count']));
+    return $response;
   }
 
   /**

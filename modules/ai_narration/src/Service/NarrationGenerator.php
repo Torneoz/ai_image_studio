@@ -71,6 +71,22 @@ final class NarrationGenerator {
   }
 
   /**
+   * Returns the maximum safe text request size for the selected model.
+   *
+   * OpenAI publishes a 4,096-character input limit for its TTS models.
+   * Gemini exposes token-based limits rather than a stable character limit,
+   * so its value is the application's conservative request safeguard.
+   */
+  public function getInputCharacterLimit(string $modelOption): ?int {
+    $provider = explode('__', $modelOption, 2)[0] ?? '';
+    return match ($provider) {
+      'openai' => 4096,
+      'gemini' => 10000,
+      default => NULL,
+    };
+  }
+
+  /**
    * Synthesizes text and saves the first returned audio stream as a file.
    */
   public function generate(string $text, string $modelOption, string $voice = '', string $format = ''): FileInterface {
