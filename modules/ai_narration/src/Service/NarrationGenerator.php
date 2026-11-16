@@ -64,10 +64,19 @@ final class NarrationGenerator {
    */
   private function getElevenLabsVoiceOptions(string $modelOption): array {
     try {
-      [, $modelId] = $this->parseModelOption($modelOption);
-      $provider = $this->providerManager->createInstance('elevenlabs');
-      $settings = $provider->getModelSettings($modelId);
-      return $settings['voice']['constraints']['options'] ?? [];
+      if (!\Drupal::hasService('elevenlabs.api')) {
+        return [];
+      }
+      $voices = \Drupal::service('elevenlabs.api')->getVoices()['voices'] ?? [];
+      $options = [];
+      foreach ($voices as $voice) {
+        if (!empty($voice['name']) && !empty($voice['voice_id'])) {
+          $value = $voice['name'] . ' :: ' . $voice['voice_id'];
+          $options[$value] = $value;
+        }
+      }
+      natcasesort($options);
+      return $options;
     }
     catch (\Throwable $exception) {
       $this->logger->warning('Could not load ElevenLabs voices: @message', ['@message' => $exception->getMessage()]);
@@ -124,7 +133,9 @@ final class NarrationGenerator {
       $configuration = match ($providerId) {
         'openai' => $voice !== '' ? ['voice' => $voice] : [],
         'gemini' => $voice !== '' ? ['voiceName' => $voice] : [],
-        'elevenlabs' => $voice !== '' ? ['voice' => $voice] : [],
+        // The ElevenLabs Drupal provider reads these from its configuration,
+        // rather than from the model argument supplied to textToSpeech().
+        'elevenlabs' => $voice !== '' ? ['model' => $modelId, 'voice' => $voice] : [],
         default => [],
       };
       if ($providerId === 'elevenlabs' && $voice === '') {
