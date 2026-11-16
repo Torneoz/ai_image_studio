@@ -1,0 +1,12 @@
+ai_narration.generate:
+  title: 'AI Narration'
+  description: 'Turn text into spoken audio.'
+  route_name: ai_narration.generate
+  parent: ai_image_studio.collection
+  weight: 5
+
+ai_narration.settings:
+  title: 'Narration settings'
+  route_name: ai_narration.settings
+  parent: ai_narration.generate
+  weight: 10
