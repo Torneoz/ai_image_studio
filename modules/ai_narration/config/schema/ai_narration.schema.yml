@@ -1,0 +1,7 @@
+ai_narration.settings:
+  type: config_object
+  label: 'AI Narration settings'
+  mapping:
+    default_model:
+      type: string
+      label: 'Default text-to-speech provider and voice'

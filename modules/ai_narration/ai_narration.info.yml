@@ -1,0 +1,11 @@
+name: 'AI Narration'
+type: module
+description: 'Generates downloadable spoken-audio narration through configured Drupal AI text-to-speech providers.'
+package: 'AI'
+lifecycle: experimental
+core_version_requirement: ^10.3 || ^11
+configure: ai_narration.settings
+dependencies:
+  - ai:ai
+  - ai_image_studio:ai_image_studio
+  - drupal:file
