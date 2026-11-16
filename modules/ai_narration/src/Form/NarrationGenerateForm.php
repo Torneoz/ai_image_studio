@@ -11,6 +11,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\user\UserDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -143,17 +144,30 @@ final class NarrationGenerateForm extends FormBase {
       '#attributes' => ['id' => 'ai-narration-feedback', 'class' => ['ai-narration-result']],
     ];
     if ($result = $form_state->get('result')) {
-      $form['feedback']['message'] = ['#markup' => '<p><strong>' . $this->t('Narration generated.') . '</strong></p>'];
-      $form['feedback']['player'] = [
+      $form['feedback']['#attributes']['role'] = 'status';
+      $form['feedback']['#attributes']['class'] = ['messages', 'messages--status', 'ai-narration-result'];
+      $form['feedback']['title'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $this->t('Narration generated'),
+      ];
+      $form['feedback']['actions'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-narration-result__actions']],
+      ];
+      $form['feedback']['actions']['player'] = [
         '#type' => 'html_tag',
         '#tag' => 'audio',
         '#attributes' => ['controls' => TRUE, 'src' => $result['url']],
       ];
-      $form['feedback']['download'] = [
+      $form['feedback']['actions']['download'] = [
         '#type' => 'link',
-        '#title' => $this->t('Download generated narration'),
+        '#title' => $this->t('Download @format file (@size)', [
+          '@format' => strtoupper($result['format'] ?: pathinfo($result['url'], PATHINFO_EXTENSION) ?: 'audio'),
+          '@size' => ByteSizeMarkup::create($result['bytes']),
+        ]),
         '#url' => Url::fromUri($result['url']),
-        '#attributes' => ['download' => TRUE],
+        '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
       $form['feedback']['metadata'] = [
         '#theme' => 'item_list',
@@ -213,7 +227,6 @@ final class NarrationGenerateForm extends FormBase {
         'seconds' => microtime(TRUE) - $started,
       ]);
       $form_state->setRebuild();
-      $this->messenger()->addStatus($this->t('Narration generated. Use the player below to preview or download it.'));
     }
     catch (\Throwable $exception) {
       $this->messenger()->addError($exception->getMessage());
