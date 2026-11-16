@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Installs persistent narration project and chapter storage.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Installs project and chapter entities for existing AI Narration sites.
+ */
+function ai_narration_update_10001(): string {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $types = \Drupal::entityTypeManager();
+  foreach (['ai_narration_project', 'ai_narration_chapter'] as $id) {
+    $manager->installEntityType($types->getDefinition($id));
+  }
+  return 'Installed AI Narration project and chapter storage.';
+}

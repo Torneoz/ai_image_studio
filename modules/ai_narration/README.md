@@ -15,6 +15,13 @@ collects text and renders the resulting download link, so future callers (a
 queue worker, a node action, or Storyboard integration) can reuse the same
 service without duplicating TTS logic.
 
+Narration projects own a voice selection and an explicit per-request character
+limit. Chapters are ordered records belonging to a project and retain their
+source text, generation state, errors, and generated chunk files. Always set
+the project limit below the provider/voice limit: `NarrationTextChunker` splits
+at sentence boundaries and only falls back to words or long-token slices when
+needed, so a request never exceeds the stored maximum.
+
 ## Setup
 
 1. Enable `ai_narration` and a Drupal AI provider supporting `text_to_speech`.

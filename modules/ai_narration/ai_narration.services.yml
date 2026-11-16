@@ -6,3 +6,6 @@ services:
   ai_narration.generator:
     class: Drupal\ai_narration\Service\NarrationGenerator
     arguments: ['@ai.provider', '@file_system', '@file.repository', '@logger.channel.ai_narration']
+
+  ai_narration.text_chunker:
+    class: Drupal\ai_narration\Service\NarrationTextChunker
