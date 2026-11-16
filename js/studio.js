@@ -135,10 +135,19 @@
           });
 
           const compileChoices = studio.querySelectorAll(
-            'input[type="checkbox"][name^="compiled_video[compiled_video_turn_ids]"]',
+            '[data-ai-image-studio-compile-choice] input[type="checkbox"], input[type="checkbox"][name^="compiled_video[compiled_video_turn_ids]"]',
           );
           const compileSubmit = studio.querySelector(
             '[data-ai-image-studio-compile-submit]',
+          );
+          const compileCount = studio.querySelector(
+            '[data-ai-image-studio-compile-count]',
+          );
+          const compileSelectAll = studio.querySelector(
+            '[data-ai-image-studio-compile-select-all]',
+          );
+          const compileClear = studio.querySelector(
+            '[data-ai-image-studio-compile-clear]',
           );
           if (compileChoices.length && compileSubmit) {
             const updateCompileControl = () => {
@@ -149,10 +158,24 @@
                 'Join Videos (@count selected)',
                 { '@count': count },
               );
+              if (compileCount) {
+                compileCount.textContent = Drupal.t(
+                  '@count clips selected',
+                  { '@count': count },
+                );
+              }
             };
             compileChoices.forEach((choice) => {
               choice.addEventListener('change', updateCompileControl);
             });
+            const setCompileChoices = (checked) => {
+              compileChoices.forEach((choice) => {
+                choice.checked = checked;
+              });
+              updateCompileControl();
+            };
+            compileSelectAll?.addEventListener('click', () => setCompileChoices(true));
+            compileClear?.addEventListener('click', () => setCompileChoices(false));
             updateCompileControl();
           }
 

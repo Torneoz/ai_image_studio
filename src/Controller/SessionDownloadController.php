@@ -114,8 +114,9 @@ final class SessionDownloadController extends ControllerBase {
     object $ai_image_studio_session,
     Request $request,
   ): BinaryFileResponse|RedirectResponse {
-    if ((new ExecutableFinder())->find('ffmpeg') === NULL) {
-      $this->messenger()->addError($this->t('Joining videos requires FFmpeg on the server.'));
+    $executable_finder = new ExecutableFinder();
+    if ($executable_finder->find('ffmpeg') === NULL || $executable_finder->find('ffprobe') === NULL) {
+      $this->messenger()->addError($this->t('Joining videos requires FFmpeg and FFprobe on the server.'));
       return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
     }
 
@@ -153,31 +154,43 @@ final class SessionDownloadController extends ControllerBase {
     }
 
     $temporary_directory = $this->fileSystem->getTempDirectory();
-    $manifest_path = tempnam($temporary_directory, 'ai-studio-videos-');
     $output_path = tempnam($temporary_directory, 'ai-studio-joined-');
-    if ($manifest_path === FALSE || $output_path === FALSE) {
+    if ($output_path === FALSE) {
       $this->messenger()->addError($this->t('Could not prepare temporary files for the joined video.'));
       return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
     }
 
     try {
-      $manifest = implode("\n", array_map(
-        static fn (string $path): string => "file '"
-          . str_replace("'", "'\\''", $path) . "'",
-        $source_paths,
-      )) . "\n";
-      if (file_put_contents($manifest_path, $manifest) === FALSE) {
-        throw new \RuntimeException('Could not write the FFmpeg input list.');
+      $clips = array_map(fn (string $path): array => $this->videoMetadata($path), $source_paths);
+      $width = max(array_column($clips, 'width'));
+      $height = max(array_column($clips, 'height'));
+      $width -= $width % 2;
+      $height -= $height % 2;
+      if ($width < 2 || $height < 2) {
+        throw new \RuntimeException('One of the selected videos has invalid dimensions.');
       }
-      $process = new Process([
-        'ffmpeg', '-y', '-fflags', '+genpts',
-        '-f', 'concat', '-safe', '0', '-i', $manifest_path,
-        '-map', '0:v:0', '-map', '0:a?',
+      $command = ['ffmpeg', '-y'];
+      foreach ($source_paths as $source_path) {
+        $command[] = '-i';
+        $command[] = $source_path;
+      }
+      $filters = [];
+      $concat_inputs = '';
+      foreach ($clips as $index => $clip) {
+        $filters[] = sprintf('[%1$d:v:0]setpts=PTS-STARTPTS,fps=30,scale=%2$d:%3$d:force_original_aspect_ratio=decrease,pad=%2$d:%3$d:(ow-iw)/2:(oh-ih)/2,setsar=1[v%1$d]', $index, $width, $height);
+        $filters[] = $clip['has_audio']
+          ? sprintf('[%1$d:a:0]aformat=sample_rates=48000:channel_layouts=stereo,apad,atrim=duration=%2$.6F,asetpts=PTS-STARTPTS[a%1$d]', $index, $clip['duration'])
+          : sprintf('anullsrc=r=48000:cl=stereo,atrim=duration=%1$.6F,asetpts=PTS-STARTPTS[a%2$d]', $clip['duration'], $index);
+        $concat_inputs .= sprintf('[v%1$d][a%1$d]', $index);
+      }
+      $filters[] = $concat_inputs . 'concat=n=' . count($clips) . ':v=1:a=1[v][a]';
+      $command = array_merge($command, [
+        '-filter_complex', implode(';', $filters), '-map', '[v]', '-map', '[a]',
         '-c:v', 'libx264', '-preset', 'medium', '-crf', '20',
-        '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
-        '-avoid_negative_ts', 'make_zero', '-movflags', '+faststart',
-        '-f', 'mp4', $output_path,
+        '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
+        '-movflags', '+faststart', '-f', 'mp4', $output_path,
       ]);
+      $process = new Process($command);
       $process->setTimeout(600);
       $process->run();
       if (!$process->isSuccessful() || !is_file($output_path)
@@ -192,10 +205,6 @@ final class SessionDownloadController extends ControllerBase {
       ]));
       return new RedirectResponse($ai_image_studio_session->toUrl()->toString());
     }
-    finally {
-      @unlink($manifest_path);
-    }
-
     $download_name = $this->safeFilename((string) $ai_image_studio_session->label())
       . '-joined.mp4';
     $response = new BinaryFileResponse($output_path);
@@ -205,6 +214,40 @@ final class SessionDownloadController extends ControllerBase {
     );
     $response->deleteFileAfterSend(TRUE);
     return $response;
+  }
+
+  /**
+   * Reads the information required to normalize a source clip.
+   */
+  private function videoMetadata(string $path): array {
+    $process = new Process([
+      'ffprobe', '-v', 'error', '-show_entries',
+      'format=duration:stream=codec_type,width,height', '-of', 'json', $path,
+    ]);
+    $process->setTimeout(30);
+    $process->run();
+    if (!$process->isSuccessful()) {
+      throw new \RuntimeException('Could not inspect a selected video.');
+    }
+    $metadata = json_decode($process->getOutput(), TRUE);
+    if (!is_array($metadata)) {
+      throw new \RuntimeException('Could not read selected video metadata.');
+    }
+    $video = NULL;
+    $has_audio = FALSE;
+    foreach ($metadata['streams'] ?? [] as $stream) {
+      if (($stream['codec_type'] ?? '') === 'video' && $video === NULL) {
+        $video = $stream;
+      }
+      $has_audio = $has_audio || (($stream['codec_type'] ?? '') === 'audio');
+    }
+    $duration = (float) ($metadata['format']['duration'] ?? 0);
+    $width = (int) ($video['width'] ?? 0);
+    $height = (int) ($video['height'] ?? 0);
+    if ($video === NULL || !is_finite($duration) || $duration <= 0 || $width < 2 || $height < 2) {
+      throw new \RuntimeException('A selected video has no usable video stream.');
+    }
+    return compact('duration', 'width', 'height', 'has_audio');
   }
 
   /**

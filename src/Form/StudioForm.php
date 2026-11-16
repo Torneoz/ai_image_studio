@@ -792,7 +792,7 @@ final class StudioForm extends FormBase {
     if (count($completed_videos) >= 2 && $this->generator->canExtractVideoFrame()) {
       $compile_options = [];
       foreach ($completed_videos as $video_turn) {
-        $compile_options[(int) $video_turn->id()] = $this->t('Version @number — @prompt', [
+        $compile_options[(int) $video_turn->id()] = $this->t('Clip @number — @prompt', [
           '@number' => $turn_numbers[(int) $video_turn->id()] ?? 1,
           '@prompt' => $this->promptSummary((string) $video_turn->get('prompt')->value),
         ]);
@@ -801,16 +801,29 @@ final class StudioForm extends FormBase {
         '#type' => 'details',
         '#tree' => TRUE,
         '#weight' => 999,
-        '#title' => $this->t('Compiled video'),
+        '#title' => $this->t('Final joined video'),
         '#open' => TRUE,
-        '#description' => $this->t('Uncheck a clip to leave it out of the compiled video. The original turn is not deleted.'),
+        '#description' => $this->t('Choose the clips to export. They are joined in the numbered order below; your original clips are never changed. Clips without audio receive silence so the final video remains in sync.'),
         'compiled_video_turn_ids' => [
           '#type' => 'checkboxes',
-          '#title' => $this->t('Included clips'),
+          '#title' => $this->t('Clips in final video'),
           '#options' => $compile_options,
           '#default_value' => array_keys($compile_options),
           '#attributes' => [
             'data-ai-image-studio-compile-choice' => '',
+          ],
+        ],
+        'selection_controls' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['ai-image-studio-compile-controls']],
+          'all' => [
+            '#markup' => '<button class="button" type="button" data-ai-image-studio-compile-select-all>' . $this->t('Select all clips') . '</button>',
+          ],
+          'none' => [
+            '#markup' => '<button class="button" type="button" data-ai-image-studio-compile-clear>' . $this->t('Clear selection') . '</button>',
+          ],
+          'count' => [
+            '#markup' => '<span class="ai-image-studio-compile-count" data-ai-image-studio-compile-count aria-live="polite"></span>',
           ],
         ],
         'actions' => [
@@ -2694,7 +2707,13 @@ final class StudioForm extends FormBase {
       ]));
     }
     $selections = $form_state->getValues();
-    $selections['source_turn_id'] = (int) ($form_state->getValue('source_turn_id') ?: ($output_type === 'image' ? $turn->id() : 0));
+    // Make every generated video the source of the next sequence. For queued
+    // requests the turn ID is remembered immediately; once processing has
+    // attached its last frame and marked it complete, the form can resolve it
+    // as the selected image-to-video source.
+    $selections['source_turn_id'] = $output_type === 'video'
+      ? (int) $turn->id()
+      : (int) ($form_state->getValue('source_turn_id') ?: $turn->id());
     if ($form_state->getValue('regenerate_with_new_settings')) {
       unset($selections['start_prompt'], $selections['prompt']);
     }
@@ -2825,6 +2844,10 @@ final class StudioForm extends FormBase {
     }
     $this->rememberRequestSelections($session_id, $values, (int) $turn->id());
     $this->rememberRequestSelections($session_id, $values, (int) $result->id());
+    $next_sequence = $values;
+    $next_sequence['source_turn_id'] = (int) $result->id();
+    $next_sequence['output_type'] = 'video';
+    $this->rememberRequestSelections($session_id, $next_sequence);
 
     $form_state->setRedirect('entity.ai_image_studio_session.canonical', [
       'ai_image_studio_session' => $session_id,

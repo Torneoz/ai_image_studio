@@ -453,6 +453,23 @@
   gap: .75rem;
 }
 
+.ai-image-studio-compile-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .75rem;
+  margin-block: .75rem;
+}
+
+.ai-image-studio-compile-controls .button {
+  margin: 0;
+}
+
+.ai-image-studio-compile-count {
+  color: var(--color-text-neutral-medium, #55565b);
+  font-size: .875rem;
+}
+
 .ai-image-studio-source-action {
   align-items: center;
   display: flex;
