@@ -129,7 +129,7 @@ final class NarrationGenerateForm extends FormBase {
       '#default_value' => $model,
       '#required' => TRUE,
       '#empty_option' => $this->t('- Select a voice -'),
-      '#description' => $options === [] ? $this->t('No usable text-to-speech provider is configured.') : $this->t('Voices are supplied by the enabled Drupal AI providers.'),
+      '#description' => $options === [] ? $this->t('No usable text-to-speech provider is configured.') : $this->t('Choose the provider and text-to-speech model. Compatible voices, formats, and advanced controls update below.'),
       '#ajax' => ['callback' => '::refreshModelOptions'],
     ];
     $voices = $this->generator->getVoiceOptions($model);
@@ -140,7 +140,7 @@ final class NarrationGenerateForm extends FormBase {
         '#title' => $this->t('Voice'),
         '#options' => $voices,
         '#default_value' => isset($voices[$form_state->getValue('voice') ?? $savedVoice]) ? ($form_state->getValue('voice') ?? $savedVoice) : array_key_first($voices),
-        '#description' => $this->t('Voice is applied to this request without changing the provider-wide default.'),
+        '#description' => $this->t('Choose the voice for this request without changing the provider-wide default.'),
       ];
     }
     $formats = $this->generator->getFormatOptions($model);
@@ -150,20 +150,23 @@ final class NarrationGenerateForm extends FormBase {
         '#title' => $this->t('Output format'),
         '#options' => $formats,
         '#default_value' => isset($formats[$form_state->getValue('format') ?? $savedFormat]) ? ($form_state->getValue('format') ?? $savedFormat) : array_key_first($formats),
-        '#description' => $this->t('The selected provider determines the available formats.'),
+        '#description' => $this->t('Choose the downloaded audio encoding. Availability depends on the selected provider.'),
       ];
     }
     $provider = explode('__', $model, 2)[0] ?? '';
     if ($provider === 'openai') {
-      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.25, '#max' => 4, '#step' => 0.05, '#description' => $this->t('OpenAI multiplier; 1 is normal speed.')];
-    }
-    elseif ($provider === 'gemini') {
-      $form['voice_wrapper']['language'] = ['#type' => 'textfield', '#title' => $this->t('Language code'), '#default_value' => '', '#maxlength' => 32, '#description' => $this->t('Optional BCP 47 code, such as en-AU or es-ES.')];
+      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.25, '#max' => 4, '#step' => 0.05, '#description' => $this->t('Playback-speed multiplier. 1 is normal speed; lower is slower and higher is faster.')];
     }
     elseif ($provider === 'grok') {
-      $form['voice_wrapper']['language'] = ['#type' => 'textfield', '#title' => $this->t('Language'), '#default_value' => 'auto', '#maxlength' => 32];
-      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.7, '#max' => 1.5, '#step' => 0.05];
-      $form['voice_wrapper']['text_normalization'] = ['#type' => 'checkbox', '#title' => $this->t('Normalize text before speaking')];
+      $form['voice_wrapper']['language'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Language'),
+        '#default_value' => 'auto',
+        '#options' => ['auto' => $this->t('Auto-detect'), 'en' => $this->t('English'), 'ar-EG' => $this->t('Arabic (Egypt)'), 'ar-SA' => $this->t('Arabic (Saudi Arabia)'), 'ar-AE' => $this->t('Arabic (UAE)'), 'bn' => $this->t('Bengali'), 'zh' => $this->t('Chinese'), 'fr' => $this->t('French'), 'de' => $this->t('German'), 'hi' => $this->t('Hindi'), 'id' => $this->t('Indonesian'), 'it' => $this->t('Italian'), 'ja' => $this->t('Japanese'), 'ko' => $this->t('Korean'), 'pt-BR' => $this->t('Portuguese (Brazil)'), 'pt-PT' => $this->t('Portuguese (Portugal)'), 'ru' => $this->t('Russian'), 'es-MX' => $this->t('Spanish (Mexico)'), 'es-ES' => $this->t('Spanish (Spain)'), 'tr' => $this->t('Turkish'), 'vi' => $this->t('Vietnamese')],
+        '#description' => $this->t('Auto-detect uses the narration text; choose a language to force a supported speech locale.'),
+      ];
+      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.7, '#max' => 1.5, '#step' => 0.05, '#description' => $this->t('Playback-speed multiplier. 1 is normal speed; Grok supports 0.7 to 1.5.')];
+      $form['voice_wrapper']['text_normalization'] = ['#type' => 'checkbox', '#title' => $this->t('Normalize text before speaking'), '#description' => $this->t('Expands numbers, abbreviations, and symbols into a spoken form before synthesis.')];
     }
     $form['actions']['submit'] = [
       '#type' => 'submit',
