@@ -248,3 +248,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance.
 ## License
 
 This project is licensed under GPL-2.0-or-later. See [LICENSE.txt](LICENSE.txt).
+
+Version 1.0.0 beta
