@@ -9,7 +9,9 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
+use Drupal\user\UserDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -21,6 +23,8 @@ final class NarrationGenerateForm extends FormBase {
     private readonly NarrationGenerator $generator,
     private readonly ConfigFactoryInterface $narrationConfigFactory,
     private readonly FileUrlGeneratorInterface $fileUrlGenerator,
+    private readonly UserDataInterface $userData,
+    private readonly AccountProxyInterface $currentUser,
   ) {}
 
   public static function create(ContainerInterface $container): self {
@@ -28,6 +32,8 @@ final class NarrationGenerateForm extends FormBase {
       $container->get('ai_narration.generator'),
       $container->get('config.factory'),
       $container->get('file_url_generator'),
+      $container->get('user.data'),
+      $container->get('current_user'),
     );
   }
 
@@ -38,18 +44,22 @@ final class NarrationGenerateForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = $this->generator->getModelOptions();
     $default = (string) $this->narrationConfigFactory->get('ai_narration.settings')->get('default_model');
+    $savedText = (string) ($this->userData->get('ai_narration', $this->currentUser->id(), 'last_text') ?? '');
+    $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser->id(), 'last_model') ?? '');
+    $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $form['text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Narration text'),
       '#description' => $this->t('Use only text you are authorized to turn into speech. Your selected provider applies its own length and content limits.'),
       '#required' => TRUE,
       '#rows' => 10,
+      '#default_value' => $form_state->getValue('text') ?? $savedText,
     ];
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Voice'),
       '#options' => $options,
-      '#default_value' => isset($options[$default]) ? $default : '',
+      '#default_value' => isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : '')),
       '#required' => TRUE,
       '#empty_option' => $this->t('- Select a voice -'),
       '#description' => $options === [] ? $this->t('No usable text-to-speech provider is configured.') : $this->t('Voices are supplied by the enabled Drupal AI providers.'),
@@ -77,7 +87,11 @@ final class NarrationGenerateForm extends FormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
-      $file = $this->generator->generate((string) $form_state->getValue('text'), (string) $form_state->getValue('model'));
+      $text = (string) $form_state->getValue('text');
+      $model = (string) $form_state->getValue('model');
+      $this->userData->set('ai_narration', $this->currentUser->id(), 'last_text', $text);
+      $this->userData->set('ai_narration', $this->currentUser->id(), 'last_model', $model);
+      $file = $this->generator->generate($text, $model);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('audio_url', $url);
       $form_state->setRebuild();
