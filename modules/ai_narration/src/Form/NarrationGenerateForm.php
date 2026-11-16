@@ -6,10 +6,10 @@ namespace Drupal\ai_narration\Form;
 
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\file\FileUrlGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
