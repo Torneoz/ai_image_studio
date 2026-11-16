@@ -6,6 +6,7 @@ namespace Drupal\ai_narration\Form;
 
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\ai_narration\Service\NarrationMediaPublisher;
+use Drupal\ai_narration\Service\NarrationDurationInspector;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
@@ -53,6 +54,11 @@ final class NarrationGenerateForm extends FormBase {
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
+  /**
+   * Reads the duration from completed audio files.
+   */
+  protected NarrationDurationInspector $durationInspector;
+
   public function __construct(
     NarrationGenerator $generator,
     ConfigFactoryInterface $narration_config_factory,
@@ -60,6 +66,7 @@ final class NarrationGenerateForm extends FormBase {
     UserDataInterface $user_data,
     NarrationMediaPublisher $media_publisher,
     EntityTypeManagerInterface $entity_type_manager,
+    NarrationDurationInspector $duration_inspector,
   ) {
     $this->generator = $generator;
     $this->narrationConfigFactory = $narration_config_factory;
@@ -67,6 +74,7 @@ final class NarrationGenerateForm extends FormBase {
     $this->userData = $user_data;
     $this->mediaPublisher = $media_publisher;
     $this->entityTypeManager = $entity_type_manager;
+    $this->durationInspector = $duration_inspector;
   }
 
   public static function create(ContainerInterface $container): self {
@@ -77,6 +85,7 @@ final class NarrationGenerateForm extends FormBase {
       $container->get('user.data'),
       $container->get('ai_narration.media_publisher'),
       $container->get('entity_type.manager'),
+      $container->get('ai_narration.duration_inspector'),
     );
   }
 
@@ -216,6 +225,7 @@ final class NarrationGenerateForm extends FormBase {
           $this->t('Input: @characters characters', ['@characters' => $result['characters']]),
           $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
           $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
+          $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
           $this->t('Provider-reported price: unavailable'),
         ],
       ];
@@ -238,6 +248,14 @@ final class NarrationGenerateForm extends FormBase {
    */
   public function ajaxSubmit(array &$form, FormStateInterface $form_state): array {
     return $form['feedback'];
+  }
+
+  /**
+   * Formats an exact clip duration as hours, minutes, and seconds.
+   */
+  private function formatDuration(float $seconds): string {
+    $seconds = (int) round($seconds);
+    return sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
   }
 
   /**
@@ -283,6 +301,7 @@ final class NarrationGenerateForm extends FormBase {
         'characters' => mb_strlen($text),
         'bytes' => $file->getSize(),
         'mime' => $file->getMimeType(),
+        'duration' => $this->durationInspector->getDuration($file),
         'seconds' => microtime(TRUE) - $started,
       ]);
       $form_state->setRebuild();

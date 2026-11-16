@@ -13,3 +13,7 @@ services:
   ai_narration.media_publisher:
     class: Drupal\ai_narration\Service\NarrationMediaPublisher
     arguments: ['@entity_type.manager']
+
+  ai_narration.duration_inspector:
+    class: Drupal\ai_narration\Service\NarrationDurationInspector
+    arguments: ['@file_system']
