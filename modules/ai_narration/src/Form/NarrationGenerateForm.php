@@ -57,7 +57,7 @@ final class NarrationGenerateForm extends FormBase {
   /**
    * Reads the duration from completed audio files.
    */
-  protected NarrationDurationInspector $durationInspector;
+  protected ?NarrationDurationInspector $durationInspector = NULL;
 
   public function __construct(
     NarrationGenerator $generator,
@@ -259,6 +259,13 @@ final class NarrationGenerateForm extends FormBase {
   }
 
   /**
+   * Loads the duration service when resuming a form serialized before it existed.
+   */
+  private function getDurationInspector(): NarrationDurationInspector {
+    return $this->durationInspector ??= \Drupal::service('ai_narration.duration_inspector');
+  }
+
+  /**
    * Saves the most recently generated narration as an Audio media item.
    */
   public function saveToMedia(array &$form, FormStateInterface $form_state): void {
@@ -301,7 +308,7 @@ final class NarrationGenerateForm extends FormBase {
         'characters' => mb_strlen($text),
         'bytes' => $file->getSize(),
         'mime' => $file->getMimeType(),
-        'duration' => $this->durationInspector->getDuration($file),
+        'duration' => $this->getDurationInspector()->getDuration($file),
         'seconds' => microtime(TRUE) - $started,
       ]);
       $form_state->setRebuild();
