@@ -56,9 +56,24 @@ final class NarrationGenerator {
   }
 
   /**
+   * Gets output formats that the selected provider can return faithfully.
+   *
+   * @return array<string, string>
+   *   Format IDs and labels.
+   */
+  public function getFormatOptions(string $modelOption): array {
+    $provider = explode('__', $modelOption, 2)[0] ?? '';
+    return match ($provider) {
+      'openai' => ['mp3' => 'MP3', 'opus' => 'Opus', 'aac' => 'AAC', 'flac' => 'FLAC', 'wav' => 'WAV', 'pcm' => 'PCM'],
+      'gemini' => ['wav' => 'WAV'],
+      default => [],
+    };
+  }
+
+  /**
    * Synthesizes text and saves the first returned audio stream as a file.
    */
-  public function generate(string $text, string $modelOption, string $voice = ''): FileInterface {
+  public function generate(string $text, string $modelOption, string $voice = '', string $format = ''): FileInterface {
     $text = trim($text);
     if ($text === '') {
       throw new \InvalidArgumentException('Narration text cannot be empty.');
@@ -77,6 +92,12 @@ final class NarrationGenerator {
       if ($voice !== '' && !isset($this->getVoiceOptions($modelOption)[$voice])) {
         throw new \InvalidArgumentException('The selected voice is not available for this provider.');
       }
+      if ($format !== '' && !isset($this->getFormatOptions($modelOption)[$format])) {
+        throw new \InvalidArgumentException('The selected audio format is not available for this provider.');
+      }
+      if ($providerId === 'openai' && $format !== '') {
+        $configuration['response_format'] = $format;
+      }
       $provider = $this->providerManager->createInstance($providerId, $configuration);
       if (!$provider->isUsable()) {
         throw new \RuntimeException('The selected text-to-speech provider is not available.');
@@ -85,7 +106,8 @@ final class NarrationGenerator {
       if ($audio === NULL || $audio->getBinary() === '') {
         throw new \UnexpectedValueException('The text-to-speech provider returned no audio.');
       }
-      return $this->saveAudio($audio->getBinary(), $audio->getMimeType(), $audio->getFilename());
+      [$mimeType, $filename] = $format === '' ? [$audio->getMimeType(), $audio->getFilename()] : $this->formatFileMetadata($format);
+      return $this->saveAudio($audio->getBinary(), $mimeType, $filename);
     }
     catch (\Throwable $exception) {
       $this->logger->error('Narration generation failed: @message', ['@message' => $exception->getMessage()]);
@@ -127,6 +149,23 @@ final class NarrationGenerator {
     $file->setPermanent();
     $file->save();
     return $file;
+  }
+
+  /**
+   * Returns accurate persisted metadata for a requested output format.
+   *
+   * @return array{string, string}
+   *   MIME type and filename.
+   */
+  private function formatFileMetadata(string $format): array {
+    return match ($format) {
+      'opus' => ['audio/ogg', 'narration.opus'],
+      'aac' => ['audio/aac', 'narration.aac'],
+      'flac' => ['audio/flac', 'narration.flac'],
+      'wav' => ['audio/wav', 'narration.wav'],
+      'pcm' => ['audio/L16', 'narration.pcm'],
+      default => ['audio/mpeg', 'narration.mp3'],
+    };
   }
 
 }

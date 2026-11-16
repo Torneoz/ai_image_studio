@@ -69,6 +69,7 @@ final class NarrationGenerateForm extends FormBase {
     $savedText = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_text') ?? '');
     $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
     $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
+    $savedFormat = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_format') ?? '');
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
     $form['text'] = [
@@ -98,6 +99,16 @@ final class NarrationGenerateForm extends FormBase {
         '#options' => $voices,
         '#default_value' => isset($voices[$form_state->getValue('voice') ?? $savedVoice]) ? ($form_state->getValue('voice') ?? $savedVoice) : array_key_first($voices),
         '#description' => $this->t('Voice is applied to this request without changing the provider-wide default.'),
+      ];
+    }
+    $formats = $this->generator->getFormatOptions($model);
+    if ($formats !== []) {
+      $form['format'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Output format'),
+        '#options' => $formats,
+        '#default_value' => isset($formats[$form_state->getValue('format') ?? $savedFormat]) ? ($form_state->getValue('format') ?? $savedFormat) : array_key_first($formats),
+        '#description' => $this->t('The selected provider determines the available formats.'),
       ];
     }
     $form['actions']['submit'] = ['#type' => 'submit', '#value' => $this->t('Generate narration'), '#disabled' => $options === []];
@@ -133,10 +144,12 @@ final class NarrationGenerateForm extends FormBase {
       $text = (string) $form_state->getValue('text');
       $model = (string) $form_state->getValue('model');
       $voice = (string) ($form_state->getValue('voice') ?? '');
+      $format = (string) ($form_state->getValue('format') ?? '');
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_text', $text);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
-      $file = $this->generator->generate($text, $model, $voice);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
+      $file = $this->generator->generate($text, $model, $voice, $format);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('audio_url', $url);
       $form_state->setRebuild();
