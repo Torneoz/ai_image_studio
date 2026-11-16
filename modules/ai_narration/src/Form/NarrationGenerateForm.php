@@ -157,6 +157,31 @@ final class NarrationGenerateForm extends FormBase {
     if ($provider === 'openai') {
       $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.25, '#max' => 4, '#step' => 0.05, '#description' => $this->t('Playback-speed multiplier. 1 is normal speed; lower is slower and higher is faster.')];
     }
+    elseif ($provider === 'gemini') {
+      $form['voice_wrapper']['language'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Speech language'),
+        '#default_value' => (string) ($form_state->getValue('language') ?? ''),
+        '#options' => [
+          '' => $this->t('Auto-detect from narration text'),
+          'en-AU' => $this->t('English (Australia)'),
+          'en-GB' => $this->t('English (United Kingdom)'),
+          'en-US' => $this->t('English (United States)'),
+          'de-DE' => $this->t('German (Germany)'),
+          'es-ES' => $this->t('Spanish (Spain)'),
+          'es-US' => $this->t('Spanish (United States)'),
+          'fr-FR' => $this->t('French (France)'),
+          'fr-CA' => $this->t('French (Canada)'),
+          'hi-IN' => $this->t('Hindi (India)'),
+          'it-IT' => $this->t('Italian (Italy)'),
+          'ja-JP' => $this->t('Japanese (Japan)'),
+          'ko-KR' => $this->t('Korean (Korea)'),
+          'pt-BR' => $this->t('Portuguese (Brazil)'),
+          'ru-RU' => $this->t('Russian (Russia)'),
+        ],
+        '#description' => $this->t('Choose a locale to guide synthesis, including Australian, British, or American English. Leave on Auto-detect for Gemini to infer the language from the narration text.'),
+      ];
+    }
     elseif ($provider === 'grok') {
       $form['voice_wrapper']['language'] = [
         '#type' => 'select',
