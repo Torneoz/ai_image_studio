@@ -153,6 +153,18 @@ final class NarrationGenerateForm extends FormBase {
         '#description' => $this->t('The selected provider determines the available formats.'),
       ];
     }
+    $provider = explode('__', $model, 2)[0] ?? '';
+    if ($provider === 'openai') {
+      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.25, '#max' => 4, '#step' => 0.05, '#description' => $this->t('OpenAI multiplier; 1 is normal speed.')];
+    }
+    elseif ($provider === 'gemini') {
+      $form['voice_wrapper']['language'] = ['#type' => 'textfield', '#title' => $this->t('Language code'), '#default_value' => '', '#maxlength' => 32, '#description' => $this->t('Optional BCP 47 code, such as en-AU or es-ES.')];
+    }
+    elseif ($provider === 'grok') {
+      $form['voice_wrapper']['language'] = ['#type' => 'textfield', '#title' => $this->t('Language'), '#default_value' => 'auto', '#maxlength' => 32];
+      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.7, '#max' => 1.5, '#step' => 0.05];
+      $form['voice_wrapper']['text_normalization'] = ['#type' => 'checkbox', '#title' => $this->t('Normalize text before speaking')];
+    }
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Generate narration'),
@@ -292,12 +304,17 @@ final class NarrationGenerateForm extends FormBase {
       $model = (string) $form_state->getValue('model');
       $voice = (string) ($form_state->getValue('voice') ?? '');
       $format = (string) ($form_state->getValue('format') ?? '');
+      $parameters = [
+        'language' => (string) ($form_state->getValue('language') ?? ''),
+        'speed' => $form_state->getValue('speed') ?? 1,
+        'text_normalization' => (bool) ($form_state->getValue('text_normalization') ?? FALSE),
+      ];
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_text', $text);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
       $started = microtime(TRUE);
-      $file = $this->generator->generate($text, $model, $voice, $format);
+      $file = $this->generator->generate($text, $model, $voice, $format, $parameters);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('result', [
         'url' => $url,
@@ -305,6 +322,7 @@ final class NarrationGenerateForm extends FormBase {
         'model' => $model,
         'voice' => $voice,
         'format' => $format,
+        'parameters' => $parameters,
         'characters' => mb_strlen($text),
         'bytes' => $file->getSize(),
         'mime' => $file->getMimeType(),

@@ -89,7 +89,7 @@ final class NarrationGenerator {
   /**
    * Synthesizes text and saves the first returned audio stream as a file.
    */
-  public function generate(string $text, string $modelOption, string $voice = '', string $format = ''): FileInterface {
+  public function generate(string $text, string $modelOption, string $voice = '', string $format = '', array $parameters = []): FileInterface {
     $text = trim($text);
     if ($text === '') {
       throw new \InvalidArgumentException('Narration text cannot be empty.');
@@ -114,6 +114,7 @@ final class NarrationGenerator {
       if ($providerId === 'openai' && $format !== '') {
         $configuration['response_format'] = $format;
       }
+      $configuration += $this->validateParameters($providerId, $parameters);
       $provider = $this->providerManager->createInstance($providerId, $configuration);
       if (!$provider->isUsable()) {
         throw new \RuntimeException('The selected text-to-speech provider is not available.');
@@ -129,6 +130,38 @@ final class NarrationGenerator {
       $this->logger->error('Narration generation failed: @message', ['@message' => $exception->getMessage()]);
       throw new \RuntimeException('Narration could not be generated. ' . $exception->getMessage(), 0, $exception);
     }
+  }
+
+  /**
+   * Validates and maps request-level controls to provider configuration.
+   */
+  private function validateParameters(string $providerId, array $parameters): array {
+    return match ($providerId) {
+      'openai' => $this->openAiParameters($parameters),
+      'gemini' => ['languageCode' => trim((string) ($parameters['language'] ?? ''))],
+      'grok' => $this->grokParameters($parameters),
+      default => [],
+    };
+  }
+
+  private function openAiParameters(array $parameters): array {
+    $speed = (float) ($parameters['speed'] ?? 1);
+    if ($speed < 0.25 || $speed > 4) {
+      throw new \InvalidArgumentException('OpenAI speech speed must be between 0.25 and 4.');
+    }
+    return ['speed' => $speed];
+  }
+
+  private function grokParameters(array $parameters): array {
+    $speed = (float) ($parameters['speed'] ?? 1);
+    if ($speed < 0.7 || $speed > 1.5) {
+      throw new \InvalidArgumentException('Grok speech speed must be between 0.7 and 1.5.');
+    }
+    return [
+      'language' => trim((string) ($parameters['language'] ?? 'auto')) ?: 'auto',
+      'speed' => $speed,
+      'text_normalization' => !empty($parameters['text_normalization']),
+    ];
   }
 
   /**
