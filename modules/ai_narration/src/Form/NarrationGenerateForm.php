@@ -79,7 +79,13 @@ final class NarrationGenerateForm extends FormBase {
       '#required' => TRUE,
       '#rows' => 10,
       '#default_value' => $form_state->getValue('text') ?? $savedText,
+      '#attributes' => ['data-ai-narration-text' => TRUE],
     ];
+    $form['text_count'] = [
+      '#type' => 'item',
+      '#markup' => '<span data-ai-narration-character-count>0</span> ' . $this->t('characters'),
+    ];
+    $form['#attached']['library'][] = 'ai_narration/character_counter';
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-speech model'),
