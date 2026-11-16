@@ -9,7 +9,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\user\UserDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,13 +18,37 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 final class NarrationGenerateForm extends FormBase {
 
+  /**
+   * Per-user storage for reusable narration values.
+   */
+  protected UserDataInterface $userData;
+
+  /**
+   * Generates audio through the selected Drupal AI provider.
+   */
+  protected NarrationGenerator $generator;
+
+  /**
+   * Reads the configured default voice.
+   */
+  protected ConfigFactoryInterface $narrationConfigFactory;
+
+  /**
+   * Generates file URLs for completed narration.
+   */
+  protected FileUrlGeneratorInterface $fileUrlGenerator;
+
   public function __construct(
-    private readonly NarrationGenerator $generator,
-    private readonly ConfigFactoryInterface $narrationConfigFactory,
-    private readonly FileUrlGeneratorInterface $fileUrlGenerator,
-    private readonly UserDataInterface $userData,
-    private readonly AccountProxyInterface $currentUser,
-  ) {}
+    NarrationGenerator $generator,
+    ConfigFactoryInterface $narration_config_factory,
+    FileUrlGeneratorInterface $file_url_generator,
+    UserDataInterface $user_data,
+  ) {
+    $this->generator = $generator;
+    $this->narrationConfigFactory = $narration_config_factory;
+    $this->fileUrlGenerator = $file_url_generator;
+    $this->userData = $user_data;
+  }
 
   public static function create(ContainerInterface $container): self {
     return new self(
@@ -33,7 +56,6 @@ final class NarrationGenerateForm extends FormBase {
       $container->get('config.factory'),
       $container->get('file_url_generator'),
       $container->get('user.data'),
-      $container->get('current_user'),
     );
   }
 
@@ -44,8 +66,8 @@ final class NarrationGenerateForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = $this->generator->getModelOptions();
     $default = (string) $this->narrationConfigFactory->get('ai_narration.settings')->get('default_model');
-    $savedText = (string) ($this->userData->get('ai_narration', $this->currentUser->id(), 'last_text') ?? '');
-    $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser->id(), 'last_model') ?? '');
+    $savedText = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_text') ?? '');
+    $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $form['text'] = [
       '#type' => 'textarea',
@@ -89,8 +111,8 @@ final class NarrationGenerateForm extends FormBase {
     try {
       $text = (string) $form_state->getValue('text');
       $model = (string) $form_state->getValue('model');
-      $this->userData->set('ai_narration', $this->currentUser->id(), 'last_text', $text);
-      $this->userData->set('ai_narration', $this->currentUser->id(), 'last_model', $model);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_text', $text);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $file = $this->generator->generate($text, $model);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('audio_url', $url);
