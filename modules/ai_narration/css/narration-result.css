@@ -1,0 +1,18 @@
+.ai-narration-result__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.ai-narration-result__actions audio {
+  flex: 0 1 31rem;
+  max-width: 100%;
+}
+
+.ai-narration-result__actions .button {
+  margin: 0;
+  text-align: center;
+}

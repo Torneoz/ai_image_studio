@@ -1,4 +1,7 @@
 character_counter:
+  css:
+    component:
+      css/narration-result.css: {}
   js:
     js/character-counter.js: {}
   dependencies:
