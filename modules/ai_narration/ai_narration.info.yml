@@ -10,3 +10,4 @@ dependencies:
   - ai_image_studio:ai_image_studio
   - drupal:file
   - drupal:media
+  - mcp_server:mcp_server

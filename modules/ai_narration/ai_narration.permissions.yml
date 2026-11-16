@@ -1,7 +1,4 @@
-generate ai narration:
-  title: 'Generate AI narration'
-  description: 'Create audio files from text using configured text-to-speech providers.'
-administer ai narration:
-  title: 'Administer AI narration'
-  description: 'Configure defaults for AI narration.'
+access ai narration mcp tools:
+  title: 'Use AI Narration MCP tools'
+  description: 'Allows an MCP client to create, inspect, and generate AI Narration projects and chapters.'
   restrict access: true
