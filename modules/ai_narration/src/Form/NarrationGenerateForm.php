@@ -19,7 +19,7 @@ final class NarrationGenerateForm extends FormBase {
 
   public function __construct(
     private readonly NarrationGenerator $generator,
-    private readonly ConfigFactoryInterface $configFactory,
+    private readonly ConfigFactoryInterface $narrationConfigFactory,
     private readonly FileUrlGeneratorInterface $fileUrlGenerator,
   ) {}
 
@@ -37,7 +37,7 @@ final class NarrationGenerateForm extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = $this->generator->getModelOptions();
-    $default = (string) $this->configFactory->get('ai_narration.settings')->get('default_model');
+    $default = (string) $this->narrationConfigFactory->get('ai_narration.settings')->get('default_model');
     $form['text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Narration text'),

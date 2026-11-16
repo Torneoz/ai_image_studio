@@ -1,7 +1,7 @@
 ai_narration.generate:
   path: '/admin/content/ai-narration'
   defaults:
-    _form: '\\Drupal\\ai_narration\\Form\\NarrationGenerateForm'
+    _form: '\Drupal\ai_narration\Form\NarrationGenerateForm'
     _title: 'AI narration'
   requirements:
     _permission: 'generate ai narration'
@@ -9,7 +9,7 @@ ai_narration.generate:
 ai_narration.settings:
   path: '/admin/config/ai/narration'
   defaults:
-    _form: '\\Drupal\\ai_narration\\Form\\NarrationSettingsForm'
+    _form: '\Drupal\ai_narration\Form\NarrationSettingsForm'
     _title: 'AI Narration settings'
   requirements:
     _permission: 'administer ai narration'
