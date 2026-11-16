@@ -68,7 +68,9 @@ final class NarrationGenerateForm extends FormBase {
     $default = (string) $this->narrationConfigFactory->get('ai_narration.settings')->get('default_model');
     $savedText = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_text') ?? '');
     $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
+    $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
+    $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
     $form['text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Narration text'),
@@ -79,13 +81,25 @@ final class NarrationGenerateForm extends FormBase {
     ];
     $form['model'] = [
       '#type' => 'select',
-      '#title' => $this->t('Voice'),
+      '#title' => $this->t('Text-to-speech model'),
       '#options' => $options,
-      '#default_value' => isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : '')),
+      '#default_value' => $model,
       '#required' => TRUE,
       '#empty_option' => $this->t('- Select a voice -'),
       '#description' => $options === [] ? $this->t('No usable text-to-speech provider is configured.') : $this->t('Voices are supplied by the enabled Drupal AI providers.'),
+      '#ajax' => ['callback' => '::refreshVoice', 'wrapper' => 'ai-narration-voice'],
     ];
+    $voices = $this->generator->getVoiceOptions($model);
+    $form['voice_wrapper'] = ['#type' => 'container', '#attributes' => ['id' => 'ai-narration-voice']];
+    if ($voices !== []) {
+      $form['voice_wrapper']['voice'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Voice'),
+        '#options' => $voices,
+        '#default_value' => isset($voices[$form_state->getValue('voice') ?? $savedVoice]) ? ($form_state->getValue('voice') ?? $savedVoice) : array_key_first($voices),
+        '#description' => $this->t('Voice is applied to this request without changing the provider-wide default.'),
+      ];
+    }
     $form['actions']['submit'] = ['#type' => 'submit', '#value' => $this->t('Generate narration'), '#disabled' => $options === []];
     if ($audioUrl = $form_state->get('audio_url')) {
       $form['result'] = [
@@ -107,13 +121,22 @@ final class NarrationGenerateForm extends FormBase {
     return $form;
   }
 
+  /**
+   * Rebuilds request-level voices after a model changes.
+   */
+  public function refreshVoice(array &$form, FormStateInterface $form_state): array {
+    return $form['voice_wrapper'];
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
       $text = (string) $form_state->getValue('text');
       $model = (string) $form_state->getValue('model');
+      $voice = (string) ($form_state->getValue('voice') ?? '');
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_text', $text);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
-      $file = $this->generator->generate($text, $model);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
+      $file = $this->generator->generate($text, $model, $voice);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('audio_url', $url);
       $form_state->setRebuild();

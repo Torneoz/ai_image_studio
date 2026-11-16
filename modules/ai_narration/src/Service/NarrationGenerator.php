@@ -35,9 +35,30 @@ final class NarrationGenerator {
   }
 
   /**
+   * Gets voices supported by providers whose voice is request-configurable.
+   *
+   * @return array<string, string>
+   *   Voice IDs and labels.
+   */
+  public function getVoiceOptions(string $modelOption): array {
+    $provider = explode('__', $modelOption, 2)[0] ?? '';
+    return match ($provider) {
+      'openai' => array_combine(
+        ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer', 'verse'],
+        ['Alloy', 'Ash', 'Ballad', 'Coral', 'Echo', 'Fable', 'Nova', 'Onyx', 'Sage', 'Shimmer', 'Verse'],
+      ),
+      'gemini' => array_combine(
+        ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
+        ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
+      ),
+      default => [],
+    };
+  }
+
+  /**
    * Synthesizes text and saves the first returned audio stream as a file.
    */
-  public function generate(string $text, string $modelOption): FileInterface {
+  public function generate(string $text, string $modelOption, string $voice = ''): FileInterface {
     $text = trim($text);
     if ($text === '') {
       throw new \InvalidArgumentException('Narration text cannot be empty.');
@@ -48,7 +69,15 @@ final class NarrationGenerator {
     }
 
     try {
-      $provider = $this->providerManager->createInstance($providerId);
+      $configuration = match ($providerId) {
+        'openai' => $voice !== '' ? ['voice' => $voice] : [],
+        'gemini' => $voice !== '' ? ['voiceName' => $voice] : [],
+        default => [],
+      };
+      if ($voice !== '' && !isset($this->getVoiceOptions($modelOption)[$voice])) {
+        throw new \InvalidArgumentException('The selected voice is not available for this provider.');
+      }
+      $provider = $this->providerManager->createInstance($providerId, $configuration);
       if (!$provider->isUsable()) {
         throw new \RuntimeException('The selected text-to-speech provider is not available.');
       }
