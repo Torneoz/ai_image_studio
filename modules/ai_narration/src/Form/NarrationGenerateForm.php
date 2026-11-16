@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Drupal\ai_narration\Form;
 
 use Drupal\ai_narration\Service\NarrationGenerator;
+use Drupal\ai_narration\Service\NarrationMediaPublisher;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\File\FileUrlGeneratorInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
@@ -41,16 +43,30 @@ final class NarrationGenerateForm extends FormBase {
    */
   protected FileUrlGeneratorInterface $fileUrlGenerator;
 
+  /**
+   * Creates reusable Media Library items from generated files.
+   */
+  protected NarrationMediaPublisher $mediaPublisher;
+
+  /**
+   * Loads the generated file before it is published to Media.
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
   public function __construct(
     NarrationGenerator $generator,
     ConfigFactoryInterface $narration_config_factory,
     FileUrlGeneratorInterface $file_url_generator,
     UserDataInterface $user_data,
+    NarrationMediaPublisher $media_publisher,
+    EntityTypeManagerInterface $entity_type_manager,
   ) {
     $this->generator = $generator;
     $this->narrationConfigFactory = $narration_config_factory;
     $this->fileUrlGenerator = $file_url_generator;
     $this->userData = $user_data;
+    $this->mediaPublisher = $media_publisher;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   public static function create(ContainerInterface $container): self {
@@ -59,6 +75,8 @@ final class NarrationGenerateForm extends FormBase {
       $container->get('config.factory'),
       $container->get('file_url_generator'),
       $container->get('user.data'),
+      $container->get('ai_narration.media_publisher'),
+      $container->get('entity_type.manager'),
     );
   }
 
@@ -169,6 +187,25 @@ final class NarrationGenerateForm extends FormBase {
         '#url' => Url::fromUri($result['url']),
         '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
+      if (empty($result['media_url'])) {
+        $form['feedback']['actions']['save_media'] = [
+          '#type' => 'submit',
+          '#value' => $this->t('Save to Media Library'),
+          '#name' => 'save_media',
+          '#submit' => ['::saveToMedia'],
+          '#limit_validation_errors' => [],
+          '#ajax' => ['callback' => '::ajaxSubmit', 'wrapper' => 'ai-narration-feedback'],
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
+      else {
+        $form['feedback']['actions']['view_media'] = [
+          '#type' => 'link',
+          '#title' => $this->t('View in Media Library'),
+          '#url' => Url::fromUri($result['media_url']),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
       $form['feedback']['metadata'] = [
         '#theme' => 'item_list',
         '#title' => $this->t('Generation details'),
@@ -203,6 +240,27 @@ final class NarrationGenerateForm extends FormBase {
     return $form['feedback'];
   }
 
+  /**
+   * Saves the most recently generated narration as an Audio media item.
+   */
+  public function saveToMedia(array &$form, FormStateInterface $form_state): void {
+    $result = $form_state->get('result');
+    $file = !empty($result['fid']) ? $this->entityTypeManager->getStorage('file')->load($result['fid']) : NULL;
+    if (!$file) {
+      $this->messenger()->addError($this->t('The generated narration file is no longer available.'));
+      return;
+    }
+    try {
+      $media = $this->mediaPublisher->publish($file, $this->t('AI narration: @filename', ['@filename' => $file->getFilename()]));
+      $result['media_url'] = $media->toUrl('canonical', ['absolute' => TRUE])->toString();
+      $form_state->set('result', $result);
+      $form_state->setRebuild();
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($exception->getMessage());
+    }
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
       $text = (string) $form_state->getValue('text');
@@ -218,6 +276,7 @@ final class NarrationGenerateForm extends FormBase {
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('result', [
         'url' => $url,
+        'fid' => $file->id(),
         'model' => $model,
         'voice' => $voice,
         'format' => $format,

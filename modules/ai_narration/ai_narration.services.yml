@@ -9,3 +9,7 @@ services:
 
   ai_narration.text_chunker:
     class: Drupal\ai_narration\Service\NarrationTextChunker
+
+  ai_narration.media_publisher:
+    class: Drupal\ai_narration\Service\NarrationMediaPublisher
+    arguments: ['@entity_type.manager']

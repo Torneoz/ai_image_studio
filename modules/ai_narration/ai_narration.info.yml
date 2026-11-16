@@ -9,3 +9,4 @@ dependencies:
   - ai:ai
   - ai_image_studio:ai_image_studio
   - drupal:file
+  - drupal:media
