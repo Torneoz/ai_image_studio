@@ -103,7 +103,7 @@ final class NarrationGenerateForm extends FormBase {
     }
     $formats = $this->generator->getFormatOptions($model);
     if ($formats !== []) {
-      $form['format'] = [
+      $form['voice_wrapper']['format'] = [
         '#type' => 'select',
         '#title' => $this->t('Output format'),
         '#options' => $formats,
