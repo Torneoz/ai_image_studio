@@ -18,9 +18,25 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
   id: 'ai_narration_chapter',
   label: new TranslatableMarkup('AI narration chapter'),
   label_collection: new TranslatableMarkup('AI narration chapters'),
+  handlers: [
+    'list_builder' => 'Drupal\Core\Entity\EntityListBuilder',
+    'form' => [
+      'add' => 'Drupal\Core\Entity\ContentEntityForm',
+      'edit' => 'Drupal\Core\Entity\ContentEntityForm',
+      'delete' => 'Drupal\Core\Entity\ContentEntityDeleteForm',
+    ],
+    'route_provider' => ['html' => 'Drupal\Core\Entity\Routing\AdminHtmlRouteProvider'],
+  ],
   base_table: 'ai_narration_chapter',
   entity_keys: ['id' => 'id', 'uuid' => 'uuid', 'label' => 'title'],
   admin_permission: 'administer ai narration',
+  links: [
+    'canonical' => '/admin/content/ai-narration/chapters/{ai_narration_chapter}',
+    'add-form' => '/admin/content/ai-narration/chapters/add',
+    'edit-form' => '/admin/content/ai-narration/chapters/{ai_narration_chapter}/edit',
+    'delete-form' => '/admin/content/ai-narration/chapters/{ai_narration_chapter}/delete',
+    'collection' => '/admin/content/ai-narration/chapters',
+  ],
 )]
 final class NarrationChapter extends ContentEntityBase {
 
@@ -29,10 +45,10 @@ final class NarrationChapter extends ContentEntityBase {
   /** {@inheritdoc} */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
     $fields = parent::baseFieldDefinitions($entity_type);
-    $fields['project_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Project'))->setRequired(TRUE)->setSetting('target_type', 'ai_narration_project');
-    $fields['title'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Title'))->setRequired(TRUE)->setSetting('max_length', 255);
-    $fields['position'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Position'))->setRequired(TRUE)->setDefaultValue(1)->setSetting('unsigned', TRUE);
-    $fields['text'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Narration text'))->setRequired(TRUE);
+    $fields['project_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Project'))->setRequired(TRUE)->setSetting('target_type', 'ai_narration_project')->setDisplayOptions('form', ['type' => 'entity_reference_autocomplete', 'weight' => -10]);
+    $fields['title'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Title'))->setRequired(TRUE)->setSetting('max_length', 255)->setDisplayOptions('form', ['type' => 'string_textfield', 'weight' => -9]);
+    $fields['position'] = BaseFieldDefinition::create('integer')->setLabel(new TranslatableMarkup('Position'))->setRequired(TRUE)->setDefaultValue(1)->setSetting('unsigned', TRUE)->setDisplayOptions('form', ['type' => 'number', 'weight' => -8]);
+    $fields['text'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Narration text'))->setRequired(TRUE)->setDisplayOptions('form', ['type' => 'string_textarea', 'weight' => -7]);
     $fields['model_override'] = BaseFieldDefinition::create('string')->setLabel(new TranslatableMarkup('Voice override'))->setSetting('max_length', 383);
     $fields['audio_files'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Generated audio chunks'))->setSetting('target_type', 'file')->setCardinality(-1);
     $fields['status'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Status'))->setSettings(['allowed_values' => ['draft' => 'Draft', 'queued' => 'Queued', 'generating' => 'Generating', 'complete' => 'Complete', 'failed' => 'Failed']])->setDefaultValue('draft');

@@ -13,3 +13,59 @@ ai_narration.settings:
     _title: 'AI Narration settings'
   requirements:
     _permission: 'administer ai narration'
+
+entity.ai_narration_project.collection:
+  path: '/admin/content/ai-narration/projects'
+  defaults:
+    _entity_list: 'ai_narration_project'
+    _title: 'Narration projects'
+  requirements:
+    _permission: 'administer ai narration'
+
+entity.ai_narration_project.add_form:
+  path: '/admin/content/ai-narration/projects/add'
+  defaults:
+    _entity_form: 'ai_narration_project.add'
+    _title: 'Add narration project'
+  requirements:
+    _permission: 'administer ai narration'
+
+entity.ai_narration_project.edit_form:
+  path: '/admin/content/ai-narration/projects/{ai_narration_project}/edit'
+  defaults:
+    _entity_form: 'ai_narration_project.edit'
+    _title: 'Edit narration project'
+  requirements:
+    _permission: 'administer ai narration'
+  options:
+    parameters:
+      ai_narration_project:
+        type: entity:ai_narration_project
+
+entity.ai_narration_chapter.collection:
+  path: '/admin/content/ai-narration/chapters'
+  defaults:
+    _entity_list: 'ai_narration_chapter'
+    _title: 'Narration chapters'
+  requirements:
+    _permission: 'administer ai narration'
+
+entity.ai_narration_chapter.add_form:
+  path: '/admin/content/ai-narration/chapters/add'
+  defaults:
+    _entity_form: 'ai_narration_chapter.add'
+    _title: 'Add narration chapter'
+  requirements:
+    _permission: 'administer ai narration'
+
+entity.ai_narration_chapter.edit_form:
+  path: '/admin/content/ai-narration/chapters/{ai_narration_chapter}/edit'
+  defaults:
+    _entity_form: 'ai_narration_chapter.edit'
+    _title: 'Edit narration chapter'
+  requirements:
+    _permission: 'administer ai narration'
+  options:
+    parameters:
+      ai_narration_chapter:
+        type: entity:ai_narration_chapter

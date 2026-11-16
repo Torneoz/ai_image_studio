@@ -10,3 +10,17 @@ ai_narration.settings:
   route_name: ai_narration.settings
   parent: ai_narration.generate
   weight: 10
+
+entity.ai_narration_project.collection:
+  title: 'Narration projects'
+  description: 'Manage narration projects and their shared generation settings.'
+  route_name: entity.ai_narration_project.collection
+  parent: ai_narration.generate
+  weight: -10
+
+entity.ai_narration_chapter.collection:
+  title: 'Narration chapters'
+  description: 'Manage generated narration chapters.'
+  route_name: entity.ai_narration_chapter.collection
+  parent: ai_narration.generate
+  weight: -9
