@@ -51,8 +51,28 @@ final class NarrationGenerator {
         ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
         ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
       ),
+      'elevenlabs' => $this->getElevenLabsVoiceOptions($modelOption),
       default => [],
     };
+  }
+
+  /**
+   * Loads the authenticated ElevenLabs voice catalogue for the chosen model.
+   *
+   * ElevenLabs expects its provider setting in the form "Name :: voice_id";
+   * preserving that value lets its Drupal provider extract the API voice ID.
+   */
+  private function getElevenLabsVoiceOptions(string $modelOption): array {
+    try {
+      [, $modelId] = $this->parseModelOption($modelOption);
+      $provider = $this->providerManager->createInstance('elevenlabs');
+      $settings = $provider->getModelSettings($modelId);
+      return $settings['voice']['constraints']['options'] ?? [];
+    }
+    catch (\Throwable $exception) {
+      $this->logger->warning('Could not load ElevenLabs voices: @message', ['@message' => $exception->getMessage()]);
+      return [];
+    }
   }
 
   /**
@@ -82,6 +102,7 @@ final class NarrationGenerator {
     return match ($provider) {
       'openai' => 4096,
       'gemini' => 10000,
+      'elevenlabs' => 5000,
       default => NULL,
     };
   }
@@ -103,8 +124,12 @@ final class NarrationGenerator {
       $configuration = match ($providerId) {
         'openai' => $voice !== '' ? ['voice' => $voice] : [],
         'gemini' => $voice !== '' ? ['voiceName' => $voice] : [],
+        'elevenlabs' => $voice !== '' ? ['voice' => $voice] : [],
         default => [],
       };
+      if ($providerId === 'elevenlabs' && $voice === '') {
+        throw new \InvalidArgumentException('Select an ElevenLabs voice before generating narration.');
+      }
       if ($voice !== '' && !isset($this->getVoiceOptions($modelOption)[$voice])) {
         throw new \InvalidArgumentException('The selected voice is not available for this provider.');
       }
