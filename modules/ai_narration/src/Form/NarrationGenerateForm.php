@@ -335,7 +335,7 @@ final class NarrationGenerateForm extends FormBase {
       return;
     }
     try {
-      $media = $this->mediaPublisher->publish($file, $this->t('AI narration: @filename', ['@filename' => $file->getFilename()]));
+      $media = $this->mediaPublisher->publish($file, (string) $this->t('AI narration: @filename', ['@filename' => $file->getFilename()]));
       $result['media_url'] = $media->toUrl('canonical', ['absolute' => TRUE])->toString();
       $form_state->set('result', $result);
       $form_state->setRebuild();
