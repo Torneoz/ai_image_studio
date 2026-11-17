@@ -152,6 +152,10 @@ final class NarrationGenerator {
       }
       $configuration += $this->validateParameters($providerId, $parameters);
       $provider = $this->providerManager->createInstance($providerId, $configuration);
+      // Drupal AI provider plugins keep request-level settings separately from
+      // their construction options. Configure the instance explicitly so
+      // providers such as ElevenLabs receive the selected model and voice.
+      $provider->setConfiguration($configuration);
       if (!$provider->isUsable()) {
         throw new \RuntimeException('The selected text-to-speech provider is not available.');
       }
