@@ -113,13 +113,18 @@ final class NarrationSourceLoader {
       }
     }
     $title = trim((string) $xpath->evaluate('string(//h1[1] | //title[1])'));
-    // XPath unions are returned in document order, which would select body
-    // before article. Choose content candidates deliberately instead.
+    // Prefer completeness over a too-aggressive article-only extraction. Some
+    // publishers put just the synopsis in <article> and keep the story body in
+    // a sibling region. After chrome removal, use the richest candidate.
     $content = NULL;
+    $contentLength = 0;
     foreach (['//article', '//*[@itemprop="articleBody"]', '//*[@role="main"]', '//main', '//body'] as $query) {
-      $content = $xpath->query($query)->item(0);
-      if ($content !== NULL) {
-        break;
+      foreach ($xpath->query($query) as $candidate) {
+        $length = mb_strlen(trim((string) $candidate->textContent));
+        if ($length > $contentLength) {
+          $content = $candidate;
+          $contentLength = $length;
+        }
       }
     }
     $text = $this->normaliseText($content ? (string) $content->textContent : '');
