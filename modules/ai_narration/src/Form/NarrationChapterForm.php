@@ -75,7 +75,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element['#description'] = $this->t('Choose the narration project whose settings this chapter will inherit.');
     if (!$this->entity->isNew()) {
       $this->buildJobSettings($form, $form_state);
-      $this->buildPreviousGenerationResult($form);
+      $this->buildPreviousGenerationResult($form, $form_state);
       $form['generate_narration'] = [
         '#type' => 'submit',
         '#value' => $this->t('Generate narration'),
@@ -189,7 +189,7 @@ final class NarrationChapterForm extends ContentEntityForm {
   /**
    * Shows the durable result saved by the last successful generation.
    */
-  private function buildPreviousGenerationResult(array &$form): void {
+  private function buildPreviousGenerationResult(array &$form, FormStateInterface $form_state): void {
     $file = $this->entity->get('last_generated_audio')->entity;
     $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
     if ($file === NULL && $metadata === []) {
@@ -200,7 +200,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#title' => $this->t('Previous Generation Result'),
       '#open' => FALSE,
       '#weight' => 85,
-      '#attributes' => ['class' => ['ai-narration-result']],
+      '#attributes' => ['id' => 'ai-narration-chapter-previous-result', 'class' => ['ai-narration-result']],
     ];
     if ($file) {
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
@@ -216,6 +216,25 @@ final class NarrationChapterForm extends ContentEntityForm {
         '#url' => Url::fromUri($url),
         '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
+      if ($media_url = $form_state->get('previous_media_url')) {
+        $form['previous_generation_result']['actions']['view_media'] = [
+          '#type' => 'link',
+          '#title' => $this->t('View previous audio in Media Library'),
+          '#url' => Url::fromUri($media_url),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
+      else {
+        $form['previous_generation_result']['actions']['save_media'] = [
+          '#type' => 'submit',
+          '#value' => $this->t('Save previous to Media Library'),
+          '#name' => 'save_previous_media',
+          '#submit' => ['::savePreviousToMedia'],
+          '#limit_validation_errors' => [],
+          '#ajax' => ['callback' => '::ajaxGenerate', 'wrapper' => 'ai-narration-chapter-feedback'],
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
     }
     if ($metadata !== []) {
       $items = [];
@@ -310,6 +329,9 @@ final class NarrationChapterForm extends ContentEntityForm {
   public function ajaxGenerate(array &$form, FormStateInterface $form_state): AjaxResponse {
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#ai-narration-chapter-feedback', $form['generation_feedback']));
+    if (isset($form['previous_generation_result'])) {
+      $response->addCommand(new ReplaceCommand('#ai-narration-chapter-previous-result', $form['previous_generation_result']));
+    }
     return $response;
   }
 
@@ -335,7 +357,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     if (empty($result['media_url'])) {
       $feedback['actions']['save_media'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Save to Media Library'),
+          '#value' => $this->t('Save current to Media Library'),
         '#name' => 'save_media',
         '#submit' => ['::saveToMedia'],
         '#limit_validation_errors' => [],
@@ -381,6 +403,26 @@ final class NarrationChapterForm extends ContentEntityForm {
       $media = $this->mediaPublisher->publish($file, (string) $this->t('AI narration: @title', ['@title' => $this->entity->label()]));
       $result['media_url'] = $media->toUrl('canonical', ['absolute' => TRUE])->toString();
       $form_state->set('generation_result', $result);
+    }
+    catch (\Throwable $exception) {
+      $form_state->set('generation_error', $exception->getMessage());
+    }
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Publishes the Chapter's stored previous-generation file to Media.
+   */
+  public function savePreviousToMedia(array &$form, FormStateInterface $form_state): void {
+    $file = $this->entity->get('last_generated_audio')->entity;
+    if (!$file) {
+      $form_state->set('generation_error', $this->t('The previous narration file is no longer available.'));
+      $form_state->setRebuild();
+      return;
+    }
+    try {
+      $media = $this->mediaPublisher->publish($file, (string) $this->t('AI narration: @title', ['@title' => $this->entity->label()]));
+      $form_state->set('previous_media_url', $media->toUrl('canonical', ['absolute' => TRUE])->toString());
     }
     catch (\Throwable $exception) {
       $form_state->set('generation_error', $exception->getMessage());
