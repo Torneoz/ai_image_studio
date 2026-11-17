@@ -74,6 +74,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element['#size'] = 1;
     $element['#description'] = $this->t('Choose the narration project whose settings this chapter will inherit.');
     if (!$this->entity->isNew()) {
+      $this->buildJobSettings($form, $form_state);
       $form['#attached']['library'][] = 'ai_narration/character_counter';
       $form['generation_feedback'] = [
         '#type' => 'container',
@@ -83,6 +84,94 @@ final class NarrationChapterForm extends ContentEntityForm {
       $this->buildGenerationFeedback($form['generation_feedback'], $form_state);
     }
     return $form;
+  }
+
+  /**
+   * Builds non-persistent overrides for the current generation only.
+   */
+  private function buildJobSettings(array &$form, FormStateInterface $form_state): void {
+    $project = $this->entity->get('project_id')->entity;
+    if ($project === NULL) {
+      return;
+    }
+    $defaults = [
+      'model' => (string) $project->get('model')->value,
+      'voice' => (string) $project->get('voice')->value,
+      'format' => (string) $project->get('format')->value,
+      'speed' => (string) $project->get('speed')->value ?: '1',
+      'language' => (string) $project->get('language')->value,
+      'text_normalization' => (bool) $project->get('text_normalization')->value,
+    ];
+    $settings = $form_state->getValue('job_settings') ?? [];
+    $models = $this->generator->getModelOptions();
+    $model = (string) ($settings['model'] ?? $defaults['model']);
+    $model = isset($models[$model]) ? $model : '';
+    $voices = $model === '' ? [] : $this->generator->getVoiceOptions($model);
+    $formats = $model === '' ? [] : $this->generator->getFormatOptions($model);
+    $provider = explode('__', $model, 2)[0] ?? '';
+
+    $form['job_settings'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Narration settings for this generation'),
+      '#description' => $this->t('These values start with the parent Project defaults. Changes are used only for this generation and do not alter the Project or Chapter.'),
+      '#open' => FALSE,
+      '#tree' => TRUE,
+      '#weight' => 80,
+      '#attributes' => ['id' => 'ai-narration-chapter-job-settings'],
+    ];
+    $form['job_settings']['model'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Text-to-speech model'),
+      '#options' => $models,
+      '#empty_option' => $this->t('- Select a model -'),
+      '#default_value' => $model,
+      '#description' => $this->t('Provider and model for this one generation.'),
+      '#ajax' => ['callback' => '::refreshJobSettings', 'wrapper' => 'ai-narration-chapter-job-settings'],
+    ];
+    $form['job_settings']['voice'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Voice'),
+      '#options' => $voices,
+      '#empty_option' => $this->t('- Provider default -'),
+      '#default_value' => isset($voices[$settings['voice'] ?? $defaults['voice']]) ? ($settings['voice'] ?? $defaults['voice']) : '',
+      '#description' => $this->t('Voice used for this one generation.'),
+    ];
+    $form['job_settings']['format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Output format'),
+      '#options' => $formats,
+      '#empty_option' => $this->t('- Provider default -'),
+      '#default_value' => isset($formats[$settings['format'] ?? $defaults['format']]) ? ($settings['format'] ?? $defaults['format']) : '',
+      '#description' => $this->t('Audio encoding for this one generation when supported by the provider.'),
+    ];
+    $form['job_settings']['speed'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Speech speed'),
+      '#default_value' => $settings['speed'] ?? $defaults['speed'],
+      '#min' => $provider === 'openai' ? 0.25 : 0.7,
+      '#max' => $provider === 'openai' ? 4 : ($provider === 'elevenlabs' ? 1.2 : 1.5),
+      '#step' => 0.05,
+      '#access' => in_array($provider, ['openai', 'grok', 'elevenlabs'], TRUE),
+      '#description' => $this->t('Playback-speed multiplier for this one generation.'),
+    ];
+    $form['job_settings']['language'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Language'),
+      '#default_value' => $settings['language'] ?? $defaults['language'],
+      '#access' => in_array($provider, ['gemini', 'grok', 'elevenlabs'], TRUE),
+      '#description' => $this->t('Optional language or locale hint for this generation.'),
+    ];
+    $form['job_settings']['text_normalization'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Normalize text before speaking'),
+      '#default_value' => $settings['text_normalization'] ?? $defaults['text_normalization'],
+      '#access' => $provider === 'grok',
+      '#description' => $this->t('Expands numbers, abbreviations, and symbols before synthesis.'),
+    ];
+  }
+
+  public function refreshJobSettings(array &$form, FormStateInterface $form_state): array {
+    return $form['job_settings'];
   }
 
   /**
@@ -116,7 +205,8 @@ final class NarrationChapterForm extends ContentEntityForm {
         throw new \RuntimeException('Choose a narration project before generating audio.');
       }
       $text = (string) $chapter->get('text')->value;
-      $model = (string) $project->get('model')->value;
+      $settings = $form_state->getValue('job_settings') ?? [];
+      $model = (string) ($settings['model'] ?? $project->get('model')->value);
       if ($model === '') {
         throw new \RuntimeException('The selected narration project has no text-to-speech model.');
       }
@@ -125,11 +215,14 @@ final class NarrationChapterForm extends ContentEntityForm {
         throw new \RuntimeException((string) $this->t('This chapter is @characters characters, exceeding the project limit of @limit. Split it into smaller chapters before generating.', ['@characters' => mb_strlen($text), '@limit' => number_format($limit)]));
       }
       $started = microtime(TRUE);
-      $file = $this->generator->generate($text, $model, (string) $project->get('voice')->value, (string) $project->get('format')->value, [
-        'language' => (string) $project->get('language')->value,
-        'speed' => $project->get('speed')->value ?: 1,
-        'text_normalization' => (bool) $project->get('text_normalization')->value,
-      ], (string) $chapter->label());
+      $voice = (string) ($settings['voice'] ?? $project->get('voice')->value);
+      $format = (string) ($settings['format'] ?? $project->get('format')->value);
+      $parameters = [
+        'language' => (string) ($settings['language'] ?? $project->get('language')->value),
+        'speed' => $settings['speed'] ?? ($project->get('speed')->value ?: 1),
+        'text_normalization' => (bool) ($settings['text_normalization'] ?? $project->get('text_normalization')->value),
+      ];
+      $file = $this->generator->generate($text, $model, $voice, $format, $parameters, (string) $chapter->label());
       $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
       $chapter->set('status', 'complete');
       $chapter->set('error_message', '');
@@ -138,8 +231,8 @@ final class NarrationChapterForm extends ContentEntityForm {
         'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()),
         'fid' => $file->id(),
         'model' => $model,
-        'voice' => (string) $project->get('voice')->value,
-        'format' => (string) $project->get('format')->value,
+        'voice' => $voice,
+        'format' => $format,
         'characters' => mb_strlen($text),
         'bytes' => $file->getSize(),
         'mime' => $file->getMimeType(),
