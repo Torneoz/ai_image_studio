@@ -17,28 +17,31 @@ final class NarrationViewsData extends EntityViewsData {
   public function getViewsData(): array {
     $data = parent::getViewsData();
     $table = $this->entityType->getBaseTable();
-    $label = $this->entityType->getCollectionLabel();
-    $data[$table]['table']['group'] = $this->t('AI Narration — @label', ['@label' => $label]);
-    $data[$table]['table']['base']['title'] = $this->t('AI Narration @label', ['@label' => $label]);
-    $data[$table]['table']['base']['help'] = $this->entityType->id() === 'ai_narration_project'
+    $is_project = $this->entityType->id() === 'ai_narration_project';
+    $data[$table]['table']['group'] = $this->t('AI Narration');
+    $data[$table]['table']['base']['title'] = $is_project
+      ? $this->t('AI Narration Project')
+      : $this->t('AI Narration Chapter');
+    $data[$table]['table']['base']['help'] = $is_project
       ? $this->t('Narration projects and their shared text-to-speech defaults.')
       : $this->t('Narration chapters, generated audio, and last-generation metadata.');
     $data[$table]['table']['base']['cache_contexts'] = ['user', 'user.permissions'];
 
-    if ($this->entityType->id() === 'ai_narration_project') {
+    if ($is_project) {
       $data[$table]['chapters'] = [
-        'title' => $this->t('Project chapters'),
+        'title' => $this->t('AI Narration Chapters'),
         'relationship' => [
           'id' => 'standard',
           'base' => 'ai_narration_chapter',
           'base field' => 'project_id',
           'relationship field' => 'id',
-          'label' => $this->t('Chapters in this project'),
+          'label' => $this->t('AI Narration Chapters'),
         ],
       ];
     }
     else {
-      $data[$table]['project_id']['relationship']['label'] = $this->t('Narration project');
+      $data[$table]['project_id']['relationship']['label'] = $this->t('AI Narration Project');
+      $data[$table]['project_id']['relationship']['title'] = $this->t('AI Narration Project');
       $data[$table]['last_generated_audio']['field']['help'] = $this->t('The file from the latest successful generation.');
       $data[$table]['generation_metadata']['field']['help'] = $this->t('Stored model, request, file, timing, and runtime metadata from the latest generation.');
     }
