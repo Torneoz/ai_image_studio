@@ -103,6 +103,11 @@ final class NarrationGenerateForm extends FormBase {
     $textDefault = (string) ($form_state->getValue('text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
+    $form['intro'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Create a single narrated audio file from a script. Select a text-to-speech model and voice, adjust the available request controls, then preview, download, or save the completed narration to the Media Library.'),
+    ];
     $form['text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Narration text'),

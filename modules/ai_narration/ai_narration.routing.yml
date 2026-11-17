@@ -2,7 +2,7 @@ ai_narration.generate:
   path: '/admin/content/ai-narration'
   defaults:
     _form: '\Drupal\ai_narration\Form\NarrationGenerateForm'
-    _title: 'AI narration'
+    _title: 'AI Simple Narration'
   requirements:
     _permission: 'generate ai narration'
 
