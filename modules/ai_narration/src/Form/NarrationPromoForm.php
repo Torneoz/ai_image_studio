@@ -22,6 +22,7 @@ final class NarrationPromoForm extends ContentEntityForm {
     $project['#empty_option'] = $this->t('- Global promo (no project) -');
     $project['#multiple'] = FALSE;
     $project['#size'] = 1;
+    $project['#default_value'] = $this->entity->get('project_id')->target_id ?: '';
     $project['#description'] = $this->t('Optional. Choose a Project for organisation, or leave this Promo globally reusable.');
     return $form;
   }
