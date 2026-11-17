@@ -6,6 +6,7 @@ namespace Drupal\ai_narration\Form;
 
 use Drupal\ai_narration\Service\NarrationDurationInspector;
 use Drupal\ai_narration\Service\NarrationGenerator;
+use Drupal\ai_narration\Service\NarrationMediaPublisher;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\ContentEntityForm;
@@ -24,6 +25,8 @@ final class NarrationChapterForm extends ContentEntityForm {
 
   protected FileUrlGeneratorInterface $fileUrlGenerator;
 
+  protected NarrationMediaPublisher $mediaPublisher;
+
   protected ?NarrationDurationInspector $durationInspector = NULL;
 
   public function __construct(
@@ -32,11 +35,13 @@ final class NarrationChapterForm extends ContentEntityForm {
     $time,
     NarrationGenerator $generator,
     FileUrlGeneratorInterface $file_url_generator,
+    NarrationMediaPublisher $media_publisher,
     NarrationDurationInspector $duration_inspector,
   ) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->generator = $generator;
     $this->fileUrlGenerator = $file_url_generator;
+    $this->mediaPublisher = $media_publisher;
     $this->durationInspector = $duration_inspector;
   }
 
@@ -47,6 +52,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $container->get('datetime.time'),
       $container->get('ai_narration.generator'),
       $container->get('file_url_generator'),
+      $container->get('ai_narration.media_publisher'),
       $container->get('ai_narration.duration_inspector'),
     );
   }
@@ -123,13 +129,14 @@ final class NarrationChapterForm extends ContentEntityForm {
         'language' => (string) $project->get('language')->value,
         'speed' => $project->get('speed')->value ?: 1,
         'text_normalization' => (bool) $project->get('text_normalization')->value,
-      ]);
+      ], (string) $chapter->label());
       $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
       $chapter->set('status', 'complete');
       $chapter->set('error_message', '');
       $chapter->save();
       $form_state->set('generation_result', [
         'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()),
+        'fid' => $file->id(),
         'model' => $model,
         'voice' => (string) $project->get('voice')->value,
         'format' => (string) $project->get('format')->value,
@@ -174,6 +181,25 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#url' => Url::fromUri($result['url']),
       '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
     ];
+    if (empty($result['media_url'])) {
+      $feedback['actions']['save_media'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save to Media Library'),
+        '#name' => 'save_media',
+        '#submit' => ['::saveToMedia'],
+        '#limit_validation_errors' => [],
+        '#ajax' => ['callback' => '::ajaxGenerate', 'wrapper' => 'ai-narration-chapter-feedback'],
+        '#attributes' => ['class' => ['button']],
+      ];
+    }
+    else {
+      $feedback['actions']['view_media'] = [
+        '#type' => 'link',
+        '#title' => $this->t('View in Media Library'),
+        '#url' => Url::fromUri($result['media_url']),
+        '#attributes' => ['class' => ['button']],
+      ];
+    }
     $feedback['metadata'] = ['#theme' => 'item_list', '#title' => $this->t('Generation details'), '#items' => [
       $this->t('Model: @model', ['@model' => $result['model']]),
       $result['voice'] === '' ? $this->t('Voice: provider default') : $this->t('Voice: @voice', ['@voice' => $result['voice']]),
@@ -187,6 +213,35 @@ final class NarrationChapterForm extends ContentEntityForm {
 
   private function getDurationInspector(): NarrationDurationInspector {
     return $this->durationInspector ??= \Drupal::service('ai_narration.duration_inspector');
+  }
+
+  /**
+   * Publishes the most recently generated chapter audio to Media.
+   */
+  public function saveToMedia(array &$form, FormStateInterface $form_state): void {
+    $result = $form_state->get('generation_result');
+    $file = !empty($result['fid']) ? $this->entityTypeManager->getStorage('file')->load($result['fid']) : NULL;
+    if (!$file) {
+      $form_state->set('generation_error', $this->t('The generated narration file is no longer available.'));
+      $form_state->setRebuild();
+      return;
+    }
+    try {
+      $media = $this->mediaPublisher->publish($file, (string) $this->t('AI narration: @title', ['@title' => $this->entity->label()]));
+      $result['media_url'] = $media->toUrl('canonical', ['absolute' => TRUE])->toString();
+      $form_state->set('generation_result', $result);
+    }
+    catch (\Throwable $exception) {
+      $form_state->set('generation_error', $exception->getMessage());
+    }
+    $form_state->setRebuild();
+  }
+
+  public function save(array $form, FormStateInterface $form_state): int {
+    $result = parent::save($form, $form_state);
+    $this->messenger()->addStatus($this->t('Narration chapter %title has been saved.', ['%title' => $this->entity->label()]));
+    $form_state->setRedirect('entity.ai_narration_chapter.collection');
+    return $result;
   }
 
   private function formatDuration(float $seconds): string {
