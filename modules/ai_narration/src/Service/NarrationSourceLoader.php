@@ -132,7 +132,8 @@ final class NarrationSourceLoader {
   }
 
   private function normaliseText(string $text): string {
-    return trim((string) preg_replace('/[ \t]+/u', ' ', (string) preg_replace('/\R{3,}/u', "\n\n", html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+    $text = (string) preg_replace('/[ \t]+/u', ' ', (string) preg_replace('/\R{3,}/u', "\n\n", html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    return (string) preg_replace('/^[\s\x{FEFF}\x{200B}\x{2060}]+|[\s\x{FEFF}\x{200B}\x{2060}]+$/u', '', $text);
   }
 
 }

@@ -120,7 +120,10 @@ final class NarrationGenerator {
    * Synthesizes text and saves the first returned audio stream as a file.
    */
   public function generate(string $text, string $modelOption, string $voice = '', string $format = '', array $parameters = [], string $filenameBase = ''): FileInterface {
-    $text = trim($text);
+    // Some web pages begin with a BOM or zero-width character before a line
+    // break. ElevenLabs' provider chunker treats that as an empty first chunk,
+    // which its API rejects. Retain paragraph breaks inside the narration.
+    $text = preg_replace('/^[\\s\\x{FEFF}\\x{200B}\\x{2060}]+|[\\s\\x{FEFF}\\x{200B}\\x{2060}]+$/u', '', $text) ?? trim($text);
     if ($text === '') {
       throw new \InvalidArgumentException('Narration text cannot be empty.');
     }
