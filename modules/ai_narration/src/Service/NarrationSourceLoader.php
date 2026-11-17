@@ -98,11 +98,30 @@ final class NarrationSourceLoader {
     $document = new \DOMDocument();
     $document->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_NONET | LIBXML_NOWARNING | LIBXML_NOERROR);
     $xpath = new \DOMXPath($document);
-    foreach ($xpath->query('//script|//style|//noscript|//svg|//nav|//footer|//header|//aside|//form') as $node) {
+    // Remove both semantic page chrome and the common landmark/class patterns
+    // used by news and publisher sites before choosing the readable region.
+    $chrome = '//script|//style|//noscript|//template|//svg|//nav|//footer|//header|//aside|//form|//iframe|//dialog|//*[@aria-hidden="true"]|//*[@role="navigation" or @role="banner" or @role="contentinfo" or @role="complementary"]';
+    foreach ($xpath->query($chrome) as $node) {
       $node->parentNode?->removeChild($node);
     }
+    $chromeTerms = ['advert', 'ad-', 'cookie', 'consent', 'newsletter', 'subscribe', 'social', 'share', 'related', 'recommend', 'comment', 'sidebar', 'pagination', 'breadcrumb', 'promo'];
+    foreach ($chromeTerms as $term) {
+      $term = strtolower($term);
+      $query = '//*[contains(translate(@class, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "' . $term . '") or contains(translate(@id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "' . $term . '")]';
+      foreach ($xpath->query($query) as $node) {
+        $node->parentNode?->removeChild($node);
+      }
+    }
     $title = trim((string) $xpath->evaluate('string(//h1[1] | //title[1])'));
-    $content = $xpath->query('//article[1] | //main[1] | //body[1]')->item(0);
+    // XPath unions are returned in document order, which would select body
+    // before article. Choose content candidates deliberately instead.
+    $content = NULL;
+    foreach (['//article', '//*[@itemprop="articleBody"]', '//*[@role="main"]', '//main', '//body'] as $query) {
+      $content = $xpath->query($query)->item(0);
+      if ($content !== NULL) {
+        break;
+      }
+    }
     $text = $this->normaliseText($content ? (string) $content->textContent : '');
     if ($text === '') {
       throw new \RuntimeException('No readable narration text could be found at the remote URL.');
