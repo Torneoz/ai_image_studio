@@ -434,6 +434,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         throw new \RuntimeException((string) $this->t('This chapter is @characters characters, exceeding the project limit of @limit. Split it into smaller chapters before generating.', ['@characters' => mb_strlen($text), '@limit' => number_format($limit)]));
       }
       $started = microtime(TRUE);
+      $generatedAt = $this->time->getRequestTime();
       $voice = (string) ($settings['voice'] ?? $project->get('voice')->value);
       $format = (string) ($settings['format'] ?? $project->get('format')->value);
       $parameters = [
@@ -455,7 +456,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         'mime' => $file->getMimeType(),
         'runtime_seconds' => $duration,
         'generation_seconds' => $seconds,
-        'generated_at' => gmdate(DATE_ATOM),
+        'generated_at' => gmdate(DATE_ATOM, $generatedAt),
       ];
       $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
       $chapter->set('last_generated_audio', ['target_id' => $file->id()]);
@@ -474,6 +475,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         'mime' => $file->getMimeType(),
         'duration' => $duration,
         'seconds' => $seconds,
+        'generated_at' => $generatedAt,
       ]);
     }
     catch (\Throwable $exception) {
@@ -539,6 +541,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
       $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
       $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
+      $this->t('Generated: @date', ['@date' => $this->formatGenerationDate((int) $result['generated_at'])]),
       $this->t('Provider-reported price: unavailable'),
     ]];
   }
@@ -599,6 +602,11 @@ final class NarrationChapterForm extends ContentEntityForm {
   private function formatDuration(float $seconds): string {
     $seconds = (int) round($seconds);
     return sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
+  }
+
+  /** Formats a generation timestamp in the site's configured timezone. */
+  private function formatGenerationDate(int $timestamp): string {
+    return \Drupal::service('date.formatter')->format($timestamp, 'custom', 'j M Y, g:i:s a T');
   }
 
 }

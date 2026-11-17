@@ -1,4 +1,6 @@
 .ai-narration-result__actions {
+  --ai-narration-player-height: 3.75rem;
+  --ai-narration-player-background: transparent;
   align-items: center;
   display: flex;
   flex-wrap: wrap;
@@ -10,6 +12,9 @@
 .ai-narration-result__actions audio {
   /* Keep playback separate from the follow-up actions. */
   flex: 0 0 100%;
+  background: var(--ai-narration-player-background);
+  border-radius: 0.75rem;
+  min-height: var(--ai-narration-player-height);
   max-width: 100%;
 }
 

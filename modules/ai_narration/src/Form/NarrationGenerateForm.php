@@ -298,6 +298,7 @@ final class NarrationGenerateForm extends FormBase {
           $this->t('Input: @characters characters', ['@characters' => $result['characters']]),
           $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
           $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
+          $this->t('Generated: @date', ['@date' => $this->formatGenerationDate((int) $result['generated_at'])]),
           $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
           $result['parameters'] === [] ? $this->t('Request parameters: provider defaults') : $this->t('Request parameters: @parameters', ['@parameters' => json_encode($result['parameters'], JSON_UNESCAPED_SLASHES)]),
           !empty($result['source']) ? $this->t('Text source: @source', ['@source' => $result['source']]) : $this->t('Text source: local text'),
@@ -468,6 +469,11 @@ final class NarrationGenerateForm extends FormBase {
     return sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
   }
 
+  /** Formats a generation timestamp in the site's configured timezone. */
+  private function formatGenerationDate(int $timestamp): string {
+    return \Drupal::service('date.formatter')->format($timestamp, 'custom', 'j M Y, g:i:s a T');
+  }
+
   /**
    * Loads the duration service when resuming a form serialized before it existed.
    */
@@ -532,6 +538,7 @@ final class NarrationGenerateForm extends FormBase {
         $sourceDescription = (string) ($source['label'] ?? '') ?: (string) ($source['url'] ?? '');
       }
       $started = microtime(TRUE);
+      $generatedAt = \Drupal::service('datetime.time')->getRequestTime();
       $file = $this->generator->generate($text, $model, $voice, $format, $parameters);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form_state->set('result', [
@@ -546,6 +553,7 @@ final class NarrationGenerateForm extends FormBase {
         'mime' => $file->getMimeType(),
         'duration' => $this->getDurationInspector()->getDuration($file),
         'seconds' => microtime(TRUE) - $started,
+        'generated_at' => $generatedAt,
         'source' => $sourceDescription,
       ]);
       $form_state->setRebuild();
