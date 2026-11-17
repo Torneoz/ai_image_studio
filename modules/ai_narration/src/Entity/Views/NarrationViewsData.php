@@ -20,12 +20,12 @@ final class NarrationViewsData extends EntityViewsData {
     $label = $this->entityType->getCollectionLabel();
     $data[$table]['table']['group'] = $this->t('AI Narration — @label', ['@label' => $label]);
     $data[$table]['table']['base']['title'] = $this->t('AI Narration @label', ['@label' => $label]);
-    $data[$table]['table']['base']['help'] = $this->entityType->getEntityTypeId() === 'ai_narration_project'
+    $data[$table]['table']['base']['help'] = $this->entityType->id() === 'ai_narration_project'
       ? $this->t('Narration projects and their shared text-to-speech defaults.')
       : $this->t('Narration chapters, generated audio, and last-generation metadata.');
     $data[$table]['table']['base']['cache_contexts'] = ['user', 'user.permissions'];
 
-    if ($this->entityType->getEntityTypeId() === 'ai_narration_project') {
+    if ($this->entityType->id() === 'ai_narration_project') {
       $data[$table]['chapters'] = [
         'title' => $this->t('Project chapters'),
         'relationship' => [
