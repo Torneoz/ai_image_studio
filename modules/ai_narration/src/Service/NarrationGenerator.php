@@ -180,6 +180,7 @@ final class NarrationGenerator {
       'openai' => $this->openAiParameters($parameters),
       'gemini' => ['languageCode' => trim((string) ($parameters['language'] ?? ''))],
       'grok' => $this->grokParameters($parameters),
+      'elevenlabs' => $this->elevenLabsParameters($parameters),
       default => [],
     };
   }
@@ -202,6 +203,52 @@ final class NarrationGenerator {
       'speed' => $speed,
       'text_normalization' => !empty($parameters['text_normalization']),
     ];
+  }
+
+  /**
+   * Maps controls supported by the installed ElevenLabs Drupal provider.
+   */
+  private function elevenLabsParameters(array $parameters): array {
+    $settings = [];
+    foreach (['speed', 'stability', 'similarity_boost', 'style'] as $name) {
+      if (($parameters[$name] ?? NULL) !== NULL && ($parameters[$name] ?? '') !== '') {
+        $settings[$name] = (float) $parameters[$name];
+      }
+    }
+    if (($settings['speed'] ?? 1) < 0.7 || ($settings['speed'] ?? 1) > 1.2) {
+      throw new \InvalidArgumentException('ElevenLabs speech speed must be between 0.7 and 1.2.');
+    }
+    foreach (['stability', 'similarity_boost', 'style'] as $name) {
+      if (isset($settings[$name]) && ($settings[$name] < 0 || $settings[$name] > 1)) {
+        throw new \InvalidArgumentException("ElevenLabs $name must be between 0 and 1.");
+      }
+    }
+    foreach (['use_speaker_boost', 'apply_language_text_normalization', 'use_pvc_as_ivc'] as $name) {
+      if (array_key_exists($name, $parameters)) {
+        $settings[$name] = (bool) $parameters[$name];
+      }
+    }
+    foreach (['language_code', 'apply_text_normalization', 'previous_text', 'next_text'] as $name) {
+      if (($value = trim((string) ($parameters[$name] ?? ''))) !== '') {
+        $settings[$name] = $value;
+      }
+    }
+    if (isset($settings['apply_text_normalization']) && !in_array($settings['apply_text_normalization'], ['auto', 'on', 'off'], TRUE)) {
+      throw new \InvalidArgumentException('ElevenLabs text normalisation must be auto, on, or off.');
+    }
+    if (($parameters['seed'] ?? '') !== '') {
+      $seed = (int) $parameters['seed'];
+      if ($seed < 0 || $seed > 4294967295) {
+        throw new \InvalidArgumentException('ElevenLabs seed must be between 0 and 4294967295.');
+      }
+      $settings['seed'] = $seed;
+    }
+    foreach (['pronunciation_dictionary_locators', 'previous_request_ids', 'next_request_ids'] as $name) {
+      if (!empty($parameters[$name])) {
+        $settings[$name] = $parameters[$name];
+      }
+    }
+    return $settings;
   }
 
   /**

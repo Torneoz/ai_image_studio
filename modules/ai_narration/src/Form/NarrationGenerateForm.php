@@ -193,6 +193,24 @@ final class NarrationGenerateForm extends FormBase {
       $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => 1, '#min' => 0.7, '#max' => 1.5, '#step' => 0.05, '#description' => $this->t('Playback-speed multiplier. 1 is normal speed; Grok supports 0.7 to 1.5.')];
       $form['voice_wrapper']['text_normalization'] = ['#type' => 'checkbox', '#title' => $this->t('Normalize text before speaking'), '#description' => $this->t('Expands numbers, abbreviations, and symbols into a spoken form before synthesis.')];
     }
+    elseif ($provider === 'elevenlabs') {
+      $form['voice_wrapper']['speed'] = ['#type' => 'number', '#title' => $this->t('Speech speed'), '#default_value' => $form_state->getValue('speed') ?? 1, '#min' => 0.7, '#max' => 1.2, '#step' => 0.01, '#description' => $this->t('Controls delivery pace. 1 is normal speed.')];
+      $form['voice_wrapper']['stability'] = ['#type' => 'number', '#title' => $this->t('Stability'), '#default_value' => $form_state->getValue('stability') ?? 0.5, '#min' => 0, '#max' => 1, '#step' => 0.01, '#description' => $this->t('Higher values are steadier; lower values are more expressive and variable.')];
+      $form['voice_wrapper']['similarity_boost'] = ['#type' => 'number', '#title' => $this->t('Similarity boost'), '#default_value' => $form_state->getValue('similarity_boost') ?? 0.75, '#min' => 0, '#max' => 1, '#step' => 0.01, '#description' => $this->t('How closely the result follows the selected voice.')];
+      $form['voice_wrapper']['style'] = ['#type' => 'number', '#title' => $this->t('Style exaggeration'), '#default_value' => $form_state->getValue('style') ?? 0, '#min' => 0, '#max' => 1, '#step' => 0.01, '#description' => $this->t('Amplifies the voice’s natural style. Higher values can add latency.')];
+      $form['voice_wrapper']['use_speaker_boost'] = ['#type' => 'checkbox', '#title' => $this->t('Use speaker boost'), '#default_value' => $form_state->getValue('use_speaker_boost') ?? TRUE, '#description' => $this->t('Improves similarity to the original speaker, with a small latency cost.')];
+      $form['voice_wrapper']['language_code'] = ['#type' => 'textfield', '#title' => $this->t('Language code'), '#default_value' => $form_state->getValue('language_code') ?? '', '#maxlength' => 8, '#description' => $this->t('Optional ISO 639-1 language code, such as en, fr, or ja. Not supported by Eleven Multilingual v2.')];
+      $form['voice_wrapper']['apply_text_normalization'] = ['#type' => 'select', '#title' => $this->t('Text normalisation'), '#options' => ['auto' => $this->t('Auto'), 'on' => $this->t('Always on'), 'off' => $this->t('Off')], '#default_value' => $form_state->getValue('apply_text_normalization') ?? 'auto', '#description' => $this->t('Controls expansion of numbers, dates, abbreviations, and symbols. Turbo v2.5 and Flash v2.5 do not support Always on.')];
+      $form['voice_wrapper']['apply_language_text_normalization'] = ['#type' => 'checkbox', '#title' => $this->t('Language-aware normalisation'), '#default_value' => $form_state->getValue('apply_language_text_normalization') ?? FALSE, '#description' => $this->t('Enables language-specific normalisation. Currently intended for Japanese and can increase latency.')];
+      $form['voice_wrapper']['seed'] = ['#type' => 'number', '#title' => $this->t('Seed'), '#default_value' => $form_state->getValue('seed') ?? '', '#min' => 0, '#max' => 4294967295, '#step' => 1, '#description' => $this->t('Optional best-effort deterministic seed. Identical output is not guaranteed.')];
+      $form['voice_wrapper']['advanced'] = ['#type' => 'details', '#title' => $this->t('Advanced ElevenLabs controls'), '#open' => FALSE];
+      $form['voice_wrapper']['advanced']['previous_text'] = ['#type' => 'textarea', '#title' => $this->t('Previous text'), '#default_value' => $form_state->getValue('previous_text') ?? '', '#rows' => 2, '#description' => $this->t('Preceding narration to improve continuity across separately generated chapters.')];
+      $form['voice_wrapper']['advanced']['next_text'] = ['#type' => 'textarea', '#title' => $this->t('Next text'), '#default_value' => $form_state->getValue('next_text') ?? '', '#rows' => 2, '#description' => $this->t('Following narration to improve continuity across separately generated chapters.')];
+      $form['voice_wrapper']['advanced']['pronunciation_dictionary_locators'] = ['#type' => 'textarea', '#title' => $this->t('Pronunciation dictionaries (JSON)'), '#default_value' => $form_state->getValue('pronunciation_dictionary_locators') ?? '', '#rows' => 2, '#description' => $this->t('Optional JSON array of up to three objects with id and version_id.')];
+      $form['voice_wrapper']['advanced']['previous_request_ids'] = ['#type' => 'textarea', '#title' => $this->t('Previous request IDs (JSON)'), '#default_value' => $form_state->getValue('previous_request_ids') ?? '', '#rows' => 2, '#description' => $this->t('Optional JSON array of up to three preceding ElevenLabs request IDs.')];
+      $form['voice_wrapper']['advanced']['next_request_ids'] = ['#type' => 'textarea', '#title' => $this->t('Next request IDs (JSON)'), '#default_value' => $form_state->getValue('next_request_ids') ?? '', '#rows' => 2, '#description' => $this->t('Optional JSON array of up to three following ElevenLabs request IDs.')];
+      $form['voice_wrapper']['advanced']['use_pvc_as_ivc'] = ['#type' => 'checkbox', '#title' => $this->t('Use IVC rather than PVC'), '#default_value' => $form_state->getValue('use_pvc_as_ivc') ?? FALSE, '#description' => $this->t('Legacy compatibility control for professional voice clones; ElevenLabs marks this API option deprecated.')];
+    }
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Generate narration'),
@@ -266,6 +284,7 @@ final class NarrationGenerateForm extends FormBase {
           $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
           $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
           $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
+          $result['parameters'] === [] ? $this->t('Request parameters: provider defaults') : $this->t('Request parameters: @parameters', ['@parameters' => json_encode($result['parameters'], JSON_UNESCAPED_SLASHES)]),
           $this->t('Provider-reported price: unavailable'),
         ],
       ];
@@ -337,6 +356,21 @@ final class NarrationGenerateForm extends FormBase {
         'speed' => $form_state->getValue('speed') ?? 1,
         'text_normalization' => (bool) ($form_state->getValue('text_normalization') ?? FALSE),
       ];
+      if (str_starts_with($model, 'elevenlabs__')) {
+        foreach (['stability', 'similarity_boost', 'style', 'use_speaker_boost', 'language_code', 'apply_text_normalization', 'apply_language_text_normalization', 'seed', 'previous_text', 'next_text', 'use_pvc_as_ivc'] as $key) {
+          $parameters[$key] = $form_state->getValue($key);
+        }
+        foreach (['pronunciation_dictionary_locators', 'previous_request_ids', 'next_request_ids'] as $key) {
+          $value = trim((string) $form_state->getValue($key));
+          if ($value !== '') {
+            $decoded = json_decode($value, TRUE, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($decoded) || !array_is_list($decoded) || count($decoded) > 3) {
+              throw new \InvalidArgumentException("$key must be a JSON array with no more than three entries.");
+            }
+            $parameters[$key] = $decoded;
+          }
+        }
+      }
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_text', $text);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
