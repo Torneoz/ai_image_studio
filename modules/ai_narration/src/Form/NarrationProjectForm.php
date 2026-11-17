@@ -86,6 +86,12 @@ final class NarrationProjectForm extends ContentEntityForm {
         '#url' => Url::fromRoute('entity.ai_narration_chapter.add_form', [], ['query' => ['project' => $this->entity->id()]]),
         '#attributes' => ['class' => ['button']],
       ];
+      $actions['create_edition'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Create edition'),
+        '#url' => Url::fromRoute('entity.ai_narration_edition.add_form', [], ['query' => ['project' => $this->entity->id()]]),
+        '#attributes' => ['class' => ['button']],
+      ];
     }
     return $actions;
   }

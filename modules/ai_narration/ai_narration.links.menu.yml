@@ -24,3 +24,17 @@ entity.ai_narration_chapter.collection:
   route_name: entity.ai_narration_chapter.collection
   parent: ai_narration.generate
   weight: -9
+
+entity.ai_narration_edition.collection:
+  title: 'Narration editions'
+  description: 'Manage optional dated editions within narration projects.'
+  route_name: entity.ai_narration_edition.collection
+  parent: ai_narration.generate
+  weight: -8
+
+entity.ai_narration_promo.collection:
+  title: 'Narration promos'
+  description: 'Manage reusable standalone narration audio.'
+  route_name: entity.ai_narration_promo.collection
+  parent: ai_narration.generate
+  weight: -7

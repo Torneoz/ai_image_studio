@@ -93,3 +93,41 @@ entity.ai_narration_chapter.canonical:
     parameters:
       ai_narration_chapter:
         type: entity:ai_narration_chapter
+
+entity.ai_narration_edition.collection:
+  path: '/admin/content/ai-narration/editions'
+  defaults: { _entity_list: 'ai_narration_edition', _title: 'Narration editions' }
+  requirements: { _permission: 'administer ai narration' }
+entity.ai_narration_edition.add_form:
+  path: '/admin/content/ai-narration/editions/add'
+  defaults: { _entity_form: 'ai_narration_edition.add', _title: 'Add narration edition' }
+  requirements: { _permission: 'administer ai narration' }
+entity.ai_narration_edition.edit_form:
+  path: '/admin/content/ai-narration/editions/{ai_narration_edition}/edit'
+  defaults: { _entity_form: 'ai_narration_edition.edit', _title: 'Edit narration edition' }
+  requirements: { _permission: 'administer ai narration' }
+  options: { parameters: { ai_narration_edition: { type: entity:ai_narration_edition } } }
+entity.ai_narration_edition.canonical:
+  path: '/admin/content/ai-narration/editions/{ai_narration_edition}'
+  defaults: { _entity_view: 'ai_narration_edition.full', _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title' }
+  requirements: { _permission: 'administer ai narration' }
+  options: { parameters: { ai_narration_edition: { type: entity:ai_narration_edition } } }
+
+entity.ai_narration_promo.collection:
+  path: '/admin/content/ai-narration/promos'
+  defaults: { _entity_list: 'ai_narration_promo', _title: 'Narration promos' }
+  requirements: { _permission: 'administer ai narration' }
+entity.ai_narration_promo.add_form:
+  path: '/admin/content/ai-narration/promos/add'
+  defaults: { _entity_form: 'ai_narration_promo.add', _title: 'Add narration promo' }
+  requirements: { _permission: 'administer ai narration' }
+entity.ai_narration_promo.edit_form:
+  path: '/admin/content/ai-narration/promos/{ai_narration_promo}/edit'
+  defaults: { _entity_form: 'ai_narration_promo.edit', _title: 'Edit narration promo' }
+  requirements: { _permission: 'administer ai narration' }
+  options: { parameters: { ai_narration_promo: { type: entity:ai_narration_promo } } }
+entity.ai_narration_promo.canonical:
+  path: '/admin/content/ai-narration/promos/{ai_narration_promo}'
+  defaults: { _entity_view: 'ai_narration_promo.full', _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title' }
+  requirements: { _permission: 'administer ai narration' }
+  options: { parameters: { ai_narration_promo: { type: entity:ai_narration_promo } } }

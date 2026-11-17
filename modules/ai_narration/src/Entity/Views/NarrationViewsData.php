@@ -17,14 +17,15 @@ final class NarrationViewsData extends EntityViewsData {
   public function getViewsData(): array {
     $data = parent::getViewsData();
     $table = $this->entityType->getBaseTable();
-    $is_project = $this->entityType->id() === 'ai_narration_project';
+    $id = $this->entityType->id();
+    $is_project = $id === 'ai_narration_project';
     $data[$table]['table']['group'] = $this->t('AI Narration');
     $data[$table]['table']['base']['title'] = $is_project
       ? $this->t('AI Narration Project')
       : $this->t('AI Narration Chapter');
     $data[$table]['table']['base']['help'] = $is_project
       ? $this->t('Narration projects and their shared text-to-speech defaults.')
-      : $this->t('Narration chapters, generated audio, and last-generation metadata.');
+      : $this->t('Narration content and metadata.');
     $data[$table]['table']['base']['cache_contexts'] = ['user', 'user.permissions'];
 
     if ($is_project) {
@@ -39,7 +40,7 @@ final class NarrationViewsData extends EntityViewsData {
         ],
       ];
     }
-    else {
+    elseif ($id === 'ai_narration_chapter') {
       $data[$table]['project_id']['relationship']['label'] = $this->t('AI Narration Project');
       $data[$table]['project_id']['relationship']['title'] = $this->t('AI Narration Project');
       $data[$table]['last_generated_audio']['field']['help'] = $this->t('The file from the latest successful generation.');

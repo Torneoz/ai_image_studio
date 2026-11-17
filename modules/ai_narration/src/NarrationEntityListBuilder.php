@@ -20,7 +20,13 @@ final class NarrationEntityListBuilder extends EntityListBuilder {
       $header += ['model' => $this->t('Model'), 'voice' => $this->t('Voice')];
     }
     if ($this->entityTypeId === 'ai_narration_chapter') {
-      $header += ['project' => $this->t('Project'), 'position' => $this->t('Position'), 'status' => $this->t('Status')];
+      $header += ['project' => $this->t('Project'), 'edition' => $this->t('Edition'), 'position' => $this->t('Position'), 'status' => $this->t('Status')];
+    }
+    if ($this->entityTypeId === 'ai_narration_edition') {
+      $header += ['project' => $this->t('Project'), 'date' => $this->t('Edition date')];
+    }
+    if ($this->entityTypeId === 'ai_narration_promo') {
+      $header += ['project' => $this->t('Project')];
     }
     return $header + parent::buildHeader();
   }
@@ -32,7 +38,13 @@ final class NarrationEntityListBuilder extends EntityListBuilder {
       $row += ['model' => $entity->get('model')->value ?: '—', 'voice' => $entity->get('voice')->value ?: $this->t('Provider default')];
     }
     if ($this->entityTypeId === 'ai_narration_chapter') {
-      $row += ['project' => $entity->get('project_id')->entity?->label() ?: '—', 'position' => $entity->get('position')->value, 'status' => $entity->get('status')->value];
+      $row += ['project' => $entity->get('project_id')->entity?->label() ?: '—', 'edition' => $entity->get('edition_id')->entity?->label() ?: '—', 'position' => $entity->get('position')->value, 'status' => $entity->get('status')->value];
+    }
+    if ($this->entityTypeId === 'ai_narration_edition') {
+      $row += ['project' => $entity->get('project_id')->entity?->label() ?: '—', 'date' => $entity->get('edition_date')->value ?: '—'];
+    }
+    if ($this->entityTypeId === 'ai_narration_promo') {
+      $row += ['project' => $entity->get('project_id')->entity?->label() ?: $this->t('Global')];
     }
     return $row + parent::buildRow($entity);
   }

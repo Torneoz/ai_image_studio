@@ -66,3 +66,21 @@ function ai_narration_update_10006(): string {
   }
   return 'Added narration chapter text-source provenance fields.';
 }
+
+/** Installs optional Edition and reusable Promo entities. */
+function ai_narration_update_10007(): string {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $types = \Drupal::entityTypeManager();
+  foreach (['ai_narration_edition', 'ai_narration_promo'] as $id) {
+    $manager->installEntityType($types->getDefinition($id));
+  }
+  return 'Installed AI Narration edition and promo storage.';
+}
+
+/** Adds the optional Edition relationship to existing Chapters. */
+function ai_narration_update_10008(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_chapter');
+  $field = \Drupal\ai_narration\Entity\NarrationChapter::baseFieldDefinitions($type)['edition_id'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('edition_id', 'ai_narration_chapter', 'ai_narration_chapter', $field);
+  return 'Added optional Edition references to narration Chapters.';
+}

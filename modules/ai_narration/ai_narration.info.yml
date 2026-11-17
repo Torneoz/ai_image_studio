@@ -9,6 +9,7 @@ dependencies:
   - ai:ai
   - ai_image_studio:ai_image_studio
   - drupal:file
+  - drupal:datetime
   - drupal:media
   - drupal:views
   - mcp_server:mcp_server
