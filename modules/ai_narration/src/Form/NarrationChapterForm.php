@@ -75,6 +75,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element['#description'] = $this->t('Choose the narration project whose settings this chapter will inherit.');
     if (!$this->entity->isNew()) {
       $this->buildJobSettings($form, $form_state);
+      $this->buildPreviousGenerationResult($form);
       $form['#attached']['library'][] = 'ai_narration/character_counter';
       $form['generation_feedback'] = [
         '#type' => 'container',
@@ -112,7 +113,7 @@ final class NarrationChapterForm extends ContentEntityForm {
 
     $form['job_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Narration settings for this generation'),
+      '#title' => $this->t('Project Narration settings'),
       '#description' => $this->t('These values start with the parent Project defaults. Changes are used only for this generation and do not alter the Project or Chapter.'),
       '#open' => FALSE,
       '#tree' => TRUE,
@@ -172,6 +173,53 @@ final class NarrationChapterForm extends ContentEntityForm {
 
   public function refreshJobSettings(array &$form, FormStateInterface $form_state): array {
     return $form['job_settings'];
+  }
+
+  /**
+   * Shows the durable result saved by the last successful generation.
+   */
+  private function buildPreviousGenerationResult(array &$form): void {
+    $file = $this->entity->get('last_generated_audio')->entity;
+    $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
+    if ($file === NULL && $metadata === []) {
+      return;
+    }
+    $form['previous_generation_result'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Previous Generation Result'),
+      '#open' => FALSE,
+      '#weight' => 85,
+    ];
+    if ($file) {
+      $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
+      $form['previous_generation_result']['audio'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'audio',
+        '#attributes' => ['controls' => TRUE, 'src' => $url],
+      ];
+      $form['previous_generation_result']['download'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download previous audio'),
+        '#url' => Url::fromUri($url),
+        '#attributes' => ['download' => TRUE, 'class' => ['button']],
+      ];
+    }
+    if ($metadata !== []) {
+      $items = [];
+      foreach ($metadata as $key => $value) {
+        if (is_array($value)) {
+          $value = json_encode($value, JSON_UNESCAPED_SLASHES);
+        }
+        if ($value !== NULL && $value !== '') {
+          $items[] = $this->t('@key: @value', ['@key' => ucwords(str_replace('_', ' ', (string) $key)), '@value' => (string) $value]);
+        }
+      }
+      $form['previous_generation_result']['metadata'] = [
+        '#theme' => 'item_list',
+        '#title' => $this->t('Saved generation metadata'),
+        '#items' => $items,
+      ];
+    }
   }
 
   /**
