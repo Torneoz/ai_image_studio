@@ -98,6 +98,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         ],
       ];
       $form['#attached']['library'][] = 'ai_narration/character_counter';
+      $form['#attached']['library'][] = 'ai_narration/audio_share';
       $form['generation_feedback'] = [
         '#type' => 'container',
         '#weight' => 90,
@@ -375,6 +376,12 @@ final class NarrationChapterForm extends ContentEntityForm {
         '#url' => Url::fromUri($url),
         '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
+      $form['previous_generation_result']['actions']['share'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'button',
+        '#value' => $this->t('Share previous audio'),
+        '#attributes' => ['type' => 'button', 'class' => ['button', 'ai-narration-share'], 'data-ai-narration-share-url' => $url, 'data-ai-narration-share-title' => $this->t('Narration: @title', ['@title' => $this->entity->label()])],
+      ];
       if ($media_url = $form_state->get('previous_media_url')) {
         $form['previous_generation_result']['actions']['view_media'] = [
           '#type' => 'link',
@@ -514,6 +521,12 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#title' => $this->t('Download @format file (@size)', ['@format' => strtoupper($result['format'] ?: pathinfo($result['url'], PATHINFO_EXTENSION) ?: 'audio'), '@size' => ByteSizeMarkup::create($result['bytes'])]),
       '#url' => Url::fromUri($result['url']),
       '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
+    ];
+    $feedback['actions']['share'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => $this->t('Share Audio'),
+      '#attributes' => ['type' => 'button', 'class' => ['button', 'ai-narration-share'], 'data-ai-narration-share-url' => $result['url'], 'data-ai-narration-share-title' => $this->t('Narration: @title', ['@title' => $this->entity->label()])],
     ];
     if (empty($result['media_url'])) {
       $feedback['actions']['save_media'] = [

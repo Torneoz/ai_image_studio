@@ -138,6 +138,7 @@ final class NarrationGenerateForm extends FormBase {
       '#markup' => '<span data-ai-narration-character-count>' . mb_strlen($textDefault) . '</span> ' . $this->t('characters') . ' · ' . $limitLabel,
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
+    $form['#attached']['library'][] = 'ai_narration/audio_share';
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-speech model'),
@@ -269,6 +270,17 @@ final class NarrationGenerateForm extends FormBase {
         ]),
         '#url' => Url::fromUri($result['url']),
         '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
+      ];
+      $form['feedback']['actions']['share'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'button',
+        '#value' => $this->t('Share Audio'),
+        '#attributes' => [
+          'type' => 'button',
+          'class' => ['button', 'ai-narration-share'],
+          'data-ai-narration-share-url' => $result['url'],
+          'data-ai-narration-share-title' => $this->t('Generated narration audio'),
+        ],
       ];
       if (empty($result['media_url'])) {
         $form['feedback']['actions']['save_media'] = [

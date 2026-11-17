@@ -7,3 +7,10 @@ character_counter:
   dependencies:
     - core/drupal
     - core/once
+
+audio_share:
+  js:
+    js/audio-share.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
