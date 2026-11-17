@@ -19,6 +19,18 @@
 }
 
 .ai-narration-result__actions .button {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 1 22rem;
+  justify-content: center;
   margin: 0;
+  max-width: 100%;
+  min-height: 4.75rem;
   text-align: center;
+  width: 22rem;
+}
+
+.ai-narration-result__actions select.button {
+  display: block;
 }

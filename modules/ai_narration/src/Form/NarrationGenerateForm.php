@@ -320,7 +320,7 @@ final class NarrationGenerateForm extends FormBase {
           '#value' => $this->t('Save To Narration Chapter'),
           '#name' => 'save_chapter',
           '#submit' => ['::saveToChapter'],
-          '#limit_validation_errors' => [],
+          '#limit_validation_errors' => [['project_id']],
           '#ajax' => ['callback' => '::ajaxSubmit', 'wrapper' => 'ai-narration-feedback'],
           '#attributes' => ['class' => ['button']],
         ];
@@ -544,7 +544,13 @@ final class NarrationGenerateForm extends FormBase {
    */
   public function saveToChapter(array &$form, FormStateInterface $form_state): void {
     $result = $form_state->get('result') ?? [];
-    $projectId = (int) $form_state->getValue('project_id');
+    // This action deliberately skips unrelated form validation. Read the
+    // selector from user input as a fallback because Drupal does not always
+    // copy excluded form values into FormState during an AJAX submission.
+    $input = $form_state->getUserInput();
+    $projectValue = $form_state->getValue('project_id');
+    $submittedProject = $input['project_id'] ?? $input['feedback']['actions']['project_id'] ?? 0;
+    $projectId = (int) ($projectValue !== '' && $projectValue !== NULL ? $projectValue : $submittedProject);
     $file = !empty($result['fid']) ? $this->entityTypeManager->getStorage('file')->load((int) $result['fid']) : NULL;
     $project = $projectId ? $this->entityTypeManager->getStorage('ai_narration_project')->load($projectId) : NULL;
     if (!$file || !$project) {
