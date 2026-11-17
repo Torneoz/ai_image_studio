@@ -408,6 +408,11 @@ final class NarrationGenerateForm extends FormBase {
       $form_state->setValue('source', $source);
       $form_state->set('source_snapshot', $source);
       $form_state->set('loaded_source_text', $loaded['text']);
+      // Submitted browser input takes precedence over #default_value on an
+      // AJAX rebuild, so replace it as well as the stored form value.
+      $input = $form_state->getUserInput();
+      $input['text'] = $loaded['text'];
+      $form_state->setUserInput($input);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_source', $source);
       $this->messenger()->addStatus($this->t('Loaded @characters characters from @source. Review the editable narration text before generating.', ['@characters' => number_format(mb_strlen($loaded['text'])), '@source' => $loaded['title']]));
     }

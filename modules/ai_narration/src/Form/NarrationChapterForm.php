@@ -217,6 +217,11 @@ final class NarrationChapterForm extends ContentEntityForm {
       $form_state->setValue('source', $source);
       $form_state->setValue(['text', 0, 'value'], $loaded['text']);
       $form_state->set('loaded_source_text', $loaded['text']);
+      // Entity widgets retain submitted browser input during an AJAX rebuild.
+      // Update that input too, so the loaded snapshot is visible immediately.
+      $input = $form_state->getUserInput();
+      $input['text'][0]['value'] = $loaded['text'];
+      $form_state->setUserInput($input);
       $this->messenger()->addStatus($this->t('Loaded @characters characters from @source. Review and save the editable narration text.', ['@characters' => number_format(mb_strlen($loaded['text'])), '@source' => $loaded['title']]));
     }
     catch (\Throwable $exception) {
