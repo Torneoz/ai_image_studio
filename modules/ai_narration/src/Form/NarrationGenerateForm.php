@@ -107,6 +107,7 @@ final class NarrationGenerateForm extends FormBase {
     $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
     $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
     $savedFormat = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_format') ?? '');
+    $savedProject = (int) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_project') ?? 0);
     $textDefault = (string) ($form_state->get('loaded_source_text') ?? $form_state->getValue('text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
@@ -135,6 +136,21 @@ final class NarrationGenerateForm extends FormBase {
       '#type' => 'item',
       '#attributes' => ['id' => 'ai-narration-text-count'],
       '#markup' => '<span data-ai-narration-character-count>' . mb_strlen($textDefault) . '</span> ' . $this->t('characters') . ' · ' . $limitLabel,
+    ];
+    $projects = $this->entityTypeManager->getStorage('ai_narration_project')->loadMultiple();
+    $projectOptions = [];
+    foreach ($projects as $project) {
+      $projectOptions[$project->id()] = (string) $project->label();
+    }
+    $selectedProject = (int) ($form_state->getValue('project_id') ?? $savedProject);
+    $form['project_id'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Narration Project'),
+      '#options' => $projectOptions,
+      '#default_value' => isset($projectOptions[$selectedProject]) ? $selectedProject : '',
+      '#empty_option' => $this->t('- No project selected -'),
+      '#description' => $projectOptions === [] ? $this->t('Create a Narration Project to save generated results as Chapters.') : $this->t('Optional. Select a Project to enable saving this generated narration as a Chapter.'),
+      '#weight' => 1,
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
     $form['model'] = [
@@ -285,6 +301,25 @@ final class NarrationGenerateForm extends FormBase {
           '#type' => 'link',
           '#title' => $this->t('View in Media Library'),
           '#url' => Url::fromUri($result['media_url']),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
+      if (!empty($result['chapter_url'])) {
+        $form['feedback']['actions']['view_chapter'] = [
+          '#type' => 'link',
+          '#title' => $this->t('View Narration Chapter'),
+          '#url' => Url::fromUri($result['chapter_url']),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
+      elseif (!empty($result['project_id'])) {
+        $form['feedback']['actions']['save_chapter'] = [
+          '#type' => 'submit',
+          '#value' => $this->t('Save To Narration Chapter'),
+          '#name' => 'save_chapter',
+          '#submit' => ['::saveToChapter'],
+          '#limit_validation_errors' => [],
+          '#ajax' => ['callback' => '::ajaxSubmit', 'wrapper' => 'ai-narration-feedback'],
           '#attributes' => ['class' => ['button']],
         ];
       }
@@ -502,6 +537,73 @@ final class NarrationGenerateForm extends FormBase {
     }
   }
 
+  /**
+   * Creates a completed Chapter from the current generated narration result.
+   */
+  public function saveToChapter(array &$form, FormStateInterface $form_state): void {
+    $result = $form_state->get('result') ?? [];
+    $projectId = (int) ($result['project_id'] ?? 0);
+    $file = !empty($result['fid']) ? $this->entityTypeManager->getStorage('file')->load((int) $result['fid']) : NULL;
+    $project = $projectId ? $this->entityTypeManager->getStorage('ai_narration_project')->load($projectId) : NULL;
+    if (!$file || !$project) {
+      $this->messenger()->addError($this->t('Select a Narration Project before generating, then try saving the result again.'));
+      return;
+    }
+    try {
+      $ids = $this->entityTypeManager->getStorage('ai_narration_chapter')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('project_id', $projectId)
+        ->sort('position', 'DESC')
+        ->range(0, 1)
+        ->execute();
+      $last = $ids ? $this->entityTypeManager->getStorage('ai_narration_chapter')->load(reset($ids)) : NULL;
+      $position = $last ? (int) $last->get('position')->value + 1 : 1;
+      $chapter = $this->entityTypeManager->getStorage('ai_narration_chapter')->create([
+        'project_id' => $projectId,
+        'title' => $this->chapterTitle($result),
+        'position' => $position,
+        'text' => (string) ($result['text'] ?? ''),
+        'audio_files' => [['target_id' => $file->id()]],
+        'last_generated_audio' => ['target_id' => $file->id()],
+        'generation_metadata' => json_encode([
+          'model' => $result['model'] ?? '',
+          'voice' => $result['voice'] ?? '',
+          'format' => $result['format'] ?? '',
+          'parameters' => $result['parameters'] ?? [],
+          'input_characters' => $result['characters'] ?? 0,
+          'file_id' => $file->id(),
+          'bytes' => $file->getSize(),
+          'mime' => $file->getMimeType(),
+          'runtime_seconds' => $result['duration'] ?? NULL,
+          'generation_seconds' => $result['seconds'] ?? NULL,
+          'generated_at' => gmdate(DATE_ATOM, (int) ($result['generated_at'] ?? time())),
+          'source' => $result['source'] ?? 'local text',
+        ], JSON_UNESCAPED_SLASHES),
+        'status' => 'complete',
+      ]);
+      $chapter->save();
+      $result['chapter_url'] = $chapter->toUrl('canonical', ['absolute' => TRUE])->toString();
+      $form_state->set('result', $result);
+      $form_state->setRebuild();
+      $this->messenger()->addStatus($this->t('Saved the generated narration as Chapter @position in %project.', ['@position' => $position, '%project' => $project->label()]));
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($exception->getMessage());
+    }
+  }
+
+  /** Creates an editable Chapter title from the source or generated script. */
+  private function chapterTitle(array $result): string {
+    $title = trim((string) ($result['source'] ?? ''));
+    if ($title === '') {
+      $title = trim((string) preg_replace('/\s+/u', ' ', (string) ($result['text'] ?? '')));
+    }
+    if ($title === '') {
+      $title = $this->t('Generated narration @date', ['@date' => $this->formatGenerationDate((int) ($result['generated_at'] ?? time()))]);
+    }
+    return mb_substr((string) $title, 0, 255);
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
       $text = (string) $form_state->getValue('text');
@@ -532,6 +634,8 @@ final class NarrationGenerateForm extends FormBase {
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
+      $projectId = (int) $form_state->getValue('project_id');
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_project', $projectId);
       $source = $form_state->get('source_snapshot');
       $sourceDescription = NULL;
       if (is_array($source) && in_array($source['type'] ?? '', ['remote_url', 'entity'], TRUE)) {
@@ -555,6 +659,8 @@ final class NarrationGenerateForm extends FormBase {
         'seconds' => microtime(TRUE) - $started,
         'generated_at' => $generatedAt,
         'source' => $sourceDescription,
+        'project_id' => $projectId,
+        'text' => $text,
       ]);
       $form_state->setRebuild();
     }
