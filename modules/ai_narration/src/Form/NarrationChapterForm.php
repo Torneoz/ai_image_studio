@@ -223,7 +223,24 @@ final class NarrationChapterForm extends ContentEntityForm {
         'text_normalization' => (bool) ($settings['text_normalization'] ?? $project->get('text_normalization')->value),
       ];
       $file = $this->generator->generate($text, $model, $voice, $format, $parameters, (string) $chapter->label());
+      $duration = $this->getDurationInspector()->getDuration($file);
+      $seconds = microtime(TRUE) - $started;
+      $metadata = [
+        'model' => $model,
+        'voice' => $voice,
+        'format' => $format,
+        'parameters' => $parameters,
+        'input_characters' => mb_strlen($text),
+        'file_id' => (int) $file->id(),
+        'bytes' => (int) $file->getSize(),
+        'mime' => $file->getMimeType(),
+        'runtime_seconds' => $duration,
+        'generation_seconds' => $seconds,
+        'generated_at' => gmdate(DATE_ATOM),
+      ];
       $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
+      $chapter->set('last_generated_audio', ['target_id' => $file->id()]);
+      $chapter->set('generation_metadata', json_encode($metadata, JSON_UNESCAPED_SLASHES));
       $chapter->set('status', 'complete');
       $chapter->set('error_message', '');
       $chapter->save();
@@ -236,8 +253,8 @@ final class NarrationChapterForm extends ContentEntityForm {
         'characters' => mb_strlen($text),
         'bytes' => $file->getSize(),
         'mime' => $file->getMimeType(),
-        'duration' => $this->getDurationInspector()->getDuration($file),
-        'seconds' => microtime(TRUE) - $started,
+        'duration' => $duration,
+        'seconds' => $seconds,
       ]);
     }
     catch (\Throwable $exception) {

@@ -61,12 +61,16 @@ final class NarrationManageTool extends NarrationMcpToolBase {
     $limit = (int) $project->get('max_input_characters')->value;
     if ($limit > 0 && mb_strlen($text) > $limit) { throw new \RuntimeException('Chapter text exceeds the project input-character limit.'); }
     $started = microtime(TRUE);
-    $file = $this->generator->generate($text, (string) $project->get('model')->value, (string) $project->get('voice')->value, (string) $project->get('format')->value, ['language' => (string) $project->get('language')->value, 'speed' => $project->get('speed')->value ?: 1, 'text_normalization' => (bool) $project->get('text_normalization')->value]);
+    $file = $this->generator->generate($text, (string) $project->get('model')->value, (string) $project->get('voice')->value, (string) $project->get('format')->value, ['language' => (string) $project->get('language')->value, 'speed' => $project->get('speed')->value ?: 1, 'text_normalization' => (bool) $project->get('text_normalization')->value], (string) $chapter->label());
+    $duration = $this->durationInspector->getDuration($file);
+    $seconds = microtime(TRUE) - $started;
     $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
+    $chapter->set('last_generated_audio', ['target_id' => $file->id()]);
+    $chapter->set('generation_metadata', json_encode(['model' => (string) $project->get('model')->value, 'voice' => (string) $project->get('voice')->value, 'format' => (string) $project->get('format')->value, 'input_characters' => mb_strlen($text), 'file_id' => (int) $file->id(), 'bytes' => (int) $file->getSize(), 'mime' => $file->getMimeType(), 'runtime_seconds' => $duration, 'generation_seconds' => $seconds, 'generated_at' => gmdate(DATE_ATOM)], JSON_UNESCAPED_SLASHES));
     $chapter->set('status', 'complete');
     $chapter->set('error_message', '');
     $chapter->save();
-    return ['chapter' => $this->chapterData($chapter), 'audio' => ['file_id' => (int) $file->id(), 'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()), 'mime' => $file->getMimeType(), 'bytes' => $file->getSize(), 'runtime_seconds' => $this->durationInspector->getDuration($file), 'generation_seconds' => microtime(TRUE) - $started]];
+    return ['chapter' => $this->chapterData($chapter), 'audio' => ['file_id' => (int) $file->id(), 'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()), 'mime' => $file->getMimeType(), 'bytes' => $file->getSize(), 'runtime_seconds' => $duration, 'generation_seconds' => $seconds]];
   }
 
 }

@@ -34,3 +34,15 @@ function ai_narration_update_10003(): string {
   }
   return 'Added narration project output defaults.';
 }
+
+/**
+ * Adds persistent last-result fields to narration chapters.
+ */
+function ai_narration_update_10004(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_chapter');
+  $fields = \Drupal\ai_narration\Entity\NarrationChapter::baseFieldDefinitions($type);
+  foreach (['last_generated_audio', 'generation_metadata'] as $name) {
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'ai_narration_chapter', 'ai_narration_chapter', $fields[$name]);
+  }
+  return 'Added persistent last-generation audio and metadata fields to narration chapters.';
+}
