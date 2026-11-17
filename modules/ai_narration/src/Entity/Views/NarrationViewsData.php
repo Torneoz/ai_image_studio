@@ -20,9 +20,12 @@ final class NarrationViewsData extends EntityViewsData {
     $id = $this->entityType->id();
     $is_project = $id === 'ai_narration_project';
     $data[$table]['table']['group'] = $this->t('AI Narration');
-    $data[$table]['table']['base']['title'] = $is_project
-      ? $this->t('AI Narration Project')
-      : $this->t('AI Narration Chapter');
+    $data[$table]['table']['base']['title'] = match ($id) {
+      'ai_narration_project' => $this->t('AI Narration Project'),
+      'ai_narration_edition' => $this->t('AI Narration Edition'),
+      'ai_narration_promo' => $this->t('AI Narration Promo'),
+      default => $this->t('AI Narration Chapter'),
+    };
     $data[$table]['table']['base']['help'] = $is_project
       ? $this->t('Narration projects and their shared text-to-speech defaults.')
       : $this->t('Narration content and metadata.');
