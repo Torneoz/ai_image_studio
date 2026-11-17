@@ -61,7 +61,8 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element =& $form['project_id']['widget'][0]['target_id'];
     $element['#type'] = 'select';
     $element['#options'] = $options;
-    $element['#default_value'] = $this->entity->get('project_id')->target_id;
+    $requested_project = (int) \Drupal::request()->query->get('project', 0);
+    $element['#default_value'] = $this->entity->get('project_id')->target_id ?: (isset($options[$requested_project]) ? $requested_project : NULL);
     $element['#empty_option'] = $this->t('- Select a project -');
     $element['#multiple'] = FALSE;
     $element['#size'] = 1;
