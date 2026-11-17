@@ -30,15 +30,23 @@ final class NarrationSourceLoader {
       'allow_redirects' => FALSE,
       'connect_timeout' => 5,
       'timeout' => 15,
+      'stream' => TRUE,
       'headers' => ['Accept' => 'text/html, text/plain;q=0.9'],
     ]);
     $contentType = strtolower($response->getHeaderLine('Content-Type'));
     if ($contentType !== '' && !str_starts_with($contentType, 'text/html') && !str_starts_with($contentType, 'text/plain') && !str_starts_with($contentType, 'application/xhtml+xml')) {
       throw new \RuntimeException('The remote URL did not return HTML or plain text.');
     }
-    $html = (string) $response->getBody();
-    if (strlen($html) > 1048576) {
+    if ((int) $response->getHeaderLine('Content-Length') > 1048576) {
       throw new \RuntimeException('The remote page is larger than the 1 MB source-loading limit.');
+    }
+    $stream = $response->getBody();
+    $html = '';
+    while (!$stream->eof()) {
+      $html .= $stream->read(8192);
+      if (strlen($html) > 1048576) {
+        throw new \RuntimeException('The remote page is larger than the 1 MB source-loading limit.');
+      }
     }
     return $this->extractHtml($html, $url);
   }
