@@ -137,21 +137,6 @@ final class NarrationGenerateForm extends FormBase {
       '#attributes' => ['id' => 'ai-narration-text-count'],
       '#markup' => '<span data-ai-narration-character-count>' . mb_strlen($textDefault) . '</span> ' . $this->t('characters') . ' · ' . $limitLabel,
     ];
-    $projects = $this->entityTypeManager->getStorage('ai_narration_project')->loadMultiple();
-    $projectOptions = [];
-    foreach ($projects as $project) {
-      $projectOptions[$project->id()] = (string) $project->label();
-    }
-    $selectedProject = (int) ($form_state->getValue('project_id') ?? $savedProject);
-    $form['project_id'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Narration Project'),
-      '#options' => $projectOptions,
-      '#default_value' => isset($projectOptions[$selectedProject]) ? $selectedProject : '',
-      '#empty_option' => $this->t('- No project selected -'),
-      '#description' => $projectOptions === [] ? $this->t('Create a Narration Project to save generated results as Chapters.') : $this->t('Optional. Select a Project to enable saving this generated narration as a Chapter.'),
-      '#weight' => 1,
-    ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
     $form['model'] = [
       '#type' => 'select',
@@ -304,6 +289,23 @@ final class NarrationGenerateForm extends FormBase {
           '#attributes' => ['class' => ['button']],
         ];
       }
+      $projects = $this->entityTypeManager->getStorage('ai_narration_project')->loadMultiple();
+      $projectOptions = [];
+      foreach ($projects as $project) {
+        $projectOptions[$project->id()] = (string) $project->label();
+      }
+      $selectedProject = (int) ($form_state->getValue('project_id') ?? $result['project_id'] ?? $savedProject);
+      if ($projectOptions !== [] && empty($result['chapter_url'])) {
+        $form['feedback']['actions']['project_id'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Narration Project'),
+          '#title_display' => 'invisible',
+          '#options' => $projectOptions,
+          '#default_value' => isset($projectOptions[$selectedProject]) ? $selectedProject : '',
+          '#empty_option' => $this->t('Select a Narration Project'),
+          '#attributes' => ['class' => ['button']],
+        ];
+      }
       if (!empty($result['chapter_url'])) {
         $form['feedback']['actions']['view_chapter'] = [
           '#type' => 'link',
@@ -312,7 +314,7 @@ final class NarrationGenerateForm extends FormBase {
           '#attributes' => ['class' => ['button']],
         ];
       }
-      elseif (!empty($result['project_id'])) {
+      elseif ($projectOptions !== []) {
         $form['feedback']['actions']['save_chapter'] = [
           '#type' => 'submit',
           '#value' => $this->t('Save To Narration Chapter'),
@@ -542,11 +544,11 @@ final class NarrationGenerateForm extends FormBase {
    */
   public function saveToChapter(array &$form, FormStateInterface $form_state): void {
     $result = $form_state->get('result') ?? [];
-    $projectId = (int) ($result['project_id'] ?? 0);
+    $projectId = (int) $form_state->getValue('project_id');
     $file = !empty($result['fid']) ? $this->entityTypeManager->getStorage('file')->load((int) $result['fid']) : NULL;
     $project = $projectId ? $this->entityTypeManager->getStorage('ai_narration_project')->load($projectId) : NULL;
     if (!$file || !$project) {
-      $this->messenger()->addError($this->t('Select a Narration Project before generating, then try saving the result again.'));
+      $this->messenger()->addError($this->t('Select a Narration Project in the result actions, then try saving the result again.'));
       return;
     }
     try {
@@ -583,6 +585,8 @@ final class NarrationGenerateForm extends FormBase {
       ]);
       $chapter->save();
       $result['chapter_url'] = $chapter->toUrl('canonical', ['absolute' => TRUE])->toString();
+      $result['project_id'] = $projectId;
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_project', $projectId);
       $form_state->set('result', $result);
       $form_state->setRebuild();
       $this->messenger()->addStatus($this->t('Saved the generated narration as Chapter @position in %project.', ['@position' => $position, '%project' => $project->label()]));
@@ -634,8 +638,6 @@ final class NarrationGenerateForm extends FormBase {
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
-      $projectId = (int) $form_state->getValue('project_id');
-      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_project', $projectId);
       $source = $form_state->get('source_snapshot');
       $sourceDescription = NULL;
       if (is_array($source) && in_array($source['type'] ?? '', ['remote_url', 'entity'], TRUE)) {
@@ -659,7 +661,6 @@ final class NarrationGenerateForm extends FormBase {
         'seconds' => microtime(TRUE) - $started,
         'generated_at' => $generatedAt,
         'source' => $sourceDescription,
-        'project_id' => $projectId,
         'text' => $text,
       ]);
       $form_state->setRebuild();
