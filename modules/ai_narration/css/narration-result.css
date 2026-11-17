@@ -22,13 +22,13 @@
   align-items: center;
   box-sizing: border-box;
   display: inline-flex;
-  flex: 0 1 22rem;
+  flex: 0 1 15rem;
   justify-content: center;
   margin: 0;
   max-width: 100%;
-  min-height: 4.75rem;
+  min-height: 3.5rem;
   text-align: center;
-  width: 22rem;
+  width: 15rem;
 }
 
 .ai-narration-result__actions select.button {
