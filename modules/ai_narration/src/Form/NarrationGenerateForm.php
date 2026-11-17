@@ -7,6 +7,7 @@ namespace Drupal\ai_narration\Form;
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\ai_narration\Service\NarrationMediaPublisher;
 use Drupal\ai_narration\Service\NarrationDurationInspector;
+use Drupal\ai_narration\Service\NarrationSourceLoader;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
@@ -59,6 +60,9 @@ final class NarrationGenerateForm extends FormBase {
    */
   protected ?NarrationDurationInspector $durationInspector = NULL;
 
+  /** Loads explicitly selected remote and local-entity text sources. */
+  protected NarrationSourceLoader $sourceLoader;
+
   public function __construct(
     NarrationGenerator $generator,
     ConfigFactoryInterface $narration_config_factory,
@@ -67,6 +71,7 @@ final class NarrationGenerateForm extends FormBase {
     NarrationMediaPublisher $media_publisher,
     EntityTypeManagerInterface $entity_type_manager,
     NarrationDurationInspector $duration_inspector,
+    NarrationSourceLoader $source_loader,
   ) {
     $this->generator = $generator;
     $this->narrationConfigFactory = $narration_config_factory;
@@ -75,6 +80,7 @@ final class NarrationGenerateForm extends FormBase {
     $this->mediaPublisher = $media_publisher;
     $this->entityTypeManager = $entity_type_manager;
     $this->durationInspector = $duration_inspector;
+    $this->sourceLoader = $source_loader;
   }
 
   public static function create(ContainerInterface $container): self {
@@ -86,6 +92,7 @@ final class NarrationGenerateForm extends FormBase {
       $container->get('ai_narration.media_publisher'),
       $container->get('entity_type.manager'),
       $container->get('ai_narration.duration_inspector'),
+      $container->get('ai_narration.source_loader'),
     );
   }
 
@@ -100,7 +107,7 @@ final class NarrationGenerateForm extends FormBase {
     $savedModel = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_model') ?? '');
     $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
     $savedFormat = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_format') ?? '');
-    $textDefault = (string) ($form_state->getValue('text') ?? $savedText);
+    $textDefault = (string) ($form_state->get('loaded_source_text') ?? $form_state->getValue('text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
     $form['intro'] = [
@@ -108,6 +115,7 @@ final class NarrationGenerateForm extends FormBase {
       '#tag' => 'p',
       '#value' => $this->t('Create a single narrated audio file from a script. Select a text-to-speech model and voice, adjust the available request controls, then preview, download, or save the completed narration to the Media Library.'),
     ];
+    $this->buildSourceControls($form, $form_state);
     $form['text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Narration text'),
@@ -116,6 +124,8 @@ final class NarrationGenerateForm extends FormBase {
       '#rows' => 10,
       '#default_value' => $textDefault,
       '#attributes' => ['data-ai-narration-text' => TRUE],
+      '#prefix' => '<div id="ai-narration-simple-text-wrapper">',
+      '#suffix' => '</div>',
     ];
     $limit = $this->generator->getInputCharacterLimit($model);
     $limitLabel = $limit === NULL
@@ -290,11 +300,142 @@ final class NarrationGenerateForm extends FormBase {
           $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
           $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
           $result['parameters'] === [] ? $this->t('Request parameters: provider defaults') : $this->t('Request parameters: @parameters', ['@parameters' => json_encode($result['parameters'], JSON_UNESCAPED_SLASHES)]),
+          !empty($result['source']) ? $this->t('Text source: @source', ['@source' => $result['source']]) : $this->t('Text source: local text'),
           $this->t('Provider-reported price: unavailable'),
         ],
       ];
     }
     return $form;
+  }
+
+  /** Builds the explicit source loader used by Simple Narration. */
+  private function buildSourceControls(array &$form, FormStateInterface $form_state): void {
+    $saved = $this->userData->get('ai_narration', $this->currentUser()->id(), 'last_source') ?? [];
+    $values = $form_state->getValue('source') ?? $saved;
+    $type = in_array($values['type'] ?? '', ['local', 'remote_url', 'entity'], TRUE) ? $values['type'] : 'local';
+    $entityTypes = $this->getContentEntityTypeOptions();
+    $entityType = isset($entityTypes[$values['entity_type'] ?? '']) ? $values['entity_type'] : 'node';
+    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage($entityType)->load((int) $values['entity_id']) : NULL;
+    $form['source'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Narration text source'),
+      '#description' => $this->t('Loading a source copies it into Narration text as an editable snapshot. It is never refreshed automatically before generation.'),
+      '#open' => $type !== 'local',
+      '#tree' => TRUE,
+      '#weight' => -1,
+      '#attributes' => ['id' => 'ai-narration-simple-source'],
+    ];
+    $form['source']['type'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Source'),
+      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local node or entity')],
+      '#default_value' => $type,
+      '#description' => $this->t('Local text is written directly below. A remote URL or local entity must be explicitly loaded.'),
+      '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-simple-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
+    ];
+    $form['source']['url'] = [
+      '#type' => 'url',
+      '#title' => $this->t('Remote URL'),
+      '#default_value' => $values['url'] ?? '',
+      '#access' => $type === 'remote_url',
+      '#description' => $this->t('A public HTTP(S) page. Its readable article or main content will be copied into Narration text.'),
+    ];
+    $form['source']['entity_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Entity type'),
+      '#options' => $entityTypes,
+      '#default_value' => $entityType,
+      '#access' => $type === 'entity',
+      '#description' => $this->t('Choose the type of local content to narrate.'),
+      '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-simple-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
+    ];
+    $form['source']['entity_id'] = [
+      '#type' => 'entity_autocomplete',
+      '#title' => $this->t('Entity'),
+      '#target_type' => $entityType,
+      '#default_value' => $sourceEntity,
+      '#access' => $type === 'entity',
+      '#description' => $this->t('Select the local content item whose readable fields should be copied into Narration text.'),
+    ];
+    if ($type !== 'local') {
+      $form['source']['load'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Load source into narration text'),
+        '#submit' => ['::loadSource'],
+        '#limit_validation_errors' => [['source']],
+        '#ajax' => ['callback' => '::loadSourceAjax', 'progress' => ['type' => 'throbber', 'message' => $this->t('Loading source…')]],
+      ];
+    }
+    if (!empty($values['fetched'])) {
+      $form['source']['loaded'] = ['#markup' => $this->t('Current editable snapshot: <strong>@source</strong>.', ['@source' => $values['label'] ?: ($values['url'] ?: $values['type'])])];
+    }
+  }
+
+  /** AJAX callback for source type and entity type changes. */
+  public function refreshSourceControls(array &$form, FormStateInterface $form_state): array {
+    return $form['source'];
+  }
+
+  /** Loads a source into the editable script field. */
+  public function loadSource(array &$form, FormStateInterface $form_state): void {
+    $source = $form_state->getValue('source') ?? [];
+    try {
+      if (($source['type'] ?? '') === 'remote_url') {
+        $url = trim((string) ($source['url'] ?? ''));
+        if ($url === '') {
+          throw new \RuntimeException('Enter a remote URL to load.');
+        }
+        $loaded = $this->sourceLoader->loadUrl($url);
+        $source += ['entity_type' => '', 'entity_id' => 0];
+        $source['url'] = $url;
+        $source['entity_type'] = '';
+        $source['entity_id'] = 0;
+      }
+      elseif (($source['type'] ?? '') === 'entity') {
+        $entityType = (string) ($source['entity_type'] ?? '');
+        $entityId = (int) ($source['entity_id'] ?? 0);
+        if ($entityType === '' || $entityId <= 0) {
+          throw new \RuntimeException('Choose a local entity to load.');
+        }
+        $loaded = $this->sourceLoader->loadEntity($entityType, $entityId);
+        $source['url'] = '';
+      }
+      else {
+        throw new \RuntimeException('Choose a remote URL or local entity source.');
+      }
+      $source['label'] = $loaded['title'];
+      $source['fetched'] = \Drupal::service('datetime.time')->getRequestTime();
+      $form_state->setValue('source', $source);
+      $form_state->set('source_snapshot', $source);
+      $form_state->set('loaded_source_text', $loaded['text']);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_source', $source);
+      $this->messenger()->addStatus($this->t('Loaded @characters characters from @source. Review the editable narration text before generating.', ['@characters' => number_format(mb_strlen($loaded['text'])), '@source' => $loaded['title']]));
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('Source could not be loaded: @error', ['@error' => $exception->getMessage()]));
+    }
+    $form_state->setRebuild();
+  }
+
+  /** Replaces the source controls and editable text after a source load. */
+  public function loadSourceAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#ai-narration-simple-source', $form['source']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-simple-text-wrapper', $form['text']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-text-count', $form['text_count']));
+    return $response;
+  }
+
+  /** @return array<string, string> */
+  private function getContentEntityTypeOptions(): array {
+    $options = [];
+    foreach ($this->entityTypeManager->getDefinitions() as $id => $definition) {
+      if ($definition->getGroup() === 'content' && $definition->hasHandlerClass('storage')) {
+        $options[$id] = (string) $definition->getLabel();
+      }
+    }
+    asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+    return $options;
   }
 
   /**
@@ -380,6 +521,11 @@ final class NarrationGenerateForm extends FormBase {
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
+      $source = $form_state->get('source_snapshot');
+      $sourceDescription = NULL;
+      if (is_array($source) && in_array($source['type'] ?? '', ['remote_url', 'entity'], TRUE)) {
+        $sourceDescription = (string) ($source['label'] ?? '') ?: (string) ($source['url'] ?? '');
+      }
       $started = microtime(TRUE);
       $file = $this->generator->generate($text, $model, $voice, $format, $parameters);
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
@@ -395,6 +541,7 @@ final class NarrationGenerateForm extends FormBase {
         'mime' => $file->getMimeType(),
         'duration' => $this->getDurationInspector()->getDuration($file),
         'seconds' => microtime(TRUE) - $started,
+        'source' => $sourceDescription,
       ]);
       $form_state->setRebuild();
     }
