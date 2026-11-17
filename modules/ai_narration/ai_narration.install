@@ -54,3 +54,15 @@ function ai_narration_update_10005(): string {
   \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
   return 'Enabled the Chapter last-generated audio player display default.';
 }
+
+/**
+ * Adds source provenance fields for narration chapter text snapshots.
+ */
+function ai_narration_update_10006(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_chapter');
+  $fields = \Drupal\ai_narration\Entity\NarrationChapter::baseFieldDefinitions($type);
+  foreach (['source_type', 'source_url', 'source_entity_type', 'source_entity_id', 'source_label', 'source_fetched'] as $name) {
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'ai_narration_chapter', 'ai_narration_chapter', $fields[$name]);
+  }
+  return 'Added narration chapter text-source provenance fields.';
+}

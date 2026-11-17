@@ -17,3 +17,7 @@ services:
   ai_narration.duration_inspector:
     class: Drupal\ai_narration\Service\NarrationDurationInspector
     arguments: ['@file_system']
+
+  ai_narration.source_loader:
+    class: Drupal\ai_narration\Service\NarrationSourceLoader
+    arguments: ['@http_client', '@entity_type.manager', '@current_user']

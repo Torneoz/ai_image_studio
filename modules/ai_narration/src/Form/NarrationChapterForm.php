@@ -7,6 +7,7 @@ namespace Drupal\ai_narration\Form;
 use Drupal\ai_narration\Service\NarrationDurationInspector;
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\ai_narration\Service\NarrationMediaPublisher;
+use Drupal\ai_narration\Service\NarrationSourceLoader;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\ContentEntityForm;
@@ -29,6 +30,8 @@ final class NarrationChapterForm extends ContentEntityForm {
 
   protected ?NarrationDurationInspector $durationInspector = NULL;
 
+  protected NarrationSourceLoader $sourceLoader;
+
   public function __construct(
     $entity_repository,
     $entity_type_bundle_info,
@@ -37,12 +40,14 @@ final class NarrationChapterForm extends ContentEntityForm {
     FileUrlGeneratorInterface $file_url_generator,
     NarrationMediaPublisher $media_publisher,
     NarrationDurationInspector $duration_inspector,
+    NarrationSourceLoader $source_loader,
   ) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->generator = $generator;
     $this->fileUrlGenerator = $file_url_generator;
     $this->mediaPublisher = $media_publisher;
     $this->durationInspector = $duration_inspector;
+    $this->sourceLoader = $source_loader;
   }
 
   public static function create(ContainerInterface $container): static {
@@ -54,6 +59,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $container->get('file_url_generator'),
       $container->get('ai_narration.media_publisher'),
       $container->get('ai_narration.duration_inspector'),
+      $container->get('ai_narration.source_loader'),
     );
   }
 
@@ -73,6 +79,10 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element['#multiple'] = FALSE;
     $element['#size'] = 1;
     $element['#description'] = $this->t('Choose the narration project whose settings this chapter will inherit.');
+    $this->buildSourceControls($form, $form_state);
+    if ($loaded_text = $form_state->get('loaded_source_text')) {
+      $form['text']['widget'][0]['value']['#default_value'] = $loaded_text;
+    }
     if (!$this->entity->isNew()) {
       $this->buildJobSettings($form, $form_state);
       $this->buildPreviousGenerationResult($form, $form_state);
@@ -96,6 +106,150 @@ final class NarrationChapterForm extends ContentEntityForm {
       $this->buildGenerationFeedback($form['generation_feedback'], $form_state);
     }
     return $form;
+  }
+
+  /**
+   * Builds the source picker without coupling a chapter to live remote content.
+   */
+  private function buildSourceControls(array &$form, FormStateInterface $form_state): void {
+    $saved = [
+      'type' => (string) ($this->entity->get('source_type')->value ?: 'local'),
+      'url' => (string) $this->entity->get('source_url')->value,
+      'entity_type' => (string) $this->entity->get('source_entity_type')->value,
+      'entity_id' => (int) $this->entity->get('source_entity_id')->value,
+      'label' => (string) $this->entity->get('source_label')->value,
+      'fetched' => (int) $this->entity->get('source_fetched')->value,
+    ];
+    $values = $form_state->getValue('source') ?? $saved;
+    $type = in_array($values['type'] ?? '', ['local', 'remote_url', 'entity'], TRUE) ? $values['type'] : 'local';
+    $entityTypes = $this->getContentEntityTypeOptions();
+    $entityType = isset($entityTypes[$values['entity_type'] ?? '']) ? $values['entity_type'] : 'node';
+    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage($entityType)->load((int) $values['entity_id']) : NULL;
+
+    $form['source'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Narration text source'),
+      '#description' => $this->t('Loading a source copies it into Narration text as an editable snapshot. It is never refreshed automatically before generation.'),
+      '#open' => $type !== 'local',
+      '#tree' => TRUE,
+      '#weight' => -7.5,
+      '#attributes' => ['id' => 'ai-narration-chapter-source'],
+    ];
+    $form['source']['type'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Source'),
+      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local node or entity')],
+      '#default_value' => $type,
+      '#description' => $this->t('Local text is written directly below. A remote URL or local entity must be explicitly loaded.'),
+      '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
+    ];
+    $form['source']['url'] = [
+      '#type' => 'url',
+      '#title' => $this->t('Remote URL'),
+      '#default_value' => $values['url'] ?? '',
+      '#access' => $type === 'remote_url',
+      '#description' => $this->t('A public HTTP(S) page. The readable article or main content will be copied into Narration text.'),
+    ];
+    $form['source']['entity_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Entity type'),
+      '#options' => $entityTypes,
+      '#default_value' => $entityType,
+      '#access' => $type === 'entity',
+      '#description' => $this->t('Choose the type of local content to narrate.'),
+      '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
+    ];
+    $form['source']['entity_id'] = [
+      '#type' => 'entity_autocomplete',
+      '#title' => $this->t('Entity'),
+      '#target_type' => $entityType,
+      '#default_value' => $sourceEntity,
+      '#access' => $type === 'entity',
+      '#description' => $this->t('Select the local content item whose readable fields should be copied into Narration text.'),
+    ];
+    if ($type !== 'local') {
+      $form['source']['load'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Load source into narration text'),
+        '#submit' => ['::loadSource'],
+        '#limit_validation_errors' => [['source']],
+        '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'progress' => ['type' => 'throbber', 'message' => $this->t('Loading source…')]],
+      ];
+    }
+    if ($saved['fetched']) {
+      $form['source']['loaded'] = ['#markup' => $this->t('Current snapshot loaded from <strong>@source</strong> on @date. It can be edited below.', ['@source' => $saved['label'] ?: ($saved['url'] ?: $saved['type']), '@date' => \Drupal::service('date.formatter')->format($saved['fetched'], 'short')])];
+    }
+  }
+
+  /** AJAX callback for the source-picker controls. */
+  public function refreshSourceControls(array &$form, FormStateInterface $form_state): array {
+    return $form['source'];
+  }
+
+  /** Copies an explicitly selected source into the editable narration snapshot. */
+  public function loadSource(array &$form, FormStateInterface $form_state): void {
+    $source = $form_state->getValue('source') ?? [];
+    try {
+      if (($source['type'] ?? '') === 'remote_url') {
+        $url = trim((string) ($source['url'] ?? ''));
+        if ($url === '') {
+          throw new \RuntimeException('Enter a remote URL to load.');
+        }
+        $loaded = $this->sourceLoader->loadUrl($url);
+        $source['url'] = $url;
+        $source['entity_type'] = '';
+        $source['entity_id'] = 0;
+      }
+      elseif (($source['type'] ?? '') === 'entity') {
+        $entityType = (string) ($source['entity_type'] ?? '');
+        $entityId = (int) ($source['entity_id'] ?? 0);
+        if ($entityType === '' || $entityId <= 0) {
+          throw new \RuntimeException('Choose a local entity to load.');
+        }
+        $loaded = $this->sourceLoader->loadEntity($entityType, $entityId);
+        $source['url'] = '';
+      }
+      else {
+        throw new \RuntimeException('Choose a remote URL or local entity source.');
+      }
+      $source['label'] = $loaded['title'];
+      $source['fetched'] = $this->time->getRequestTime();
+      $form_state->setValue('source', $source);
+      $form_state->setValue(['text', 0, 'value'], $loaded['text']);
+      $form_state->set('loaded_source_text', $loaded['text']);
+      $this->messenger()->addStatus($this->t('Loaded @characters characters from @source. Review and save the editable narration text.', ['@characters' => number_format(mb_strlen($loaded['text'])), '@source' => $loaded['title']]));
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('Source could not be loaded: @error', ['@error' => $exception->getMessage()]));
+    }
+    $form_state->setRebuild();
+  }
+
+  /** @return array<string, string> */
+  private function getContentEntityTypeOptions(): array {
+    $options = [];
+    foreach ($this->entityTypeManager->getDefinitions() as $id => $definition) {
+      if ($definition->getGroup() === 'content' && $definition->hasHandlerClass('storage')) {
+        $options[$id] = (string) $definition->getLabel();
+      }
+    }
+    asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+    return $options;
+  }
+
+  /** {@inheritdoc} */
+  public function buildEntity(array $form, FormStateInterface $form_state) {
+    $entity = parent::buildEntity($form, $form_state);
+    $source = $form_state->getValue('source');
+    if (is_array($source)) {
+      $entity->set('source_type', $source['type'] ?? 'local');
+      $entity->set('source_url', $source['type'] === 'remote_url' ? ($source['url'] ?? '') : '');
+      $entity->set('source_entity_type', $source['type'] === 'entity' ? ($source['entity_type'] ?? '') : '');
+      $entity->set('source_entity_id', $source['type'] === 'entity' ? (int) ($source['entity_id'] ?? 0) : 0);
+      $entity->set('source_label', $source['label'] ?? '');
+      $entity->set('source_fetched', (int) ($source['fetched'] ?? 0));
+    }
+    return $entity;
   }
 
   /**
