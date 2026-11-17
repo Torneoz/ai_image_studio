@@ -51,11 +51,6 @@ function ai_narration_update_10004(): string {
  * Uses the narration audio-player formatter on the Chapter full display.
  */
 function ai_narration_update_10005(): string {
-  $display = \Drupal::service('entity_display.repository')->getViewDisplay('ai_narration_chapter', 'ai_narration_chapter', 'full');
-  $display->setComponent('last_generated_audio', [
-    'type' => 'ai_narration_audio_player',
-    'label' => 'above',
-    'weight' => 10,
-  ])->save();
-  return 'Configured the Chapter last-generated audio player display.';
+  \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+  return 'Enabled the Chapter last-generated audio player display default.';
 }
