@@ -76,6 +76,17 @@ final class NarrationChapterForm extends ContentEntityForm {
     if (!$this->entity->isNew()) {
       $this->buildJobSettings($form, $form_state);
       $this->buildPreviousGenerationResult($form);
+      $form['generate_narration'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Generate narration'),
+        '#weight' => 89,
+        '#submit' => ['::submitForm', '::save', '::generateNarration'],
+        '#ajax' => [
+          'callback' => '::ajaxGenerate',
+          'wrapper' => 'ai-narration-chapter-feedback',
+          'progress' => ['type' => 'throbber', 'message' => $this->t('Generating narration…')],
+        ],
+      ];
       $form['#attached']['library'][] = 'ai_narration/character_counter';
       $form['generation_feedback'] = [
         '#type' => 'container',
@@ -127,7 +138,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#empty_option' => $this->t('- Select a model -'),
       '#default_value' => $model,
       '#description' => $this->t('Provider and model for this one generation.'),
-      '#ajax' => ['callback' => '::refreshJobSettings', 'wrapper' => 'ai-narration-chapter-job-settings'],
+      '#ajax' => ['callback' => '::refreshJobSettings', 'wrapper' => 'ai-narration-chapter-job-settings', 'progress' => ['type' => 'throbber'], 'event' => 'change'],
     ];
     $form['job_settings']['voice'] = [
       '#type' => 'select',
@@ -189,19 +200,21 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#title' => $this->t('Previous Generation Result'),
       '#open' => FALSE,
       '#weight' => 85,
+      '#attributes' => ['class' => ['ai-narration-result']],
     ];
     if ($file) {
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
-      $form['previous_generation_result']['audio'] = [
+      $form['previous_generation_result']['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
+      $form['previous_generation_result']['actions']['audio'] = [
         '#type' => 'html_tag',
         '#tag' => 'audio',
         '#attributes' => ['controls' => TRUE, 'src' => $url],
       ];
-      $form['previous_generation_result']['download'] = [
+      $form['previous_generation_result']['actions']['download'] = [
         '#type' => 'link',
         '#title' => $this->t('Download previous audio'),
         '#url' => Url::fromUri($url),
-        '#attributes' => ['download' => TRUE, 'class' => ['button']],
+        '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
     }
     if ($metadata !== []) {
@@ -220,26 +233,6 @@ final class NarrationChapterForm extends ContentEntityForm {
         '#items' => $items,
       ];
     }
-  }
-
-  /**
-   * Adds project-driven generation to existing chapter edit forms.
-   */
-  protected function actions(array $form, FormStateInterface $form_state): array {
-    $actions = parent::actions($form, $form_state);
-    if (!$this->entity->isNew()) {
-      $actions['generate'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Generate narration'),
-        '#submit' => ['::submitForm', '::save', '::generateNarration'],
-        '#ajax' => [
-          'callback' => '::ajaxGenerate',
-          'wrapper' => 'ai-narration-chapter-feedback',
-          'progress' => ['type' => 'throbber', 'message' => $this->t('Generating narration…')],
-        ],
-      ];
-    }
-    return $actions;
   }
 
   /**
