@@ -24,6 +24,15 @@
         select.addEventListener('change', updateLimit);
         updateLimit();
       });
+      once('ai-narration-single-player', '.ai-narration-result audio', context).forEach((player) => {
+        player.addEventListener('play', () => {
+          document.querySelectorAll('.ai-narration-result audio').forEach((other) => {
+            if (other !== player && !other.paused) {
+              other.pause();
+            }
+          });
+        });
+      });
     },
   };
 }(Drupal, drupalSettings, once));
