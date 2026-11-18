@@ -142,6 +142,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         '#type' => 'submit',
         '#value' => $this->t('Split into chapters'),
         '#name' => 'split_chapter',
+        '#validate' => ['::validateSplitChapter'],
         '#submit' => ['::submitForm', '::splitChapter'],
         '#attributes' => ['class' => ['button']],
       ];
@@ -472,15 +473,15 @@ final class NarrationChapterForm extends ContentEntityForm {
   }
 
   /**
-   * Splits an overlong chapter into ordered, independently editable chapters.
+   * Validates that the chapter can be split safely.
    */
-  public function splitChapter(array &$form, FormStateInterface $form_state): void {
+  public function validateSplitChapter(array &$form, FormStateInterface $form_state): void {
     if (!$form_state->getValue(['split_chapter', 'confirm'])) {
       $form_state->setErrorByName('split_chapter][confirm', $this->t('Confirm that you want to split this chapter.'));
       return;
     }
 
-    $chapter = $this->entity;
+    $chapter = $this->buildEntity($form, $form_state);
     $project = $chapter->get('project_id')->entity;
     if ($project === NULL) {
       $form_state->setErrorByName('project_id', $this->t('Choose a Project before splitting a chapter.'));
@@ -492,9 +493,21 @@ final class NarrationChapterForm extends ContentEntityForm {
     $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
     if ($limit < 100) {
       $form_state->setErrorByName('project_id', $this->t('The Project needs a maximum input-character limit of at least 100 before this chapter can be split.'));
+    }
+  }
+
+  /**
+   * Splits an overlong chapter into ordered, independently editable chapters.
+   */
+  public function splitChapter(array &$form, FormStateInterface $form_state): void {
+    $chapter = $this->entity;
+    $project = $chapter->get('project_id')->entity;
+    if ($project === NULL) {
       return;
     }
-
+    $model_limit = $this->generator->getInputCharacterLimit((string) $project->get('model')->value);
+    $project_limit = (int) $project->get('max_input_characters')->value;
+    $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
     $chunks = $this->textChunker->split((string) $chapter->get('text')->value, $limit);
     if (count($chunks) < 2) {
       $this->messenger()->addWarning($this->t('This chapter already fits within the effective limit of @limit characters; no chapters were created.', ['@limit' => number_format($limit)]));
