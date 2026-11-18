@@ -77,6 +77,18 @@ final class NarrationProjectForm extends ContentEntityForm {
       $form['joined_result']['download'] = ['#type' => 'link', '#title' => $this->t('Download joined audio'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]];
       $form['joined_result']['metadata'] = ['#theme' => 'item_list', '#title' => $this->t('Join details'), '#items' => [$this->t('File: @name', ['@name' => $file->getFilename()]), $this->t('Size: @size bytes', ['@size' => number_format($file->getSize())]), $this->t('Generated from all available Project chapters')]];
     }
+    if (!$this->entity->isNew()) {
+      $chapters = $this->entityTypeManager->getStorage('ai_narration_chapter')->loadMultiple($this->entityTypeManager->getStorage('ai_narration_chapter')->getQuery()->accessCheck(FALSE)->condition('project_id', $this->entity->id())->sort('position')->execute());
+      $form['chapter_audio'] = ['#type' => 'details', '#title' => $this->t('Chapter audio'), '#open' => FALSE, '#weight' => 81, '#attributes' => ['class' => ['ai-narration-result']]];
+      foreach ($chapters as $chapter) {
+        $metadata = json_decode((string) $chapter->get('generation_metadata')->value, TRUE) ?: [];
+        $audio = !empty($metadata['entire_file_id']) ? $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']) : $chapter->get('last_generated_audio')->entity;
+        if (!$audio) continue;
+        $url = \Drupal::service('file_url_generator')->generateAbsoluteString($audio->getFileUri());
+        $key = 'chapter_' . $chapter->id();
+        $form['chapter_audio'][$key] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'title' => ['#markup' => '<strong>' . $this->t('@position. @title', ['@position' => $chapter->get('position')->value, '@title' => $chapter->label()]) . '</strong>'], 'audio' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+      }
+    }
     return $form;
   }
 
