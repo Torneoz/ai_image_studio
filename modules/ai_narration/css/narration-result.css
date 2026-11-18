@@ -51,7 +51,9 @@
 }
 
 .ai-narration-project-action {
-  min-height: 2.75rem;
-  padding: 0.5rem 1rem;
-  width: auto;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  min-height: 2.25rem !important;
+  padding: 0.35rem 0.75rem !important;
+  width: auto !important;
 }
