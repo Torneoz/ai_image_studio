@@ -142,7 +142,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $form['split_chapter']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Split into chapters'),
-        '#name' => 'split_chapter',
+        '#name' => 'split_chapter_submit',
         '#validate' => ['::validateSplitChapter'],
         '#submit' => ['::submitForm', '::splitChapter'],
         '#attributes' => ['class' => ['button']],
