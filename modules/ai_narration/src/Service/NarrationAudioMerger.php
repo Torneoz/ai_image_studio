@@ -25,8 +25,9 @@ final class NarrationAudioMerger {
     $process->run();
     @unlink($list);
     if (!$process->isSuccessful() || !is_file($output)) return NULL;
-    $uri = 'public://ai-narration/' . $this->fileSystem->basename($output);
-    $this->fileSystem->prepareDirectory('public://ai-narration', FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $public_directory = 'public://ai-narration';
+    $uri = $public_directory . '/' . $this->fileSystem->basename($output);
+    $this->fileSystem->prepareDirectory($public_directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $this->fileSystem->copy($output, $uri, FileSystemInterface::EXISTS_RENAME);
     @unlink($output);
     return $this->fileRepository->createFileFromUri($uri, TRUE);
