@@ -49,3 +49,9 @@
 .ai-narration-result__actions select.button {
   display: block;
 }
+
+.ai-narration-project-action {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  width: auto;
+}

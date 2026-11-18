@@ -25,6 +25,7 @@ final class NarrationProjectForm extends ContentEntityForm {
 
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+    $form['#attached']['library'][] = 'ai_narration/character_counter';
     $models = $this->generator->getModelOptions();
     $model = (string) ($form_state->getValue(['model', 0, 'value']) ?? $this->entity->get('model')->value);
     $model = isset($models[$model]) ? $model : '';
@@ -128,6 +129,10 @@ final class NarrationProjectForm extends ContentEntityForm {
       ];
       $actions['join_chapter_audio'] = ['#type' => 'submit', '#value' => $this->t('Join chapter audio'), '#submit' => ['::joinChapterAudio'], '#limit_validation_errors' => []];
     }
+    foreach ($actions as &$action) {
+      $action['#attributes']['class'][] = 'ai-narration-project-action';
+    }
+    unset($action);
     return $actions;
   }
 
