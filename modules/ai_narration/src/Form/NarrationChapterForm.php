@@ -410,6 +410,10 @@ final class NarrationChapterForm extends ContentEntityForm {
     if ($files !== []) {
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form['previous_generation_result']['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
+      if (!empty($metadata['entire_file_id']) && ($entire = $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']))) {
+        $entire_url = $this->fileUrlGenerator->generateAbsoluteString($entire->getFileUri());
+        $form['previous_generation_result']['actions']['entire'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Entire') . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $entire_url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download entire audio'), '#url' => Url::fromUri($entire_url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+      }
       foreach ($files as $index => $audio_file) {
         $audio_url = $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri());
         $form['previous_generation_result']['actions']['segment_' . $index] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Part @part', ['@part' => $index + 1]) . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $audio_url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download part @part', ['@part' => $index + 1]), '#url' => Url::fromUri($audio_url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
