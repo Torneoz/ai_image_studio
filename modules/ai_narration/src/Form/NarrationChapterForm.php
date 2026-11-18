@@ -383,7 +383,15 @@ final class NarrationChapterForm extends ContentEntityForm {
    * Shows the durable result saved by the last successful generation.
    */
   private function buildPreviousGenerationResult(array &$form, FormStateInterface $form_state): void {
+    $files = [];
+    foreach ($this->entity->get('audio_files')->referencedEntities() as $audio_file) {
+      $files[] = $audio_file;
+    }
     $file = $this->entity->get('last_generated_audio')->entity;
+    if ($files === [] && $file) {
+      $files[] = $file;
+    }
+    $file ??= end($files) ?: NULL;
     $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
     if ($file === NULL && $metadata === []) {
       return;
@@ -395,20 +403,13 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#weight' => 85,
       '#attributes' => ['id' => 'ai-narration-chapter-previous-result', 'class' => ['ai-narration-result']],
     ];
-    if ($file) {
+    if ($files !== []) {
       $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
       $form['previous_generation_result']['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
-      $form['previous_generation_result']['actions']['audio'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'audio',
-        '#attributes' => ['controls' => TRUE, 'src' => $url],
-      ];
-      $form['previous_generation_result']['actions']['download'] = [
-        '#type' => 'link',
-        '#title' => $this->t('Download previous audio'),
-        '#url' => Url::fromUri($url),
-        '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
-      ];
+      foreach ($files as $index => $audio_file) {
+        $audio_url = $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri());
+        $form['previous_generation_result']['actions']['segment_' . $index] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Part @part', ['@part' => $index + 1]) . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $audio_url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download part @part', ['@part' => $index + 1]), '#url' => Url::fromUri($audio_url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+      }
       $form['previous_generation_result']['actions']['share'] = [
         '#type' => 'html_tag',
         '#tag' => 'button',
@@ -437,6 +438,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     }
     if ($metadata !== []) {
       $items = [];
+      $items[] = $this->t('Segments: @count', ['@count' => count($files)]);
       foreach ($metadata as $key => $value) {
         if (is_array($value)) {
           $value = json_encode($value, JSON_UNESCAPED_SLASHES);
