@@ -107,9 +107,12 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#type' => 'item',
       '#weight' => -6,
       '#attributes' => ['id' => 'ai-narration-text-count'],
-      '#markup' => '<span data-ai-narration-character-count>' . mb_strlen((string) ($form_state->getValue(['text', 0, 'value']) ?? $text_element['#default_value'])) . '</span> ' . $this->t('characters') . ' · ' . $limit_label,
+      '#markup' => '<span data-ai-narration-character-count>' . mb_strlen((string) ($form_state->getValue(['text', 0, 'value']) ?? $text_element['#default_value'])) . '</span> ' . $this->t('characters') . ' · <span data-ai-narration-limit-label>' . $limit_label . '</span>',
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
+    foreach ($this->generator->getModelOptions() as $model_option => $label) {
+      $form['#attached']['drupalSettings']['aiNarration']['modelCharacterLimits'][$model_option] = $this->generator->getInputCharacterLimit($model_option);
+    }
     if (!$this->entity->isNew()) {
       $this->buildJobSettings($form, $form_state);
       $this->buildPreviousGenerationResult($form, $form_state);
@@ -342,6 +345,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#empty_option' => $this->t('- Select a model -'),
       '#default_value' => $model,
       '#description' => $this->t('Provider and model for this one generation.'),
+      '#attributes' => ['data-ai-narration-model-select' => TRUE],
       '#ajax' => ['callback' => '::refreshJobSettings', 'wrapper' => 'ai-narration-chapter-job-settings', 'progress' => ['type' => 'throbber'], 'event' => 'change'],
     ];
     $form['job_settings']['voice'] = [
