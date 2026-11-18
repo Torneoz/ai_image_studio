@@ -518,6 +518,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $chapter->save();
       $form_state->set('generation_result', [
         'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()),
+        'segments' => array_map(fn ($audio_file) => ['url' => $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri()), 'name' => $audio_file->getFilename()], $files),
         'fid' => $file->id(),
         'model' => $model,
         'voice' => $voice,
@@ -560,7 +561,14 @@ final class NarrationChapterForm extends ContentEntityForm {
     $feedback['#attributes']['class'] = ['messages', 'messages--status', 'ai-narration-result'];
     $feedback['title'] = ['#type' => 'html_tag', '#tag' => 'h2', '#value' => $this->t('Narration generated')];
     $feedback['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
-    $feedback['actions']['player'] = ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $result['url']]];
+    foreach ($result['segments'] ?? [['url' => $result['url'], 'name' => 'Audio']] as $index => $segment) {
+      $feedback['actions']['segment_' . $index] = [
+        '#type' => 'container',
+        'label' => ['#markup' => '<strong>' . $this->t('Part @part', ['@part' => $index + 1]) . '</strong>'],
+        'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $segment['url']]],
+        'download' => ['#type' => 'link', '#title' => $this->t('Download part @part', ['@part' => $index + 1]), '#url' => Url::fromUri($segment['url']), '#attributes' => ['download' => TRUE, 'class' => ['button']]],
+      ];
+    }
     $feedback['actions']['download'] = [
       '#type' => 'link',
       '#title' => $this->t('Download @format file (@size)', ['@format' => strtoupper($result['format'] ?: pathinfo($result['url'], PATHINFO_EXTENSION) ?: 'audio'), '@size' => ByteSizeMarkup::create($result['bytes'])]),
