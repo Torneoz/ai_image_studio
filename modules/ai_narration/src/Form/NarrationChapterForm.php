@@ -127,26 +127,6 @@ final class NarrationChapterForm extends ContentEntityForm {
           'progress' => ['type' => 'throbber', 'message' => $this->t('Generating narration…')],
         ],
       ];
-      $form['split_chapter'] = [
-        '#type' => 'details',
-        '#title' => $this->t('Split into chapters'),
-        '#tree' => TRUE,
-        '#weight' => 88,
-        '#open' => FALSE,
-        '#description' => $this->t('Split narration text at sentence and word boundaries when it exceeds the safe request limit. The current chapter becomes part 1 and new sibling chapters are created for the remaining parts.'),
-      ];
-      $form['split_chapter']['confirm'] = [
-        '#type' => 'checkbox',
-        '#title' => $this->t('I understand this will replace this chapter’s text and create additional chapters.'),
-      ];
-      $form['split_chapter']['submit'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Split into chapters'),
-        '#name' => 'split_chapter_submit',
-        '#validate' => ['::validateSplitChapter'],
-        '#submit' => ['::submitForm', '::splitChapter'],
-        '#attributes' => ['class' => ['button']],
-      ];
       $form['#attached']['library'][] = 'ai_narration/audio_share';
       $form['generation_feedback'] = [
         '#type' => 'container',
@@ -474,105 +454,6 @@ final class NarrationChapterForm extends ContentEntityForm {
   }
 
   /**
-   * Validates that the chapter can be split safely.
-   */
-  public function validateSplitChapter(array &$form, FormStateInterface $form_state): void {
-    if (!$form_state->getValue(['split_chapter', 'confirm'])) {
-      $form_state->setErrorByName('split_chapter][confirm', $this->t('Confirm that you want to split this chapter.'));
-      return;
-    }
-
-    $chapter = $this->buildEntity($form, $form_state);
-    $project = $chapter->get('project_id')->entity;
-    if ($project === NULL) {
-      $form_state->setErrorByName('project_id', $this->t('Choose a Project before splitting a chapter.'));
-      return;
-    }
-
-    $model_limit = $this->generator->getInputCharacterLimit((string) $project->get('model')->value);
-    $project_limit = (int) $project->get('max_input_characters')->value;
-    $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
-    if ($limit < 100) {
-      $form_state->setErrorByName('project_id', $this->t('The Project needs a maximum input-character limit of at least 100 before this chapter can be split.'));
-    }
-  }
-
-  /**
-   * Splits an overlong chapter into ordered, independently editable chapters.
-   */
-  public function splitChapter(array &$form, FormStateInterface $form_state): void {
-    $chapter = $this->entity;
-    $project = $chapter->get('project_id')->entity;
-    if ($project === NULL) {
-      return;
-    }
-    $model_limit = $this->generator->getInputCharacterLimit((string) $project->get('model')->value);
-    $project_limit = (int) $project->get('max_input_characters')->value;
-    $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
-    $chunks = $this->textChunker->split((string) $chapter->get('text')->value, $limit);
-    if (count($chunks) < 2) {
-      $this->messenger()->addWarning($this->t('This chapter already fits within the effective limit of @limit characters; no chapters were created.', ['@limit' => number_format($limit)]));
-      return;
-    }
-
-    $storage = $this->entityTypeManager->getStorage('ai_narration_chapter');
-    $project_id = (int) $chapter->get('project_id')->target_id;
-    $edition_id = (int) $chapter->get('edition_id')->target_id;
-    $position = (int) $chapter->get('position')->value;
-    // Make room immediately after this chapter while retaining sibling order.
-    foreach ($storage->loadMultiple() as $sibling) {
-      if ((int) $sibling->id() === (int) $chapter->id()
-        || (int) $sibling->get('project_id')->target_id !== $project_id
-        || (int) $sibling->get('edition_id')->target_id !== $edition_id
-        || (int) $sibling->get('position')->value <= $position) {
-        continue;
-      }
-      $sibling->set('position', (int) $sibling->get('position')->value + count($chunks) - 1);
-      $sibling->save();
-    }
-
-    $title = (string) $chapter->label();
-    $provenance = [
-      'source_type' => $chapter->get('source_type')->value,
-      'source_url' => $chapter->get('source_url')->value,
-      'source_entity_type' => $chapter->get('source_entity_type')->value,
-      'source_entity_id' => $chapter->get('source_entity_id')->value,
-      'source_label' => $chapter->get('source_label')->value,
-      'source_fetched' => $chapter->get('source_fetched')->value,
-      'model_override' => $chapter->get('model_override')->value,
-    ];
-    $this->setSplitChapterValues($chapter, $chunks[0], $title, 1, count($chunks), $position);
-    $chapter->save();
-    foreach (array_slice($chunks, 1) as $index => $chunk) {
-      $part = $index + 2;
-      $new_chapter = $storage->create($provenance + [
-        'project_id' => $project_id,
-        'edition_id' => $edition_id ?: NULL,
-        'position' => $position + $index + 1,
-        'status' => 'draft',
-      ]);
-      $this->setSplitChapterValues($new_chapter, $chunk, $title, $part, count($chunks), $position + $index + 1);
-      $new_chapter->save();
-    }
-
-    $this->messenger()->addStatus($this->t('Split %title into @count chapters of no more than @limit characters.', ['%title' => $title, '@count' => count($chunks), '@limit' => number_format($limit)]));
-    $form_state->setRedirect('entity.ai_narration_chapter.collection');
-  }
-
-  /** Sets common values on a split chapter and clears stale generated audio. */
-  private function setSplitChapterValues(object $chapter, string $text, string $title, int $part, int $total, int $position): void {
-    $suffix = $this->t(' (@part of @total)', ['@part' => $part, '@total' => $total]);
-    $chapter->set('title', mb_substr($title, 0, 255 - mb_strlen((string) $suffix)) . $suffix);
-    $chapter->set('text', $text);
-    $chapter->set('position', $position);
-    $chapter->set('audio_files', []);
-    $chapter->set('last_generated_audio', NULL);
-    $chapter->set('generation_metadata', '');
-    $chapter->set('status', 'draft');
-    $chapter->set('error_message', '');
-  }
-
-  /**
    * Generates audio using the selected project's shared settings.
    */
   public function generateNarration(array &$form, FormStateInterface $form_state): void {
@@ -590,9 +471,12 @@ final class NarrationChapterForm extends ContentEntityForm {
       }
       $project_limit = (int) $project->get('max_input_characters')->value;
       $model_limit = $this->generator->getInputCharacterLimit($model);
-      $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
-      if ($limit > 0 && mb_strlen($text) > $limit) {
-        throw new \RuntimeException((string) $this->t('This chapter is @characters characters, exceeding the effective limit of @limit. Split it into smaller chapters before generating.', ['@characters' => mb_strlen($text), '@limit' => number_format($limit)]));
+      $limit = $model_limit ?? 4096;
+      if ($project_limit > 0) {
+        $limit = min($project_limit, $limit);
+      }
+      if ($limit < 100) {
+        throw new \RuntimeException('The effective input-character limit must be at least 100.');
       }
       $started = microtime(TRUE);
       $generatedAt = $this->time->getRequestTime();
@@ -603,8 +487,15 @@ final class NarrationChapterForm extends ContentEntityForm {
         'speed' => $settings['speed'] ?? ($project->get('speed')->value ?: 1),
         'text_normalization' => (bool) ($settings['text_normalization'] ?? $project->get('text_normalization')->value),
       ];
-      $file = $this->generator->generate($text, $model, $voice, $format, $parameters, (string) $chapter->label());
-      $duration = $this->getDurationInspector()->getDuration($file);
+      $files = [];
+      $duration = 0.0;
+      foreach ($this->textChunker->split($text, $limit) as $index => $chunk) {
+        $file = $this->generator->generate($chunk, $model, $voice, $format, $parameters, (string) $chapter->label() . '-' . ($index + 1));
+        $files[] = $file;
+        $duration += $this->getDurationInspector()->getDuration($file) ?? 0.0;
+        $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
+      }
+      $file = end($files);
       $seconds = microtime(TRUE) - $started;
       $metadata = [
         'model' => $model,
@@ -612,14 +503,14 @@ final class NarrationChapterForm extends ContentEntityForm {
         'format' => $format,
         'parameters' => $parameters,
         'input_characters' => mb_strlen($text),
-        'file_id' => (int) $file->id(),
+        'file_ids' => array_map(static fn ($file) => (int) $file->id(), $files),
+        'audio_segments' => count($files),
         'bytes' => (int) $file->getSize(),
         'mime' => $file->getMimeType(),
         'runtime_seconds' => $duration,
         'generation_seconds' => $seconds,
         'generated_at' => gmdate(DATE_ATOM, $generatedAt),
       ];
-      $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
       $chapter->set('last_generated_audio', ['target_id' => $file->id()]);
       $chapter->set('generation_metadata', json_encode($metadata, JSON_UNESCAPED_SLASHES));
       $chapter->set('status', 'complete');
