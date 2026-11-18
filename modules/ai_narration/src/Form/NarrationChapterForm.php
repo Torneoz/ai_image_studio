@@ -412,6 +412,8 @@ final class NarrationChapterForm extends ContentEntityForm {
       $form['previous_generation_result']['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
       if (!empty($metadata['entire_file_id']) && ($entire = $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']))) {
         $entire_url = $this->fileUrlGenerator->generateAbsoluteString($entire->getFileUri());
+        $file = $entire;
+        $url = $entire_url;
         $form['previous_generation_result']['actions']['entire'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Entire') . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $entire_url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download entire audio'), '#url' => Url::fromUri($entire_url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
       }
       foreach ($files as $index => $audio_file) {
@@ -656,6 +658,10 @@ final class NarrationChapterForm extends ContentEntityForm {
    */
   public function savePreviousToMedia(array &$form, FormStateInterface $form_state): void {
     $file = $this->entity->get('last_generated_audio')->entity;
+    $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
+    if (!empty($metadata['entire_file_id'])) {
+      $file = $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']) ?: $file;
+    }
     if (!$file) {
       $form_state->set('generation_error', $this->t('The previous narration file is no longer available.'));
       $form_state->setRebuild();
