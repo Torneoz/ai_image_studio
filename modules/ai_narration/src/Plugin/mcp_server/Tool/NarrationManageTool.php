@@ -58,8 +58,10 @@ final class NarrationManageTool extends NarrationMcpToolBase {
     $project = $chapter->get('project_id')->entity;
     if (!$project || !(string) $project->get('model')->value) { throw new \RuntimeException('The chapter project must have a text-to-speech model.'); }
     $text = (string) $chapter->get('text')->value;
-    $limit = (int) $project->get('max_input_characters')->value;
-    if ($limit > 0 && mb_strlen($text) > $limit) { throw new \RuntimeException('Chapter text exceeds the project input-character limit.'); }
+    $project_limit = (int) $project->get('max_input_characters')->value;
+    $model_limit = $this->generator->getInputCharacterLimit((string) $project->get('model')->value);
+    $limit = $model_limit === NULL ? $project_limit : min($project_limit, $model_limit);
+    if ($limit > 0 && mb_strlen($text) > $limit) { throw new \RuntimeException('Chapter text exceeds the effective input-character limit.'); }
     $started = microtime(TRUE);
     $file = $this->generator->generate($text, (string) $project->get('model')->value, (string) $project->get('voice')->value, (string) $project->get('format')->value, ['language' => (string) $project->get('language')->value, 'speed' => $project->get('speed')->value ?: 1, 'text_normalization' => (bool) $project->get('text_normalization')->value], (string) $chapter->label());
     $duration = $this->durationInspector->getDuration($file);
