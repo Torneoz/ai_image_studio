@@ -503,6 +503,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         $chapter->get('audio_files')->appendItem(['target_id' => $file->id()]);
       }
       $file = end($files);
+      $entire = \Drupal::service('ai_narration.audio_merger')->merge($files, (string) $chapter->label());
       $seconds = microtime(TRUE) - $started;
       $metadata = [
         'model' => $model,
@@ -511,6 +512,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         'parameters' => $parameters,
         'input_characters' => mb_strlen($text),
         'file_ids' => array_map(static fn ($file) => (int) $file->id(), $files),
+        'entire_file_id' => $entire?->id(),
         'audio_segments' => count($files),
         'bytes' => (int) $file->getSize(),
         'mime' => $file->getMimeType(),
@@ -525,6 +527,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $chapter->save();
       $form_state->set('generation_result', [
         'url' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()),
+        'entire' => $entire ? ['url' => $this->fileUrlGenerator->generateAbsoluteString($entire->getFileUri())] : NULL,
         'segments' => array_map(fn ($audio_file) => ['url' => $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri()), 'name' => $audio_file->getFilename()], $files),
         'fid' => $file->id(),
         'model' => $model,
@@ -568,6 +571,9 @@ final class NarrationChapterForm extends ContentEntityForm {
     $feedback['#attributes']['class'] = ['messages', 'messages--status', 'ai-narration-result'];
     $feedback['title'] = ['#type' => 'html_tag', '#tag' => 'h2', '#value' => $this->t('Narration generated')];
     $feedback['actions'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__actions']]];
+    if (!empty($result['entire']['url'])) {
+      $feedback['actions']['entire'] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Entire') . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $result['entire']['url']]], 'download' => ['#type' => 'link', '#title' => $this->t('Download entire audio'), '#url' => Url::fromUri($result['entire']['url']), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+    }
     foreach ($result['segments'] ?? [['url' => $result['url'], 'name' => 'Audio']] as $index => $segment) {
       $feedback['actions']['segment_' . $index] = [
         '#type' => 'container',
