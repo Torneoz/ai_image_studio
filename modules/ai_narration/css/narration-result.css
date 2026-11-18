@@ -18,6 +18,20 @@
   max-width: 100%;
 }
 
+.ai-narration-result__segment {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.ai-narration-result__segment audio {
+  width: 100%;
+}
+
+.ai-narration-result__segment .button {
+  justify-self: start;
+}
+
 .ai-narration-result__actions .button {
   align-items: center;
   box-sizing: border-box;

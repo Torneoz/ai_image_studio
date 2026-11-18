@@ -524,7 +524,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         'voice' => $voice,
         'format' => $format,
         'characters' => mb_strlen($text),
-        'bytes' => $file->getSize(),
+        'bytes' => array_sum(array_map(static fn ($audio_file) => $audio_file->getSize(), $files)),
         'mime' => $file->getMimeType(),
         'duration' => $duration,
         'seconds' => $seconds,
@@ -564,17 +564,12 @@ final class NarrationChapterForm extends ContentEntityForm {
     foreach ($result['segments'] ?? [['url' => $result['url'], 'name' => 'Audio']] as $index => $segment) {
       $feedback['actions']['segment_' . $index] = [
         '#type' => 'container',
+        '#attributes' => ['class' => ['ai-narration-result__segment']],
         'label' => ['#markup' => '<strong>' . $this->t('Part @part', ['@part' => $index + 1]) . '</strong>'],
         'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $segment['url']]],
         'download' => ['#type' => 'link', '#title' => $this->t('Download part @part', ['@part' => $index + 1]), '#url' => Url::fromUri($segment['url']), '#attributes' => ['download' => TRUE, 'class' => ['button']]],
       ];
     }
-    $feedback['actions']['download'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Download @format file (@size)', ['@format' => strtoupper($result['format'] ?: pathinfo($result['url'], PATHINFO_EXTENSION) ?: 'audio'), '@size' => ByteSizeMarkup::create($result['bytes'])]),
-      '#url' => Url::fromUri($result['url']),
-      '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
-    ];
     $feedback['actions']['share'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
@@ -603,6 +598,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $feedback['metadata'] = ['#theme' => 'item_list', '#title' => $this->t('Generation details'), '#items' => [
       $this->t('Model: @model', ['@model' => $result['model']]),
       $result['voice'] === '' ? $this->t('Voice: provider default') : $this->t('Voice: @voice', ['@voice' => $result['voice']]),
+      $this->t('Segments: @count', ['@count' => count($result['segments'] ?? []) ?: 1]),
       $this->t('Input: @characters characters', ['@characters' => $result['characters']]),
       $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
       $result['duration'] === NULL ? $this->t('Clip runtime: unavailable') : $this->t('Clip runtime: @duration', ['@duration' => $this->formatDuration($result['duration'])]),
