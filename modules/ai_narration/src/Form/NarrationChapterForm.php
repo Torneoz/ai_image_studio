@@ -388,11 +388,15 @@ final class NarrationChapterForm extends ContentEntityForm {
       $files[] = $audio_file;
     }
     $file = $this->entity->get('last_generated_audio')->entity;
+    $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
+    if (!empty($metadata['file_ids'])) {
+      $latest_ids = array_map('intval', $metadata['file_ids']);
+      $files = array_values(array_filter($files, static fn ($audio_file) => in_array((int) $audio_file->id(), $latest_ids, TRUE)));
+    }
     if ($files === [] && $file) {
       $files[] = $file;
     }
     $file ??= end($files) ?: NULL;
-    $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
     if ($file === NULL && $metadata === []) {
       return;
     }
@@ -491,6 +495,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       ];
       $files = [];
       $duration = 0.0;
+      $chapter->set('audio_files', []);
       foreach ($this->textChunker->split($text, $limit) as $index => $chunk) {
         $file = $this->generator->generate($chunk, $model, $voice, $format, $parameters, (string) $chapter->label() . '-' . ($index + 1));
         $files[] = $file;
