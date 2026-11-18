@@ -130,6 +130,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       $form['split_chapter'] = [
         '#type' => 'details',
         '#title' => $this->t('Split into chapters'),
+        '#tree' => TRUE,
         '#weight' => 88,
         '#open' => FALSE,
         '#description' => $this->t('Split narration text at sentence and word boundaries when it exceeds the safe request limit. The current chapter becomes part 1 and new sibling chapters are created for the remaining parts.'),
