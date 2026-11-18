@@ -12,7 +12,7 @@ services:
 
   ai_narration.audio_merger:
     class: Drupal\ai_narration\Service\NarrationAudioMerger
-    arguments: ['@file_system', '@file.repository']
+    arguments: ['@file_system']
 
   ai_narration.media_publisher:
     class: Drupal\ai_narration\Service\NarrationMediaPublisher

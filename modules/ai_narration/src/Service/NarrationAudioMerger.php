@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Drupal\ai_narration\Service;
 
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
-use Drupal\file\FileRepositoryInterface;
 use Symfony\Component\Process\Process;
 
 final class NarrationAudioMerger {
-  public function __construct(private readonly FileSystemInterface $fileSystem, private readonly FileRepositoryInterface $fileRepository) {}
+  public function __construct(private readonly FileSystemInterface $fileSystem) {}
 
   /** Joins compatible narration files without re-encoding them. */
   public function merge(array $files, string $name): ?FileInterface {
@@ -30,6 +30,8 @@ final class NarrationAudioMerger {
     $this->fileSystem->prepareDirectory($public_directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $this->fileSystem->copy($output, $uri, FileSystemInterface::EXISTS_RENAME);
     @unlink($output);
-    return $this->fileRepository->createFileFromUri($uri, TRUE);
+    $file = File::create(['uri' => $uri, 'status' => TRUE]);
+    $file->save();
+    return $file;
   }
 }
