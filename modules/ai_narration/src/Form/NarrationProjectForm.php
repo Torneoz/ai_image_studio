@@ -92,8 +92,27 @@ final class NarrationProjectForm extends ContentEntityForm {
         '#url' => Url::fromRoute('entity.ai_narration_edition.add_form', [], ['query' => ['project' => $this->entity->id()]]),
         '#attributes' => ['class' => ['button']],
       ];
+      $actions['join_chapter_audio'] = ['#type' => 'submit', '#value' => $this->t('Join chapter audio'), '#submit' => ['::joinChapterAudio'], '#limit_validation_errors' => []];
     }
     return $actions;
+  }
+
+  /** Joins the latest audio for all Project chapters in position order. */
+  public function joinChapterAudio(array &$form, FormStateInterface $form_state): void {
+    $storage = $this->entityTypeManager->getStorage('ai_narration_chapter');
+    $ids = $storage->getQuery()->accessCheck(FALSE)->condition('project_id', $this->entity->id())->sort('position')->execute();
+    $files = [];
+    foreach ($storage->loadMultiple($ids) as $chapter) {
+      $metadata = json_decode((string) $chapter->get('generation_metadata')->value, TRUE) ?: [];
+      $file = !empty($metadata['entire_file_id']) ? $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']) : $chapter->get('last_generated_audio')->entity;
+      if ($file) $files[] = $file;
+    }
+    $joined = \Drupal::service('ai_narration.audio_merger')->merge($files, (string) $this->entity->label());
+    if (!$joined) { $this->messenger()->addError($this->t('At least two generated chapter files are needed to join audio.')); return; }
+    $this->entity->set('joined_audio', ['target_id' => $joined->id()]);
+    $this->entity->save();
+    $this->messenger()->addStatus($this->t('Joined @count chapter audio files.', ['@count' => count($files)]));
+    $form_state->setRebuild();
   }
 
   public function save(array $form, FormStateInterface $form_state): int {

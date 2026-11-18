@@ -84,3 +84,11 @@ function ai_narration_update_10008(): string {
   \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('edition_id', 'ai_narration_chapter', 'ai_narration_chapter', $field);
   return 'Added optional Edition references to narration Chapters.';
 }
+
+/** Adds Project-level joined narration audio. */
+function ai_narration_update_10009(): string {
+  $type = \Drupal::entityTypeManager()->getDefinition('ai_narration_project');
+  $field = \Drupal\ai_narration\Entity\NarrationProject::baseFieldDefinitions($type)['joined_audio'];
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('joined_audio', 'ai_narration_project', 'ai_narration_project', $field);
+  return 'Added joined chapter audio to narration projects.';
+}
