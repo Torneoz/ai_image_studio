@@ -80,6 +80,7 @@ final class NarrationProjectForm extends ContentEntityForm {
     if (!$this->entity->isNew()) {
       $chapters = $this->entityTypeManager->getStorage('ai_narration_chapter')->loadMultiple($this->entityTypeManager->getStorage('ai_narration_chapter')->getQuery()->accessCheck(FALSE)->condition('project_id', $this->entity->id())->sort('position')->execute());
       $form['chapter_audio'] = ['#type' => 'details', '#title' => $this->t('Chapter audio'), '#open' => FALSE, '#weight' => 81, '#attributes' => ['class' => ['ai-narration-result']]];
+      $form['chapter_audio']['table'] = ['#type' => 'table', '#header' => [$this->t('Chapter'), $this->t('Position'), $this->t('Audio')], '#empty' => $this->t('No generated chapter audio is available.'), '#tabledrag' => [['action' => 'order', 'relationship' => 'sibling', 'group' => 'ai-narration-chapter-weight']]];
       foreach ($chapters as $chapter) {
         $metadata = json_decode((string) $chapter->get('generation_metadata')->value, TRUE) ?: [];
         $audio = !empty($metadata['entire_file_id']) ? $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']) : $chapter->get('last_generated_audio')->entity;
@@ -87,10 +88,23 @@ final class NarrationProjectForm extends ContentEntityForm {
         $url = \Drupal::service('file_url_generator')->generateAbsoluteString($audio->getFileUri());
         $key = 'chapter_' . $chapter->id();
         $title = mb_strimwidth((string) $chapter->label(), 0, 80, '…');
-        $form['chapter_audio'][$key] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'title' => ['#type' => 'link', '#title' => $this->t('@position. @title', ['@position' => $chapter->get('position')->value, '@title' => $title]), '#url' => $chapter->toUrl('edit-form'), '#attributes' => ['class' => ['ai-narration-chapter-link']]], 'audio' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+        $form['chapter_audio']['table'][$key] = ['#attributes' => ['class' => ['draggable']], 'title' => ['data' => ['#type' => 'link', '#title' => $title, '#url' => $chapter->toUrl('edit-form')]], 'position' => ['data' => ['#type' => 'number', '#default_value' => $chapter->get('position')->value, '#attributes' => ['class' => ['ai-narration-chapter-weight']], '#name' => 'chapter_order[' . $chapter->id() . '][position]']], 'audio' => ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]]];
       }
+      $form['chapter_audio']['save_order'] = ['#type' => 'submit', '#value' => $this->t('Save chapter order'), '#submit' => ['::saveChapterOrder'], '#limit_validation_errors' => [['chapter_order']]];
     }
     return $form;
+  }
+
+  /** Saves the positions set by the Project's draggable Chapter table. */
+  public function saveChapterOrder(array &$form, FormStateInterface $form_state): void {
+    foreach ($form_state->getValue('chapter_order') ?? [] as $id => $values) {
+      if ($chapter = $this->entityTypeManager->getStorage('ai_narration_chapter')->load((int) $id)) {
+        $chapter->set('position', (int) $values['position']);
+        $chapter->save();
+      }
+    }
+    $this->messenger()->addStatus($this->t('Chapter order saved.'));
+    $form_state->setRebuild();
   }
 
   public function refreshProjectSettings(array &$form, FormStateInterface $form_state): array {
