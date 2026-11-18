@@ -93,8 +93,10 @@ final class NarrationChapterForm extends ContentEntityForm {
     $text_element['#attributes']['data-ai-narration-text'] = TRUE;
     $project_id = (int) ($form_state->getValue(['project_id', 0, 'target_id']) ?? $element['#default_value'] ?? 0);
     $project = $project_id ? ($projects[$project_id] ?? NULL) : NULL;
+    $selected_model = (string) ($form_state->getValue(['job_settings', 'model']) ?? '');
+    $model = $selected_model !== '' ? $selected_model : (string) ($project?->get('model')->value ?? '');
     $limit = $project
-      ? $this->generator->getInputCharacterLimit((string) $project->get('model')->value)
+      ? $this->generator->getInputCharacterLimit($model)
       : NULL;
     $limit_label = $project === NULL
       ? $this->t('Select a project to show its model limit.')
@@ -105,7 +107,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#type' => 'item',
       '#weight' => -6,
       '#attributes' => ['id' => 'ai-narration-text-count'],
-      '#markup' => '<span data-ai-narration-character-count>' . mb_strlen((string) $text_element['#default_value']) . '</span> ' . $this->t('characters') . ' · ' . $limit_label,
+      '#markup' => '<span data-ai-narration-character-count>' . mb_strlen((string) ($form_state->getValue(['text', 0, 'value']) ?? $text_element['#default_value'])) . '</span> ' . $this->t('characters') . ' · ' . $limit_label,
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
     if (!$this->entity->isNew()) {
@@ -384,8 +386,11 @@ final class NarrationChapterForm extends ContentEntityForm {
     ];
   }
 
-  public function refreshJobSettings(array &$form, FormStateInterface $form_state): array {
-    return $form['job_settings'];
+  public function refreshJobSettings(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#ai-narration-chapter-job-settings', $form['job_settings']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-text-count', $form['text_count']));
+    return $response;
   }
 
   /**
