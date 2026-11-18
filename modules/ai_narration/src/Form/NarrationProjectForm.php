@@ -86,7 +86,8 @@ final class NarrationProjectForm extends ContentEntityForm {
         if (!$audio) continue;
         $url = \Drupal::service('file_url_generator')->generateAbsoluteString($audio->getFileUri());
         $key = 'chapter_' . $chapter->id();
-        $form['chapter_audio'][$key] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'title' => ['#markup' => '<strong>' . $this->t('@position. @title', ['@position' => $chapter->get('position')->value, '@title' => $chapter->label()]) . '</strong>'], 'audio' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+        $title = mb_strimwidth((string) $chapter->label(), 0, 80, '…');
+        $form['chapter_audio'][$key] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'title' => ['#type' => 'link', '#title' => $this->t('@position. @title', ['@position' => $chapter->get('position')->value, '@title' => $title]), '#url' => $chapter->toUrl('edit-form'), '#attributes' => ['class' => ['ai-narration-chapter-link']]], 'audio' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]], 'download' => ['#type' => 'link', '#title' => $this->t('Download'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
       }
     }
     return $form;
