@@ -271,6 +271,9 @@ final class NarrationGenerateForm extends FormBase {
         '#url' => Url::fromUri($result['url']),
         '#attributes' => ['download' => TRUE, 'class' => ['button', 'button--primary']],
       ];
+      foreach ($result['segments'] ?? [] as $index => $segment) {
+        $form['feedback']['actions']['part_' . $index] = ['#type' => 'container', '#attributes' => ['class' => ['ai-narration-result__segment']], 'label' => ['#markup' => '<strong>' . $this->t('Part @part', ['@part' => $index + 1]) . '</strong>'], 'player' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $segment['url']]], 'download' => ['#type' => 'link', '#title' => $this->t('Download part @part', ['@part' => $index + 1]), '#url' => Url::fromUri($segment['url']), '#attributes' => ['download' => TRUE, 'class' => ['button']]]];
+      }
       $form['feedback']['actions']['share'] = [
         '#type' => 'html_tag',
         '#tag' => 'button',
@@ -345,6 +348,7 @@ final class NarrationGenerateForm extends FormBase {
           $result['voice'] === '' ? $this->t('Voice: provider default') : $this->t('Voice: @voice', ['@voice' => $result['voice']]),
           $result['format'] === '' ? $this->t('Format: provider default') : $this->t('Format: @format', ['@format' => strtoupper($result['format'])]),
           $this->t('Input: @characters characters', ['@characters' => $result['characters']]),
+          $this->t('Segments: @count', ['@count' => count($result['segments'] ?? []) ?: 1]),
           $this->t('File: @size bytes (@mime)', ['@size' => number_format($result['bytes']), '@mime' => $result['mime']]),
           $this->t('Generation time: @seconds seconds', ['@seconds' => number_format($result['seconds'], 2)]),
           $this->t('Generated: @date', ['@date' => $this->formatGenerationDate((int) $result['generated_at'])]),
@@ -663,17 +667,26 @@ final class NarrationGenerateForm extends FormBase {
       }
       $started = microtime(TRUE);
       $generatedAt = \Drupal::service('datetime.time')->getRequestTime();
-      $file = $this->generator->generate($text, $model, $voice, $format, $parameters);
-      $url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
+      $limit = $this->generator->getInputCharacterLimit($model) ?? 4096;
+      $files = [];
+      foreach (\Drupal::service('ai_narration.text_chunker')->split($text, $limit) as $index => $chunk) {
+        $files[] = $this->generator->generate($chunk, $model, $voice, $format, $parameters, 'narration-' . ($index + 1));
+      }
+      $file = end($files);
+      $entire = \Drupal::service('ai_narration.audio_merger')->merge($files, 'narration-entire');
+      $result_file = $entire ?: $file;
+      $url = $this->fileUrlGenerator->generateAbsoluteString($result_file->getFileUri());
       $form_state->set('result', [
         'url' => $url,
-        'fid' => $file->id(),
+        'fid' => $result_file->id(),
+        'segments' => array_map(fn ($audio_file) => ['url' => $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri())], $files),
+        'entire' => $entire ? ['url' => $url] : NULL,
         'model' => $model,
         'voice' => $voice,
         'format' => $format,
         'parameters' => $parameters,
         'characters' => mb_strlen($text),
-        'bytes' => $file->getSize(),
+        'bytes' => array_sum(array_map(static fn ($audio_file) => $audio_file->getSize(), $files)),
         'mime' => $file->getMimeType(),
         'duration' => $this->getDurationInspector()->getDuration($file),
         'seconds' => microtime(TRUE) - $started,
