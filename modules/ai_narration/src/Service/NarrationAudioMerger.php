@@ -18,10 +18,12 @@ final class NarrationAudioMerger {
     $directory = 'temporary://ai-narration-merge';
     $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     $list = $this->fileSystem->realpath($directory . '/inputs-' . uniqid() . '.txt');
-    $output = $this->fileSystem->realpath($directory . '/entire-' . uniqid() . '.' . pathinfo($files[0]->getFilename(), PATHINFO_EXTENSION));
+    $output = $this->fileSystem->realpath($directory . '/entire-' . uniqid() . '.mp3');
     $lines = array_map(fn (FileInterface $file) => "file '" . str_replace("'", "'\\\\''", $this->fileSystem->realpath($file->getFileUri())) . "'", $files);
     file_put_contents($list, implode("\n", $lines));
-    $process = new Process(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', $list, '-c', 'copy', $output]);
+    // Re-encode rather than stream-copy: providers can produce files with
+    // incompatible timing metadata, which otherwise yields silent joins.
+    $process = new Process(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', $list, '-c:a', 'libmp3lame', '-q:a', '2', $output]);
     $process->run();
     @unlink($list);
     if (!$process->isSuccessful() || !is_file($output)) return NULL;
