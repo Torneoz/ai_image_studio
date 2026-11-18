@@ -88,7 +88,7 @@ final class NarrationProjectForm extends ContentEntityForm {
         $url = \Drupal::service('file_url_generator')->generateAbsoluteString($audio->getFileUri());
         $key = 'chapter_' . $chapter->id();
         $title = mb_strimwidth((string) $chapter->label(), 0, 80, '…');
-        $form['chapter_audio']['table'][$key] = ['#attributes' => ['class' => ['draggable']], 'title' => ['data' => ['#type' => 'link', '#title' => $title, '#url' => $chapter->toUrl('edit-form')]], 'position' => ['data' => ['#type' => 'number', '#default_value' => $chapter->get('position')->value, '#attributes' => ['class' => ['ai-narration-chapter-weight']], '#name' => 'chapter_order[' . $chapter->id() . '][position]']], 'audio' => ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]]];
+        $form['chapter_audio']['table'][$key] = ['#attributes' => ['class' => ['draggable']], 'title' => ['data' => ['#type' => 'link', '#title' => $title, '#url' => $chapter->toUrl('edit-form')]], 'position' => ['data' => ['#type' => 'number', '#default_value' => $chapter->get('position')->value, '#attributes' => ['class' => ['ai-narration-chapter-weight']], '#parents' => ['chapter_order', $chapter->id(), 'position']]], 'audio' => ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]]];
       }
       $form['chapter_audio']['save_order'] = ['#type' => 'submit', '#value' => $this->t('Save chapter order'), '#submit' => ['::saveChapterOrder'], '#limit_validation_errors' => [['chapter_order']]];
     }
