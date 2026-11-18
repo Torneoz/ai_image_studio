@@ -36,13 +36,13 @@
   align-items: center;
   box-sizing: border-box;
   display: inline-flex;
-  flex: 0 1 15rem;
+  flex: 0 1 11rem;
   justify-content: center;
   margin: 0;
   max-width: 100%;
-  min-height: 3.5rem;
+  min-height: 2.75rem;
   text-align: center;
-  width: 15rem;
+  width: 11rem;
 }
 
 .ai-narration-result__actions select.button {
