@@ -5,3 +5,6 @@ ai_narration.settings:
     default_model:
       type: string
       label: 'Default text-to-speech provider and voice'
+    player_mode:
+      type: string
+      label: 'Default audio player display mode'

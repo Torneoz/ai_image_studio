@@ -122,6 +122,23 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#markup' => '<span data-ai-narration-character-count>' . mb_strlen((string) ($form_state->getValue(['text', 0, 'value']) ?? $text_element['#default_value'])) . '</span> ' . $this->t('characters') . ' · <span data-ai-narration-limit-label>' . $limit_label . '</span>',
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
+    $form['#attached']['library'][] = 'ai_narration/enhanced_player';
+    $site_player_mode = (string) (\Drupal::config('ai_narration.settings')->get('player_mode') ?: 'native');
+    $saved_player_mode = (string) (\Drupal::service('user.data')->get('ai_narration', $this->currentUser()->id(), 'player_mode') ?? '');
+    $form['player_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Audio player display'),
+      '#options' => [
+        '' => $this->t('Use site default (@mode)', ['@mode' => $site_player_mode === 'enhanced' ? $this->t('enhanced') : $this->t('native')]),
+        'native' => $this->t('Native browser player'),
+        'enhanced' => $this->t('Enhanced narration player'),
+      ],
+      '#default_value' => $form_state->getValue('player_mode') ?? $saved_player_mode,
+      '#description' => $this->t('Your selection is remembered for future narration work.'),
+      '#weight' => -5.5,
+      '#attributes' => ['data-ai-narration-player-mode' => TRUE],
+    ];
+    $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = $site_player_mode;
     foreach ($this->generator->getModelOptions() as $model_option => $label) {
       $form['#attached']['drupalSettings']['aiNarration']['modelCharacterLimits'][$model_option] = $this->generator->getInputCharacterLimit($model_option);
     }
@@ -496,6 +513,7 @@ final class NarrationChapterForm extends ContentEntityForm {
    */
   public function generateNarration(array &$form, FormStateInterface $form_state): void {
     try {
+      \Drupal::service('user.data')->set('ai_narration', $this->currentUser()->id(), 'player_mode', (string) $form_state->getValue('player_mode'));
       $chapter = $this->entity;
       $project = $chapter->get('project_id')->entity;
       if ($project === NULL) {

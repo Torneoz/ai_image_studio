@@ -108,6 +108,8 @@ final class NarrationGenerateForm extends FormBase {
     $savedVoice = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_voice') ?? '');
     $savedFormat = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_format') ?? '');
     $savedProject = (int) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_project') ?? 0);
+    $sitePlayerMode = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_mode') ?: 'native');
+    $savedPlayerMode = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'player_mode') ?? '');
     $textDefault = (string) ($form_state->get('loaded_source_text') ?? $form_state->getValue('text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
@@ -115,6 +117,18 @@ final class NarrationGenerateForm extends FormBase {
       '#type' => 'html_tag',
       '#tag' => 'p',
       '#value' => $this->t('Create a single narrated audio file from a script. Select a text-to-speech model and voice, adjust the available request controls, then preview, download, or save the completed narration to the Media Library.'),
+    ];
+    $form['player_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Audio player display'),
+      '#options' => [
+        '' => $this->t('Use site default (@mode)', ['@mode' => $sitePlayerMode === 'enhanced' ? $this->t('enhanced') : $this->t('native')]),
+        'native' => $this->t('Native browser player'),
+        'enhanced' => $this->t('Enhanced narration player'),
+      ],
+      '#default_value' => $form_state->getValue('player_mode') ?? $savedPlayerMode,
+      '#description' => $this->t('Your selection is remembered for future narration work.'),
+      '#attributes' => ['data-ai-narration-player-mode' => TRUE],
     ];
     $this->buildSourceControls($form, $form_state);
     $form['text'] = [
@@ -139,6 +153,8 @@ final class NarrationGenerateForm extends FormBase {
     ];
     $form['#attached']['library'][] = 'ai_narration/character_counter';
     $form['#attached']['library'][] = 'ai_narration/audio_share';
+    $form['#attached']['library'][] = 'ai_narration/enhanced_player';
+    $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = $sitePlayerMode;
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-speech model'),
@@ -660,6 +676,7 @@ final class NarrationGenerateForm extends FormBase {
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_model', $model);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_voice', $voice);
       $this->userData->set('ai_narration', $this->currentUser()->id(), 'last_format', $format);
+      $this->userData->set('ai_narration', $this->currentUser()->id(), 'player_mode', (string) $form_state->getValue('player_mode'));
       $source = $form_state->get('source_snapshot');
       $sourceDescription = NULL;
       if (is_array($source) && in_array($source['type'] ?? '', ['remote_url', 'entity'], TRUE)) {

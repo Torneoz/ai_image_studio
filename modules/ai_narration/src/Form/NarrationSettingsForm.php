@@ -38,11 +38,24 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#default_value' => $this->config('ai_narration.settings')->get('default_model'),
       '#description' => $this->t('This only chooses the preselected voice; users may choose any usable provider voice.'),
     ];
+    $form['player_mode'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Default audio player'),
+      '#options' => [
+        'native' => $this->t('Native browser player'),
+        'enhanced' => $this->t('Enhanced narration player'),
+      ],
+      '#default_value' => $this->config('ai_narration.settings')->get('player_mode') ?: 'native',
+      '#description' => $this->t('Users can override this choice on narration screens.'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $this->config('ai_narration.settings')->set('default_model', (string) $form_state->getValue('default_model'))->save();
+    $this->config('ai_narration.settings')
+      ->set('default_model', (string) $form_state->getValue('default_model'))
+      ->set('player_mode', (string) $form_state->getValue('player_mode'))
+      ->save();
     parent::submitForm($form, $form_state);
   }
 

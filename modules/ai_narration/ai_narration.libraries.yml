@@ -14,3 +14,13 @@ audio_share:
   dependencies:
     - core/drupal
     - core/once
+
+enhanced_player:
+  css:
+    component:
+      css/enhanced-player.css: {}
+  js:
+    js/enhanced-player.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
