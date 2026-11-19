@@ -43,33 +43,45 @@
 
     const controls = document.createElement('div');
     controls.className = 'ai-narration-enhanced-player__controls';
-    controls.innerHTML = '<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>';
+    const bars = Array.from({length: 56}, (_, index) => {
+      const height = 22 + ((index * 17 + index * index * 7) % 72);
+      return `<span class="ai-narration-enhanced-player__bar" style="--bar-height:${height}%"></span>`;
+    }).join('');
+    controls.innerHTML = `<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><div class="ai-narration-enhanced-player__track" role="presentation"><div class="ai-narration-enhanced-player__waveform" aria-hidden="true">${bars}</div><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"></div><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>`;
     wrapper.appendChild(controls);
     const play = controls.querySelector('.ai-narration-enhanced-player__play');
     const seek = controls.querySelector('.ai-narration-enhanced-player__seek');
     const time = controls.querySelector('.ai-narration-enhanced-player__time');
     const duration = controls.querySelector('.ai-narration-enhanced-player__duration');
     const speed = controls.querySelector('.ai-narration-enhanced-player__speed');
+    const updateProgress = () => {
+      const progress = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      seek.value = String(progress);
+      controls.style.setProperty('--ai-narration-progress', `${progress}%`);
+    };
 
     play.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
     audio.addEventListener('play', () => {
       pauseOthers(audio);
+      wrapper.classList.add('is-playing');
       play.textContent = '❚❚';
       play.setAttribute('aria-label', 'Pause audio');
     });
     audio.addEventListener('pause', () => {
+      wrapper.classList.remove('is-playing');
       play.textContent = '▶';
       play.setAttribute('aria-label', 'Play audio');
     });
     audio.addEventListener('loadedmetadata', () => duration.textContent = formatTime(audio.duration));
     audio.addEventListener('timeupdate', () => {
       time.textContent = formatTime(audio.currentTime);
-      seek.value = audio.duration ? String((audio.currentTime / audio.duration) * 100) : '0';
+      updateProgress();
     });
-    audio.addEventListener('ended', () => seek.value = '0');
+    audio.addEventListener('ended', () => updateProgress());
     seek.addEventListener('input', () => {
       if (audio.duration) {
         audio.currentTime = (Number(seek.value) / 100) * audio.duration;
+        updateProgress();
       }
     });
     speed.addEventListener('change', () => audio.playbackRate = Number(speed.value));
