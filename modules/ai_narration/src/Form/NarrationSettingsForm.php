@@ -123,7 +123,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
         'audio' => [
           '#type' => 'html_tag',
           '#tag' => 'audio',
-          '#attributes' => ['controls' => TRUE, 'preload' => 'metadata', 'src' => $test_audio_url],
+          '#attributes' => ['controls' => TRUE, 'preload' => 'metadata', 'src' => $test_audio_url, 'data-ai-narration-display-style' => $display_style],
         ],
       ],
       '#weight' => 20,

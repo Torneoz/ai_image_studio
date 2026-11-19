@@ -1,6 +1,7 @@
 (function (Drupal, drupalSettings, once) {
   const narrationSettings = drupalSettings.aiNarration || {};
-  const displayStyle = narrationSettings.playerDisplayStyle === 'bars' ? 'bars' : 'waveform';
+  const defaultDisplayStyle = narrationSettings.playerDisplayStyle === 'bars' ? 'bars' : 'waveform';
+  const displayStyle = (audio) => audio.dataset.aiNarrationDisplayStyle === 'bars' ? 'bars' : defaultDisplayStyle;
   const customColours = narrationSettings.playerColourMode === 'custom';
   const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
     ? narrationSettings.playerAccentColour
@@ -55,7 +56,8 @@
   const drawWaveform = (audio) => {
     const canvas = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__waveform');
     const buffer = audio._aiNarrationWaveform;
-    if (!canvas || (displayStyle === 'waveform' && !buffer)) {
+    const style = displayStyle(audio);
+    if (!canvas || (style === 'waveform' && !buffer)) {
       return;
     }
     const width = Math.max(1, Math.round(canvas.clientWidth));
@@ -68,7 +70,7 @@
     context.clearRect(0, 0, width, height);
     const progress = audio.duration ? audio.currentTime / audio.duration : 0;
     const playedWidth = width * progress;
-    if (displayStyle === 'bars') {
+    if (style === 'bars') {
       const bars = 48;
       const gap = 2;
       const barWidth = Math.max(1, (width - ((bars - 1) * gap)) / bars);
@@ -99,7 +101,7 @@
   };
 
   const loadWaveform = async (audio) => {
-    if (displayStyle === 'bars') {
+    if (displayStyle(audio) === 'bars') {
       drawWaveform(audio);
       return;
     }
