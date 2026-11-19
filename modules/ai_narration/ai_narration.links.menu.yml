@@ -11,6 +11,12 @@ ai_narration.settings:
   parent: ai_narration.generate
   weight: 10
 
+ai_narration.voices:
+  title: 'Narration Voices'
+  route_name: ai_narration.voices
+  parent: ai_narration.generate
+  weight: -6
+
 entity.ai_narration_project.collection:
   title: 'Narration projects'
   description: 'Manage narration projects and their shared generation settings.'

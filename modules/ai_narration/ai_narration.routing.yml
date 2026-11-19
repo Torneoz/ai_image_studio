@@ -14,6 +14,14 @@ ai_narration.settings:
   requirements:
     _permission: 'administer ai narration'
 
+ai_narration.voices:
+  path: '/admin/content/ai-narration/voices'
+  defaults:
+    _form: '\Drupal\ai_narration\Form\NarrationVoicesForm'
+    _title: 'Narration Voices'
+  requirements:
+    _permission: 'administer ai narration'
+
 entity.ai_narration_project.collection:
   path: '/admin/content/ai-narration/projects'
   defaults:
