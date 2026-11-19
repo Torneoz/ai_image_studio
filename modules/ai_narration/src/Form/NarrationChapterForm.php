@@ -90,6 +90,8 @@ final class NarrationChapterForm extends ContentEntityForm {
       $form['text']['widget'][0]['value']['#default_value'] = $loaded_text;
     }
     $text_element =& $form['text']['widget'][0]['value'];
+    $text_element['#prefix'] = '<div id="ai-narration-chapter-text-wrapper">';
+    $text_element['#suffix'] = '</div>';
     $text_element['#attributes']['data-ai-narration-text'] = TRUE;
     $project_id = (int) ($form_state->getValue(['project_id', 0, 'target_id']) ?? $element['#default_value'] ?? 0);
     $project = $project_id ? ($projects[$project_id] ?? NULL) : NULL;
@@ -206,7 +208,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         '#value' => $this->t('Load source into narration text'),
         '#submit' => ['::loadSource'],
         '#limit_validation_errors' => [['source']],
-        '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'progress' => ['type' => 'throbber', 'message' => $this->t('Loading source…')]],
+        '#ajax' => ['callback' => '::loadSourceAjax', 'progress' => ['type' => 'throbber', 'message' => $this->t('Loading source…')]],
       ];
     }
     if ($saved['fetched']) {
@@ -217,6 +219,15 @@ final class NarrationChapterForm extends ContentEntityForm {
   /** AJAX callback for the source-picker controls. */
   public function refreshSourceControls(array &$form, FormStateInterface $form_state): array {
     return $form['source'];
+  }
+
+  /** Replaces source controls and the loaded narration text. */
+  public function loadSourceAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand('#ai-narration-chapter-source', $form['source']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-chapter-text-wrapper', $form['text']['widget'][0]['value']));
+    $response->addCommand(new ReplaceCommand('#ai-narration-text-count', $form['text_count']));
+    return $response;
   }
 
   /** Copies an explicitly selected source into the editable narration snapshot. */
