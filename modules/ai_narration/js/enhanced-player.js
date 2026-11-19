@@ -47,7 +47,9 @@
         peak = Math.max(peak, Math.abs(source[offset + index]));
       }
       const barHeight = Math.max(2, peak * height);
-      context.fillStyle = x <= playedWidth ? '#57f3e1' : '#050c0c';
+      // Keep unplayed audio visibly distinct from the dark panel, while the
+      // played section remains the strongest visual cue.
+      context.fillStyle = x <= playedWidth ? '#74fff0' : '#4c898a';
       context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
     }
   };
