@@ -29,7 +29,25 @@ final class NarrationSettingsForm extends ConfigFormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = $this->generator()->getModelOptions();
+    $setting = function (string $name, mixed $fallback) use ($form_state): mixed {
+      $value = $form_state->getValue($name);
+      if ($value === NULL) {
+        $value = $this->config('ai_narration.settings')->get($name);
+      }
+      return $value === NULL || $value === '' ? $fallback : $value;
+    };
+    $preview_ajax = [
+      'callback' => '::refreshPlayerPreview',
+      'wrapper' => 'ai-narration-player-settings-preview',
+      'event' => 'change',
+    ];
     $display_style = (string) ($form_state->getValue('player_display_style') ?? $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform');
+    $colour_mode = (string) $setting('player_colour_mode', 'default');
+    $accent_colour = (string) $setting('player_accent_colour', '#24c7b9');
+    $waveform_colour = (string) $setting('player_waveform_colour', '#74fff0');
+    $background_colour = (string) $setting('player_background_colour', '#102b2d');
+    $text_colour = (string) $setting('player_text_colour', '#e9fffc');
+    $player_height = (string) $setting('player_height', '4rem');
     $form['default_model'] = [
       '#type' => 'select',
       '#title' => $this->t('Default voice'),
@@ -55,33 +73,38 @@ final class NarrationSettingsForm extends ConfigFormBase {
         'default' => $this->t('Default colours'),
         'custom' => $this->t('Custom colours'),
       ],
-      '#default_value' => $this->config('ai_narration.settings')->get('player_colour_mode') ?: 'default',
+      '#default_value' => $colour_mode,
+      '#ajax' => $preview_ajax,
     ];
     $custom_state = [':input[name="player_colour_mode"]' => ['value' => 'custom']];
     $form['player_accent_colour'] = [
       '#type' => 'color',
       '#title' => $this->t('Accent colour'),
-      '#default_value' => $this->config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
+      '#default_value' => $accent_colour,
       '#description' => $this->t('Used for the player border, play control, speed control, and segment markers.'),
       '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
     ];
     $form['player_waveform_colour'] = [
       '#type' => 'color',
       '#title' => $this->t('Played waveform colour'),
-      '#default_value' => $this->config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0',
+      '#default_value' => $waveform_colour,
       '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
     ];
     $form['player_background_colour'] = [
       '#type' => 'color',
       '#title' => $this->t('Player background colour'),
-      '#default_value' => $this->config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
+      '#default_value' => $background_colour,
       '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
     ];
     $form['player_text_colour'] = [
       '#type' => 'color',
       '#title' => $this->t('Player text colour'),
-      '#default_value' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
+      '#default_value' => $text_colour,
       '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
     ];
     $form['player_height'] = [
       '#type' => 'select',
@@ -95,7 +118,8 @@ final class NarrationSettingsForm extends ConfigFormBase {
         '2rem' => $this->t('2 rem'),
         '1.5rem' => $this->t('1.5 rem'),
       ],
-      '#default_value' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
+      '#default_value' => $player_height,
+      '#ajax' => $preview_ajax,
     ];
     $form['player_display_style'] = [
       '#type' => 'select',
@@ -106,10 +130,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $display_style,
       '#description' => $this->t('Actual waveform uses the audio file’s amplitude data. Generic bars are a lightweight equalizer-style display.'),
-      '#ajax' => [
-        'callback' => '::refreshPlayerPreview',
-        'wrapper' => 'ai-narration-player-settings-preview',
-      ],
+      '#ajax' => $preview_ajax,
     ];
     $module_path = \Drupal::service('extension.list.module')->getPath('ai_narration');
     $test_audio_url = Url::fromUri('base:' . $module_path . '/css/ui-test-file.mp3')->toString();
@@ -130,12 +151,12 @@ final class NarrationSettingsForm extends ConfigFormBase {
     ];
     $player_settings = [
       'playerModeDefault' => 'enhanced',
-      'playerAccentColour' => $this->config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
-      'playerColourMode' => $this->config('ai_narration.settings')->get('player_colour_mode') ?: 'default',
-      'playerWaveformColour' => $this->config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0',
-      'playerBackgroundColour' => $this->config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
-      'playerTextColour' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
-      'playerHeight' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
+      'playerAccentColour' => $accent_colour,
+      'playerColourMode' => $colour_mode,
+      'playerWaveformColour' => $waveform_colour,
+      'playerBackgroundColour' => $background_colour,
+      'playerTextColour' => $text_colour,
+      'playerHeight' => $player_height,
       'playerDisplayStyle' => $display_style,
     ];
     $form['player_preview']['#attached'] = [
