@@ -13,6 +13,7 @@
       waveform: custom ? validColour(values.aiNarrationPlayerWaveformColour || narrationSettings.playerWaveformColour, '#74fff0') : '#74fff0',
       unplayedWaveform: custom ? validColour(values.aiNarrationPlayerUnplayedWaveformColour || narrationSettings.playerUnplayedWaveformColour, '#4c898a') : '#4c898a',
       speedControl: custom ? validColour(values.aiNarrationPlayerSpeedControlColour || narrationSettings.playerSpeedControlColour, '#e9fffc') : '#e9fffc',
+      controlBackground: custom ? validColour(values.aiNarrationPlayerControlBackgroundColour || narrationSettings.playerControlBackgroundColour, '#0c2527') : '#0c2527',
       background: custom ? validColour(values.aiNarrationPlayerBackgroundColour || narrationSettings.playerBackgroundColour, '#102b2d') : '#102b2d',
       text: custom ? validColour(values.aiNarrationPlayerTextColour || narrationSettings.playerTextColour, '#e9fffc') : '#e9fffc',
       height,
@@ -30,6 +31,7 @@
     wrapper.style.setProperty('--ai-narration-player-background', values.background);
     wrapper.style.setProperty('--ai-narration-player-text', values.text);
     wrapper.style.setProperty('--ai-narration-player-speed-control', values.speedControl);
+    wrapper.style.setProperty('--ai-narration-player-control-background', values.controlBackground);
     wrapper.style.setProperty('--ai-narration-player-height', values.height);
     const heightValue = Number.parseFloat(values.height);
     wrapper.style.setProperty('--ai-narration-player-play-size', `${Math.max(1.2, heightValue - 1.1)}rem`);
@@ -266,6 +268,7 @@
         player_waveform_colour: 'aiNarrationPlayerWaveformColour',
         player_unplayed_waveform_colour: 'aiNarrationPlayerUnplayedWaveformColour',
         player_speed_control_colour: 'aiNarrationPlayerSpeedControlColour',
+        player_control_background_colour: 'aiNarrationPlayerControlBackgroundColour',
         player_background_colour: 'aiNarrationPlayerBackgroundColour',
         player_text_colour: 'aiNarrationPlayerTextColour',
         player_height: 'aiNarrationPlayerHeight',

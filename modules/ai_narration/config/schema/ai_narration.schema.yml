@@ -22,7 +22,10 @@ ai_narration.settings:
       label: 'Enhanced audio player unplayed waveform colour'
     player_speed_control_colour:
       type: string
-      label: 'Enhanced audio player speed control colour'
+      label: 'Enhanced audio player control text colour'
+    player_control_background_colour:
+      type: string
+      label: 'Enhanced audio player control background colour'
     player_background_colour:
       type: string
       label: 'Enhanced audio player background colour'

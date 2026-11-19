@@ -47,6 +47,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
     $waveform_colour = (string) $setting('player_waveform_colour', '#74fff0');
     $unplayed_waveform_colour = (string) $setting('player_unplayed_waveform_colour', '#4c898a');
     $speed_control_colour = (string) $setting('player_speed_control_colour', '#e9fffc');
+    $control_background_colour = (string) $setting('player_control_background_colour', '#0c2527');
     $background_colour = (string) $setting('player_background_colour', '#102b2d');
     $text_colour = (string) $setting('player_text_colour', '#e9fffc');
     $player_height = (string) $setting('player_height', '4rem');
@@ -103,9 +104,17 @@ final class NarrationSettingsForm extends ConfigFormBase {
     ];
     $form['player_speed_control_colour'] = [
       '#type' => 'color',
-      '#title' => $this->t('Speed control colour'),
+      '#title' => $this->t('Control text colour'),
       '#default_value' => $speed_control_colour,
       '#description' => $this->t('Used for the speed selector border and value text.'),
+      '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
+    ];
+    $form['player_control_background_colour'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Control background colour'),
+      '#default_value' => $control_background_colour,
+      '#description' => $this->t('Used for the speed selector background.'),
       '#states' => ['visible' => $custom_state],
       '#ajax' => $preview_ajax,
     ];
@@ -171,6 +180,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
             'data-ai-narration-player-waveform-colour' => $waveform_colour,
             'data-ai-narration-player-unplayed-waveform-colour' => $unplayed_waveform_colour,
             'data-ai-narration-player-speed-control-colour' => $speed_control_colour,
+            'data-ai-narration-player-control-background-colour' => $control_background_colour,
             'data-ai-narration-player-background-colour' => $background_colour,
             'data-ai-narration-player-text-colour' => $text_colour,
             'data-ai-narration-player-height' => $player_height,
@@ -187,6 +197,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       'playerWaveformColour' => $waveform_colour,
       'playerUnplayedWaveformColour' => $unplayed_waveform_colour,
       'playerSpeedControlColour' => $speed_control_colour,
+      'playerControlBackgroundColour' => $control_background_colour,
       'playerBackgroundColour' => $background_colour,
       'playerTextColour' => $text_colour,
       'playerHeight' => $player_height,
@@ -213,6 +224,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ->set('player_waveform_colour', (string) $form_state->getValue('player_waveform_colour'))
       ->set('player_unplayed_waveform_colour', (string) $form_state->getValue('player_unplayed_waveform_colour'))
       ->set('player_speed_control_colour', (string) $form_state->getValue('player_speed_control_colour'))
+      ->set('player_control_background_colour', (string) $form_state->getValue('player_control_background_colour'))
       ->set('player_background_colour', (string) $form_state->getValue('player_background_colour'))
       ->set('player_text_colour', (string) $form_state->getValue('player_text_colour'))
       ->set('player_height', (string) $form_state->getValue('player_height'))
