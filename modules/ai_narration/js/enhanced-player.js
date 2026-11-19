@@ -243,6 +243,10 @@
       }
     });
     speed.addEventListener('change', () => audio.playbackRate = Number(speed.value));
+    audio.addEventListener('aiNarrationAppearanceChange', () => {
+      applyAppearance(audio);
+      drawWaveform(audio);
+    });
     updateProgress();
     refreshMode(audio);
   };
@@ -252,6 +256,30 @@
       once('ai-narration-enhanced-player', '.ai-narration-result audio', context).forEach(enhance);
       once('ai-narration-player-mode', '[data-ai-narration-player-mode]', context).forEach((select) => {
         select.addEventListener('change', () => document.querySelectorAll('.ai-narration-result audio').forEach(refreshMode));
+      });
+      const previewAttributes = {
+        player_colour_mode: 'aiNarrationPlayerColourMode',
+        player_accent_colour: 'aiNarrationPlayerAccentColour',
+        player_waveform_colour: 'aiNarrationPlayerWaveformColour',
+        player_background_colour: 'aiNarrationPlayerBackgroundColour',
+        player_text_colour: 'aiNarrationPlayerTextColour',
+        player_height: 'aiNarrationPlayerHeight',
+      };
+      Object.entries(previewAttributes).forEach(([name, attribute]) => {
+        once(`ai-narration-live-preview-${name}`, `[name="${name}"]`, context).forEach((input) => {
+          const update = () => {
+            const previewAudio = document.querySelector('#ai-narration-player-settings-preview audio');
+            if (!previewAudio) {
+              return;
+            }
+            if (input.type !== 'radio' || input.checked) {
+              previewAudio.dataset[attribute] = input.value;
+              previewAudio.dispatchEvent(new Event('aiNarrationAppearanceChange'));
+            }
+          };
+          input.addEventListener('input', update);
+          input.addEventListener('change', update);
+        });
       });
     },
   };
