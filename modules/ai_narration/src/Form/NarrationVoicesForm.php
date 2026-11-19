@@ -21,9 +21,9 @@ final class NarrationVoicesForm extends FormBase {
     $characters = mb_strlen((string) ($form_state->getValue('text') ?: 'This is a narration voice example.'));
     foreach ($this->voiceModels() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
       $url = ($form_state->get('examples') ?? [])[$model . '::' . $voice] ?? NULL;
-      $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated'), ['data' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice]]];
+      $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated'), ['data' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice, '#ajax' => ['callback' => '::ajaxGenerateExample', 'wrapper' => 'ai-narration-voices-table', 'progress' => ['type' => 'throbber', 'message' => $this->t('Generating example…')]]]]];
     }
-    $form['voices'] = ['#type' => 'table', '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example'), $this->t('Action')], '#rows' => $rows, '#empty' => $this->t('No authenticated provider voices are available.')];
+    $form['voices'] = ['#type' => 'table', '#attributes' => ['id' => 'ai-narration-voices-table'], '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example'), $this->t('Action')], '#rows' => $rows, '#empty' => $this->t('No authenticated provider voices are available.')];
     return $form;
   }
   public function submitForm(array &$form, FormStateInterface $form_state): void {
@@ -43,6 +43,7 @@ final class NarrationVoicesForm extends FormBase {
     }
     catch (\Throwable $e) { $this->messenger()->addError($e->getMessage()); }
   }
+  public function ajaxGenerateExample(array &$form, FormStateInterface $form_state): array { return $form['voices']; }
   private function estimateCost(string $model, int $characters): string {
     if (!str_starts_with($model, 'openai__')) return (string) $this->t('Unavailable');
     $rate = str_contains($model, 'tts-1-hd') ? 0.00003 : 0.000015;
