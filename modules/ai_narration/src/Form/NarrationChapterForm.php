@@ -85,6 +85,16 @@ final class NarrationChapterForm extends ContentEntityForm {
     $element['#multiple'] = FALSE;
     $element['#size'] = 1;
     $element['#description'] = $this->t('Choose the narration project whose settings this chapter will inherit.');
+    if ($this->entity->isNew() && !empty($element['#default_value'])) {
+      $positions = $this->entityTypeManager->getStorage('ai_narration_chapter')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('project_id', (int) $element['#default_value'])
+        ->sort('position', 'DESC')
+        ->range(0, 1)
+        ->execute();
+      $last = $positions ? $this->entityTypeManager->getStorage('ai_narration_chapter')->load(reset($positions)) : NULL;
+      $form['position']['widget'][0]['value']['#default_value'] = $last ? (int) $last->get('position')->value + 1 : 1;
+    }
     $this->buildSourceControls($form, $form_state);
     if ($loaded_text = $form_state->get('loaded_source_text')) {
       $form['text']['widget'][0]['value']['#default_value'] = $loaded_text;
