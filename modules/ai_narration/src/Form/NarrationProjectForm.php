@@ -33,6 +33,8 @@ final class NarrationProjectForm extends ContentEntityForm {
     $form['#attached']['drupalSettings']['aiNarration']['playerWaveformColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0');
     $form['#attached']['drupalSettings']['aiNarration']['playerBackgroundColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d');
     $form['#attached']['drupalSettings']['aiNarration']['playerTextColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc');
+    $form['#attached']['drupalSettings']['aiNarration']['playerUseThemeAccent'] = (bool) \Drupal::config('ai_narration.settings')->get('player_use_theme_accent');
+    $form['#attached']['drupalSettings']['aiNarration']['playerHeight'] = (string) (\Drupal::config('ai_narration.settings')->get('player_height') ?: '4rem');
     $models = $this->generator->getModelOptions();
     $model = (string) ($form_state->getValue(['model', 0, 'value']) ?? $this->entity->get('model')->value);
     $model = isset($models[$model]) ? $model : '';

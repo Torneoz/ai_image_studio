@@ -5,3 +5,5 @@ player_colour_mode: default
 player_waveform_colour: '#74fff0'
 player_background_colour: '#102b2d'
 player_text_colour: '#e9fffc'
+player_use_theme_accent: false
+player_height: '4rem'

@@ -83,6 +83,26 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#default_value' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
       '#states' => ['visible' => $custom_state],
     ];
+    $form['player_use_theme_accent'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use theme accent colour'),
+      '#default_value' => $this->config('ai_narration.settings')->get('player_use_theme_accent') ?? FALSE,
+      '#description' => $this->t('Uses the active site theme’s accent colour for player borders, controls, and segment markers when the theme exposes one.'),
+    ];
+    $form['player_height'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Enhanced player height'),
+      '#options' => [
+        '4.5rem' => $this->t('4.5 rem'),
+        '4rem' => $this->t('4 rem'),
+        '3.5rem' => $this->t('3.5 rem'),
+        '3rem' => $this->t('3 rem'),
+        '2.5rem' => $this->t('2.5 rem'),
+        '2rem' => $this->t('2 rem'),
+        '1.5rem' => $this->t('1.5 rem'),
+      ],
+      '#default_value' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
+    ];
     $bars = implode('', array_fill(0, 42, '<span></span>'));
     $form['player_preview'] = [
       '#type' => 'container',
@@ -105,6 +125,8 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ->set('player_waveform_colour', (string) $form_state->getValue('player_waveform_colour'))
       ->set('player_background_colour', (string) $form_state->getValue('player_background_colour'))
       ->set('player_text_colour', (string) $form_state->getValue('player_text_colour'))
+      ->set('player_use_theme_accent', (bool) $form_state->getValue('player_use_theme_accent'))
+      ->set('player_height', (string) $form_state->getValue('player_height'))
       ->save();
     parent::submitForm($form, $form_state);
   }

@@ -16,7 +16,8 @@
   gap: 0.7rem;
   margin-top: 0.5rem;
   max-width: 62rem;
-  min-height: 4rem;
+  font-size: var(--ai-narration-preview-font-size, 1rem);
+  min-height: var(--ai-narration-preview-height, 4rem);
   padding: 0.55rem 0.85rem;
 }
 
@@ -26,9 +27,9 @@
   border-radius: 50%;
   color: #09201f;
   display: inline-flex;
-  height: 2.35rem;
+  height: var(--ai-narration-preview-play-size, 2.35rem);
   justify-content: center;
-  width: 2.35rem;
+  width: var(--ai-narration-preview-play-size, 2.35rem);
 }
 
 .ai-narration-player-settings-preview__waveform {
@@ -36,7 +37,7 @@
   display: flex;
   flex: 1 1 10rem;
   gap: 2px;
-  height: 2.1rem;
+  height: var(--ai-narration-preview-waveform-height, 2.1rem);
   min-width: 5rem;
 }
 

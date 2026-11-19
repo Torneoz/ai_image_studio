@@ -23,3 +23,9 @@ ai_narration.settings:
     player_text_colour:
       type: string
       label: 'Enhanced audio player text colour'
+    player_use_theme_accent:
+      type: boolean
+      label: 'Use the active theme accent colour for the enhanced player'
+    player_height:
+      type: string
+      label: 'Enhanced audio player height'

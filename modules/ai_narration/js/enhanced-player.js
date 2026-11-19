@@ -1,7 +1,10 @@
 (function (Drupal, drupalSettings, once) {
   const narrationSettings = drupalSettings.aiNarration || {};
   const customColours = narrationSettings.playerColourMode === 'custom';
-  const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
+  const themeAccent = ['--theme-accent-color', '--color-primary', '--color-accent', '--primary'].map((property) => getComputedStyle(document.documentElement).getPropertyValue(property).trim()).find((value) => /^#[0-9a-f]{6}$/i.test(value));
+  const accent = narrationSettings.playerUseThemeAccent && themeAccent
+    ? themeAccent
+    : customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
     ? narrationSettings.playerAccentColour
     : '#24c7b9';
   const waveformColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerWaveformColour || '')
@@ -13,12 +16,20 @@
   const textColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerTextColour || '')
     ? narrationSettings.playerTextColour
     : '#e9fffc';
-  if (customColours) {
+  const height = /^([1-4](?:\.5)?|4\.5)rem$/.test(narrationSettings.playerHeight || '') ? narrationSettings.playerHeight : '4rem';
+  if (customColours || narrationSettings.playerUseThemeAccent) {
     document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
+  }
+  if (customColours) {
     document.documentElement.style.setProperty('--ai-narration-player-accent-light', waveformColour);
     document.documentElement.style.setProperty('--ai-narration-player-background', backgroundColour);
     document.documentElement.style.setProperty('--ai-narration-player-text', textColour);
   }
+  document.documentElement.style.setProperty('--ai-narration-player-height', height);
+  const heightValue = Number.parseFloat(height);
+  document.documentElement.style.setProperty('--ai-narration-player-play-size', `${Math.max(1.2, heightValue - 1.1)}rem`);
+  document.documentElement.style.setProperty('--ai-narration-player-waveform-height', `${Math.max(0.75, heightValue - 1.5)}rem`);
+  document.documentElement.style.setProperty('--ai-narration-player-font-size', `${Math.max(0.65, Math.min(1, heightValue * 0.22))}rem`);
 
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds) || seconds < 0) {

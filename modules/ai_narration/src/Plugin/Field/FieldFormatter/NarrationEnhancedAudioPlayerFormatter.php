@@ -56,6 +56,8 @@ final class NarrationEnhancedAudioPlayerFormatter extends FormatterBase implemen
           'playerWaveformColour' => $this->configFactory->get('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0',
           'playerBackgroundColour' => $this->configFactory->get('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
           'playerTextColour' => $this->configFactory->get('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
+          'playerUseThemeAccent' => (bool) $this->configFactory->get('ai_narration.settings')->get('player_use_theme_accent'),
+          'playerHeight' => $this->configFactory->get('ai_narration.settings')->get('player_height') ?: '4rem',
         ]],
       ],
     ];
