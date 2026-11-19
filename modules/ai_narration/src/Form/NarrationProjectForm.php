@@ -114,7 +114,6 @@ final class NarrationProjectForm extends ContentEntityForm {
 
   protected function actions(array $form, FormStateInterface $form_state): array {
     $actions = parent::actions($form, $form_state);
-    $actions['#attributes']['class'][] = 'ai-narration-project-actions';
     if (!$this->entity->isNew()) {
       $actions['create_chapter'] = [
         '#type' => 'link',
