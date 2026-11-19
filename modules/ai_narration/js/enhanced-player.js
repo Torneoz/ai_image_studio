@@ -22,6 +22,58 @@
     });
   };
 
+  const drawWaveform = (audio) => {
+    const canvas = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__waveform');
+    const buffer = audio._aiNarrationWaveform;
+    if (!canvas || !buffer) {
+      return;
+    }
+    const width = Math.max(1, Math.round(canvas.clientWidth));
+    const height = Math.max(1, Math.round(canvas.clientHeight));
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    const context = canvas.getContext('2d');
+    context.scale(ratio, ratio);
+    context.clearRect(0, 0, width, height);
+    const source = buffer.getChannelData(0);
+    const samplesPerBar = Math.max(1, Math.floor(source.length / width));
+    const progress = audio.duration ? audio.currentTime / audio.duration : 0;
+    const playedWidth = width * progress;
+    for (let x = 0; x < width; x++) {
+      const offset = x * samplesPerBar;
+      let peak = 0;
+      for (let index = 0; index < samplesPerBar && offset + index < source.length; index++) {
+        peak = Math.max(peak, Math.abs(source[offset + index]));
+      }
+      const barHeight = Math.max(2, peak * height);
+      context.fillStyle = x <= playedWidth ? '#57f3e1' : '#050c0c';
+      context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
+    }
+  };
+
+  const loadWaveform = async (audio) => {
+    if (audio._aiNarrationWaveform || audio._aiNarrationWaveformLoading || !audio.currentSrc) {
+      return;
+    }
+    audio._aiNarrationWaveformLoading = true;
+    try {
+      const response = await fetch(audio.currentSrc);
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audio._aiNarrationWaveform = await audioContext.decodeAudioData(await response.arrayBuffer());
+      await audioContext.close();
+      drawWaveform(audio);
+      const resizeObserver = new ResizeObserver(() => drawWaveform(audio));
+      resizeObserver.observe(audio.closest('.ai-narration-enhanced-player').querySelector('.ai-narration-enhanced-player__track'));
+    }
+    catch (error) {
+      audio.closest('.ai-narration-enhanced-player')?.classList.add('waveform-unavailable');
+    }
+    finally {
+      audio._aiNarrationWaveformLoading = false;
+    }
+  };
+
   const refreshMode = (audio) => {
     const enhanced = playerMode(audio) === 'enhanced';
     const wrapper = audio.closest('.ai-narration-enhanced-player');
@@ -29,6 +81,9 @@
       wrapper.classList.toggle('is-active', enhanced);
     }
     audio.classList.toggle('ai-narration-native-player', !enhanced);
+    if (enhanced) {
+      loadWaveform(audio);
+    }
   };
 
   const enhance = (audio) => {
@@ -43,24 +98,17 @@
 
     const controls = document.createElement('div');
     controls.className = 'ai-narration-enhanced-player__controls';
-    const waveformBars = Array.from({length: 56}, (_, index) => {
-      const height = 22 + ((index * 17 + index * index * 7) % 72);
-      return `<span class="ai-narration-enhanced-player__bar" style="--bar-height:${height}%"></span>`;
-    }).join('');
-    controls.innerHTML = `<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><div class="ai-narration-enhanced-player__track" role="presentation"><div class="ai-narration-enhanced-player__waveform" aria-hidden="true">${waveformBars}</div><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"></div><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>`;
+    controls.innerHTML = '<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><div class="ai-narration-enhanced-player__track" role="presentation"><canvas class="ai-narration-enhanced-player__waveform" aria-hidden="true"></canvas><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"></div><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>';
     wrapper.appendChild(controls);
     const play = controls.querySelector('.ai-narration-enhanced-player__play');
     const seek = controls.querySelector('.ai-narration-enhanced-player__seek');
     const time = controls.querySelector('.ai-narration-enhanced-player__time');
     const duration = controls.querySelector('.ai-narration-enhanced-player__duration');
     const speed = controls.querySelector('.ai-narration-enhanced-player__speed');
-    const bars = controls.querySelectorAll('.ai-narration-enhanced-player__bar');
     const updateProgress = () => {
       const progress = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
       seek.value = String(progress);
-      bars.forEach((bar, index) => {
-        bar.classList.toggle('is-played', index < Math.ceil((progress / 100) * bars.length));
-      });
+      drawWaveform(audio);
     };
 
     play.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());

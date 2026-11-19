@@ -48,36 +48,9 @@
 }
 
 .ai-narration-enhanced-player__waveform {
-  align-items: center;
-  display: flex;
-  gap: 2px;
+  display: block;
   height: 2.6rem;
-  overflow: hidden;
-  position: relative;
-}
-
-.ai-narration-enhanced-player__bar {
-  background: #050c0c;
-  border-radius: 999px;
-  flex: 1 1 0;
-  height: var(--bar-height);
-  min-width: 2px;
-  box-shadow: inset 0 0 0 1px rgb(104 255 239 / 10%);
-  opacity: 0.95;
-  transform-origin: center;
-}
-
-.ai-narration-enhanced-player__bar.is-played {
-  background: linear-gradient(to top, #12bfb4, #70fff0);
-  box-shadow: 0 0 0.5rem rgb(71 236 218 / 35%);
-}
-
-.ai-narration-enhanced-player.is-playing .ai-narration-enhanced-player__bar {
-  animation: ai-narration-wave-pulse 1.15s ease-in-out infinite alternate;
-}
-
-.ai-narration-enhanced-player.is-playing .ai-narration-enhanced-player__bar:nth-child(3n) {
-  animation-delay: -0.45s;
+  width: 100%;
 }
 
 .ai-narration-enhanced-player__seek {
@@ -123,7 +96,3 @@
   }
 }
 
-@keyframes ai-narration-wave-pulse {
-  from { transform: scaleY(0.7); }
-  to { transform: scaleY(1); }
-}
