@@ -64,6 +64,7 @@
 }
 
 .ai-narration-enhanced-player__time,
+.ai-narration-enhanced-player__remaining,
 .ai-narration-enhanced-player__duration {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;

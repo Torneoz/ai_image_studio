@@ -104,11 +104,12 @@
 
     const controls = document.createElement('div');
     controls.className = 'ai-narration-enhanced-player__controls';
-    controls.innerHTML = '<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><div class="ai-narration-enhanced-player__track" role="presentation"><canvas class="ai-narration-enhanced-player__waveform" aria-hidden="true"></canvas><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"></div><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>';
+    controls.innerHTML = '<button type="button" class="ai-narration-enhanced-player__play" aria-label="Play audio">▶</button><span class="ai-narration-enhanced-player__time">0:00</span><div class="ai-narration-enhanced-player__track" role="presentation"><canvas class="ai-narration-enhanced-player__waveform" aria-hidden="true"></canvas><input class="ai-narration-enhanced-player__seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Audio progress"></div><span class="ai-narration-enhanced-player__remaining">−0:00</span><span class="ai-narration-enhanced-player__duration">0:00</span><label class="ai-narration-enhanced-player__speed-label">Speed <select class="ai-narration-enhanced-player__speed" aria-label="Playback speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>';
     wrapper.appendChild(controls);
     const play = controls.querySelector('.ai-narration-enhanced-player__play');
     const seek = controls.querySelector('.ai-narration-enhanced-player__seek');
     const time = controls.querySelector('.ai-narration-enhanced-player__time');
+    const remaining = controls.querySelector('.ai-narration-enhanced-player__remaining');
     const duration = controls.querySelector('.ai-narration-enhanced-player__duration');
     const speed = controls.querySelector('.ai-narration-enhanced-player__speed');
     const updateProgress = () => {
@@ -129,13 +130,17 @@
       play.textContent = '▶';
       play.setAttribute('aria-label', 'Play audio');
     });
-    audio.addEventListener('loadedmetadata', () => duration.textContent = formatTime(audio.duration));
+    audio.addEventListener('loadedmetadata', () => {
+      duration.textContent = formatTime(audio.duration);
+      remaining.textContent = `−${formatTime(audio.duration - audio.currentTime)}`;
+    });
     audio.addEventListener('loadedmetadata', () => {
       loadWaveform(audio);
       drawWaveform(audio);
     });
     audio.addEventListener('timeupdate', () => {
       time.textContent = formatTime(audio.currentTime);
+      remaining.textContent = `−${formatTime(audio.duration - audio.currentTime)}`;
       updateProgress();
     });
     audio.addEventListener('ended', () => updateProgress());
