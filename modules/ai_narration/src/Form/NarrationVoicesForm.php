@@ -21,8 +21,11 @@ final class NarrationVoicesForm extends FormBase {
     $characters = mb_strlen((string) ($form_state->getValue('text') ?: 'This is a narration voice example.'));
     foreach ($this->voiceModels() as $model => $label) foreach ($this->generator()->getVoiceOptions($model) as $voice => $voice_label) {
       $url = ($form_state->get('examples') ?? [])[$model . '::' . $voice] ?? NULL;
-      $key = md5($model . '::' . $voice);
-      $form['voices'][$key] = ['provider' => ['#plain_text' => $label], 'voice' => ['#plain_text' => $voice_label], 'cost' => ['#plain_text' => $this->estimateCost($model, $characters)], 'example' => $url ? ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]] : ['#markup' => $this->t('Not generated')], 'action' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice, '#ajax' => ['callback' => '::ajaxGenerateExample', 'wrapper' => 'ai-narration-voices-table', 'progress' => ['type' => 'throbber', 'message' => $this->t('Generating example…')]]]];
+      $source_key = $model . '::' . $voice;
+      $key = md5($source_key);
+      $error = ($form_state->get('example_errors') ?? [])[$source_key] ?? NULL;
+      $example = $url ? ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]] : ($error ? ['#plain_text' => $error] : ['#markup' => $this->t('Not generated')]);
+      $form['voices'][$key] = ['provider' => ['#plain_text' => $label], 'voice' => ['#plain_text' => $voice_label], 'cost' => ['#plain_text' => $this->estimateCost($model, $characters)], 'example' => $example, 'action' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice, '#ajax' => ['callback' => '::ajaxGenerateExample', 'wrapper' => 'ai-narration-voices-table', 'progress' => ['type' => 'throbber', 'message' => $this->t('Generating example…')]]]];
     }
     return $form;
   }
@@ -41,7 +44,11 @@ final class NarrationVoicesForm extends FormBase {
       $examples[$trigger['#model_option'] . '::' . $trigger['#voice_option']] = $this->urlGenerator()->generateAbsoluteString($file->getFileUri());
       $form_state->set('examples', $examples)->setRebuild();
     }
-    catch (\Throwable $e) { $this->messenger()->addError($e->getMessage()); }
+    catch (\Throwable $e) {
+      $errors = $form_state->get('example_errors') ?? [];
+      $errors[$trigger['#model_option'] . '::' . $trigger['#voice_option']] = $e->getMessage();
+      $form_state->set('example_errors', $errors)->setRebuild();
+    }
   }
   public function ajaxGenerateExample(array &$form, FormStateInterface $form_state): array { return $form['voices']; }
   private function estimateCost(string $model, int $characters): string {
