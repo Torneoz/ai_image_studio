@@ -7,6 +7,7 @@ namespace Drupal\ai_narration\Form;
 use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -108,15 +109,38 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Actual waveform uses the audio file’s amplitude data. Generic bars are a lightweight equalizer-style display.'),
     ];
     $bars = implode('', array_fill(0, 42, '<span></span>'));
+    $module_path = \Drupal::service('extension.list.module')->getPath('ai_narration');
+    $test_audio_url = Url::fromUri('base:' . $module_path . '/css/ui-test-file.mp3')->toString();
     $form['player_preview'] = [
       '#type' => 'container',
       '#title' => $this->t('Player preview'),
       '#attributes' => ['id' => 'ai-narration-player-settings-preview', 'class' => ['ai-narration-player-settings-preview']],
       'title' => ['#markup' => '<strong>' . $this->t('Enhanced player preview') . '</strong>'],
       'player' => ['#markup' => '<div class="ai-narration-player-settings-preview__player"><span class="ai-narration-player-settings-preview__play">▶</span><span>2:14</span><span class="ai-narration-player-settings-preview__waveform" aria-hidden="true">' . $bars . '</span><span>−1:29</span><span>3:43</span><span>1×</span></div>'],
+      'audio_test_title' => ['#markup' => '<p><strong>' . $this->t('Live audio test') . '</strong></p>'],
+      'audio_test' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['ai-narration-result']],
+        'audio' => [
+          '#type' => 'html_tag',
+          '#tag' => 'audio',
+          '#attributes' => ['controls' => TRUE, 'preload' => 'metadata', 'src' => $test_audio_url],
+        ],
+      ],
       '#weight' => 20,
     ];
     $form['#attached']['library'][] = 'ai_narration/player_settings_preview';
+    $form['#attached']['library'][] = 'ai_narration/enhanced_player';
+    $form['#attached']['drupalSettings']['aiNarration'] = [
+      'playerModeDefault' => 'enhanced',
+      'playerAccentColour' => $this->config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
+      'playerColourMode' => $this->config('ai_narration.settings')->get('player_colour_mode') ?: 'default',
+      'playerWaveformColour' => $this->config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0',
+      'playerBackgroundColour' => $this->config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
+      'playerTextColour' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
+      'playerHeight' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
+      'playerDisplayStyle' => $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform',
+    ];
     return parent::buildForm($form, $form_state);
   }
 
