@@ -21,9 +21,9 @@ final class NarrationVoicesForm extends FormBase {
     $characters = mb_strlen((string) ($form_state->getValue('text') ?: 'This is a narration voice example.'));
     foreach ($this->generator->getModelOptions() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
       $url = ($form_state->get('examples') ?? [])[$model . '::' . $voice] ?? NULL;
-      $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated')];
+      $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated'), ['data' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice]]];
     }
-    $form['voices'] = ['#type' => 'table', '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example')], '#rows' => $rows, '#empty' => $this->t('No authenticated provider voices are available.')];
+    $form['voices'] = ['#type' => 'table', '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example'), $this->t('Action')], '#rows' => $rows, '#empty' => $this->t('No authenticated provider voices are available.')];
     return $form;
   }
   public function submitForm(array &$form, FormStateInterface $form_state): void {
@@ -32,6 +32,16 @@ final class NarrationVoicesForm extends FormBase {
       try { $file = $this->generator->generate((string) $form_state->getValue('text'), $model, $voice); $examples[$model . '::' . $voice] = $this->urls->generateAbsoluteString($file->getFileUri()); } catch (\Throwable $e) { $this->messenger()->addWarning($this->t('Could not generate @voice.', ['@voice' => $voice_label])); }
     }
     $form_state->set('examples', $examples)->setRebuild();
+  }
+  public function generateExample(array &$form, FormStateInterface $form_state): void {
+    $trigger = $form_state->getTriggeringElement();
+    try {
+      $file = $this->generator->generate((string) $form_state->getValue('text'), $trigger['#model_option'], $trigger['#voice_option']);
+      $examples = $form_state->get('examples') ?? [];
+      $examples[$trigger['#model_option'] . '::' . $trigger['#voice_option']] = $this->urls->generateAbsoluteString($file->getFileUri());
+      $form_state->set('examples', $examples)->setRebuild();
+    }
+    catch (\Throwable $e) { $this->messenger()->addError($e->getMessage()); }
   }
   private function estimateCost(string $model, int $characters): string {
     if (!str_starts_with($model, 'openai__')) return (string) $this->t('Unavailable');
