@@ -26,6 +26,8 @@ final class NarrationProjectForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
     $form['#attached']['library'][] = 'ai_narration/character_counter';
+    $form['#attached']['library'][] = 'ai_narration/enhanced_player';
+    $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = (string) (\Drupal::service('user.data')->get('ai_narration', $this->currentUser()->id(), 'player_mode') ?: \Drupal::config('ai_narration.settings')->get('player_mode') ?: 'native');
     $models = $this->generator->getModelOptions();
     $model = (string) ($form_state->getValue(['model', 0, 'value']) ?? $this->entity->get('model')->value);
     $model = isset($models[$model]) ? $model : '';
