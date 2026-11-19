@@ -55,12 +55,16 @@
   };
 
   const loadWaveform = async (audio) => {
-    if (audio._aiNarrationWaveform || audio._aiNarrationWaveformLoading || !audio.currentSrc) {
+    const source = audio.currentSrc || audio.src;
+    if (audio._aiNarrationWaveform || audio._aiNarrationWaveformLoading || !source) {
       return;
     }
     audio._aiNarrationWaveformLoading = true;
     try {
-      const response = await fetch(audio.currentSrc);
+      const response = await fetch(source);
+      if (!response.ok) {
+        throw new Error(`Could not load waveform audio (${response.status}).`);
+      }
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audio._aiNarrationWaveform = await audioContext.decodeAudioData(await response.arrayBuffer());
       await audioContext.close();
@@ -126,6 +130,10 @@
       play.setAttribute('aria-label', 'Play audio');
     });
     audio.addEventListener('loadedmetadata', () => duration.textContent = formatTime(audio.duration));
+    audio.addEventListener('loadedmetadata', () => {
+      loadWaveform(audio);
+      drawWaveform(audio);
+    });
     audio.addEventListener('timeupdate', () => {
       time.textContent = formatTime(audio.currentTime);
       updateProgress();
