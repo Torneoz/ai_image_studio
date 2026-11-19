@@ -65,8 +65,13 @@ final class NarrationSourceLoader {
     if (!$entity || !$entity->access('view', $this->currentUser)) {
       throw new \RuntimeException('The selected local entity is unavailable or cannot be viewed.');
     }
-    $values = [];
+    $values = $entityTypeId === 'node' ? [(string) $entity->label()] : [];
     foreach ($entity->getFieldDefinitions() as $name => $fieldDefinition) {
+      // Nodes intentionally narrate only their title and body fields. This
+      // avoids IDs, taxonomy labels, moderation values, and other metadata.
+      if ($entityTypeId === 'node' && !($name === 'body' || str_contains($name, 'body'))) {
+        continue;
+      }
       if ($fieldDefinition->isComputed() || $fieldDefinition->getFieldStorageDefinition()->isBaseField() && in_array($name, ['uuid', 'langcode', 'revision_id', 'vid', 'uid', 'created', 'changed', 'status'], TRUE)) {
         continue;
       }
