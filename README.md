@@ -143,6 +143,30 @@ Configure a compatible provider through Drupal AI before creating a session.
 Core File, Media, and Media Library are enabled as module dependencies. No
 additional Media Library widget module is required.
 
+### AI Narration
+
+`ai_narration` is independent of the AI Image Studio module. Enable it on its
+own when you only need text-to-speech narration:
+
+```shell
+drush en ai_narration
+```
+
+It requires Drupal AI, File, Datetime, Media, Views, and MCP Server. Configure
+at least one Drupal AI text-to-speech provider before generating audio.
+
+For split and joined narration, the PHP host that runs Drupal must have both
+`ffmpeg` and `ffprobe` available on its `PATH`. `ffmpeg` combines chapter or
+part files into an Entire file; `ffprobe` measures each file's duration for
+runtime metadata and joined-waveform markers. Single-file narration still
+works without them, but joining, duration details, and boundary markers will
+not be available. Install the operating-system package in the web/PHP runtime
+(for example, `apt install ffmpeg`, `dnf install ffmpeg`, `apk add ffmpeg`, or
+`brew install ffmpeg`), then verify with `ffmpeg -version` and
+`ffprobe -version` as that runtime user. For DDEV, add the package in the
+project web container configuration and restart DDEV; installing it only on
+the host is not sufficient.
+
 ## Configuration
 
 Module settings are available at:
