@@ -276,7 +276,7 @@ final class NarrationGenerateForm extends FormBase {
       $form['feedback']['actions']['player'] = [
         '#type' => 'html_tag',
         '#tag' => 'audio',
-        '#attributes' => ['controls' => TRUE, 'src' => $result['url']],
+        '#attributes' => ['controls' => TRUE, 'src' => $result['url'], 'data-ai-narration-segment-markers' => json_encode($result['entire']['markers'] ?? [])],
       ];
       $form['feedback']['actions']['download'] = [
         '#type' => 'link',
@@ -691,13 +691,14 @@ final class NarrationGenerateForm extends FormBase {
       }
       $file = end($files);
       $entire = \Drupal::service('ai_narration.audio_merger')->merge($files, 'narration-entire');
+      $segment_markers = array_map(fn ($audio_file, int $index) => ['duration' => $this->getDurationInspector()->getDuration($audio_file) ?? 0.0, 'label' => 'Part ' . ($index + 1)], $files, array_keys($files));
       $result_file = $entire ?: $file;
       $url = $this->fileUrlGenerator->generateAbsoluteString($result_file->getFileUri());
       $form_state->set('result', [
         'url' => $url,
         'fid' => $result_file->id(),
         'segments' => array_map(fn ($audio_file) => ['url' => $this->fileUrlGenerator->generateAbsoluteString($audio_file->getFileUri())], $files),
-        'entire' => $entire ? ['url' => $url] : NULL,
+        'entire' => $entire ? ['url' => $url, 'markers' => $segment_markers] : NULL,
         'model' => $model,
         'voice' => $voice,
         'format' => $format,

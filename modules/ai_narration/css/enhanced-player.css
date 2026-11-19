@@ -63,6 +63,21 @@
   width: 100%;
 }
 
+.ai-narration-enhanced-player__markers {
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.ai-narration-enhanced-player__marker {
+  background: #ffd36a;
+  box-shadow: 0 0 0.4rem rgb(255 211 106 / 85%);
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 2px;
+}
+
 .ai-narration-enhanced-player__time,
 .ai-narration-enhanced-player__remaining,
 .ai-narration-enhanced-player__duration {

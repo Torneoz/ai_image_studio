@@ -80,6 +80,37 @@
     }
   };
 
+  const renderSegmentMarkers = (audio) => {
+    const track = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__track');
+    if (!track || !audio.duration) {
+      return;
+    }
+    let markers = [];
+    try {
+      markers = JSON.parse(audio.dataset.aiNarrationSegmentMarkers || '[]');
+    }
+    catch (error) {
+      return;
+    }
+    track.querySelector('.ai-narration-enhanced-player__markers')?.remove();
+    if (!Array.isArray(markers) || markers.length < 2) {
+      return;
+    }
+    const container = document.createElement('div');
+    container.className = 'ai-narration-enhanced-player__markers';
+    let elapsed = 0;
+    markers.slice(0, -1).forEach((marker, index) => {
+      elapsed += Number(marker.duration) || 0;
+      const boundary = document.createElement('span');
+      boundary.className = 'ai-narration-enhanced-player__marker';
+      boundary.style.left = `${Math.min(100, (elapsed / audio.duration) * 100)}%`;
+      boundary.title = marker.label || `Segment ${index + 1}`;
+      boundary.setAttribute('aria-label', boundary.title);
+      container.appendChild(boundary);
+    });
+    track.appendChild(container);
+  };
+
   const refreshMode = (audio) => {
     const enhanced = playerMode(audio) === 'enhanced';
     const wrapper = audio.closest('.ai-narration-enhanced-player');
@@ -133,6 +164,7 @@
     audio.addEventListener('loadedmetadata', () => {
       duration.textContent = formatTime(audio.duration);
       remaining.textContent = `−${formatTime(audio.duration - audio.currentTime)}`;
+      renderSegmentMarkers(audio);
     });
     audio.addEventListener('loadedmetadata', () => {
       loadWaveform(audio);

@@ -75,8 +75,18 @@ final class NarrationProjectForm extends ContentEntityForm {
     $form['project_settings']['language']['#access'] = in_array($provider, ['gemini', 'grok', 'elevenlabs'], TRUE);
     if (!$this->entity->isNew() && ($file = $this->entity->get('joined_audio')->entity)) {
       $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+      $markers = [];
+      $chapter_storage = $this->entityTypeManager->getStorage('ai_narration_chapter');
+      $chapter_ids = $chapter_storage->getQuery()->accessCheck(FALSE)->condition('project_id', $this->entity->id())->sort('position')->execute();
+      foreach ($chapter_storage->loadMultiple($chapter_ids) as $chapter) {
+        $metadata = json_decode((string) $chapter->get('generation_metadata')->value, TRUE) ?: [];
+        $audio = !empty($metadata['entire_file_id']) ? $this->entityTypeManager->getStorage('file')->load((int) $metadata['entire_file_id']) : $chapter->get('last_generated_audio')->entity;
+        if ($audio) {
+          $markers[] = ['duration' => \Drupal::service('ai_narration.duration_inspector')->getDuration($audio) ?? 0.0, 'label' => (string) $chapter->label()];
+        }
+      }
       $form['joined_result'] = ['#type' => 'details', '#title' => $this->t('Joined chapter audio'), '#open' => TRUE, '#weight' => 80, '#attributes' => ['class' => ['ai-narration-result']]];
-      $form['joined_result']['audio'] = ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url, 'style' => 'width: 100%']];
+      $form['joined_result']['audio'] = ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url, 'style' => 'width: 100%', 'data-ai-narration-segment-markers' => json_encode($markers)]];
       $form['joined_result']['download'] = ['#type' => 'link', '#title' => $this->t('Download joined audio'), '#url' => Url::fromUri($url), '#attributes' => ['download' => TRUE, 'class' => ['button']]];
       $form['joined_result']['metadata'] = ['#theme' => 'item_list', '#title' => $this->t('Join details'), '#items' => [$this->t('File: @name', ['@name' => $file->getFilename()]), $this->t('Size: @size bytes', ['@size' => number_format($file->getSize())]), $this->t('Generated from all available Project chapters')]];
     }
