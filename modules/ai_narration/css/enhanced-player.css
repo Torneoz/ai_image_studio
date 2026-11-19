@@ -120,7 +120,7 @@
   }
 }
 
-@container (max-width: 52rem) {
+@container (max-width: 68rem) {
   .ai-narration-enhanced-player.is-active .ai-narration-enhanced-player__controls {
     flex-wrap: wrap;
   }
