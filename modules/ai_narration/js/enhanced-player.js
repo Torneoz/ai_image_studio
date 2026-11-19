@@ -62,6 +62,13 @@
     });
   };
 
+  const roundedRect = (context, x, y, width, height) => {
+    const radius = Math.min(3, width / 2, height / 2);
+    context.beginPath();
+    context.roundRect(x, y, width, height, radius);
+    context.fill();
+  };
+
   const drawWaveform = (audio) => {
     const canvas = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__waveform');
     const buffer = audio._aiNarrationWaveform;
@@ -88,7 +95,7 @@
         const barHeight = height * (0.25 + (((index * 13 + index * index * 3) % 65) / 100));
         const x = index * (barWidth + gap);
         context.fillStyle = x <= playedWidth ? playerAppearance.waveform : playerAppearance.unplayedWaveform;
-        context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight);
+        roundedRect(context, x, (height - barHeight) / 2, barWidth, barHeight);
       }
       return;
     }

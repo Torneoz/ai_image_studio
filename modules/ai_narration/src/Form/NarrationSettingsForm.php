@@ -151,8 +151,8 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#type' => 'select',
       '#title' => $this->t('Enhanced player display'),
       '#options' => [
-        'waveform' => $this->t('Actual waveform'),
-        'bars' => $this->t('Generic bars'),
+        'waveform' => $this->t('Waveform'),
+        'bars' => $this->t('Bars'),
       ],
       '#default_value' => $display_style,
       '#description' => $this->t('Actual waveform uses the audio file’s amplitude data. Generic bars are a lightweight equalizer-style display.'),
