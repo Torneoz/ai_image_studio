@@ -145,10 +145,11 @@ additional Media Library widget module is required.
 
 ### AI Narration
 
-`ai_narration` is independent of the AI Image Studio module. Enable it on its
-own when you only need text-to-speech narration:
+`ai_narration` is an optional child module of AI Image Studio. Enable the
+parent module first, then enable Narration:
 
 ```shell
+drush en ai_image_studio
 drush en ai_narration
 ```
 
