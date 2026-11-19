@@ -17,13 +17,13 @@ final class NarrationVoicesForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $form['text'] = ['#type' => 'textarea', '#title' => $this->t('Example text'), '#default_value' => $form_state->getValue('text') ?: 'This is a narration voice example.', '#required' => TRUE, '#rows' => 3];
     $form['actions']['generate'] = ['#type' => 'submit', '#value' => $this->t('Generate examples'), '#button_type' => 'primary'];
-    $rows = [];
+    $form['voices'] = ['#type' => 'table', '#attributes' => ['id' => 'ai-narration-voices-table'], '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example'), $this->t('Action')], '#empty' => $this->t('No authenticated provider voices are available.')];
     $characters = mb_strlen((string) ($form_state->getValue('text') ?: 'This is a narration voice example.'));
     foreach ($this->voiceModels() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
       $url = ($form_state->get('examples') ?? [])[$model . '::' . $voice] ?? NULL;
-      $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated'), ['data' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice, '#ajax' => ['callback' => '::ajaxGenerateExample', 'wrapper' => 'ai-narration-voices-table', 'progress' => ['type' => 'throbber', 'message' => $this->t('Generating example…')]]]]];
+      $key = md5($model . '::' . $voice);
+      $form['voices'][$key] = ['provider' => ['#plain_text' => $label], 'voice' => ['#plain_text' => $voice_label], 'cost' => ['#plain_text' => $this->estimateCost($model, $characters)], 'example' => $url ? ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]] : ['#markup' => $this->t('Not generated')], 'action' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice, '#ajax' => ['callback' => '::ajaxGenerateExample', 'wrapper' => 'ai-narration-voices-table', 'progress' => ['type' => 'throbber', 'message' => $this->t('Generating example…')]]]];
     }
-    $form['voices'] = ['#type' => 'table', '#attributes' => ['id' => 'ai-narration-voices-table'], '#header' => [$this->t('Provider / model'), $this->t('Voice'), $this->t('Estimated cost'), $this->t('Example'), $this->t('Action')], '#rows' => $rows, '#empty' => $this->t('No authenticated provider voices are available.')];
     return $form;
   }
   public function submitForm(array &$form, FormStateInterface $form_state): void {
