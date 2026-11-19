@@ -152,9 +152,10 @@ final class NarrationChapterForm extends ContentEntityForm {
     ];
     $values = $form_state->getValue('source') ?? $saved;
     $type = in_array($values['type'] ?? '', ['local', 'remote_url', 'entity'], TRUE) ? $values['type'] : 'local';
-    $entityTypes = $this->getContentEntityTypeOptions();
-    $entityType = isset($entityTypes[$values['entity_type'] ?? '']) ? $values['entity_type'] : 'node';
-    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage($entityType)->load((int) $values['entity_id']) : NULL;
+    $entityType = 'node';
+    $bundles = array_map(static fn ($type) => $type->label(), $this->entityTypeManager->getStorage('node_type')->loadMultiple());
+    $bundle = $values['bundle'] ?? '';
+    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage('node')->load((int) $values['entity_id']) : NULL;
 
     $form['source'] = [
       '#type' => 'details',
@@ -168,7 +169,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $form['source']['type'] = [
       '#type' => 'radios',
       '#title' => $this->t('Source'),
-      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local node or entity')],
+      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local node')],
       '#default_value' => $type,
       '#description' => $this->t('Local text is written directly below. A remote URL or local entity must be explicitly loaded.'),
       '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
@@ -180,22 +181,24 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#access' => $type === 'remote_url',
       '#description' => $this->t('A public HTTP(S) page. The readable article or main content will be copied into Narration text.'),
     ];
-    $form['source']['entity_type'] = [
+    $form['source']['bundle'] = [
       '#type' => 'select',
-      '#title' => $this->t('Entity type'),
-      '#options' => $entityTypes,
-      '#default_value' => $entityType,
+      '#title' => $this->t('Content type'),
+      '#options' => $bundles,
+      '#default_value' => $bundle,
+      '#empty_option' => $this->t('- Any content type -'),
       '#access' => $type === 'entity',
-      '#description' => $this->t('Choose the type of local content to narrate.'),
+      '#description' => $this->t('Limit node suggestions to a content type.'),
       '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
     ];
     $form['source']['entity_id'] = [
       '#type' => 'entity_autocomplete',
       '#title' => $this->t('Entity'),
       '#target_type' => $entityType,
+      '#selection_settings' => $bundle === '' ? [] : ['target_bundles' => [$bundle]],
       '#default_value' => $sourceEntity,
       '#access' => $type === 'entity',
-      '#description' => $this->t('Select the local content item whose readable fields should be copied into Narration text.'),
+      '#description' => $this->t('Start typing a node title to choose narration content.'),
     ];
     if ($type !== 'local') {
       $form['source']['load'] = [
@@ -231,7 +234,7 @@ final class NarrationChapterForm extends ContentEntityForm {
         $source['entity_id'] = 0;
       }
       elseif (($source['type'] ?? '') === 'entity') {
-        $entityType = (string) ($source['entity_type'] ?? '');
+        $entityType = 'node';
         $entityId = (int) ($source['entity_id'] ?? 0);
         if ($entityType === '' || $entityId <= 0) {
           throw new \RuntimeException('Choose a local entity to load.');
