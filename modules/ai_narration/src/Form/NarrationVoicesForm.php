@@ -19,7 +19,7 @@ final class NarrationVoicesForm extends FormBase {
     $form['actions']['generate'] = ['#type' => 'submit', '#value' => $this->t('Generate examples'), '#button_type' => 'primary'];
     $rows = [];
     $characters = mb_strlen((string) ($form_state->getValue('text') ?: 'This is a narration voice example.'));
-    foreach ($this->generator->getModelOptions() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
+    foreach ($this->voiceModels() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
       $url = ($form_state->get('examples') ?? [])[$model . '::' . $voice] ?? NULL;
       $rows[] = [(string) $label, (string) $voice_label, $this->estimateCost($model, $characters), $url ? ['data' => ['#type' => 'html_tag', '#tag' => 'audio', '#attributes' => ['controls' => TRUE, 'src' => $url]]] : $this->t('Not generated'), ['data' => ['#type' => 'submit', '#value' => $this->t('Generate'), '#submit' => ['::generateExample'], '#limit_validation_errors' => [['text']], '#model_option' => $model, '#voice_option' => $voice]]];
     }
@@ -28,7 +28,7 @@ final class NarrationVoicesForm extends FormBase {
   }
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $examples = [];
-    foreach ($this->generator->getModelOptions() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
+    foreach ($this->voiceModels() as $model => $label) foreach ($this->generator->getVoiceOptions($model) as $voice => $voice_label) {
       try { $file = $this->generator->generate((string) $form_state->getValue('text'), $model, $voice); $examples[$model . '::' . $voice] = $this->urls->generateAbsoluteString($file->getFileUri()); } catch (\Throwable $e) { $this->messenger()->addWarning($this->t('Could not generate @voice.', ['@voice' => $voice_label])); }
     }
     $form_state->set('examples', $examples)->setRebuild();
@@ -47,5 +47,18 @@ final class NarrationVoicesForm extends FormBase {
     if (!str_starts_with($model, 'openai__')) return (string) $this->t('Unavailable');
     $rate = str_contains($model, 'tts-1-hd') ? 0.00003 : 0.000015;
     return '$' . number_format($characters * $rate, 4) . ' / ' . number_format($characters) . ' chars';
+  }
+  /** Returns the preferred current model for each provider; Grok models are voices. */
+  private function voiceModels(): array {
+    $models = $this->generator->getModelOptions();
+    $preferred = [];
+    foreach ($models as $id => $label) {
+      $provider = explode('__', $id, 2)[0] ?? '';
+      if ($provider === 'grok') { $preferred[$id] = $id; continue; }
+      if (!isset($preferred[$provider])) $preferred[$provider] = $id;
+      if (($provider === 'openai' && str_contains($id, 'gpt-4o-mini-tts')) || ($provider === 'gemini' && str_contains($id, '2.5'))) $preferred[$provider] = $id;
+    }
+    $ids = array_values($preferred);
+    return array_intersect_key($models, array_flip($ids));
   }
 }
