@@ -51,6 +51,11 @@ final class NarrationGenerator {
         ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
         ['Kore', 'Puck', 'Charon', 'Fenrir', 'Aoede', 'Leda', 'Orus', 'Zephyr'],
       ),
+      // The Grok provider exposes each TTS voice as its model ID.
+      'grok' => (static function () use ($modelOption): array {
+        $voice = explode('__', $modelOption, 2)[1] ?? '';
+        return $voice === '' ? [] : [$voice => ucfirst($voice)];
+      })(),
       'elevenlabs' => $this->getElevenLabsVoiceOptions($modelOption),
       default => [],
     };
