@@ -1,5 +1,5 @@
 .ai-narration-result__actions {
-  --ai-narration-player-height: 3.75rem;
+  --ai-narration-player-height: 4.75rem;
   --ai-narration-player-background: #102b2d;
   --ai-narration-player-border: #1ba9a0;
   align-items: center;
@@ -15,9 +15,15 @@
   flex: 0 0 100%;
   background: var(--ai-narration-player-background);
   border: 1px solid var(--ai-narration-player-border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   min-height: var(--ai-narration-player-height);
   max-width: 100%;
+}
+
+/* Native controls remain browser-owned; Chromium/WebKit allow limited sizing. */
+.ai-narration-result__actions audio::-webkit-media-controls-play-button,
+.ai-narration-result__actions audio::-webkit-media-controls-mute-button {
+  transform: scale(1.2);
 }
 
 .ai-narration-result__segment {
