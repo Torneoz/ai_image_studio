@@ -51,9 +51,16 @@
 }
 
 .ai-narration-project-action {
+  align-items: center;
+  display: inline-flex !important;
   font-size: 0.9rem;
+  justify-content: center;
   line-height: 1.2;
   min-height: 2.25rem !important;
   padding: 0.35rem 0.75rem !important;
   width: auto !important;
+}
+
+.ai-narration-project-actions {
+  align-items: center;
 }
