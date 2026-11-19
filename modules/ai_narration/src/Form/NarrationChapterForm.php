@@ -309,13 +309,15 @@ final class NarrationChapterForm extends ContentEntityForm {
     if ($project === NULL) {
       return;
     }
+    $metadata = json_decode((string) $this->entity->get('generation_metadata')->value, TRUE) ?: [];
+    $overrides = $metadata['parameters'] ?? [];
     $defaults = [
-      'model' => (string) $project->get('model')->value,
-      'voice' => (string) $project->get('voice')->value,
-      'format' => (string) $project->get('format')->value,
-      'speed' => (string) $project->get('speed')->value ?: '1',
-      'language' => (string) $project->get('language')->value,
-      'text_normalization' => (bool) $project->get('text_normalization')->value,
+      'model' => (string) ($metadata['model'] ?? $project->get('model')->value),
+      'voice' => (string) ($metadata['voice'] ?? $project->get('voice')->value),
+      'format' => (string) ($metadata['format'] ?? $project->get('format')->value),
+      'speed' => (string) ($overrides['speed'] ?? ($project->get('speed')->value ?: '1')),
+      'language' => (string) ($overrides['language'] ?? $project->get('language')->value),
+      'text_normalization' => (bool) ($overrides['text_normalization'] ?? $project->get('text_normalization')->value),
     ];
     $settings = $form_state->getValue('job_settings') ?? [];
     $models = $this->generator->getModelOptions();
