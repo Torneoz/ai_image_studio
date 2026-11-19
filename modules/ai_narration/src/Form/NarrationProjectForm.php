@@ -29,6 +29,9 @@ final class NarrationProjectForm extends ContentEntityForm {
     $form['#attached']['library'][] = 'ai_narration/enhanced_player';
     $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = (string) (\Drupal::service('user.data')->get('ai_narration', $this->currentUser()->id(), 'player_mode') ?: \Drupal::config('ai_narration.settings')->get('player_mode') ?: 'native');
     $form['#attached']['drupalSettings']['aiNarration']['playerAccentColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9');
+    $form['#attached']['drupalSettings']['aiNarration']['playerColourMode'] = (string) (\Drupal::config('ai_narration.settings')->get('player_colour_mode') ?: 'default');
+    $form['#attached']['drupalSettings']['aiNarration']['playerWaveformColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0');
+    $form['#attached']['drupalSettings']['aiNarration']['playerBackgroundColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d');
     $models = $this->generator->getModelOptions();
     $model = (string) ($form_state->getValue(['model', 0, 'value']) ?? $this->entity->get('model')->value);
     $model = isset($models[$model]) ? $model : '';

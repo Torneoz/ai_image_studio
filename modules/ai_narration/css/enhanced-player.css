@@ -12,7 +12,7 @@
 
 .ai-narration-enhanced-player.is-active .ai-narration-enhanced-player__controls {
   align-items: center;
-  background: linear-gradient(135deg, #102b2d, #163f42);
+  background: var(--ai-narration-player-background, #102b2d);
   border: 1px solid var(--ai-narration-player-accent, #24c7b9);
   border-radius: 1.1rem;
   box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 25%);

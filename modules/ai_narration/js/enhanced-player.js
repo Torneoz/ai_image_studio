@@ -1,8 +1,19 @@
 (function (Drupal, drupalSettings, once) {
-  const accent = drupalSettings.aiNarration?.playerAccentColour;
-  if (/^#[0-9a-f]{6}$/i.test(accent || '')) {
+  const narrationSettings = drupalSettings.aiNarration || {};
+  const customColours = narrationSettings.playerColourMode === 'custom';
+  const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
+    ? narrationSettings.playerAccentColour
+    : '#24c7b9';
+  const waveformColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerWaveformColour || '')
+    ? narrationSettings.playerWaveformColour
+    : '#74fff0';
+  const backgroundColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerBackgroundColour || '')
+    ? narrationSettings.playerBackgroundColour
+    : '#102b2d';
+  if (customColours) {
     document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
-    document.documentElement.style.setProperty('--ai-narration-player-accent-light', accent);
+    document.documentElement.style.setProperty('--ai-narration-player-accent-light', waveformColour);
+    document.documentElement.style.setProperty('--ai-narration-player-background', backgroundColour);
   }
 
   const formatTime = (seconds) => {
@@ -55,7 +66,7 @@
       const barHeight = Math.max(2, peak * height);
       // Keep unplayed audio visibly distinct from the dark panel, while the
       // played section remains the strongest visual cue.
-      context.fillStyle = x <= playedWidth ? (accent || '#74fff0') : '#4c898a';
+      context.fillStyle = x <= playedWidth ? waveformColour : '#4c898a';
       context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
     }
   };
