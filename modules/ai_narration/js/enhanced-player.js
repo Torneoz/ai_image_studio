@@ -2,33 +2,37 @@
   const narrationSettings = drupalSettings.aiNarration || {};
   const defaultDisplayStyle = narrationSettings.playerDisplayStyle === 'bars' ? 'bars' : 'waveform';
   const displayStyle = (audio) => audio.dataset.aiNarrationDisplayStyle === 'bars' ? 'bars' : defaultDisplayStyle;
-  const customColours = narrationSettings.playerColourMode === 'custom';
-  const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
-    ? narrationSettings.playerAccentColour
-    : '#24c7b9';
-  const waveformColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerWaveformColour || '')
-    ? narrationSettings.playerWaveformColour
-    : '#74fff0';
-  const backgroundColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerBackgroundColour || '')
-    ? narrationSettings.playerBackgroundColour
-    : '#102b2d';
-  const textColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerTextColour || '')
-    ? narrationSettings.playerTextColour
-    : '#e9fffc';
-  const height = /^([1-4](?:\.5)?|4\.5)rem$/.test(narrationSettings.playerHeight || '') ? narrationSettings.playerHeight : '4rem';
-  if (customColours) {
-    document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
-  }
-  if (customColours) {
-    document.documentElement.style.setProperty('--ai-narration-player-accent-light', waveformColour);
-    document.documentElement.style.setProperty('--ai-narration-player-background', backgroundColour);
-    document.documentElement.style.setProperty('--ai-narration-player-text', textColour);
-  }
-  document.documentElement.style.setProperty('--ai-narration-player-height', height);
-  const heightValue = Number.parseFloat(height);
-  document.documentElement.style.setProperty('--ai-narration-player-play-size', `${Math.max(1.2, heightValue - 1.1)}rem`);
-  document.documentElement.style.setProperty('--ai-narration-player-waveform-height', `${Math.max(0.75, heightValue - 1.5)}rem`);
-  document.documentElement.style.setProperty('--ai-narration-player-font-size', `${Math.max(0.65, Math.min(1, heightValue * 0.22))}rem`);
+  const validColour = (value, fallback) => /^#[0-9a-f]{6}$/i.test(value || '') ? value : fallback;
+  const appearance = (audio) => {
+    const values = audio.dataset;
+    const custom = (values.aiNarrationPlayerColourMode || narrationSettings.playerColourMode) === 'custom';
+    const height = /^([1-4](?:\.5)?|4\.5)rem$/.test(values.aiNarrationPlayerHeight || narrationSettings.playerHeight || '') ? (values.aiNarrationPlayerHeight || narrationSettings.playerHeight) : '4rem';
+    return {
+      custom,
+      accent: custom ? validColour(values.aiNarrationPlayerAccentColour || narrationSettings.playerAccentColour, '#24c7b9') : '#24c7b9',
+      waveform: custom ? validColour(values.aiNarrationPlayerWaveformColour || narrationSettings.playerWaveformColour, '#74fff0') : '#74fff0',
+      background: custom ? validColour(values.aiNarrationPlayerBackgroundColour || narrationSettings.playerBackgroundColour, '#102b2d') : '#102b2d',
+      text: custom ? validColour(values.aiNarrationPlayerTextColour || narrationSettings.playerTextColour, '#e9fffc') : '#e9fffc',
+      height,
+    };
+  };
+
+  const applyAppearance = (audio) => {
+    const wrapper = audio.closest('.ai-narration-enhanced-player');
+    if (!wrapper) {
+      return;
+    }
+    const values = appearance(audio);
+    wrapper.style.setProperty('--ai-narration-player-accent', values.accent);
+    wrapper.style.setProperty('--ai-narration-player-accent-light', values.waveform);
+    wrapper.style.setProperty('--ai-narration-player-background', values.background);
+    wrapper.style.setProperty('--ai-narration-player-text', values.text);
+    wrapper.style.setProperty('--ai-narration-player-height', values.height);
+    const heightValue = Number.parseFloat(values.height);
+    wrapper.style.setProperty('--ai-narration-player-play-size', `${Math.max(1.2, heightValue - 1.1)}rem`);
+    wrapper.style.setProperty('--ai-narration-player-waveform-height', `${Math.max(0.75, heightValue - 1.5)}rem`);
+    wrapper.style.setProperty('--ai-narration-player-font-size', `${Math.max(0.65, Math.min(1, heightValue * 0.22))}rem`);
+  };
 
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -56,6 +60,7 @@
   const drawWaveform = (audio) => {
     const canvas = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__waveform');
     const buffer = audio._aiNarrationWaveform;
+    const playerAppearance = appearance(audio);
     const style = displayStyle(audio);
     if (!canvas || (style === 'waveform' && !buffer)) {
       return;
@@ -77,7 +82,7 @@
       for (let index = 0; index < bars; index++) {
         const barHeight = height * (0.25 + (((index * 13 + index * index * 3) % 65) / 100));
         const x = index * (barWidth + gap);
-        context.fillStyle = x <= playedWidth ? waveformColour : '#4c898a';
+        context.fillStyle = x <= playedWidth ? playerAppearance.waveform : '#4c898a';
         context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight);
       }
       return;
@@ -95,7 +100,7 @@
       const barHeight = Math.max(3, Math.min(height, Math.pow(peak, 0.42) * height));
       // Keep unplayed audio visibly distinct from the dark panel, while the
       // played section remains the strongest visual cue.
-      context.fillStyle = x <= playedWidth ? waveformColour : '#4c898a';
+      context.fillStyle = x <= playedWidth ? playerAppearance.waveform : '#4c898a';
       context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
     }
   };
@@ -166,6 +171,7 @@
     const wrapper = audio.closest('.ai-narration-enhanced-player');
     if (wrapper) {
       wrapper.classList.toggle('is-active', enhanced);
+      applyAppearance(audio);
     }
     audio.classList.toggle('ai-narration-native-player', !enhanced);
     if (enhanced) {
