@@ -1,10 +1,7 @@
 (function (Drupal, drupalSettings, once) {
   const narrationSettings = drupalSettings.aiNarration || {};
   const customColours = narrationSettings.playerColourMode === 'custom';
-  const themeAccent = ['--theme-accent-color', '--color-primary', '--color-accent', '--primary'].map((property) => getComputedStyle(document.documentElement).getPropertyValue(property).trim()).find((value) => /^#[0-9a-f]{6}$/i.test(value));
-  const accent = narrationSettings.playerUseThemeAccent && themeAccent
-    ? themeAccent
-    : customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
+  const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
     ? narrationSettings.playerAccentColour
     : '#24c7b9';
   const waveformColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerWaveformColour || '')
@@ -17,7 +14,7 @@
     ? narrationSettings.playerTextColour
     : '#e9fffc';
   const height = /^([1-4](?:\.5)?|4\.5)rem$/.test(narrationSettings.playerHeight || '') ? narrationSettings.playerHeight : '4rem';
-  if (customColours || narrationSettings.playerUseThemeAccent) {
+  if (customColours) {
     document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
   }
   if (customColours) {
