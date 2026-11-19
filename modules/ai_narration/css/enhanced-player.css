@@ -102,9 +102,9 @@
 
 .ai-narration-enhanced-player__speed {
   background: #0c2527;
-  border: 1px solid var(--ai-narration-player-accent, #24c7b9);
+  border: 1px solid var(--ai-narration-player-speed-control, #e9fffc);
   border-radius: 0.4rem;
-  color: inherit;
+  color: var(--ai-narration-player-speed-control, #e9fffc);
   padding: 0.2rem;
   font-size: inherit;
 }

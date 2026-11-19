@@ -159,6 +159,7 @@ final class NarrationGenerateForm extends FormBase {
     $form['#attached']['drupalSettings']['aiNarration']['playerColourMode'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_colour_mode') ?: 'default');
     $form['#attached']['drupalSettings']['aiNarration']['playerWaveformColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0');
     $form['#attached']['drupalSettings']['aiNarration']['playerUnplayedWaveformColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_unplayed_waveform_colour') ?: '#4c898a');
+    $form['#attached']['drupalSettings']['aiNarration']['playerSpeedControlColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_speed_control_colour') ?: '#e9fffc');
     $form['#attached']['drupalSettings']['aiNarration']['playerBackgroundColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_background_colour') ?: '#102b2d');
     $form['#attached']['drupalSettings']['aiNarration']['playerTextColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc');
     $form['#attached']['drupalSettings']['aiNarration']['playerHeight'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_height') ?: '4rem');

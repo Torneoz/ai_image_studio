@@ -12,6 +12,7 @@
       accent: custom ? validColour(values.aiNarrationPlayerAccentColour || narrationSettings.playerAccentColour, '#24c7b9') : '#24c7b9',
       waveform: custom ? validColour(values.aiNarrationPlayerWaveformColour || narrationSettings.playerWaveformColour, '#74fff0') : '#74fff0',
       unplayedWaveform: custom ? validColour(values.aiNarrationPlayerUnplayedWaveformColour || narrationSettings.playerUnplayedWaveformColour, '#4c898a') : '#4c898a',
+      speedControl: custom ? validColour(values.aiNarrationPlayerSpeedControlColour || narrationSettings.playerSpeedControlColour, '#e9fffc') : '#e9fffc',
       background: custom ? validColour(values.aiNarrationPlayerBackgroundColour || narrationSettings.playerBackgroundColour, '#102b2d') : '#102b2d',
       text: custom ? validColour(values.aiNarrationPlayerTextColour || narrationSettings.playerTextColour, '#e9fffc') : '#e9fffc',
       height,
@@ -28,6 +29,7 @@
     wrapper.style.setProperty('--ai-narration-player-accent-light', values.waveform);
     wrapper.style.setProperty('--ai-narration-player-background', values.background);
     wrapper.style.setProperty('--ai-narration-player-text', values.text);
+    wrapper.style.setProperty('--ai-narration-player-speed-control', values.speedControl);
     wrapper.style.setProperty('--ai-narration-player-height', values.height);
     const heightValue = Number.parseFloat(values.height);
     wrapper.style.setProperty('--ai-narration-player-play-size', `${Math.max(1.2, heightValue - 1.1)}rem`);
@@ -263,6 +265,7 @@
         player_accent_colour: 'aiNarrationPlayerAccentColour',
         player_waveform_colour: 'aiNarrationPlayerWaveformColour',
         player_unplayed_waveform_colour: 'aiNarrationPlayerUnplayedWaveformColour',
+        player_speed_control_colour: 'aiNarrationPlayerSpeedControlColour',
         player_background_colour: 'aiNarrationPlayerBackgroundColour',
         player_text_colour: 'aiNarrationPlayerTextColour',
         player_height: 'aiNarrationPlayerHeight',
