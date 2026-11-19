@@ -88,7 +88,9 @@
       for (let index = 0; index < samplesPerBar && offset + index < source.length; index++) {
         peak = Math.max(peak, Math.abs(source[offset + index]));
       }
-      const barHeight = Math.max(2, peak * height);
+      // Apply perceptual gain so quieter narration remains legible without
+      // changing the source audio or the player’s actual playback level.
+      const barHeight = Math.max(3, Math.min(height, Math.pow(peak, 0.42) * height));
       // Keep unplayed audio visibly distinct from the dark panel, while the
       // played section remains the strongest visual cue.
       context.fillStyle = x <= playedWidth ? waveformColour : '#4c898a';
