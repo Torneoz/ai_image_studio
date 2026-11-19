@@ -11,6 +11,7 @@
       custom,
       accent: custom ? validColour(values.aiNarrationPlayerAccentColour || narrationSettings.playerAccentColour, '#24c7b9') : '#24c7b9',
       waveform: custom ? validColour(values.aiNarrationPlayerWaveformColour || narrationSettings.playerWaveformColour, '#74fff0') : '#74fff0',
+      unplayedWaveform: custom ? validColour(values.aiNarrationPlayerUnplayedWaveformColour || narrationSettings.playerUnplayedWaveformColour, '#4c898a') : '#4c898a',
       background: custom ? validColour(values.aiNarrationPlayerBackgroundColour || narrationSettings.playerBackgroundColour, '#102b2d') : '#102b2d',
       text: custom ? validColour(values.aiNarrationPlayerTextColour || narrationSettings.playerTextColour, '#e9fffc') : '#e9fffc',
       height,
@@ -82,7 +83,7 @@
       for (let index = 0; index < bars; index++) {
         const barHeight = height * (0.25 + (((index * 13 + index * index * 3) % 65) / 100));
         const x = index * (barWidth + gap);
-        context.fillStyle = x <= playedWidth ? playerAppearance.waveform : '#4c898a';
+        context.fillStyle = x <= playedWidth ? playerAppearance.waveform : playerAppearance.unplayedWaveform;
         context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight);
       }
       return;
@@ -100,7 +101,7 @@
       const barHeight = Math.max(3, Math.min(height, Math.pow(peak, 0.42) * height));
       // Keep unplayed audio visibly distinct from the dark panel, while the
       // played section remains the strongest visual cue.
-      context.fillStyle = x <= playedWidth ? playerAppearance.waveform : '#4c898a';
+      context.fillStyle = x <= playedWidth ? playerAppearance.waveform : playerAppearance.unplayedWaveform;
       context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
     }
   };
@@ -261,6 +262,7 @@
         player_colour_mode: 'aiNarrationPlayerColourMode',
         player_accent_colour: 'aiNarrationPlayerAccentColour',
         player_waveform_colour: 'aiNarrationPlayerWaveformColour',
+        player_unplayed_waveform_colour: 'aiNarrationPlayerUnplayedWaveformColour',
         player_background_colour: 'aiNarrationPlayerBackgroundColour',
         player_text_colour: 'aiNarrationPlayerTextColour',
         player_height: 'aiNarrationPlayerHeight',

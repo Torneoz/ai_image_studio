@@ -45,6 +45,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
     $colour_mode = (string) $setting('player_colour_mode', 'default');
     $accent_colour = (string) $setting('player_accent_colour', '#24c7b9');
     $waveform_colour = (string) $setting('player_waveform_colour', '#74fff0');
+    $unplayed_waveform_colour = (string) $setting('player_unplayed_waveform_colour', '#4c898a');
     $background_colour = (string) $setting('player_background_colour', '#102b2d');
     $text_colour = (string) $setting('player_text_colour', '#e9fffc');
     $player_height = (string) $setting('player_height', '4rem');
@@ -89,6 +90,13 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#type' => 'color',
       '#title' => $this->t('Played waveform colour'),
       '#default_value' => $waveform_colour,
+      '#states' => ['visible' => $custom_state],
+      '#ajax' => $preview_ajax,
+    ];
+    $form['player_unplayed_waveform_colour'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Unplayed waveform/bars colour'),
+      '#default_value' => $unplayed_waveform_colour,
       '#states' => ['visible' => $custom_state],
       '#ajax' => $preview_ajax,
     ];
@@ -152,6 +160,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
             'data-ai-narration-player-colour-mode' => $colour_mode,
             'data-ai-narration-player-accent-colour' => $accent_colour,
             'data-ai-narration-player-waveform-colour' => $waveform_colour,
+            'data-ai-narration-player-unplayed-waveform-colour' => $unplayed_waveform_colour,
             'data-ai-narration-player-background-colour' => $background_colour,
             'data-ai-narration-player-text-colour' => $text_colour,
             'data-ai-narration-player-height' => $player_height,
@@ -166,6 +175,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       'playerAccentColour' => $accent_colour,
       'playerColourMode' => $colour_mode,
       'playerWaveformColour' => $waveform_colour,
+      'playerUnplayedWaveformColour' => $unplayed_waveform_colour,
       'playerBackgroundColour' => $background_colour,
       'playerTextColour' => $text_colour,
       'playerHeight' => $player_height,
@@ -190,6 +200,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ->set('player_accent_colour', (string) $form_state->getValue('player_accent_colour'))
       ->set('player_colour_mode', (string) $form_state->getValue('player_colour_mode'))
       ->set('player_waveform_colour', (string) $form_state->getValue('player_waveform_colour'))
+      ->set('player_unplayed_waveform_colour', (string) $form_state->getValue('player_unplayed_waveform_colour'))
       ->set('player_background_colour', (string) $form_state->getValue('player_background_colour'))
       ->set('player_text_colour', (string) $form_state->getValue('player_text_colour'))
       ->set('player_height', (string) $form_state->getValue('player_height'))
