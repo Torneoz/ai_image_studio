@@ -20,3 +20,6 @@ ai_narration.settings:
     player_background_colour:
       type: string
       label: 'Enhanced audio player background colour'
+    player_text_colour:
+      type: string
+      label: 'Enhanced audio player text colour'

@@ -77,6 +77,22 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#default_value' => $this->config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
       '#states' => ['visible' => $custom_state],
     ];
+    $form['player_text_colour'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Player text colour'),
+      '#default_value' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
+      '#states' => ['visible' => $custom_state],
+    ];
+    $bars = implode('', array_fill(0, 42, '<span></span>'));
+    $form['player_preview'] = [
+      '#type' => 'container',
+      '#title' => $this->t('Player preview'),
+      '#attributes' => ['id' => 'ai-narration-player-settings-preview', 'class' => ['ai-narration-player-settings-preview']],
+      'title' => ['#markup' => '<strong>' . $this->t('Enhanced player preview') . '</strong>'],
+      'player' => ['#markup' => '<div class="ai-narration-player-settings-preview__player"><span class="ai-narration-player-settings-preview__play">▶</span><span>2:14</span><span class="ai-narration-player-settings-preview__waveform" aria-hidden="true">' . $bars . '</span><span>−1:29</span><span>3:43</span><span>1×</span></div>'],
+      '#weight' => 20,
+    ];
+    $form['#attached']['library'][] = 'ai_narration/player_settings_preview';
     return parent::buildForm($form, $form_state);
   }
 
@@ -88,6 +104,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ->set('player_colour_mode', (string) $form_state->getValue('player_colour_mode'))
       ->set('player_waveform_colour', (string) $form_state->getValue('player_waveform_colour'))
       ->set('player_background_colour', (string) $form_state->getValue('player_background_colour'))
+      ->set('player_text_colour', (string) $form_state->getValue('player_text_colour'))
       ->save();
     parent::submitForm($form, $form_state);
   }

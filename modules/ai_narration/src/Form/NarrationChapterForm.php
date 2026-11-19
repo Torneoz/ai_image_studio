@@ -143,6 +143,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $form['#attached']['drupalSettings']['aiNarration']['playerColourMode'] = (string) (\Drupal::config('ai_narration.settings')->get('player_colour_mode') ?: 'default');
     $form['#attached']['drupalSettings']['aiNarration']['playerWaveformColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_waveform_colour') ?: '#74fff0');
     $form['#attached']['drupalSettings']['aiNarration']['playerBackgroundColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d');
+    $form['#attached']['drupalSettings']['aiNarration']['playerTextColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc');
     foreach ($this->generator->getModelOptions() as $model_option => $label) {
       $form['#attached']['drupalSettings']['aiNarration']['modelCharacterLimits'][$model_option] = $this->generator->getInputCharacterLimit($model_option);
     }

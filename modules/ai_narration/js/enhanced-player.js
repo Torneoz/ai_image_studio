@@ -10,10 +10,14 @@
   const backgroundColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerBackgroundColour || '')
     ? narrationSettings.playerBackgroundColour
     : '#102b2d';
+  const textColour = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerTextColour || '')
+    ? narrationSettings.playerTextColour
+    : '#e9fffc';
   if (customColours) {
     document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
     document.documentElement.style.setProperty('--ai-narration-player-accent-light', waveformColour);
     document.documentElement.style.setProperty('--ai-narration-player-background', backgroundColour);
+    document.documentElement.style.setProperty('--ai-narration-player-text', textColour);
   }
 
   const formatTime = (seconds) => {
