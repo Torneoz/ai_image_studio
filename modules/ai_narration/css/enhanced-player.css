@@ -47,6 +47,11 @@
   position: relative;
 }
 
+.ai-narration-project-audio-cell {
+  container-type: inline-size;
+  min-width: 0;
+}
+
 .ai-narration-enhanced-player__waveform {
   display: block;
   height: 2.1rem;
@@ -110,6 +115,32 @@
   .ai-narration-enhanced-player__track {
     order: 3;
     flex-basis: 100%;
+  }
+}
+
+@container (max-width: 52rem) {
+  .ai-narration-enhanced-player.is-active .ai-narration-enhanced-player__controls {
+    flex-wrap: wrap;
+  }
+
+  .ai-narration-enhanced-player__track {
+    flex-basis: 100%;
+    order: 3;
+  }
+}
+
+@container (max-width: 32rem) {
+  .ai-narration-enhanced-player.is-active .ai-narration-enhanced-player__controls {
+    gap: 0.45rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .ai-narration-enhanced-player__speed-label {
+    font-size: 0;
+  }
+
+  .ai-narration-enhanced-player__speed-label .ai-narration-enhanced-player__speed {
+    font-size: 0.85rem;
   }
 }
 
