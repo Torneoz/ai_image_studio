@@ -155,6 +155,7 @@ final class NarrationGenerateForm extends FormBase {
     $form['#attached']['library'][] = 'ai_narration/audio_share';
     $form['#attached']['library'][] = 'ai_narration/enhanced_player';
     $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = $sitePlayerMode;
+    $form['#attached']['drupalSettings']['aiNarration']['playerAccentColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9');
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-speech model'),

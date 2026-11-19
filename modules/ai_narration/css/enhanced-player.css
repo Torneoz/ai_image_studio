@@ -13,7 +13,7 @@
 .ai-narration-enhanced-player.is-active .ai-narration-enhanced-player__controls {
   align-items: center;
   background: linear-gradient(135deg, #102b2d, #163f42);
-  border: 1px solid #27c7ba;
+  border: 1px solid var(--ai-narration-player-accent, #24c7b9);
   border-radius: 1.1rem;
   box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 25%);
   box-sizing: border-box;
@@ -27,7 +27,7 @@
 
 .ai-narration-enhanced-player__play {
   align-items: center;
-  background: #24c7b9;
+  background: var(--ai-narration-player-accent, #24c7b9);
   border: 0;
   border-radius: 50%;
   color: #09201f;
@@ -76,8 +76,8 @@
 }
 
 .ai-narration-enhanced-player__marker {
-  background: #ffd36a;
-  box-shadow: 0 0 0.4rem rgb(255 211 106 / 85%);
+  background: var(--ai-narration-player-accent-light, #74fff0);
+  box-shadow: 0 0 0.4rem var(--ai-narration-player-accent, #24c7b9);
   height: 100%;
   position: absolute;
   top: 0;
@@ -101,7 +101,7 @@
 
 .ai-narration-enhanced-player__speed {
   background: #0c2527;
-  border: 1px solid #51e6d5;
+  border: 1px solid var(--ai-narration-player-accent, #24c7b9);
   border-radius: 0.4rem;
   color: inherit;
   padding: 0.2rem;

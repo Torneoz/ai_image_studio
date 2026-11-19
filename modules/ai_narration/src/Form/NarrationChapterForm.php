@@ -139,6 +139,7 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#attributes' => ['data-ai-narration-player-mode' => TRUE],
     ];
     $form['#attached']['drupalSettings']['aiNarration']['playerModeDefault'] = $site_player_mode;
+    $form['#attached']['drupalSettings']['aiNarration']['playerAccentColour'] = (string) (\Drupal::config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9');
     foreach ($this->generator->getModelOptions() as $model_option => $label) {
       $form['#attached']['drupalSettings']['aiNarration']['modelCharacterLimits'][$model_option] = $this->generator->getInputCharacterLimit($model_option);
     }

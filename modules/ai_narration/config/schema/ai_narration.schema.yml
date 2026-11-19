@@ -8,3 +8,6 @@ ai_narration.settings:
     player_mode:
       type: string
       label: 'Default audio player display mode'
+    player_accent_colour:
+      type: string
+      label: 'Enhanced audio player accent colour'

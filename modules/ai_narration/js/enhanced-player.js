@@ -1,4 +1,10 @@
 (function (Drupal, drupalSettings, once) {
+  const accent = drupalSettings.aiNarration?.playerAccentColour;
+  if (/^#[0-9a-f]{6}$/i.test(accent || '')) {
+    document.documentElement.style.setProperty('--ai-narration-player-accent', accent);
+    document.documentElement.style.setProperty('--ai-narration-player-accent-light', accent);
+  }
+
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds) || seconds < 0) {
       return '0:00';
@@ -49,7 +55,7 @@
       const barHeight = Math.max(2, peak * height);
       // Keep unplayed audio visibly distinct from the dark panel, while the
       // played section remains the strongest visual cue.
-      context.fillStyle = x <= playedWidth ? '#74fff0' : '#4c898a';
+      context.fillStyle = x <= playedWidth ? (accent || '#74fff0') : '#4c898a';
       context.fillRect(x, (height - barHeight) / 2, 1, barHeight);
     }
   };

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_narration\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -23,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 final class NarrationEnhancedAudioPlayerFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 
-  public function __construct(string $plugin_id, mixed $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, string $label, string $view_mode, array $third_party_settings, private readonly FileUrlGeneratorInterface $fileUrlGenerator) {
+  public function __construct(string $plugin_id, mixed $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, string $label, string $view_mode, array $third_party_settings, private readonly FileUrlGeneratorInterface $fileUrlGenerator, private readonly ConfigFactoryInterface $configFactory) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
   }
 
@@ -37,6 +38,7 @@ final class NarrationEnhancedAudioPlayerFormatter extends FormatterBase implemen
       $configuration['view_mode'],
       $configuration['third_party_settings'],
       $container->get('file_url_generator'),
+      $container->get('config.factory'),
     );
   }
 
@@ -47,7 +49,10 @@ final class NarrationEnhancedAudioPlayerFormatter extends FormatterBase implemen
     $elements = [
       '#attached' => [
         'library' => ['ai_narration/enhanced_player'],
-        'drupalSettings' => ['aiNarration' => ['playerModeDefault' => 'enhanced']],
+        'drupalSettings' => ['aiNarration' => [
+          'playerModeDefault' => 'enhanced',
+          'playerAccentColour' => $this->configFactory->get('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
+        ]],
       ],
     ];
     foreach ($items as $delta => $item) {

@@ -48,6 +48,12 @@ final class NarrationSettingsForm extends ConfigFormBase {
       '#default_value' => $this->config('ai_narration.settings')->get('player_mode') ?: 'native',
       '#description' => $this->t('Users can override this choice on narration screens.'),
     ];
+    $form['player_accent_colour'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Enhanced player accent colour'),
+      '#default_value' => $this->config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
+      '#description' => $this->t('Used for the enhanced player border, play control, waveform progress, and segment markers.'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -55,6 +61,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
     $this->config('ai_narration.settings')
       ->set('default_model', (string) $form_state->getValue('default_model'))
       ->set('player_mode', (string) $form_state->getValue('player_mode'))
+      ->set('player_accent_colour', (string) $form_state->getValue('player_accent_colour'))
       ->save();
     parent::submitForm($form, $form_state);
   }
