@@ -8,17 +8,15 @@ use Drupal\ai_narration\Service\NarrationGenerator;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configures the default narration voice.
  */
 final class NarrationSettingsForm extends ConfigFormBase {
 
-  public function __construct(private readonly NarrationGenerator $generator) {}
-
-  public static function create(ContainerInterface $container): self {
-    return new self($container->get('ai_narration.generator'));
+  /** Resolves the service lazily so it also works on AJAX form rebuilds. */
+  private function generator(): NarrationGenerator {
+    return \Drupal::service('ai_narration.generator');
   }
 
   public function getFormId(): string {
@@ -30,7 +28,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
   }
 
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $options = $this->generator->getModelOptions();
+    $options = $this->generator()->getModelOptions();
     $display_style = (string) ($form_state->getValue('player_display_style') ?? $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform');
     $form['default_model'] = [
       '#type' => 'select',
