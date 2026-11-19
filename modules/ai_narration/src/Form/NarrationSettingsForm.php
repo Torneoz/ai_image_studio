@@ -155,6 +155,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
             'data-ai-narration-player-background-colour' => $background_colour,
             'data-ai-narration-player-text-colour' => $text_colour,
             'data-ai-narration-player-height' => $player_height,
+            'data-ai-narration-preview-position' => '0.45',
           ],
         ],
       ],

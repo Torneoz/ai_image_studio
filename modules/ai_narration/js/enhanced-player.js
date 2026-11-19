@@ -219,6 +219,10 @@
     });
     audio.addEventListener('loadedmetadata', () => {
       duration.textContent = formatTime(audio.duration);
+      const previewPosition = Number(audio.dataset.aiNarrationPreviewPosition);
+      if (previewPosition > 0 && previewPosition < 1 && audio.currentTime === 0 && audio.duration) {
+        audio.currentTime = audio.duration * previewPosition;
+      }
       remaining.textContent = `−${formatTime(audio.duration - audio.currentTime)}`;
       renderSegmentMarkers(audio);
     });
