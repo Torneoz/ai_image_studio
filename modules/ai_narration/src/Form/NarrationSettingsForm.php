@@ -31,6 +31,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = $this->generator->getModelOptions();
+    $display_style = (string) ($form_state->getValue('player_display_style') ?? $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform');
     $form['default_model'] = [
       '#type' => 'select',
       '#title' => $this->t('Default voice'),
@@ -105,19 +106,19 @@ final class NarrationSettingsForm extends ConfigFormBase {
         'waveform' => $this->t('Actual waveform'),
         'bars' => $this->t('Generic bars'),
       ],
-      '#default_value' => $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform',
+      '#default_value' => $display_style,
       '#description' => $this->t('Actual waveform uses the audio file’s amplitude data. Generic bars are a lightweight equalizer-style display.'),
+      '#ajax' => [
+        'callback' => '::refreshPlayerPreview',
+        'wrapper' => 'ai-narration-player-settings-preview',
+      ],
     ];
-    $bars = implode('', array_fill(0, 42, '<span></span>'));
     $module_path = \Drupal::service('extension.list.module')->getPath('ai_narration');
     $test_audio_url = Url::fromUri('base:' . $module_path . '/css/ui-test-file.mp3')->toString();
     $form['player_preview'] = [
       '#type' => 'container',
       '#title' => $this->t('Player preview'),
-      '#attributes' => ['id' => 'ai-narration-player-settings-preview', 'class' => ['ai-narration-player-settings-preview']],
-      'title' => ['#markup' => '<strong>' . $this->t('Enhanced player preview') . '</strong>'],
-      'player' => ['#markup' => '<div class="ai-narration-player-settings-preview__player"><span class="ai-narration-player-settings-preview__play">▶</span><span>2:14</span><span class="ai-narration-player-settings-preview__waveform" aria-hidden="true">' . $bars . '</span><span>−1:29</span><span>3:43</span><span>1×</span></div>'],
-      'audio_test_title' => ['#markup' => '<p><strong>' . $this->t('Live audio test') . '</strong></p>'],
+      '#attributes' => ['id' => 'ai-narration-player-settings-preview', 'class' => ['ai-narration-result']],
       'audio_test' => [
         '#type' => 'container',
         '#attributes' => ['class' => ['ai-narration-result']],
@@ -129,9 +130,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ],
       '#weight' => 20,
     ];
-    $form['#attached']['library'][] = 'ai_narration/player_settings_preview';
-    $form['#attached']['library'][] = 'ai_narration/enhanced_player';
-    $form['#attached']['drupalSettings']['aiNarration'] = [
+    $player_settings = [
       'playerModeDefault' => 'enhanced',
       'playerAccentColour' => $this->config('ai_narration.settings')->get('player_accent_colour') ?: '#24c7b9',
       'playerColourMode' => $this->config('ai_narration.settings')->get('player_colour_mode') ?: 'default',
@@ -139,9 +138,18 @@ final class NarrationSettingsForm extends ConfigFormBase {
       'playerBackgroundColour' => $this->config('ai_narration.settings')->get('player_background_colour') ?: '#102b2d',
       'playerTextColour' => $this->config('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc',
       'playerHeight' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
-      'playerDisplayStyle' => $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform',
+      'playerDisplayStyle' => $display_style,
+    ];
+    $form['player_preview']['#attached'] = [
+      'library' => ['ai_narration/enhanced_player'],
+      'drupalSettings' => ['aiNarration' => $player_settings],
     ];
     return parent::buildForm($form, $form_state);
+  }
+
+  /** Refreshes the real player preview for the selected display style. */
+  public function refreshPlayerPreview(array &$form, FormStateInterface $form_state): array {
+    return $form['player_preview'];
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {

@@ -25,12 +25,3 @@ enhanced_player:
     - core/drupal
     - core/once
 
-player_settings_preview:
-  css:
-    component:
-      css/player-settings-preview.css: {}
-  js:
-    js/player-settings-preview.js: {}
-  dependencies:
-    - core/drupal
-    - core/once
