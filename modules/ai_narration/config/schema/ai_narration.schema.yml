@@ -26,3 +26,6 @@ ai_narration.settings:
     player_height:
       type: string
       label: 'Enhanced audio player height'
+    player_display_style:
+      type: string
+      label: 'Enhanced audio player display style'

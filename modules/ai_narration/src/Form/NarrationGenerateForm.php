@@ -161,6 +161,7 @@ final class NarrationGenerateForm extends FormBase {
     $form['#attached']['drupalSettings']['aiNarration']['playerBackgroundColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_background_colour') ?: '#102b2d');
     $form['#attached']['drupalSettings']['aiNarration']['playerTextColour'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_text_colour') ?: '#e9fffc');
     $form['#attached']['drupalSettings']['aiNarration']['playerHeight'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_height') ?: '4rem');
+    $form['#attached']['drupalSettings']['aiNarration']['playerDisplayStyle'] = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_display_style') ?: 'waveform');
     $form['model'] = [
       '#type' => 'select',
       '#title' => $this->t('Text-to-speech model'),

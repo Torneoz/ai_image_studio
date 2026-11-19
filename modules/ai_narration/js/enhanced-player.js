@@ -1,5 +1,6 @@
 (function (Drupal, drupalSettings, once) {
   const narrationSettings = drupalSettings.aiNarration || {};
+  const displayStyle = narrationSettings.playerDisplayStyle === 'bars' ? 'bars' : 'waveform';
   const customColours = narrationSettings.playerColourMode === 'custom';
   const accent = customColours && /^#[0-9a-f]{6}$/i.test(narrationSettings.playerAccentColour || '')
     ? narrationSettings.playerAccentColour
@@ -54,7 +55,7 @@
   const drawWaveform = (audio) => {
     const canvas = audio.closest('.ai-narration-enhanced-player')?.querySelector('.ai-narration-enhanced-player__waveform');
     const buffer = audio._aiNarrationWaveform;
-    if (!canvas || !buffer) {
+    if (!canvas || (displayStyle === 'waveform' && !buffer)) {
       return;
     }
     const width = Math.max(1, Math.round(canvas.clientWidth));
@@ -65,10 +66,22 @@
     const context = canvas.getContext('2d');
     context.scale(ratio, ratio);
     context.clearRect(0, 0, width, height);
-    const source = buffer.getChannelData(0);
-    const samplesPerBar = Math.max(1, Math.floor(source.length / width));
     const progress = audio.duration ? audio.currentTime / audio.duration : 0;
     const playedWidth = width * progress;
+    if (displayStyle === 'bars') {
+      const bars = 48;
+      const gap = 2;
+      const barWidth = Math.max(1, (width - ((bars - 1) * gap)) / bars);
+      for (let index = 0; index < bars; index++) {
+        const barHeight = height * (0.25 + (((index * 13 + index * index * 3) % 65) / 100));
+        const x = index * (barWidth + gap);
+        context.fillStyle = x <= playedWidth ? waveformColour : '#4c898a';
+        context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight);
+      }
+      return;
+    }
+    const source = buffer.getChannelData(0);
+    const samplesPerBar = Math.max(1, Math.floor(source.length / width));
     for (let x = 0; x < width; x++) {
       const offset = x * samplesPerBar;
       let peak = 0;
@@ -84,6 +97,10 @@
   };
 
   const loadWaveform = async (audio) => {
+    if (displayStyle === 'bars') {
+      drawWaveform(audio);
+      return;
+    }
     const source = audio.currentSrc || audio.src;
     if (audio._aiNarrationWaveform || audio._aiNarrationWaveformLoading || !source) {
       return;

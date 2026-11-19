@@ -97,6 +97,16 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $this->config('ai_narration.settings')->get('player_height') ?: '4rem',
     ];
+    $form['player_display_style'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Enhanced player display'),
+      '#options' => [
+        'waveform' => $this->t('Actual waveform'),
+        'bars' => $this->t('Generic bars'),
+      ],
+      '#default_value' => $this->config('ai_narration.settings')->get('player_display_style') ?: 'waveform',
+      '#description' => $this->t('Actual waveform uses the audio file’s amplitude data. Generic bars are a lightweight equalizer-style display.'),
+    ];
     $bars = implode('', array_fill(0, 42, '<span></span>'));
     $form['player_preview'] = [
       '#type' => 'container',
@@ -120,6 +130,7 @@ final class NarrationSettingsForm extends ConfigFormBase {
       ->set('player_background_colour', (string) $form_state->getValue('player_background_colour'))
       ->set('player_text_colour', (string) $form_state->getValue('player_text_colour'))
       ->set('player_height', (string) $form_state->getValue('player_height'))
+      ->set('player_display_style', (string) $form_state->getValue('player_display_style'))
       ->save();
     parent::submitForm($form, $form_state);
   }
