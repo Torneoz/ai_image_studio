@@ -66,18 +66,20 @@ final class StoryboardManager {
   public function generateShot(object $storyboard, object $shot, array $badge_settings = []): object {
     $session = $this->prepareSession($storyboard);
     $after_prompt = trim((string) $storyboard->get('after_prompt')->value);
-    $prompt = implode("\n\n", array_filter([
+    // Shot direction comes before reusable bibles: it must survive if a
+    // project has more continuity detail than its configured provider budget.
+    $prompt = StoryboardPromptBudget::fit([
       'Create one production storyboard frame. No text, lettering, borders, split panels, or captions.',
       'VISUAL STYLE: ' . $storyboard->get('visual_style')->value,
       'ASPECT RATIO: ' . $storyboard->get('aspect_ratio')->value,
-      'CONTINUITY BIBLE: ' . $storyboard->get('continuity_bible')->value,
-      'CHARACTER BIBLE: ' . $storyboard->get('character_bible')->value,
-      $this->narrative->prompt($shot),
       'THIS SHOT: ' . $shot->get('image_prompt')->value,
       'COMPOSITION: ' . implode(', ', array_filter([$shot->get('shot_size')->value, $shot->get('camera_angle')->value, $shot->get('lens')->value, $shot->get('lighting')->value])),
       'SHOT CONTINUITY: ' . $shot->get('continuity_notes')->value,
       $after_prompt !== '' ? 'FINAL INSTRUCTION: ' . $after_prompt : '',
-    ]));
+      $this->narrative->prompt($shot),
+      'CONTINUITY BIBLE: ' . $storyboard->get('continuity_bible')->value,
+      'CHARACTER BIBLE: ' . $storyboard->get('character_bible')->value,
+    ], (int) $storyboard->get('max_prompt_length')->value ?: 4000);
     $references = $this->narrative->references($shot);
     $settings = ['aspect_ratio' => (string) $storyboard->get('aspect_ratio')->value, 'variations' => 1];
     $supports_references = $this->imageGenerator->supportsMultipleImages((string) $storyboard->get('image_model')->value);
