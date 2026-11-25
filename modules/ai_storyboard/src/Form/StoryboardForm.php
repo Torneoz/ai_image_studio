@@ -297,12 +297,26 @@ final class StoryboardForm extends FormBase {
   private function loadOrCreate(FormStateInterface $form_state): object {
     $storage = $this->entityTypeManager->getStorage('ai_storyboard');
     $board = $form_state->get('storyboard_id') ? $storage->load($form_state->get('storyboard_id')) : $storage->create(['uid' => $this->currentUser()->id()]);
-    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status', 'continuity_bible', 'character_bible'] as $field) {
-      $board->set($field, $form_state->getValue($field));
+    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status'] as $field) {
+      $value = $form_state->getValue(['project', $field]);
+      if ($value !== NULL) {
+        $board->set($field, $value);
+      }
     }
-    $board->set('audio_prompt', (string) $form_state->getValue('audio_prompt'));
-    $board->set('max_prompt_length', (int) $form_state->getValue('max_prompt_length'));
-    $board->set('machine_name', (string) $form_state->getValue('machine_name'));
+    foreach (['continuity_bible', 'character_bible', 'audio_prompt'] as $field) {
+      $value = $form_state->getValue(['prompt_bibles', $field]);
+      if ($value !== NULL) {
+        $board->set($field, $value);
+      }
+    }
+    $max_prompt_length = $form_state->getValue(['project', 'max_prompt_length']);
+    if ($max_prompt_length !== NULL && $max_prompt_length !== '') {
+      $board->set('max_prompt_length', (int) $max_prompt_length);
+    }
+    $machine_name = $form_state->getValue(['project', 'machine_name']);
+    if ($machine_name !== NULL) {
+      $board->set('machine_name', (string) $machine_name);
+    }
     $board->save();
     return $board;
   }
