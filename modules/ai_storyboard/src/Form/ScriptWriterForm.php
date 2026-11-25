@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\ai_storyboard\Form;
 
+use Drupal\ai_image_studio\Service\ImageGenerator;
+use Drupal\ai_storyboard\Service\ScriptBreakdown;
 use Drupal\ai_storyboard\Service\ScriptWriter;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
@@ -17,13 +19,20 @@ final class ScriptWriterForm extends FormBase {
   public function __construct(
     private readonly ScriptWriter $scriptWriter,
     private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly ScriptBreakdown $breakdown,
+    private readonly ImageGenerator $imageGenerator,
   ) {}
 
   /**
    *
    */
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('ai_storyboard.script_writer'), $container->get('entity_type.manager'));
+    return new static(
+      $container->get('ai_storyboard.script_writer'),
+      $container->get('entity_type.manager'),
+      $container->get('ai_storyboard.breakdown'),
+      $container->get('ai_image_studio.generator'),
+    );
   }
 
   /**
@@ -55,6 +64,18 @@ final class ScriptWriterForm extends FormBase {
       $form['result']['actions']['outline'] = ['#type' => 'submit', '#value' => $this->t('Use as outline'), '#submit' => ['::useAsOutline']];
       $form['result']['actions']['draft'] = ['#type' => 'submit', '#value' => $this->t('Draft screenplay from this'), '#submit' => ['::useAsDraft']];
       $form['result']['save_to_project'] = ['#type' => 'select', '#title' => $this->t('Save script to project'), '#options' => $this->getProjectOptions(), '#empty_option' => $this->t('- Select project -')];
+      $form['result']['create_project'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Create a new storyboard project'),
+        '#description' => $this->t('Create a project with this script and continue to its storyboard workspace.'),
+      ];
+      $form['result']['new_project_title'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('New project title'),
+        '#default_value' => $this->suggestTitle((string) $form_state->getValue('brief', '')),
+        '#maxlength' => 255,
+        '#states' => ['visible' => [':input[name="result[create_project]"]' => ['checked' => TRUE]], 'required' => [':input[name="result[create_project]"]' => ['checked' => TRUE]]],
+      ];
       $form['result']['actions']['save'] = ['#type' => 'submit', '#value' => $this->t('Save to project'), '#submit' => ['::saveToProject']];
     }
     $form['#cache']['max-age'] = 0;
@@ -105,6 +126,38 @@ final class ScriptWriterForm extends FormBase {
   public function saveToProject(array &$form, FormStateInterface $form_state): void {
     $id = $form_state->getValue(['result', 'save_to_project']);
     $text = trim((string) $form_state->getValue(['result', 'text']));
+    if ($form_state->getValue(['result', 'create_project'])) {
+      $title = trim((string) $form_state->getValue(['result', 'new_project_title']));
+      if ($title === '' || $text === '') {
+        $this->messenger()->addError($this->t('Enter a title and make sure the script is not empty.'));
+        $form_state->setRebuild();
+        return;
+      }
+      $chat_options = $this->breakdown->getModelOptions();
+      $image_options = $this->imageGenerator->getModelOptions('text_to_image');
+      if (!$chat_options || !$image_options) {
+        $this->messenger()->addError($this->t('Configure an available chat model and image generation model before creating a storyboard project.'));
+        $form_state->setRebuild();
+        return;
+      }
+      $settings = \Drupal::config('ai_image_studio.settings');
+      $board = $this->entityTypeManager->getStorage('ai_storyboard')->create([
+        'uid' => $this->currentUser()->id(),
+        'title' => $title,
+        'script' => $text,
+        'creative_brief' => (string) $form_state->getValue('brief'),
+        'visual_style' => 'cinematic storyboard sketch',
+        'aspect_ratio' => '16:9',
+        'chat_model' => (string) array_key_first($chat_options),
+        'image_model' => (string) array_key_first($image_options),
+        'max_prompt_length' => (int) ($settings->get('max_prompt_length') ?: 4000),
+        'status' => 'draft',
+      ]);
+      $board->save();
+      $this->messenger()->addStatus($this->t('New storyboard project created with the script. Use “Rebuild shots from script” when you are ready to create scenes and shots.'));
+      $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
+      return;
+    }
     $board = $id ? $this->entityTypeManager->getStorage('ai_storyboard')->load($id) : NULL;
     if ($text === '' || !$board || !$board->access('update')) {
       $this->messenger()->addError($this->t('Select a project you can edit.'));
@@ -129,6 +182,13 @@ final class ScriptWriterForm extends FormBase {
       }
     }
     return $options;
+  }
+
+  /** Suggests a concise project title from the creative brief. */
+  private function suggestTitle(string $brief): string {
+    $line = preg_split('/[\r\n.!?]+/', trim($brief))[0] ?? '';
+    $line = trim((string) preg_replace('/\s+/', ' ', $line));
+    return mb_substr($line ?: 'New screenplay', 0, 80);
   }
 
 }
