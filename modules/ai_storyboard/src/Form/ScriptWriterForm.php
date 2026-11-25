@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class ScriptWriterForm extends FormBase {
 
   public function __construct(
-    private readonly ScriptWriter $writer,
+    private readonly ScriptWriter $scriptWriter,
     private readonly EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
@@ -37,7 +37,7 @@ final class ScriptWriterForm extends FormBase {
    *
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $options = $this->writer->getModelOptions();
+    $options = $this->scriptWriter->getModelOptions();
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
     $form['intro'] = ['#markup' => '<p>' . $this->t('Develop an idea into a story outline, draft it as a screenplay, then revise passages with focused notes. Generated text stays in this workspace until you choose what to save.') . '</p>'];
     $form['setup'] = ['#type' => 'details', '#title' => $this->t('Story setup'), '#open' => TRUE];
@@ -66,7 +66,7 @@ final class ScriptWriterForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
-      $text = $this->writer->write((string) $form_state->getValue('model'), (string) $form_state->getValue('mode'), (string) $form_state->getValue('brief'), (string) $form_state->getValue('source'), (string) $form_state->getValue('instruction'));
+      $text = $this->scriptWriter->write((string) $form_state->getValue('model'), (string) $form_state->getValue('mode'), (string) $form_state->getValue('brief'), (string) $form_state->getValue('source'), (string) $form_state->getValue('instruction'));
       if ($text === '') {
         throw new \UnexpectedValueException('The provider returned empty writing.');
       }
