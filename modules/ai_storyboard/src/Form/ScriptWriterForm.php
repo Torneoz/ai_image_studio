@@ -105,12 +105,20 @@ final class ScriptWriterForm extends FormBase {
    *
    */
   public function saveToProject(array &$form, FormStateInterface $form_state): void {
-    $id = $form_state->getValue(['result', 'save_to_project']);
-    $text = trim((string) $form_state->getValue(['result', 'text']));
     $user_input = $form_state->getUserInput();
+    $result_input = is_array($user_input['result'] ?? NULL) ? $user_input['result'] : [];
+    $id = $form_state->getValue(['result', 'save_to_project'])
+      ?? $result_input['save_to_project']
+      ?? NULL;
+    $text = trim((string) (
+      $form_state->getValue(['result', 'text'])
+      ?? $result_input['text']
+      ?? $form_state->get('result')
+      ?? ''
+    ));
     $title = trim((string) ($form_state->getValue(['result', 'new_project_title'])
       ?? $form_state->getValue('new_project_title')
-      ?? $user_input['result']['new_project_title']
+      ?? $result_input['new_project_title']
       ?? ''));
     if (!$id && $title !== '') {
       if ($title === '' || $text === '') {
