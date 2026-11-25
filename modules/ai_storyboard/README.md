@@ -18,6 +18,12 @@ the next logical increments.
 
 ## Usage
 
+Use **AI Storyboards → Script writer** to develop a creative brief into an
+outline, draft a screenplay from outline or notes, or revise existing text with
+focused instructions. Generated text remains editable in the writer. Choose a
+project to save a script there; script writing does not automatically rebuild
+shots, so production breakdown remains an explicit next step in that project.
+
 Enable the module, grant **Access AI Storyboard**, then visit:
 
 `/admin/content/ai-storyboard`

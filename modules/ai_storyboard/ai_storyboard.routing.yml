@@ -14,6 +14,14 @@ entity.ai_storyboard.collection:
   requirements:
     _permission: 'access ai storyboard'
 
+ai_storyboard.script_writer:
+  path: '/admin/content/ai-storyboard/script-writer'
+  defaults:
+    _form: '\Drupal\ai_storyboard\Form\ScriptWriterForm'
+    _title: 'Script writer'
+  requirements:
+    _permission: 'access ai storyboard'
+
 ai_storyboard.new:
   path: '/admin/content/ai-storyboard/new'
   defaults:

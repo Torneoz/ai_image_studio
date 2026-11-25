@@ -18,6 +18,13 @@ ai_storyboard.new:
   parent: ai_image_studio.collection
   weight: -4
 
+ai_storyboard.script_writer:
+  title: 'Script writer'
+  description: 'Develop an idea into screenplay text and revise drafts.'
+  route_name: ai_storyboard.script_writer
+  parent: ai_image_studio.collection
+  weight: -3
+
 ai_storyboard.view_storyboards:
   title: 'AI Storyboards'
   description: 'Browse the AI Storyboards View.'
