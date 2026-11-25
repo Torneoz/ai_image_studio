@@ -16,25 +16,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Provides an AI assisted screenplay writing workspace. */
 final class ScriptWriterForm extends FormBase {
 
-  public function __construct(
-    private readonly ScriptWriter $scriptWriter,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
-    private readonly ScriptBreakdown $breakdown,
-    private readonly ImageGenerator $imageGenerator,
-  ) {}
-
-  /**
-   *
-   */
-  public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('ai_storyboard.script_writer'),
-      $container->get('entity_type.manager'),
-      $container->get('ai_storyboard.breakdown'),
-      $container->get('ai_image_studio.generator'),
-    );
-  }
-
   /**
    *
    */
@@ -46,7 +27,7 @@ final class ScriptWriterForm extends FormBase {
    *
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $options = $this->scriptWriter->getModelOptions();
+    $options = $this->scriptWriter()->getModelOptions();
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
     $form['intro'] = ['#markup' => '<p>' . $this->t('Develop an idea into a story outline, draft it as a screenplay, then revise passages with focused notes. Generated text stays in this workspace until you choose what to save.') . '</p>'];
     $form['setup'] = ['#type' => 'details', '#title' => $this->t('Story setup'), '#open' => TRUE];
@@ -87,7 +68,7 @@ final class ScriptWriterForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
-      $text = $this->scriptWriter->write((string) $form_state->getValue('model'), (string) $form_state->getValue('mode'), (string) $form_state->getValue('brief'), (string) $form_state->getValue('source'), (string) $form_state->getValue('instruction'));
+      $text = $this->scriptWriter()->write((string) $form_state->getValue('model'), (string) $form_state->getValue('mode'), (string) $form_state->getValue('brief'), (string) $form_state->getValue('source'), (string) $form_state->getValue('instruction'));
       if ($text === '') {
         throw new \UnexpectedValueException('The provider returned empty writing.');
       }
@@ -133,15 +114,15 @@ final class ScriptWriterForm extends FormBase {
         $form_state->setRebuild();
         return;
       }
-      $chat_options = $this->breakdown->getModelOptions();
-      $image_options = $this->imageGenerator->getModelOptions('text_to_image');
+      $chat_options = $this->breakdown()->getModelOptions();
+      $image_options = $this->imageGenerator()->getModelOptions('text_to_image');
       if (!$chat_options || !$image_options) {
         $this->messenger()->addError($this->t('Configure an available chat model and image generation model before creating a storyboard project.'));
         $form_state->setRebuild();
         return;
       }
       $settings = \Drupal::config('ai_image_studio.settings');
-      $board = $this->entityTypeManager->getStorage('ai_storyboard')->create([
+      $board = $this->entityTypeManager()->getStorage('ai_storyboard')->create([
         'uid' => $this->currentUser()->id(),
         'title' => $title,
         'script' => $text,
@@ -158,7 +139,7 @@ final class ScriptWriterForm extends FormBase {
       $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
       return;
     }
-    $board = $id ? $this->entityTypeManager->getStorage('ai_storyboard')->load($id) : NULL;
+    $board = $id ? $this->entityTypeManager()->getStorage('ai_storyboard')->load($id) : NULL;
     if ($text === '' || !$board || !$board->access('update')) {
       $this->messenger()->addError($this->t('Select a project you can edit.'));
       $form_state->setRebuild();
@@ -174,9 +155,9 @@ final class ScriptWriterForm extends FormBase {
    *
    */
   private function getProjectOptions(): array {
-    $ids = $this->entityTypeManager->getStorage('ai_storyboard')->getQuery()->accessCheck(TRUE)->sort('changed', 'DESC')->execute();
+    $ids = $this->entityTypeManager()->getStorage('ai_storyboard')->getQuery()->accessCheck(TRUE)->sort('changed', 'DESC')->execute();
     $options = [];
-    foreach ($this->entityTypeManager->getStorage('ai_storyboard')->loadMultiple($ids) as $board) {
+    foreach ($this->entityTypeManager()->getStorage('ai_storyboard')->loadMultiple($ids) as $board) {
       if ($board->access('update')) {
         $options[$board->id()] = $board->label();
       }
@@ -189,6 +170,26 @@ final class ScriptWriterForm extends FormBase {
     $line = preg_split('/[\r\n.!?]+/', trim($brief))[0] ?? '';
     $line = trim((string) preg_replace('/\s+/', ' ', $line));
     return mb_substr($line ?: 'New screenplay', 0, 80);
+  }
+
+  /** Returns the script writer service without retaining it on form state. */
+  private function scriptWriter(): ScriptWriter {
+    return \Drupal::service('ai_storyboard.script_writer');
+  }
+
+  /** Returns the entity type manager without retaining it on form state. */
+  private function entityTypeManager(): EntityTypeManagerInterface {
+    return \Drupal::entityTypeManager();
+  }
+
+  /** Returns the script breakdown service. */
+  private function breakdown(): ScriptBreakdown {
+    return \Drupal::service('ai_storyboard.breakdown');
+  }
+
+  /** Returns the image generator service. */
+  private function imageGenerator(): ImageGenerator {
+    return \Drupal::service('ai_image_studio.generator');
   }
 
 }
