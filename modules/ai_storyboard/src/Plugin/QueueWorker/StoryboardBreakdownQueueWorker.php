@@ -36,6 +36,7 @@ final class StoryboardBreakdownQueueWorker extends QueueWorkerBase {
     $state->set($id, [
       'status' => 'processing',
       'message' => 'Generating shots and continuity bibles. This page refreshes automatically.',
+      'processing_at' => \Drupal::time()->getCurrentTime(),
     ]);
     $snapshot = $board->toArray();
     $observability = \Drupal::service('ai_image_studio.observability');

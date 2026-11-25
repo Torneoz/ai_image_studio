@@ -297,23 +297,38 @@ final class StoryboardForm extends FormBase {
   private function loadOrCreate(FormStateInterface $form_state): object {
     $storage = $this->entityTypeManager->getStorage('ai_storyboard');
     $board = $form_state->get('storyboard_id') ? $storage->load($form_state->get('storyboard_id')) : $storage->create(['uid' => $this->currentUser()->id()]);
+    $input = $form_state->getUserInput();
+    $project_input = is_array($input['project'] ?? NULL) ? $input['project'] : [];
     foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status'] as $field) {
-      $value = $form_state->getValue(['project', $field]);
+      $value = $form_state->getValue(['project', $field])
+        ?? $form_state->getValue($field)
+        ?? $project_input[$field]
+        ?? NULL;
       if ($value !== NULL) {
         $board->set($field, $value);
       }
     }
+    $prompt_input = is_array($input['prompt_bibles'] ?? NULL) ? $input['prompt_bibles'] : [];
     foreach (['continuity_bible', 'character_bible', 'audio_prompt'] as $field) {
-      $value = $form_state->getValue(['prompt_bibles', $field]);
+      $value = $form_state->getValue(['prompt_bibles', $field])
+        ?? $form_state->getValue($field)
+        ?? $prompt_input[$field]
+        ?? NULL;
       if ($value !== NULL) {
         $board->set($field, $value);
       }
     }
-    $max_prompt_length = $form_state->getValue(['project', 'max_prompt_length']);
+    $max_prompt_length = $form_state->getValue(['project', 'max_prompt_length'])
+      ?? $form_state->getValue('max_prompt_length')
+      ?? $project_input['max_prompt_length']
+      ?? NULL;
     if ($max_prompt_length !== NULL && $max_prompt_length !== '') {
       $board->set('max_prompt_length', (int) $max_prompt_length);
     }
-    $machine_name = $form_state->getValue(['project', 'machine_name']);
+    $machine_name = $form_state->getValue(['project', 'machine_name'])
+      ?? $form_state->getValue('machine_name')
+      ?? $project_input['machine_name']
+      ?? NULL;
     if ($machine_name !== NULL) {
       $board->set('machine_name', (string) $machine_name);
     }
@@ -337,20 +352,44 @@ final class StoryboardForm extends FormBase {
    *
    */
   private function runBreakdown(object $board, FormStateInterface $form_state): void {
+    if (trim((string) $board->get('script')->value) === '') {
+      $this->messenger()->addError($this->t('Add a script before rebuilding shots.'));
+      $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
+      return;
+    }
+    $model_option = (string) $board->get('chat_model')->value;
+    if (!isset($this->breakdown->getModelOptions()[$model_option])) {
+      $this->messenger()->addError($this->t('Select an available script breakdown model and save the project before rebuilding shots.'));
+      $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
+      return;
+    }
     $state = \Drupal::keyValue('ai_storyboard.breakdown');
     $status = $state->get($board->id(), []);
-    if (!in_array($status['status'] ?? '', ['queued', 'processing'], TRUE)) {
-      $state->set($board->id(), [
-        'status' => 'queued',
-        'message' => (string) $this->t('Queued: generating shots and continuity bibles. This page refreshes automatically.'),
-      ]);
-      \Drupal::queue('ai_storyboard_breakdown')->createItem(['storyboard_id' => (int) $board->id()]);
-      \Drupal::service('ai_image_studio.observability')->record('breakdown.queued', [
-        'storyboard_id' => (int) $board->id(),
-        'status' => 'queued',
-        'model' => (string) $board->get('chat_model')->value,
-      ], ['ai_image_studio', 'ai_storyboard']);
+    $now = \Drupal::time()->getCurrentTime();
+    $stale_after = 900;
+    if (($status['status'] ?? '') === 'processing'
+      && $now - (int) ($status['processing_at'] ?? $now) < $stale_after) {
+      $this->messenger()->addStatus($this->t('This script breakdown is already processing.'));
+      $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
+      return;
     }
+    if (($status['status'] ?? '') === 'queued'
+      && $now - (int) ($status['queued_at'] ?? 0) < $stale_after) {
+      $this->messenger()->addStatus($this->t('This script breakdown is already queued.'));
+      $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
+      return;
+    }
+    $state->set($board->id(), [
+      'status' => 'queued',
+      'message' => (string) $this->t('Queued: generating shots and continuity bibles. This page refreshes automatically.'),
+      'queued_at' => $now,
+    ]);
+    \Drupal::queue('ai_storyboard_breakdown')->createItem(['storyboard_id' => (int) $board->id()]);
+    \Drupal::service('ai_image_studio.observability')->record('breakdown.queued', [
+      'storyboard_id' => (int) $board->id(),
+      'status' => 'queued',
+      'model' => $model_option,
+    ], ['ai_image_studio', 'ai_storyboard']);
     $this->messenger()->addStatus($this->t('Script breakdown queued. Your project has been saved.'));
     $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
   }
