@@ -45,19 +45,19 @@ final class ScriptWriterForm extends FormBase {
       $form['result']['actions']['outline'] = ['#type' => 'submit', '#value' => $this->t('Use as outline'), '#submit' => ['::useAsOutline']];
       $form['result']['actions']['draft'] = ['#type' => 'submit', '#value' => $this->t('Draft screenplay from this'), '#submit' => ['::useAsDraft']];
       $form['result']['save_to_project'] = ['#type' => 'select', '#title' => $this->t('Save script to project'), '#options' => $this->getProjectOptions(), '#empty_option' => $this->t('- Select project -')];
-      $form['result']['create_project'] = [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Create a new storyboard project'),
-        '#description' => $this->t('Create a project with this script and continue to its storyboard workspace.'),
-      ];
       $form['result']['new_project_title'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('New project title'),
+        '#title' => $this->t('Or create a new storyboard project'),
         '#default_value' => $this->suggestTitle((string) $form_state->getValue('brief', '')),
         '#maxlength' => 255,
-        '#states' => ['visible' => [':input[name="result[create_project]"]' => ['checked' => TRUE]], 'required' => [':input[name="result[create_project]"]' => ['checked' => TRUE]]],
+        '#description' => $this->t('Leave the existing project selector blank and enter a title here to create a new project.'),
       ];
-      $form['result']['actions']['save'] = ['#type' => 'submit', '#value' => $this->t('Save to project'), '#submit' => ['::saveToProject']];
+      $form['result']['actions']['save'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save to project'),
+        '#submit' => ['::saveToProject'],
+        '#name' => 'save_script_to_project',
+      ];
     }
     $form['#cache']['max-age'] = 0;
     return $form;
@@ -107,8 +107,12 @@ final class ScriptWriterForm extends FormBase {
   public function saveToProject(array &$form, FormStateInterface $form_state): void {
     $id = $form_state->getValue(['result', 'save_to_project']);
     $text = trim((string) $form_state->getValue(['result', 'text']));
-    if ($form_state->getValue(['result', 'create_project'])) {
-      $title = trim((string) $form_state->getValue(['result', 'new_project_title']));
+    $user_input = $form_state->getUserInput();
+    $title = trim((string) ($form_state->getValue(['result', 'new_project_title'])
+      ?? $form_state->getValue('new_project_title')
+      ?? $user_input['result']['new_project_title']
+      ?? ''));
+    if (!$id && $title !== '') {
       if ($title === '' || $text === '') {
         $this->messenger()->addError($this->t('Enter a title and make sure the script is not empty.'));
         $form_state->setRebuild();
