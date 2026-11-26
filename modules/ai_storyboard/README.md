@@ -73,8 +73,10 @@ that should also apply when individual shots are regenerated.
 Generated frames can be exported from the storyboard workspace as an ordered
 ZIP image collection with a JSON shot manifest, or as an MP4 animatic. The MP4
 uses each shot's configured duration, includes audio from generated video clips,
-and mixes in the project's selected Audio media item when present. It requires
-FFmpeg and FFprobe on the server.
+and mixes in the project's selected Audio media item when present. For still
+frame-only exports, shot durations are spread across the selected audio's full
+duration so the final frame remains visible until the soundtrack ends. It
+requires FFmpeg and FFprobe on the server.
 
 ## Reusable Locations, Characters and Scenes
 

@@ -187,6 +187,23 @@ final class StoryboardExportController extends ControllerBase {
     unset($frame);
 
     $soundtrack = $this->storyboardAudioPath($ai_storyboard);
+    $still_only = count(array_filter($frames, static fn (array $frame): bool => $frame['video'])) === 0;
+    if ($soundtrack !== NULL && $still_only) {
+      $probe = new Process([
+        'ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1', $soundtrack,
+      ]);
+      $probe->setTimeout(30);
+      $probe->run();
+      $audio_duration = $probe->isSuccessful() ? (float) trim($probe->getOutput()) : 0.0;
+      if ($audio_duration > 0) {
+        $still_duration = max(0.001, $audio_duration / count($frames));
+        foreach ($frames as &$frame) {
+          $frame['duration'] = $still_duration;
+        }
+        unset($frame);
+      }
+    }
     $timeline_duration = array_sum(array_column($frames, 'duration'));
 
     [$width, $height] = $this->videoDimensions((string) $ai_storyboard->get('aspect_ratio')->value);
