@@ -212,7 +212,7 @@ final class BulkJobController extends ControllerBase {
         ['data' => $preview],
         $result,
         ['data' => $regenerate],
-        ['data' => ['#plain_text' => (string) ($item->error_message ?? '')]],
+        ['data' => ['#plain_text' => $this->formatItemError((string) ($item->error_message ?? ''))]],
       ];
     }
     $active = array_filter(
@@ -330,6 +330,28 @@ final class BulkJobController extends ControllerBase {
     $query->addExpression('COUNT(*)', 'item_count');
     $query->condition('job_id', $job_id)->groupBy('status');
     return $query->execute()->fetchAllKeyed();
+  }
+
+  /** Turns monthly token quota failures into an actionable message. */
+  private function formatItemError(string $message): string {
+    if (!preg_match(
+      '/Monthly AI token quota exceeded for user \d+\. Budget:\s*(\d+),\s*consumed:\s*(\d+)/i',
+      $message,
+      $matches,
+    )) {
+      return $message;
+    }
+    $budget = (int) $matches[1];
+    $consumed = (int) $matches[2];
+    $over = max(0, $consumed - $budget);
+    return (string) $this->t(
+      'Monthly AI token limit reached. Usage is @consumed tokens against a limit of @budget tokens (@over tokens over). Wait for the quota to reset or ask your site administrator to increase it, then retry this failed item.',
+      [
+        '@consumed' => number_format($consumed),
+        '@budget' => number_format($budget),
+        '@over' => number_format($over),
+      ],
+    );
   }
 
   /**
