@@ -144,7 +144,7 @@ final class ScriptWriterForm extends FormBase {
       $form_state->setRebuild();
       return;
     }
-    \Drupal::service('user.private_tempstore')->get('ai_storyboard')->set('narration_text_' . $this->currentUser()->id(), $text);
+    \Drupal::service('tempstore.private')->get('ai_storyboard')->set('narration_text', $text);
     $form_state->setRedirect('ai_narration.generate', [], ['query' => ['storyboard_narration' => 1]]);
   }
 

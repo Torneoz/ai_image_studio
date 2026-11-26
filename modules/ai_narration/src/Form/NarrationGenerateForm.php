@@ -114,11 +114,11 @@ final class NarrationGenerateForm extends FormBase {
     if (!$form_state->has('storyboard_narration_transfer_checked')) {
       $query = \Drupal::request()->query;
       if ($query->getInt('storyboard_narration') === 1) {
-        $store = \Drupal::service('user.private_tempstore')->get('ai_storyboard');
-        $transferredText = $store->get('narration_text_' . $this->currentUser()->id());
+        $store = \Drupal::service('tempstore.private')->get('ai_storyboard');
+        $transferredText = $store->get('narration_text');
         if (is_string($transferredText) && trim($transferredText) !== '') {
           $form_state->set('storyboard_narration_text', $transferredText);
-          $store->delete('narration_text_' . $this->currentUser()->id());
+          $store->delete('narration_text');
           $storyboardTransfer = TRUE;
         }
       }
