@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ai_storyboard\Form;
 
 use Drupal\ai_image_studio\Service\BadgePolicy;
+use Drupal\ai_image_studio\Service\ImageGenerator;
 use Drupal\ai_storyboard\Service\StoryboardManager;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -19,12 +20,18 @@ final class GenerateShotForm extends ConfirmFormBase {
   private object $storyboard;
   private object $shot;
 
-  public function __construct(private readonly StoryboardManager $manager) {}
+  public function __construct(
+    private readonly StoryboardManager $manager,
+    private readonly ImageGenerator $imageGenerator,
+  ) {}
 
   /**
    * {@inheritdoc} */
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('ai_storyboard.manager'));
+    return new static(
+      $container->get('ai_storyboard.manager'),
+      $container->get('ai_image_studio.generator'),
+    );
   }
 
   /**
@@ -70,6 +77,17 @@ final class GenerateShotForm extends ConfirmFormBase {
     }
     $this->storyboard = $ai_storyboard;
     $this->shot = $ai_storyboard_shot;
+    $models = $this->imageGenerator->getModelOptions('text_to_image');
+    $form['image_model'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Frame generation model'),
+      '#options' => $models,
+      '#default_value' => isset($models[$ai_storyboard->get('image_model')->value])
+        ? $ai_storyboard->get('image_model')->value
+        : (string) array_key_first($models),
+      '#required' => TRUE,
+      '#description' => $this->t('This generation uses the selected model, even if earlier frames used a different model.'),
+    ];
     $form['badges'] = BadgePolicy::requestControls($this->config('ai_image_studio.settings')->getRawData());
     return parent::buildForm($form, $form_state);
   }
@@ -78,6 +96,12 @@ final class GenerateShotForm extends ConfirmFormBase {
    * {@inheritdoc} */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     try {
+      $model = (string) $form_state->getValue('image_model');
+      $available_models = $this->imageGenerator->getModelOptions('text_to_image');
+      if (!isset($available_models[$model])) {
+        throw new \InvalidArgumentException('Select an available frame generation model.');
+      }
+      $this->storyboard->set('image_model', $model)->save();
       $turn = $this->manager->generateShot($this->storyboard, $this->shot, (array) $form_state->getValue('badges'));
       if ($turn->get('status')->value === 'completed') {
         $this->messenger()->addStatus($this->t('The storyboard frame has been generated.'));
