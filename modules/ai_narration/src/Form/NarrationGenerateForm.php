@@ -110,7 +110,21 @@ final class NarrationGenerateForm extends FormBase {
     $savedProject = (int) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'last_project') ?? 0);
     $sitePlayerMode = (string) ($this->narrationConfigFactory->get('ai_narration.settings')->get('player_mode') ?: 'native');
     $savedPlayerMode = (string) ($this->userData->get('ai_narration', $this->currentUser()->id(), 'player_mode') ?? '');
-    $textDefault = (string) ($form_state->get('loaded_source_text') ?? $form_state->getValue('text') ?? $savedText);
+    $storyboardTransfer = FALSE;
+    if (!$form_state->has('storyboard_narration_transfer_checked')) {
+      $query = \Drupal::request()->query;
+      if ($query->getInt('storyboard_narration') === 1) {
+        $store = \Drupal::service('user.private_tempstore')->get('ai_storyboard');
+        $transferredText = $store->get('narration_text_' . $this->currentUser()->id());
+        if (is_string($transferredText) && trim($transferredText) !== '') {
+          $form_state->set('storyboard_narration_text', $transferredText);
+          $store->delete('narration_text_' . $this->currentUser()->id());
+          $storyboardTransfer = TRUE;
+        }
+      }
+      $form_state->set('storyboard_narration_transfer_checked', TRUE);
+    }
+    $textDefault = (string) ($form_state->get('loaded_source_text') ?? $form_state->getValue('text') ?? $form_state->get('storyboard_narration_text') ?? $savedText);
     $submittedModel = (string) ($form_state->getValue('model') ?? '');
     $model = isset($options[$submittedModel]) ? $submittedModel : (isset($options[$savedModel]) ? $savedModel : (isset($options[$default]) ? $default : ''));
     $form['intro'] = [
@@ -142,6 +156,13 @@ final class NarrationGenerateForm extends FormBase {
       '#prefix' => '<div id="ai-narration-simple-text-wrapper">',
       '#suffix' => '</div>',
     ];
+    if ($storyboardTransfer) {
+      $form['storyboard_source_notice'] = [
+        '#type' => 'item',
+        '#weight' => 1,
+        '#markup' => '<p>' . $this->t('Narration text was transferred from AI Storyboard. Review and edit it before generating audio.') . '</p>',
+      ];
+    }
     $limit = $this->generator->getInputCharacterLimit($model);
     $limitLabel = $limit === NULL
       ? $this->t('No application limit is available for this provider.')

@@ -59,4 +59,29 @@ final class ScriptWriter {
     }
   }
 
+  /** Adapts a screenplay into clean, speakable narration while preserving story events. */
+  public function createNarrationText(string $modelOption, string $script, string $instruction = ''): string {
+    $parts = explode('__', $modelOption);
+    if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+      throw new \InvalidArgumentException('The selected chat provider/model is unavailable.');
+    }
+    $provider = $this->providerManager->createInstance($parts[0]);
+    $model = $this->providerManager->getModelNameFromSimpleOption($modelOption);
+    if (!$provider->isUsable() || $model === '') {
+      throw new \InvalidArgumentException('The selected chat provider/model is unavailable.');
+    }
+    $input = new ChatInput([new ChatMessage('user', implode("\n\n", array_filter([
+      "SCREENPLAY:\n{$script}",
+      $instruction !== '' ? "NARRATION DIRECTION:\n{$instruction}" : '',
+    ])))]);
+    $input->setSystemPrompt('Adapt the screenplay into narration text intended to be read aloud. Preserve the complete plot, important character actions, emotional turns, and key spoken lines. Remove screenplay formatting, scene headings, camera directions, and production notes. Write fluent, natural spoken prose with clear transitions. Do not summarize, invent events, add an introduction or commentary, or include sound cues. Return only the narration text.');
+    try {
+      return trim((string) $provider->chat($input, $model, ['ai_storyboard'])->getNormalized()->getText());
+    }
+    catch (\Throwable $e) {
+      $this->logger->error('Narration adaptation failed: @message', ['@message' => $e->getMessage()]);
+      throw new \RuntimeException('The AI provider could not adapt the screenplay for narration. ' . $e->getMessage(), 0, $e);
+    }
+  }
+
 }

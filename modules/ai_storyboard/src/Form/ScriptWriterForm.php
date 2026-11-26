@@ -58,6 +58,13 @@ final class ScriptWriterForm extends FormBase {
         '#submit' => ['::saveToProject'],
         '#name' => 'save_script_to_project',
       ];
+      if ($form_state->get('narration_result')) {
+        $form['result']['narration'] = ['#type' => 'details', '#title' => $this->t('Narration text'), '#open' => TRUE];
+        $form['result']['narration']['text'] = ['#type' => 'textarea', '#title' => $this->t('Review and edit narration text'), '#rows' => 14, '#default_value' => $form_state->get('narration_result'), '#description' => $this->t('This version is adapted for spoken narration. Review it before opening AI Narration.')];
+        $form['result']['narration']['actions']['send'] = ['#type' => 'submit', '#value' => $this->t('Open in AI Narration'), '#submit' => ['::sendToNarration'], '#name' => 'send_to_ai_narration'];
+      }
+      $form['result']['narration_instruction'] = ['#type' => 'textarea', '#title' => $this->t('Narration adaptation direction'), '#rows' => 2, '#default_value' => $form_state->getValue(['result', 'narration_instruction'], ''), '#description' => $this->t('Optional tone or style, such as warm documentary or suspenseful third-person narration.')];
+      $form['result']['actions']['prepare_narration'] = ['#type' => 'submit', '#value' => $this->t('Prepare narration text'), '#submit' => ['::prepareNarration'], '#name' => 'prepare_narration_text'];
     }
     $form['#cache']['max-age'] = 0;
     return $form;
@@ -99,6 +106,46 @@ final class ScriptWriterForm extends FormBase {
     $form_state->setValue('mode', 'draft');
     $form_state->set('result', NULL);
     $form_state->setRebuild();
+  }
+
+  /** Adapts the current editable screenplay into narration text. */
+  public function prepareNarration(array &$form, FormStateInterface $form_state): void {
+    $script = trim((string) ($form_state->getValue(['result', 'text']) ?? $form_state->get('result') ?? ''));
+    if ($script === '') {
+      $this->messenger()->addError($this->t('Generate or enter screenplay text before preparing narration.'));
+      $form_state->setRebuild();
+      return;
+    }
+    try {
+      $text = $this->scriptWriter()->createNarrationText((string) $form_state->getValue('model'), $script, trim((string) $form_state->getValue(['result', 'narration_instruction'])));
+      if ($text === '') {
+        throw new \UnexpectedValueException('The provider returned empty narration text.');
+      }
+      $form_state->set('result', $script);
+      $form_state->set('narration_result', $text);
+    }
+    catch (\Throwable $e) {
+      $form_state->set('result', $script);
+      $this->messenger()->addError($this->t('Could not prepare narration text: @message', ['@message' => $e->getMessage()]));
+    }
+    $form_state->setRebuild();
+  }
+
+  /** Transfers reviewed narration text to the AI Narration form. */
+  public function sendToNarration(array &$form, FormStateInterface $form_state): void {
+    if (!\Drupal::moduleHandler()->moduleExists('ai_narration') || !\Drupal::currentUser()->hasPermission('generate ai narration')) {
+      $this->messenger()->addError($this->t('AI Narration is not available for your account.'));
+      $form_state->setRebuild();
+      return;
+    }
+    $text = trim((string) ($form_state->getValue(['result', 'narration', 'text']) ?? $form_state->get('narration_result') ?? ''));
+    if ($text === '') {
+      $this->messenger()->addError($this->t('Prepare narration text before opening AI Narration.'));
+      $form_state->setRebuild();
+      return;
+    }
+    \Drupal::service('user.private_tempstore')->get('ai_storyboard')->set('narration_text_' . $this->currentUser()->id(), $text);
+    $form_state->setRedirect('ai_narration.generate', [], ['query' => ['storyboard_narration' => 1]]);
   }
 
   /**
