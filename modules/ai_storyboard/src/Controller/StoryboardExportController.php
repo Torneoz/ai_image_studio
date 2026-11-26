@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessSignaledException;
 
 /**
  * Exports generated storyboard frames as image collections and animatics.
@@ -156,55 +155,21 @@ final class StoryboardExportController extends ControllerBase {
       $this->messenger()->addError($this->t('MP4 export requires FFmpeg and FFprobe on the server.'));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
     }
-    $frames = $this->frames($ai_storyboard, TRUE);
+    try {
+      $frames = $this->timelineFrames($ai_storyboard);
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('The MP4 timeline could not be prepared: @message', ['@message' => $exception->getMessage()]));
+      return new RedirectResponse($ai_storyboard->toUrl()->toString());
+    }
     if ($frames === []) {
       $this->messenger()->addError($this->t('Generate at least one storyboard frame or video before exporting an MP4.'));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
     }
 
-    foreach ($frames as &$frame) {
-      $frame['duration'] = max(0.1, (float) $frame['shot']->get('duration')->value);
-      $frame['audio'] = FALSE;
-      if ($frame['video']) {
-        $probe = new Process([
-          'ffprobe', '-v', 'error', '-show_entries',
-          'format=duration:stream=codec_type', '-of', 'json', $frame['path'],
-        ]);
-        $probe->setTimeout(30);
-        $probe->run();
-        $metadata = json_decode($probe->getOutput(), TRUE) ?: [];
-        $duration = (float) ($metadata['format']['duration'] ?? 0);
-        if (!$probe->isSuccessful() || $duration <= 0) {
-          $this->messenger()->addError($this->t('The video for “@shot” could not be read.', [
-            '@shot' => $frame['shot']->label(),
-          ]));
-          return new RedirectResponse($ai_storyboard->toUrl()->toString());
-        }
-        $frame['duration'] = $duration;
-        $frame['audio'] = in_array('audio', array_column($metadata['streams'] ?? [], 'codec_type'), TRUE);
-      }
-    }
-    unset($frame);
-
     $soundtrack = $this->storyboardAudioPath($ai_storyboard);
-    $still_only = count(array_filter($frames, static fn (array $frame): bool => $frame['video'])) === 0;
-    if ($soundtrack !== NULL && $still_only) {
-      $probe = new Process([
-        'ffprobe', '-v', 'error', '-show_entries', 'format=duration',
-        '-of', 'default=noprint_wrappers=1:nokey=1', $soundtrack,
-      ]);
-      $probe->setTimeout(30);
-      $probe->run();
-      $audio_duration = $probe->isSuccessful() ? (float) trim($probe->getOutput()) : 0.0;
-      if ($audio_duration > 0) {
-        $still_duration = max(0.001, $audio_duration / count($frames));
-        foreach ($frames as &$frame) {
-          $frame['duration'] = $still_duration;
-        }
-        unset($frame);
-      }
-    }
     $timeline_duration = array_sum(array_column($frames, 'duration'));
+    $subtitle_text = $this->subtitleFileContents($ai_storyboard, $frames, $timeline_duration);
 
     [$width, $height] = $this->videoDimensions((string) $ai_storyboard->get('aspect_ratio')->value);
     $output_path = tempnam($this->fileSystem->getTempDirectory(), 'ai-storyboard-video-');
@@ -220,6 +185,18 @@ final class StoryboardExportController extends ControllerBase {
     }
     if ($soundtrack !== NULL) {
       $command = array_merge($command, ['-stream_loop', '-1', '-i', $soundtrack]);
+    }
+    $subtitle_path = NULL;
+    if ($subtitle_text !== '') {
+      $subtitle_path = tempnam($this->fileSystem->getTempDirectory(), 'ai-storyboard-subs-');
+      if ($subtitle_path === FALSE || file_put_contents($subtitle_path, $subtitle_text) === FALSE) {
+        if (is_string($subtitle_path)) {
+          @unlink($subtitle_path);
+        }
+        @unlink($output_path);
+        throw new \RuntimeException('Could not prepare the temporary subtitle file.');
+      }
+      $command = array_merge($command, ['-f', 'srt', '-i', $subtitle_path]);
     }
     $filters = [];
     $streams = '';
@@ -268,32 +245,65 @@ final class StoryboardExportController extends ControllerBase {
       '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart',
       '-f', 'mp4',
-      $output_path,
     ]);
+    if ($subtitle_path !== NULL) {
+      $subtitle_index = count($frames) + ($soundtrack !== NULL ? 1 : 0);
+      $command = array_merge($command, ['-map', $subtitle_index . ':0', '-c:s', 'mov_text']);
+    }
+    $command[] = $output_path;
 
     $process = new Process($command);
     $process->setTimeout(900);
     try {
       $process->run();
     }
-    catch (ProcessSignaledException $exception) {
+    catch (\Throwable $exception) {
       @unlink($output_path);
+      if ($subtitle_path !== NULL) {
+        @unlink($subtitle_path);
+      }
       $this->messenger()->addError($this->t('The MP4 export process was terminated by the server. Try exporting fewer or shorter clips at a time.'));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
     }
     if (!$process->isSuccessful() || !is_file($output_path)
       || filesize($output_path) === 0) {
       @unlink($output_path);
+      if ($subtitle_path !== NULL) {
+        @unlink($subtitle_path);
+      }
       $this->messenger()->addError($this->t('The MP4 could not be created. FFmpeg reported: @message', [
         '@message' => mb_substr(trim($process->getErrorOutput()), 0, 500),
       ]));
       return new RedirectResponse($ai_storyboard->toUrl()->toString());
+    }
+    if ($subtitle_path !== NULL) {
+      @unlink($subtitle_path);
     }
 
     return $this->downloadResponse(
       $output_path,
       $this->projectFilename($ai_storyboard) . '-animatic.mp4',
     );
+  }
+
+  /** Downloads a SubRip subtitle file for the current storyboard timeline. */
+  public function downloadSubtitles(object $ai_storyboard): Response|RedirectResponse {
+    try {
+      $frames = $this->timelineFrames($ai_storyboard);
+      $duration = array_sum(array_column($frames, 'duration'));
+      $contents = $this->subtitleFileContents($ai_storyboard, $frames, $duration);
+      if ($contents === '') {
+        throw new \RuntimeException('No dialogue was found in the saved shots or screenplay.');
+      }
+      $response = new Response($contents, 200, ['Content-Type' => 'application/x-subrip; charset=UTF-8']);
+      $response->headers->set('Content-Disposition', $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $this->projectFilename($ai_storyboard) . '-subtitles.srt'));
+      $response->headers->set('Cache-Control', 'private, no-store');
+      return $response;
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('Subtitles could not be created: @message', ['@message' => $exception->getMessage()]));
+      return new RedirectResponse($ai_storyboard->toUrl()->toString());
+    }
   }
 
   /**
@@ -331,6 +341,163 @@ final class StoryboardExportController extends ControllerBase {
       }
     }
     return $frames;
+  }
+
+  /** Adds clip durations and stream metadata to the ordered storyboard frames. */
+  private function timelineFrames(object $storyboard): array {
+    $frames = $this->frames($storyboard, TRUE);
+    foreach ($frames as &$frame) {
+      $frame['duration'] = max(0.1, (float) $frame['shot']->get('duration')->value);
+      $frame['audio'] = FALSE;
+      if (!$frame['video']) {
+        continue;
+      }
+      if ((new ExecutableFinder())->find('ffprobe') === NULL) {
+        throw new \RuntimeException('FFprobe is required to read generated video durations.');
+      }
+      $probe = new Process([
+        'ffprobe', '-v', 'error', '-show_entries',
+        'format=duration:stream=codec_type', '-of', 'json', $frame['path'],
+      ]);
+      $probe->setTimeout(30);
+      $probe->run();
+      $metadata = json_decode($probe->getOutput(), TRUE) ?: [];
+      $duration = (float) ($metadata['format']['duration'] ?? 0);
+      if (!$probe->isSuccessful() || $duration <= 0) {
+        throw new \RuntimeException(sprintf('The video for "%s" could not be read.', $frame['shot']->label()));
+      }
+      $frame['duration'] = $duration;
+      $frame['audio'] = in_array('audio', array_column($metadata['streams'] ?? [], 'codec_type'), TRUE);
+    }
+    unset($frame);
+
+    $soundtrack = $this->storyboardAudioPath($storyboard);
+    $still_only = count(array_filter($frames, static fn (array $frame): bool => $frame['video'])) === 0;
+    if ($frames !== [] && $soundtrack !== NULL && $still_only && (new ExecutableFinder())->find('ffprobe') !== NULL) {
+      $probe = new Process([
+        'ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1', $soundtrack,
+      ]);
+      $probe->setTimeout(30);
+      $probe->run();
+      $audio_duration = $probe->isSuccessful() ? (float) trim($probe->getOutput()) : 0.0;
+      if ($audio_duration > 0) {
+        $still_duration = max(0.001, $audio_duration / count($frames));
+        foreach ($frames as &$frame) {
+          $frame['duration'] = $still_duration;
+        }
+        unset($frame);
+      }
+    }
+    return $frames;
+  }
+
+  /** Creates estimated SRT cues from shot dialogue or parsed screenplay dialogue. */
+  private function subtitleFileContents(object $storyboard, array $frames, float $timeline_duration): string {
+    if ($frames === [] || $timeline_duration <= 0) {
+      return '';
+    }
+    $cues = [];
+    $time = 0.0;
+    foreach ($frames as $frame) {
+      $dialogue = trim((string) $frame['shot']->get('dialogue')->value);
+      $duration = (float) $frame['duration'];
+      if ($dialogue !== '') {
+        $cues = array_merge($cues, $this->weightedSubtitleCues($dialogue, $time, $duration));
+      }
+      $time += $duration;
+    }
+
+    // Use the screenplay dialogue as a fallback when the shot breakdown did
+    // not include dialogue. These timings are proportional estimates, not
+    // speech recognition or forced alignment.
+    if ($cues === []) {
+      $paragraphs = ScriptExporter::paragraphs((string) $storyboard->get('script')->value);
+      $blocks = [];
+      $speaker = '';
+      foreach ($paragraphs as $paragraph) {
+        if ($paragraph['type'] === 'Character') {
+          $speaker = trim($paragraph['text']);
+        }
+        elseif ($paragraph['type'] === 'Dialogue') {
+          $line = trim($paragraph['text']);
+          if ($line !== '') {
+            $blocks[] = ($speaker !== '' ? $speaker . ': ' : '') . $line;
+          }
+        }
+      }
+      if ($blocks !== []) {
+        $cues = $this->weightedSubtitleCues(implode("\n", $blocks), 0, $timeline_duration);
+      }
+    }
+
+    $srt = '';
+    foreach ($cues as $index => $cue) {
+      $srt .= ($index + 1) . "\n"
+        . $this->subtitleTimestamp($cue['start']) . ' --> ' . $this->subtitleTimestamp($cue['end']) . "\n"
+        . $cue['text'] . "\n\n";
+    }
+    return $srt;
+  }
+
+  /** Splits readable text into two-line cues and distributes them by length. */
+  private function weightedSubtitleCues(string $text, float $start, float $duration): array {
+    $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags($text)));
+    if ($text === '' || $duration <= 0) {
+      return [];
+    }
+    $words = preg_split('/\s+/u', $text) ?: [];
+    $lines = [];
+    $line = '';
+    foreach ($words as $word) {
+      if (mb_strlen($word) > 42) {
+        if ($line !== '') {
+          $lines[] = $line;
+          $line = '';
+        }
+        foreach (mb_str_split($word, 42) as $part) {
+          $lines[] = $part;
+        }
+        continue;
+      }
+      $candidate = $line === '' ? $word : $line . ' ' . $word;
+      if ($line !== '' && mb_strlen($candidate) > 42) {
+        $lines[] = $line;
+        $line = $word;
+      }
+      else {
+        $line = $candidate;
+      }
+    }
+    if ($line !== '') {
+      $lines[] = $line;
+    }
+    $captions = [];
+    foreach (array_chunk($lines, 2) as $lineset) {
+      $captions[] = implode("\n", $lineset);
+    }
+    $weights = array_map(static fn (string $caption): int => max(1, mb_strlen(str_replace("\n", ' ', $caption))), $captions);
+    $weight_total = array_sum($weights);
+    $cues = [];
+    $elapsed = 0.0;
+    foreach ($captions as $index => $caption) {
+      $cue_duration = $index === array_key_last($captions)
+        ? $duration - $elapsed
+        : $duration * $weights[$index] / $weight_total;
+      $cues[] = ['start' => $start + $elapsed, 'end' => $start + $elapsed + $cue_duration, 'text' => $caption];
+      $elapsed += $cue_duration;
+    }
+    return $cues;
+  }
+
+  /** Formats a timestamp for the SubRip file format. */
+  private function subtitleTimestamp(float $seconds): string {
+    $milliseconds = max(0, (int) round($seconds * 1000));
+    $hours = intdiv($milliseconds, 3600000);
+    $minutes = intdiv($milliseconds % 3600000, 60000);
+    $whole_seconds = intdiv($milliseconds % 60000, 1000);
+    $fraction = $milliseconds % 1000;
+    return sprintf('%02d:%02d:%02d,%03d', $hours, $minutes, $whole_seconds, $fraction);
   }
 
   /** Gets the local file path for the project's selected Audio media item. */

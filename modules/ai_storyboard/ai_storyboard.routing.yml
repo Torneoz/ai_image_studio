@@ -76,6 +76,17 @@ ai_storyboard.download_video:
       ai_storyboard:
         type: entity:ai_storyboard
 
+ai_storyboard.download_subtitles:
+  path: '/admin/content/ai-storyboard/{ai_storyboard}/export/subtitles'
+  defaults:
+    _controller: '\Drupal\ai_storyboard\Controller\StoryboardExportController::downloadSubtitles'
+  requirements:
+    _entity_access: 'ai_storyboard.view'
+  options:
+    parameters:
+      ai_storyboard:
+        type: entity:ai_storyboard
+
 entity.ai_storyboard.delete_form:
   path: '/admin/content/ai-storyboard/{ai_storyboard}/delete'
   defaults:

@@ -224,6 +224,14 @@ final class StoryboardForm extends FormBase {
         ]),
         '#attributes' => ['class' => ['button']],
       ];
+      $form['storyboard_actions']['buttons']['download_subtitles'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download subtitles (SRT)'),
+        '#url' => Url::fromRoute('ai_storyboard.download_subtitles', [
+          'ai_storyboard' => $ai_storyboard->id(),
+        ]),
+        '#attributes' => ['class' => ['button']],
+      ];
       $delete = Link::fromTextAndUrl(
         $this->t('Delete'),
         $ai_storyboard->toUrl('delete-form'),

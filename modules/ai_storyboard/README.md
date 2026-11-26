@@ -76,7 +76,11 @@ uses each shot's configured duration, includes audio from generated video clips,
 and mixes in the project's selected Audio media item when present. For still
 frame-only exports, shot durations are spread across the selected audio's full
 duration so the final frame remains visible until the soundtrack ends. It
-requires FFmpeg and FFprobe on the server.
+requires FFmpeg and FFprobe on the server. Dialogue can also be downloaded as
+an SRT subtitle file and is embedded as a selectable subtitle track in the MP4
+when available. Subtitle timing is estimated from shot durations, or spread
+over the timeline when using screenplay dialogue as a fallback; it is not
+aligned against the spoken audio.
 
 ## Reusable Locations, Characters and Scenes
 
