@@ -80,6 +80,15 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
     $fields['audio_prompt'] = BaseFieldDefinition::create('string_long')
       ->setLabel(new TranslatableMarkup('Audio prompt'))
       ->setDescription(new TranslatableMarkup('Project-wide audio instructions included in every video generation prompt.'));
+    $fields['audio_media'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Audio media'))
+      ->setDescription(new TranslatableMarkup('Optional Audio media item associated with this storyboard project.'))
+      ->setSetting('target_type', 'media')
+      ->setSetting('handler', 'default:media')
+      ->setSetting('handler_settings', ['target_bundles' => ['audio' => 'audio']])
+      ->setDisplayOptions('form', ['type' => 'entity_reference_autocomplete', 'weight' => 9])
+      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'entity_reference_entity_view', 'weight' => 9])
+      ->setDisplayConfigurable('view', TRUE);
     $fields['studio_session_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Image Studio session'))->setSetting('target_type', 'ai_image_studio_session');
     $fields['status'] = BaseFieldDefinition::create('list_string')->setLabel(new TranslatableMarkup('Status'))->setSettings(['allowed_values' => ['draft' => 'Draft', 'in_review' => 'In review', 'approved' => 'Approved']])->setDefaultValue('draft');
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(new TranslatableMarkup('Created'));
