@@ -186,6 +186,9 @@ final class StoryboardExportController extends ControllerBase {
     }
     unset($frame);
 
+    $soundtrack = $this->storyboardAudioPath($ai_storyboard);
+    $timeline_duration = array_sum(array_column($frames, 'duration'));
+
     [$width, $height] = $this->videoDimensions((string) $ai_storyboard->get('aspect_ratio')->value);
     $output_path = tempnam($this->fileSystem->getTempDirectory(), 'ai-storyboard-video-');
     if ($output_path === FALSE) {
@@ -197,6 +200,9 @@ final class StoryboardExportController extends ControllerBase {
         $command = array_merge($command, ['-loop', '1', '-t', (string) $frame['duration']]);
       }
       $command = array_merge($command, ['-i', $frame['path']]);
+    }
+    if ($soundtrack !== NULL) {
+      $command = array_merge($command, ['-stream_loop', '-1', '-i', $soundtrack]);
     }
     $filters = [];
     $streams = '';
@@ -220,12 +226,22 @@ final class StoryboardExportController extends ControllerBase {
       $streams,
       count($frames),
     );
+    $audio_map = '[outa]';
+    if ($soundtrack !== NULL) {
+      $soundtrack_index = count($frames);
+      $filters[] = sprintf(
+        '[%d:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,atrim=duration=%s,asetpts=PTS-STARTPTS[soundtrack];[outa][soundtrack]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.95[audioout]',
+        $soundtrack_index,
+        $timeline_duration,
+      );
+      $audio_map = '[audioout]';
+    }
     $command = array_merge($command, [
       '-filter_threads', '1',
       '-filter_complex_threads', '1',
       '-filter_complex', implode(';', $filters),
       '-map', '[outv]',
-      '-map', '[outa]',
+      '-map', $audio_map,
       '-c:a', 'aac',
       '-b:a', '192k',
       '-c:v', 'libx264',
@@ -298,6 +314,24 @@ final class StoryboardExportController extends ControllerBase {
       }
     }
     return $frames;
+  }
+
+  /** Gets the local file path for the project's selected Audio media item. */
+  private function storyboardAudioPath(object $storyboard): ?string {
+    if (!$storyboard->hasField('audio_media') || !$storyboard->get('audio_media')->entity) {
+      return NULL;
+    }
+    $media = $storyboard->get('audio_media')->entity;
+    $source_field = (string) ($media->getSource()->getConfiguration()['source_field'] ?? '');
+    if ($source_field === '' || !$media->hasField($source_field)) {
+      return NULL;
+    }
+    $file = $media->get($source_field)->entity;
+    if (!$file instanceof FileInterface) {
+      return NULL;
+    }
+    $path = $this->fileSystem->realpath($file->getFileUri());
+    return $path !== FALSE && is_file($path) ? $path : NULL;
   }
 
   /**
