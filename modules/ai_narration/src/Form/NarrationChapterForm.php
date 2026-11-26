@@ -191,10 +191,16 @@ final class NarrationChapterForm extends ContentEntityForm {
     ];
     $values = $form_state->getValue('source') ?? $saved;
     $type = in_array($values['type'] ?? '', ['local', 'remote_url', 'entity'], TRUE) ? $values['type'] : 'local';
-    $entityType = 'node';
-    $bundles = array_map(static fn ($type) => $type->label(), $this->entityTypeManager->getStorage('node_type')->loadMultiple());
+    $entity_types = ['node' => $this->t('Content item')];
+    if (\Drupal::moduleHandler()->moduleExists('ai_storyboard')) {
+      $entity_types['ai_storyboard_scene'] = $this->t('Storyboard scene');
+    }
+    $entityType = isset($entity_types[$values['entity_type'] ?? '']) ? (string) $values['entity_type'] : 'node';
+    $bundles = $entityType === 'node'
+      ? array_map(static fn ($type) => $type->label(), $this->entityTypeManager->getStorage('node_type')->loadMultiple())
+      : [];
     $bundle = $values['bundle'] ?? '';
-    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage('node')->load((int) $values['entity_id']) : NULL;
+    $sourceEntity = !empty($values['entity_id']) ? $this->entityTypeManager->getStorage($entityType)->load((int) $values['entity_id']) : NULL;
 
     $form['source'] = [
       '#type' => 'details',
@@ -208,7 +214,7 @@ final class NarrationChapterForm extends ContentEntityForm {
     $form['source']['type'] = [
       '#type' => 'radios',
       '#title' => $this->t('Source'),
-      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local node')],
+      '#options' => ['local' => $this->t('Local text'), 'remote_url' => $this->t('Remote URL'), 'entity' => $this->t('Local content or storyboard scene')],
       '#default_value' => $type,
       '#description' => $this->t('Local text is written directly below. A remote URL or local entity must be explicitly loaded.'),
       '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
@@ -226,19 +232,35 @@ final class NarrationChapterForm extends ContentEntityForm {
       '#options' => $bundles,
       '#default_value' => $bundle,
       '#empty_option' => $this->t('- Any content type -'),
+      '#access' => $type === 'entity' && $entityType === 'node',
+      '#description' => $this->t('Limit content suggestions to a content type.'),
+      '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
+    ];
+    $form['source']['entity_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content type'),
+      '#options' => $entity_types,
+      '#default_value' => $entityType,
       '#access' => $type === 'entity',
-      '#description' => $this->t('Limit node suggestions to a content type.'),
       '#ajax' => ['callback' => '::refreshSourceControls', 'wrapper' => 'ai-narration-chapter-source', 'event' => 'change', 'progress' => ['type' => 'throbber']],
     ];
     $form['source']['entity_id'] = [
       '#type' => 'entity_autocomplete',
       '#title' => $this->t('Entity'),
       '#target_type' => $entityType,
-      '#selection_settings' => $bundle === '' ? [] : ['target_bundles' => [$bundle]],
+      '#selection_settings' => $entityType !== 'node' || $bundle === '' ? [] : ['target_bundles' => [$bundle]],
       '#default_value' => $sourceEntity,
       '#access' => $type === 'entity',
-      '#description' => $this->t('Start typing a node title to choose narration content.'),
+      '#description' => $this->t('Select the content item or Storyboard scene for this narration chapter.'),
     ];
+    if ($entityType === 'ai_storyboard_scene' && !empty($values['entity_id'])) {
+      $form['source']['scene_link'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Open linked Storyboard scene'),
+        '#url' => \Drupal\Core\Url::fromRoute('entity.ai_storyboard_scene.canonical', ['ai_storyboard_scene' => (int) $values['entity_id']]),
+        '#access' => $type === 'entity',
+      ];
+    }
     if ($type !== 'local') {
       $form['source']['load'] = [
         '#type' => 'submit',
@@ -282,12 +304,20 @@ final class NarrationChapterForm extends ContentEntityForm {
         $source['entity_id'] = 0;
       }
       elseif (($source['type'] ?? '') === 'entity') {
-        $entityType = 'node';
+        $entityType = (string) ($source['entity_type'] ?? 'node');
+        $allowed_types = ['node'];
+        if (\Drupal::moduleHandler()->moduleExists('ai_storyboard')) {
+          $allowed_types[] = 'ai_storyboard_scene';
+        }
+        if (!in_array($entityType, $allowed_types, TRUE)) {
+          throw new \RuntimeException('Choose a content item or Storyboard scene.');
+        }
         $entityId = (int) ($source['entity_id'] ?? 0);
         if ($entityType === '' || $entityId <= 0) {
           throw new \RuntimeException('Choose a local entity to load.');
         }
         $loaded = $this->sourceLoader->loadEntity($entityType, $entityId);
+        $source['entity_type'] = $entityType;
         $source['url'] = '';
       }
       else {

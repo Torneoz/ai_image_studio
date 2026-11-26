@@ -65,6 +65,26 @@ final class NarrationSourceLoader {
     if (!$entity || !$entity->access('view', $this->currentUser)) {
       throw new \RuntimeException('The selected local entity is unavailable or cannot be viewed.');
     }
+    if ($entityTypeId === 'ai_storyboard_scene') {
+      $scene_number = (int) ($entity->get('scene_number')->value ?? 0);
+      $values = [$scene_number > 0 ? "Scene {$scene_number}: {$entity->label()}" : (string) $entity->label()];
+      foreach ([
+        'script_excerpt' => 'Script excerpt',
+        'action' => 'Scene action',
+        'conditions' => 'Scene conditions',
+        'character_states' => 'Character states',
+      ] as $field => $label) {
+        $text = trim((string) ($entity->get($field)->value ?? ''));
+        if ($text !== '') {
+          $values[] = $label . ":\n" . $text;
+        }
+      }
+      $text = $this->normaliseText(implode("\n\n", $values));
+      if ($text === '') {
+        throw new \RuntimeException('The selected Storyboard scene has no readable narration text.');
+      }
+      return ['title' => (string) $entity->label(), 'text' => $text];
+    }
     $values = $entityTypeId === 'node' ? [(string) $entity->label()] : [];
     foreach ($entity->getFieldDefinitions() as $name => $fieldDefinition) {
       // Nodes intentionally narrate only their title and body fields. This
