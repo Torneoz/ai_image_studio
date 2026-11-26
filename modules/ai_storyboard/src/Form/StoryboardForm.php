@@ -86,16 +86,26 @@ final class StoryboardForm extends FormBase {
     ];
     $form['project']['creative_brief'] = ['#type' => 'textarea', '#title' => $this->t('Creative brief'), '#rows' => 3, '#default_value' => $ai_storyboard?->get('creative_brief')->value, '#description' => $this->t('Audience, objective, tone, runtime, platform, and production constraints.')];
     $form['project']['script'] = ['#type' => 'textarea', '#title' => $this->t('Script'), '#required' => TRUE, '#rows' => 14, '#default_value' => $ai_storyboard?->get('script')->value];
-    $audio_media = $ai_storyboard?->get('audio_media')->entity;
-    $form['project']['audio_media'] = [
-      '#type' => 'entity_autocomplete',
-      '#title' => $this->t('Audio media'),
-      '#target_type' => 'media',
-      '#selection_settings' => ['target_bundles' => ['audio']],
-      '#default_value' => $audio_media,
-      '#description' => $this->t('Select an Audio item from the Media Library to associate it with this storyboard project.'),
-      '#weight' => 9,
-    ];
+    if ($ai_storyboard === NULL || $ai_storyboard->hasField('audio_media')) {
+      $audio_media = $ai_storyboard?->hasField('audio_media') ? $ai_storyboard->get('audio_media')->entity : NULL;
+      $form['project']['audio_media'] = [
+        '#type' => 'entity_autocomplete',
+        '#title' => $this->t('Audio media'),
+        '#target_type' => 'media',
+        '#selection_settings' => ['target_bundles' => ['audio']],
+        '#default_value' => $audio_media,
+        '#description' => $this->t('Select an Audio item from the Media Library to associate it with this storyboard project.'),
+        '#weight' => 9,
+      ];
+    }
+    else {
+      $form['project']['audio_media_update'] = [
+        '#type' => 'item',
+        '#title' => $this->t('Audio media'),
+        '#plain_text' => $this->t('Run pending database updates to enable the Audio media reference.'),
+        '#weight' => 9,
+      ];
+    }
     $form['project']['visual_style'] = ['#type' => 'textfield', '#title' => $this->t('Visual style'), '#default_value' => $ai_storyboard?->get('visual_style')->value ?? 'cinematic storyboard sketch', '#maxlength' => 255];
     $form['project']['after_prompt'] = [
       '#type' => 'textarea',
@@ -336,7 +346,11 @@ final class StoryboardForm extends FormBase {
     $board = $form_state->get('storyboard_id') ? $storage->load($form_state->get('storyboard_id')) : $storage->create(['uid' => $this->currentUser()->id()]);
     $input = $form_state->getUserInput();
     $project_input = is_array($input['project'] ?? NULL) ? $input['project'] : [];
-    foreach (['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'audio_media', 'status'] as $field) {
+    $fields = ['title', 'creative_brief', 'script', 'visual_style', 'after_prompt', 'aspect_ratio', 'chat_model', 'image_model', 'status'];
+    if ($board->hasField('audio_media')) {
+      $fields[] = 'audio_media';
+    }
+    foreach ($fields as $field) {
       $value = $form_state->getValue(['project', $field])
         ?? $form_state->getValue($field)
         ?? $project_input[$field]
