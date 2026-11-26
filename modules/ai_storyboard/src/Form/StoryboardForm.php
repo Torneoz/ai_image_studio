@@ -288,7 +288,34 @@ final class StoryboardForm extends FormBase {
   /**
    * Saves and deliberately replaces the generated breakdown. */
   public function rebuildShots(array &$form, FormStateInterface $form_state): void {
-    $this->runBreakdown($this->loadOrCreate($form_state), $form_state);
+    $id = (int) $form_state->get('storyboard_id');
+    $board = $this->entityTypeManager->getStorage('ai_storyboard')->load($id);
+    if (!$board) {
+      $this->messenger()->addError($this->t('The storyboard project could not be loaded.'));
+      return;
+    }
+
+    // Rebuild only from the script already saved on the project. Saving the
+    // whole form here risks treating the clicked submit button as a field
+    // value, which can overwrite the script. Model selections are the one
+    // project setting users commonly change immediately before rebuilding.
+    $input = $form_state->getUserInput();
+    $project_input = is_array($input['project'] ?? NULL) ? $input['project'] : [];
+    $model_options = [
+      'chat_model' => $this->breakdown->getModelOptions(),
+      'image_model' => $this->imageGenerator->getModelOptions('text_to_image'),
+    ];
+    foreach ($model_options as $field => $available) {
+      $value = $form_state->getValue(['project', $field])
+        ?? $form_state->getValue($field)
+        ?? $project_input[$field]
+        ?? NULL;
+      if (is_string($value) && isset($available[$value])) {
+        $board->set($field, $value);
+      }
+    }
+    $board->save();
+    $this->runBreakdown($board, $form_state);
   }
 
   /**
