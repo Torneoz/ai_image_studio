@@ -27,12 +27,13 @@ final class StoryboardBulkManager {
 
   /**
    * Queues all current shots in a storyboard and returns the new job ID. */
-  public function enqueueProject(object $storyboard, int $uid, array $badge_settings = []): int {
+  public function enqueueProject(object $storyboard, int $uid, array $badge_settings = [], bool $skip_existing_frames = TRUE): int {
     $now = $this->time->getRequestTime();
     $configuration = json_encode([
       'badge_settings' => $badge_settings,
       'source_type' => 'storyboard',
       'storyboard_id' => (int) $storyboard->id(),
+      'skip_existing_frames' => $skip_existing_frames,
     ], JSON_THROW_ON_ERROR);
     $session_id = $storyboard->get('studio_session_id')->target_id;
     $job_id = (int) $this->database->insert('ai_image_studio_vbo_job')
@@ -52,7 +53,12 @@ final class StoryboardBulkManager {
       ->condition('storyboard_id', $storyboard->id())
       ->sort('position')
       ->execute();
+    $queued_count = 0;
     foreach ($storage->loadMultiple($ids) as $shot) {
+      $existing_frame = $shot->get('studio_turn_id')->entity?->get('image')->entity;
+      if ($skip_existing_frames && $existing_frame) {
+        continue;
+      }
       $item_id = (int) $this->database->insert('ai_image_studio_vbo_item')
         ->fields([
           'job_id' => $job_id,
@@ -68,8 +74,9 @@ final class StoryboardBulkManager {
         ])->execute();
       $this->queueFactory->get('ai_storyboard_frame_generation')
         ->createItem(['item_id' => $item_id]);
+      $queued_count++;
     }
-    if ($ids === []) {
+    if ($queued_count === 0) {
       $this->updateJobStatus($job_id);
     }
     return $job_id;

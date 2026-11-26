@@ -45,7 +45,7 @@ final class GenerateAllForm extends ConfirmFormBase {
   /**
    * {@inheritdoc} */
   public function getDescription(): string {
-    return (string) $this->t('One provider request will be queued for every shot. Existing frames will be regenerated and retained in the linked Image Studio session history. Provider charges may apply.');
+    return (string) $this->t('Choose whether to skip shots that already have a generated frame. Each queued shot makes a provider request and may incur charges.');
   }
 
   /**
@@ -66,6 +66,12 @@ final class GenerateAllForm extends ConfirmFormBase {
    * {@inheritdoc} */
   public function buildForm(array $form, FormStateInterface $form_state, ?object $ai_storyboard = NULL): array {
     $this->storyboard = $ai_storyboard;
+    $form['skip_existing_frames'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Skip shots that already have a generated frame'),
+      '#default_value' => 1,
+      '#description' => $this->t('Clear this option to regenerate every shot. Previous images remain in the linked Image Studio session history.'),
+    ];
     $form['badges'] = BadgePolicy::requestControls($this->config('ai_image_studio.settings')->getRawData());
     return parent::buildForm($form, $form_state);
   }
@@ -77,8 +83,9 @@ final class GenerateAllForm extends ConfirmFormBase {
       $this->storyboard,
       (int) $this->currentUser()->id(),
       (array) $form_state->getValue('badges'),
+      (bool) $form_state->getValue('skip_existing_frames'),
     );
-    $this->messenger()->addStatus($this->t('All storyboard frames have been queued.'));
+    $this->messenger()->addStatus($this->t('Eligible storyboard frames have been queued. Shots with existing frames were skipped according to your selection.'));
     $form_state->setRedirect('ai_image_studio_vbo.job', ['job_id' => $job_id]);
   }
 
