@@ -27,9 +27,20 @@ final class ScriptWriterForm extends FormBase {
    *
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
+    $this->loadScriptFromQuery($form_state);
     $options = $this->scriptWriter()->getModelOptions();
     $form['#attached']['library'][] = 'ai_storyboard/workspace';
-    $form['intro'] = ['#markup' => '<p>' . $this->t('Develop an idea into a story outline, draft it as a screenplay, then revise passages with focused notes. Generated text stays in this workspace until you choose what to save.') . '</p>'];
+    $form['intro'] = ['#markup' => '<p>' . $this->t('Develop an idea into a story outline, draft it as a screenplay, then revise passages with focused notes. Save scripts as reusable, editable documents.') . '</p>'];
+    $form['script_id'] = ['#type' => 'hidden', '#value' => $form_state->get('script_id')];
+    $form['saved_scripts'] = ['#type' => 'details', '#title' => $this->t('Saved scripts'), '#open' => FALSE];
+    $form['saved_scripts']['script'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Open a saved script'),
+      '#options' => $this->getSavedScriptOptions(),
+      '#empty_option' => $this->t('- Select a script -'),
+      '#default_value' => $form_state->get('script_id') ?: '',
+    ];
+    $form['saved_scripts']['load'] = ['#type' => 'submit', '#value' => $this->t('Open script'), '#submit' => ['::loadSavedScript']];
     $form['setup'] = ['#type' => 'details', '#title' => $this->t('Story setup'), '#open' => TRUE];
     $form['setup']['brief'] = ['#type' => 'textarea', '#title' => $this->t('What is the story?'), '#description' => $this->t('Describe the premise, genre, tone, audience, format, characters, themes, or constraints. Start with whatever you know.'), '#rows' => 5, '#required' => TRUE, '#default_value' => $form_state->getValue('brief', '')];
     $form['setup']['model'] = ['#type' => 'select', '#title' => $this->t('Writing model'), '#options' => $options, '#required' => TRUE, '#default_value' => $form_state->getValue('model') ?: (string) array_key_first($options)];
@@ -40,10 +51,12 @@ final class ScriptWriterForm extends FormBase {
     $form['actions']['generate'] = ['#type' => 'submit', '#value' => $this->t('Generate writing'), '#button_type' => 'primary'];
     if ($form_state->get('result')) {
       $form['result'] = ['#type' => 'details', '#title' => $this->t('Generated draft'), '#open' => TRUE, '#weight' => 10];
+      $form['result']['title'] = ['#type' => 'textfield', '#title' => $this->t('Script title'), '#required' => TRUE, '#maxlength' => 255, '#default_value' => $form_state->getValue(['result', 'title']) ?: $this->suggestTitle((string) $form_state->getValue('brief', ''))];
       $form['result']['text'] = ['#type' => 'textarea', '#title' => $this->t('Edit the result'), '#rows' => 24, '#default_value' => $form_state->get('result'), '#description' => $this->t('Edit freely before saving or using this text as the next step.')];
       $form['result']['actions'] = ['#type' => 'actions'];
       $form['result']['actions']['outline'] = ['#type' => 'submit', '#value' => $this->t('Use as outline'), '#submit' => ['::useAsOutline']];
       $form['result']['actions']['draft'] = ['#type' => 'submit', '#value' => $this->t('Draft screenplay from this'), '#submit' => ['::useAsDraft']];
+      $form['result']['actions']['save_script'] = ['#type' => 'submit', '#value' => $this->t($form_state->get('script_id') ? 'Save changes to script' : 'Save script'), '#button_type' => 'primary', '#submit' => ['::saveScript'], '#name' => 'save_script_draft'];
       $form['result']['save_to_project'] = ['#type' => 'select', '#title' => $this->t('Save script to project'), '#options' => $this->getProjectOptions(), '#empty_option' => $this->t('- Select project -')];
       $form['result']['new_project_title'] = [
         '#type' => 'textfield',
@@ -80,12 +93,110 @@ final class ScriptWriterForm extends FormBase {
         throw new \UnexpectedValueException('The provider returned empty writing.');
       }
       $form_state->set('result', $text);
+      $form_state->set('narration_result', NULL);
       $form_state->setRebuild();
     }
     catch (\Throwable $e) {
       $this->messenger()->addError($this->t('Could not generate writing: @message', ['@message' => $e->getMessage()]));
       $form_state->setRebuild();
     }
+  }
+
+  /** Opens an owned saved script in the writer workspace. */
+  public function loadSavedScript(array &$form, FormStateInterface $form_state): void {
+    $id = (int) ($form_state->getValue(['saved_scripts', 'script']) ?? 0);
+    $script = $id ? $this->entityTypeManager()->getStorage('ai_storyboard_script')->load($id) : NULL;
+    if (!$script || !$script->access('view')) {
+      $this->messenger()->addError($this->t('Select a saved script you can access.'));
+      $form_state->setRebuild();
+      return;
+    }
+    $this->populateFromScript($script, $form_state);
+    $this->messenger()->addStatus($this->t('Opened @title.', ['@title' => $script->label()]));
+    $form_state->setRebuild();
+  }
+
+  /** Saves the editable writer workspace to its script entity. */
+  public function saveScript(array &$form, FormStateInterface $form_state): void {
+    $script_text = trim((string) ($form_state->getValue(['result', 'text']) ?? $form_state->get('result') ?? ''));
+    $title = trim((string) $form_state->getValue(['result', 'title']));
+    if ($script_text === '') {
+      $this->messenger()->addError($this->t('Write or generate screenplay text before saving.'));
+      $form_state->setRebuild();
+      return;
+    }
+    if ($title === '') {
+      $title = $this->suggestTitle((string) $form_state->getValue('brief', ''));
+    }
+    $storage = $this->entityTypeManager()->getStorage('ai_storyboard_script');
+    $id = (int) ($form_state->getValue('script_id') ?: $form_state->get('script_id'));
+    $script = $id ? $storage->load($id) : NULL;
+    if ($script && !$script->access('update')) {
+      $this->messenger()->addError($this->t('You cannot edit this saved script.'));
+      $form_state->setRebuild();
+      return;
+    }
+    $script ??= $storage->create(['uid' => $this->currentUser()->id()]);
+    $script->set('title', $title);
+    $script->set('brief', (string) $form_state->getValue('brief'));
+    $script->set('writing_mode', (string) $form_state->getValue('mode'));
+    $script->set('source_text', (string) $form_state->getValue('source'));
+    $script->set('instruction', (string) $form_state->getValue('instruction'));
+    $script->set('model', (string) $form_state->getValue('model'));
+    $script->set('script_text', $script_text);
+    $script->set('narration_text', (string) ($form_state->getValue(['result', 'narration', 'text']) ?? $form_state->get('narration_result') ?? ''));
+    $script->set('narration_instruction', (string) $form_state->getValue(['result', 'narration_instruction']));
+    $script->save();
+    $form_state->set('script_id', $script->id());
+    $form_state->setValue('script_id', $script->id());
+    $form_state->set('result', $script_text);
+    $form_state->set('narration_result', $script->get('narration_text')->value ?: NULL);
+    $this->messenger()->addStatus($this->t('Saved @title.', ['@title' => $script->label()]));
+    $form_state->setRebuild();
+  }
+
+  /** Loads a saved document when ScriptWriter is opened from its collection. */
+  private function loadScriptFromQuery(FormStateInterface $form_state): void {
+    if ($form_state->get('script_writer_query_checked')) {
+      return;
+    }
+    $form_state->set('script_writer_query_checked', TRUE);
+    $id = (int) \Drupal::request()->query->get('script', 0);
+    $script = $id ? $this->entityTypeManager()->getStorage('ai_storyboard_script')->load($id) : NULL;
+    if ($script && $script->access('view')) {
+      $this->populateFromScript($script, $form_state);
+    }
+  }
+
+  /** Populates writer form state from a saved Script entity. */
+  private function populateFromScript(object $script, FormStateInterface $form_state): void {
+    foreach (['brief', 'writing_mode', 'source_text', 'instruction', 'model'] as $field) {
+      $key = $field === 'writing_mode' ? 'mode' : ($field === 'source_text' ? 'source' : $field);
+      $form_state->setValue($key, (string) $script->get($field)->value);
+    }
+    $form_state->setValue('result', [
+      'title' => $script->label(),
+      'text' => (string) $script->get('script_text')->value,
+      'narration' => ['text' => (string) $script->get('narration_text')->value],
+      'narration_instruction' => (string) $script->get('narration_instruction')->value,
+    ]);
+    $form_state->set('result', (string) $script->get('script_text')->value);
+    $form_state->set('narration_result', $script->get('narration_text')->value ?: NULL);
+    $form_state->set('script_id', (int) $script->id());
+    $form_state->setValue('script_id', (int) $script->id());
+  }
+
+  /** Returns accessible saved script labels for the workspace selector. */
+  private function getSavedScriptOptions(): array {
+    $storage = $this->entityTypeManager()->getStorage('ai_storyboard_script');
+    $ids = $storage->getQuery()->accessCheck(TRUE)->sort('changed', 'DESC')->execute();
+    $options = [];
+    foreach ($storage->loadMultiple($ids) as $script) {
+      if ($script->access('view')) {
+        $options[$script->id()] = $script->label();
+      }
+    }
+    return $options;
   }
 
   /**

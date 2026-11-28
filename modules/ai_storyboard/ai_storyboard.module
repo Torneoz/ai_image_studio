@@ -97,6 +97,23 @@ function ai_storyboard_query_ai_storyboard_access_alter(AlterableInterface $quer
 }
 
 /**
+ * Restricts saved ScriptWriter documents to their owner or administrators.
+ */
+function ai_storyboard_query_ai_storyboard_script_access_alter(AlterableInterface $query): void {
+  $account = \Drupal::currentUser();
+  if ($account->hasPermission('administer ai storyboard')) {
+    return;
+  }
+  if (!$account->hasPermission('access ai storyboard')) {
+    $query->where('1 = 0');
+    return;
+  }
+  foreach (_ai_storyboard_query_table_aliases($query, 'ai_storyboard_script') as $alias) {
+    $query->condition($alias . '.uid', $account->id());
+  }
+}
+
+/**
  * Implements hook_query_ai_storyboard_shot_access_alter().
  */
 function ai_storyboard_query_ai_storyboard_shot_access_alter(AlterableInterface $query): void {

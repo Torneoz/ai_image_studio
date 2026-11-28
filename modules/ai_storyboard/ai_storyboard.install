@@ -252,6 +252,19 @@ function ai_storyboard_update_10012(): string {
 }
 
 /**
+ * Installs the saveable ScriptWriter document entity type.
+ */
+function ai_storyboard_update_10013(): string {
+  $manager = \Drupal::entityTypeManager();
+  $manager->clearCachedDefinitions();
+  $updates = \Drupal::entityDefinitionUpdateManager();
+  if (!$updates->getEntityType('ai_storyboard_script')) {
+    $updates->installEntityType($manager->getDefinition('ai_storyboard_script'));
+  }
+  return 'Added saveable ScriptWriter documents.';
+}
+
+/**
  * Adds shared narrative libraries, project scenes/cast and shot references.
  */
 function ai_storyboard_update_10009(array &$sandbox): void {

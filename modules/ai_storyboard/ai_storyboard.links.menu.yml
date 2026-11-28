@@ -25,6 +25,13 @@ ai_storyboard.script_writer:
   parent: ai_image_studio.collection
   weight: -3
 
+ai_storyboard.saved_scripts:
+  title: 'Saved scripts'
+  description: 'Open and manage saved ScriptWriter documents.'
+  route_name: entity.ai_storyboard_script.collection
+  parent: ai_storyboard.script_writer
+  weight: 1
+
 ai_storyboard.view_storyboards:
   title: 'AI Storyboards'
   description: 'Browse the AI Storyboards View.'
