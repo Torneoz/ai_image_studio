@@ -255,6 +255,20 @@ function ai_storyboard_update_10012(): string {
  * Installs the saveable ScriptWriter document entity type.
  */
 function ai_storyboard_update_10013(): string {
+  return _ai_storyboard_install_script_entity_type();
+}
+
+/**
+ * Installs saved ScriptWriter storage for sites already at update 10014.
+ */
+function ai_storyboard_update_10015(): string {
+  return _ai_storyboard_install_script_entity_type();
+}
+
+/**
+ * Installs the saveable ScriptWriter entity type when it is not installed.
+ */
+function _ai_storyboard_install_script_entity_type(): string {
   $manager = \Drupal::entityTypeManager();
   $manager->clearCachedDefinitions();
   $updates = \Drupal::entityDefinitionUpdateManager();
