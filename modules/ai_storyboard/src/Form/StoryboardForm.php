@@ -232,6 +232,28 @@ final class StoryboardForm extends FormBase {
         ]),
         '#attributes' => ['class' => ['button']],
       ];
+      $form['storyboard_actions']['buttons']['preview_subtitles'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Generate SRT preview'),
+        '#submit' => ['::previewSubtitles'],
+        '#limit_validation_errors' => [],
+      ];
+      if ($form_state->has('subtitle_preview')) {
+        $form['subtitle_preview'] = [
+          '#type' => 'details',
+          '#title' => $this->t('Generated subtitles (SRT)'),
+          '#open' => TRUE,
+          '#weight' => 11,
+        ];
+        $form['subtitle_preview']['text'] = [
+          '#type' => 'textarea',
+          '#title' => $this->t('SRT text'),
+          '#rows' => 18,
+          '#default_value' => $form_state->get('subtitle_preview'),
+          '#attributes' => ['readonly' => 'readonly', 'spellcheck' => 'false'],
+          '#description' => $this->t('Copy this text to use the generated subtitles elsewhere. The preview uses saved project data; save edits before refreshing it.'),
+        ];
+      }
       $delete = Link::fromTextAndUrl(
         $this->t('Delete'),
         $ai_storyboard->toUrl('delete-form'),
@@ -344,6 +366,31 @@ final class StoryboardForm extends FormBase {
     }
     $board->save();
     $this->runBreakdown($board, $form_state);
+  }
+
+  /** Generates and displays the current saved SRT subtitle text. */
+  public function previewSubtitles(array &$form, FormStateInterface $form_state): void {
+    $id = (int) $form_state->get('storyboard_id');
+    $board = $id ? $this->entityTypeManager->getStorage('ai_storyboard')->load($id) : NULL;
+    if (!$board) {
+      $this->messenger()->addError($this->t('Save the storyboard before generating a subtitle preview.'));
+      $form_state->set('subtitle_preview', '');
+      $form_state->setRebuild();
+      return;
+    }
+    try {
+      $controller = \Drupal\ai_storyboard\Controller\StoryboardExportController::create(\Drupal::getContainer());
+      $subtitles = $controller->buildSubtitlePreview($board);
+      if ($subtitles === '') {
+        $this->messenger()->addError($this->t('No dialogue was found in the saved shots or screenplay.'));
+      }
+      $form_state->set('subtitle_preview', $subtitles);
+    }
+    catch (\Throwable $exception) {
+      $this->messenger()->addError($this->t('The subtitle preview could not be generated: @message', ['@message' => $exception->getMessage()]));
+      $form_state->set('subtitle_preview', '');
+    }
+    $form_state->setRebuild();
   }
 
   /**

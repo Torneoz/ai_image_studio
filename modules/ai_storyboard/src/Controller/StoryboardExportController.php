@@ -306,6 +306,16 @@ final class StoryboardExportController extends ControllerBase {
     }
   }
 
+  /** Builds the SRT preview using the same timing as MP4 export. */
+  public function buildSubtitlePreview(object $ai_storyboard): string {
+    $frames = $this->timelineFrames($ai_storyboard);
+    return $this->subtitleFileContents(
+      $ai_storyboard,
+      $frames,
+      array_sum(array_column($frames, 'duration')),
+    );
+  }
+
   /**
    * Loads keyframes or preferred completed videos in storyboard order.
    */
