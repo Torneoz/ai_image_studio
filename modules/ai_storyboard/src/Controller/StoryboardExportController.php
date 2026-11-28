@@ -248,7 +248,14 @@ final class StoryboardExportController extends ControllerBase {
     ]);
     if ($subtitle_path !== NULL) {
       $subtitle_index = count($frames) + ($soundtrack !== NULL ? 1 : 0);
-      $command = array_merge($command, ['-map', $subtitle_index . ':0', '-c:s', 'mov_text']);
+      $command = array_merge($command, [
+        '-map', $subtitle_index . ':0',
+        '-c:s', 'mov_text',
+        '-metadata:s:s:0', 'language=und',
+        '-metadata:s:s:0', 'title=Subtitles',
+        '-metadata:s:s:0', 'handler_name=Subtitles',
+        '-disposition:s:0', 'default',
+      ]);
     }
     $command[] = $output_path;
 
