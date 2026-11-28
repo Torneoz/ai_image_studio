@@ -41,7 +41,7 @@ final class StoryboardScriptListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity): array {
     $url = Url::fromRoute('ai_storyboard.script_writer', [], ['query' => ['script' => $entity->id()]]);
     return [
-      'title' => Link::fromTextAndUrl($entity->label(), $url)->toRenderable(),
+      'title' => ['data' => Link::fromTextAndUrl($entity->label(), $url)->toRenderable()],
       'changed' => \Drupal::service('date.formatter')->format($entity->getChangedTime(), 'short'),
     ] + parent::buildRow($entity);
   }
