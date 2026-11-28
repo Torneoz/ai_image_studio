@@ -27,6 +27,12 @@ You can also choose a project to copy the screenplay there; script writing does
 not automatically rebuild shots, so production breakdown remains an explicit
 next step in that project.
 
+Each Storyboard project owns its saved ScriptWriter documents. The project keeps
+the selected document as its current script source, and saving the project script
+updates that linked document. ScriptWriter can open the current document or
+attach another saved draft to the project; earlier attached drafts remain
+available in the project’s saved-script list.
+
 Enable the module, grant **Access AI Storyboard**, then visit:
 
 `/admin/content/ai-storyboard`

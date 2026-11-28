@@ -7,6 +7,7 @@ namespace Drupal\ai_storyboard\Entity;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -49,6 +50,26 @@ final class StoryboardScript extends ContentEntityBase implements EntityOwnerInt
   /**
    * {@inheritdoc}
    */
+  public function preSave(EntityStorageInterface $storage): void {
+    parent::preSave($storage);
+    if (!$project_id = $this->get('storyboard_id')->target_id) {
+      return;
+    }
+    $project = \Drupal::entityTypeManager()->getStorage('ai_storyboard')->load($project_id);
+    if (!$project) {
+      throw new \InvalidArgumentException('The parent storyboard project does not exist.');
+    }
+    $original = $this->isNew() ? NULL : $storage->loadUnchanged($this->id());
+    $original_project_id = $original?->get('storyboard_id')->target_id;
+    if ($original_project_id && (int) $original_project_id !== (int) $project_id) {
+      throw new \InvalidArgumentException('A saved script cannot be moved to another storyboard project.');
+    }
+    $this->setOwnerId((int) $project->getOwnerId());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
     $fields = parent::baseFieldDefinitions($entity_type);
     $fields['title'] = BaseFieldDefinition::create('string')
@@ -60,6 +81,10 @@ final class StoryboardScript extends ContentEntityBase implements EntityOwnerInt
       ->setLabel(new TranslatableMarkup('Owner'))
       ->setSetting('target_type', 'user')
       ->setDefaultValueCallback(static::class . '::getDefaultEntityOwner');
+    $fields['storyboard_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Storyboard project'))
+      ->setDescription(new TranslatableMarkup('The project that owns this script document.'))
+      ->setSetting('target_type', 'ai_storyboard');
     foreach ([
       'brief' => 'Creative brief',
       'source_text' => 'Source text',

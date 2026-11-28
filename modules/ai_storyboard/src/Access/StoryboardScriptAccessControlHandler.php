@@ -18,6 +18,10 @@ final class StoryboardScriptAccessControlHandler extends EntityAccessControlHand
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account): AccessResult {
+    if ($project = $entity->get('storyboard_id')->entity) {
+      return $project->access($operation, $account, TRUE)
+        ->addCacheableDependency($entity);
+    }
     if ($account->hasPermission('administer ai storyboard')) {
       return AccessResult::allowed()->cachePerPermissions();
     }

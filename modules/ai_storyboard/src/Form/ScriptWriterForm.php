@@ -57,7 +57,14 @@ final class ScriptWriterForm extends FormBase {
       $form['result']['actions']['outline'] = ['#type' => 'submit', '#value' => $this->t('Use as outline'), '#submit' => ['::useAsOutline']];
       $form['result']['actions']['draft'] = ['#type' => 'submit', '#value' => $this->t('Draft screenplay from this'), '#submit' => ['::useAsDraft']];
       $form['result']['actions']['save_script'] = ['#type' => 'submit', '#value' => $this->t($form_state->get('script_id') ? 'Save changes to script' : 'Save script'), '#button_type' => 'primary', '#submit' => ['::saveScript'], '#name' => 'save_script_draft'];
-      $form['result']['save_to_project'] = ['#type' => 'select', '#title' => $this->t('Save script to project'), '#options' => $this->getProjectOptions(), '#empty_option' => $this->t('- Select project -')];
+      $form['result']['save_to_project'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Link script to storyboard project'),
+        '#options' => $this->getProjectOptions(),
+        '#empty_option' => $this->t('- Select project -'),
+        '#default_value' => $form_state->getValue(['result', 'save_to_project']) ?: $this->getScriptProjectId((int) $form_state->get('script_id')),
+        '#description' => $this->t('The saved Script becomes a child of this project and its text stays synchronized with the project script.'),
+      ];
       $form['result']['new_project_title'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Or create a new storyboard project'),
@@ -67,7 +74,7 @@ final class ScriptWriterForm extends FormBase {
       ];
       $form['result']['actions']['save'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Save to project'),
+        '#value' => $this->t('Link script to project'),
         '#submit' => ['::saveToProject'],
         '#name' => 'save_script_to_project',
       ];
@@ -147,6 +154,13 @@ final class ScriptWriterForm extends FormBase {
     $script->set('narration_text', (string) ($form_state->getValue(['result', 'narration', 'text']) ?? $form_state->get('narration_result') ?? ''));
     $script->set('narration_instruction', (string) $form_state->getValue(['result', 'narration_instruction']));
     $script->save();
+    if ($project = $script->get('storyboard_id')->entity) {
+      if ((int) $project->get('script_entity_id')->target_id === (int) $script->id()) {
+        $project->set('script', $script_text);
+        $project->set('creative_brief', (string) $script->get('brief')->value);
+        $project->save();
+      }
+    }
     $form_state->set('script_id', $script->id());
     $form_state->setValue('script_id', $script->id());
     $form_state->set('result', $script_text);
@@ -305,6 +319,7 @@ final class ScriptWriterForm extends FormBase {
         'status' => 'draft',
       ]);
       $board->save();
+      $this->attachScriptToProject($board, $text, $form_state);
       $this->messenger()->addStatus($this->t('New storyboard project created with the script. Use “Rebuild shots from script” when you are ready to create scenes and shots.'));
       $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
       return;
@@ -316,8 +331,8 @@ final class ScriptWriterForm extends FormBase {
       return;
     }
     $board->set('script', $text);
-    $board->save();
-    $this->messenger()->addStatus($this->t('Script saved to @project. Run “Rebuild shots from script” in that project when you are ready.', ['@project' => $board->label()]));
+    $this->attachScriptToProject($board, $text, $form_state);
+    $this->messenger()->addStatus($this->t('Linked the saved script to @project. Run “Rebuild shots from script” there when you are ready.', ['@project' => $board->label()]));
     $form_state->setRedirect('entity.ai_storyboard.canonical', ['ai_storyboard' => $board->id()]);
   }
 
@@ -333,6 +348,40 @@ final class ScriptWriterForm extends FormBase {
       }
     }
     return $options;
+  }
+
+  /** Links the current document to a storyboard and marks it as the source. */
+  private function attachScriptToProject(object $board, string $text, FormStateInterface $form_state): object {
+    $storage = $this->entityTypeManager()->getStorage('ai_storyboard_script');
+    $id = (int) ($form_state->getValue('script_id') ?: $form_state->get('script_id'));
+    $script = $id ? $storage->load($id) : NULL;
+    if (!$script || !$script->access('update') || ($script->get('storyboard_id')->target_id && (int) $script->get('storyboard_id')->target_id !== (int) $board->id())) {
+      $script = $storage->create(['uid' => $board->getOwnerId()]);
+      $script->set('brief', (string) $form_state->getValue('brief'));
+      $script->set('writing_mode', (string) $form_state->getValue('mode'));
+      $script->set('source_text', (string) $form_state->getValue('source'));
+      $script->set('instruction', (string) $form_state->getValue('instruction'));
+      $script->set('model', (string) $form_state->getValue('model'));
+      $script->set('narration_text', (string) ($form_state->getValue(['result', 'narration', 'text']) ?? $form_state->get('narration_result') ?? ''));
+      $script->set('narration_instruction', (string) $form_state->getValue(['result', 'narration_instruction']));
+    }
+    $script->set('title', trim((string) ($form_state->getValue(['result', 'title']) ?: $board->label())));
+    $script->set('storyboard_id', $board->id());
+    $script->setOwnerId((int) $board->getOwnerId());
+    $script->set('script_text', $text);
+    $script->save();
+    $board->set('script', $text);
+    $board->set('script_entity_id', $script->id());
+    $board->save();
+    $form_state->set('script_id', $script->id());
+    $form_state->setValue('script_id', $script->id());
+    return $script;
+  }
+
+  /** Returns the parent project ID for a saved script. */
+  private function getScriptProjectId(int $script_id): string {
+    $script = $script_id ? $this->entityTypeManager()->getStorage('ai_storyboard_script')->load($script_id) : NULL;
+    return $script && $script->access('view') ? (string) ($script->get('storyboard_id')->target_id ?: '') : '';
   }
 
   /** Suggests a concise project title from the creative brief. */

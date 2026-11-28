@@ -57,6 +57,10 @@ final class Storyboard extends ContentEntityBase implements EntityOwnerInterface
       ->addConstraint('UniqueField');
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')->setLabel(new TranslatableMarkup('Owner'))->setSetting('target_type', 'user')->setDefaultValueCallback(static::class . '::getDefaultEntityOwner');
     $fields['script'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Script'))->setRequired(TRUE);
+    $fields['script_entity_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('ScriptWriter document'))
+      ->setDescription(new TranslatableMarkup('The current saved ScriptWriter document used as this project’s script.'))
+      ->setSetting('target_type', 'ai_storyboard_script');
     $fields['creative_brief'] = BaseFieldDefinition::create('string_long')->setLabel(new TranslatableMarkup('Creative brief'));
     $fields['after_prompt'] = BaseFieldDefinition::create('string_long')
       ->setLabel(new TranslatableMarkup('After prompt'))

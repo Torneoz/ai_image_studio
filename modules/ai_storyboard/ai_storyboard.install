@@ -279,6 +279,51 @@ function _ai_storyboard_install_script_entity_type(): string {
 }
 
 /**
+ * Links Storyboards to their ScriptWriter children and backfills current text.
+ */
+function ai_storyboard_update_10016(array &$sandbox): void {
+  $manager = \Drupal::entityTypeManager();
+  $updates = \Drupal::entityDefinitionUpdateManager();
+  if (empty($sandbox['initialized'])) {
+    $manager->clearCachedDefinitions();
+    $board_type = $manager->getDefinition('ai_storyboard');
+    $board_fields = \Drupal\ai_storyboard\Entity\Storyboard::baseFieldDefinitions($board_type);
+    if (!$updates->getFieldStorageDefinition('script_entity_id', 'ai_storyboard')) {
+      $updates->installFieldStorageDefinition('script_entity_id', 'ai_storyboard', 'ai_storyboard', $board_fields['script_entity_id']);
+    }
+    $script_type = $manager->getDefinition('ai_storyboard_script');
+    $script_fields = \Drupal\ai_storyboard\Entity\StoryboardScript::baseFieldDefinitions($script_type);
+    if (!$updates->getFieldStorageDefinition('storyboard_id', 'ai_storyboard_script')) {
+      $updates->installFieldStorageDefinition('storyboard_id', 'ai_storyboard_script', 'ai_storyboard_script', $script_fields['storyboard_id']);
+    }
+    $sandbox['initialized'] = TRUE;
+    $sandbox['last_id'] = 0;
+  }
+
+  $boards = $manager->getStorage('ai_storyboard');
+  $ids = $boards->getQuery()->accessCheck(FALSE)
+    ->condition('id', $sandbox['last_id'], '>')->sort('id')->range(0, 50)->execute();
+  foreach ($boards->loadMultiple($ids) as $board) {
+    $sandbox['last_id'] = (int) $board->id();
+    if ($board->get('script_entity_id')->target_id || trim((string) $board->get('script')->value) === '') {
+      continue;
+    }
+    $script = $manager->getStorage('ai_storyboard_script')->create([
+      'uid' => $board->getOwnerId(),
+      'storyboard_id' => $board->id(),
+      'title' => $board->label(),
+      'brief' => (string) $board->get('creative_brief')->value,
+      'writing_mode' => 'draft',
+      'model' => (string) $board->get('chat_model')->value,
+      'script_text' => (string) $board->get('script')->value,
+    ]);
+    $script->save();
+    $board->set('script_entity_id', $script->id())->save();
+  }
+  $sandbox['#finished'] = count($ids) < 50 ? 1 : 0.5;
+}
+
+/**
  * Adds shared narrative libraries, project scenes/cast and shot references.
  */
 function ai_storyboard_update_10009(array &$sandbox): void {

@@ -86,6 +86,20 @@ final class StoryboardForm extends FormBase {
     ];
     $form['project']['creative_brief'] = ['#type' => 'textarea', '#title' => $this->t('Creative brief'), '#rows' => 3, '#default_value' => $ai_storyboard?->get('creative_brief')->value, '#description' => $this->t('Audience, objective, tone, runtime, platform, and production constraints.')];
     $form['project']['script'] = ['#type' => 'textarea', '#title' => $this->t('Script'), '#required' => TRUE, '#rows' => 14, '#default_value' => $ai_storyboard?->get('script')->value];
+    if ($ai_storyboard && $ai_storyboard->hasField('script_entity_id') && ($script_entity = $ai_storyboard->get('script_entity_id')->entity)) {
+      $form['project']['script_writer_link'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Open this script in ScriptWriter'),
+        '#url' => Url::fromRoute('ai_storyboard.script_writer', [], ['query' => ['script' => $script_entity->id()]]),
+        '#weight' => 2,
+      ];
+      $form['project']['project_scripts_link'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Browse this project’s saved scripts'),
+        '#url' => Url::fromRoute('entity.ai_storyboard_script.collection', [], ['query' => ['project' => $ai_storyboard->id()]]),
+        '#weight' => 3,
+      ];
+    }
     if ($ai_storyboard === NULL || $ai_storyboard->hasField('audio_media')) {
       $audio_media = $ai_storyboard?->hasField('audio_media') ? $ai_storyboard->get('audio_media')->entity : NULL;
       $form['project']['audio_media'] = [
@@ -439,7 +453,32 @@ final class StoryboardForm extends FormBase {
       $board->set('machine_name', (string) $machine_name);
     }
     $board->save();
+    $this->syncScriptDocument($board);
     return $board;
+  }
+
+  /** Keeps the parent project's script snapshot linked to its Script entity. */
+  private function syncScriptDocument(object $board): void {
+    if (!$board->hasField('script_entity_id') || trim((string) $board->get('script')->value) === '') {
+      return;
+    }
+    $storage = $this->entityTypeManager->getStorage('ai_storyboard_script');
+    $script = $board->get('script_entity_id')->entity;
+    if (!$script || ($script->get('storyboard_id')->target_id && (int) $script->get('storyboard_id')->target_id !== (int) $board->id())) {
+      $script = $storage->create(['uid' => $board->getOwnerId()]);
+      $script->set('title', $board->label());
+      $script->set('writing_mode', 'draft');
+      $script->set('model', (string) $board->get('chat_model')->value);
+    }
+    $script->set('storyboard_id', $board->id());
+    $script->setOwnerId((int) $board->getOwnerId());
+    $script->set('brief', (string) $board->get('creative_brief')->value);
+    $script->set('script_text', (string) $board->get('script')->value);
+    $script->save();
+    if ((int) $board->get('script_entity_id')->target_id !== (int) $script->id()) {
+      $board->set('script_entity_id', $script->id());
+      $board->save();
+    }
   }
 
   /**
